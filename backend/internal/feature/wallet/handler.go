@@ -1,0 +1,184 @@
+package wallet
+
+import (
+	"strconv"
+
+	"github.com/artafinance/backend/internal/domain"
+	"github.com/artafinance/backend/internal/dto"
+	"github.com/artafinance/backend/pkg/jwt"
+	"github.com/artafinance/backend/pkg/middleware"
+	"github.com/gofiber/fiber/v2"
+)
+
+// Handler exposes wallet HTTP endpoints.
+type Handler struct {
+	repo    *Repository
+	jwtMgr  *jwt.Manager
+	checker middleware.TokenStatusChecker
+}
+
+// NewHandler creates a new wallet handler.
+func NewHandler(repo *Repository, jwtMgr *jwt.Manager, checker middleware.TokenStatusChecker) *Handler {
+	return &Handler{repo: repo, jwtMgr: jwtMgr, checker: checker}
+}
+
+// RegisterRoutes registers wallet routes.
+func (h *Handler) RegisterRoutes(router fiber.Router) {
+	group := router.Group("/wallet")
+	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr, h.checker))
+	protected.Get("/", h.list)
+	protected.Post("/", h.create)
+	protected.Get("/:id", h.get)
+	protected.Put("/:id", h.update)
+	protected.Delete("/:id", h.delete)
+}
+
+func (h *Handler) list(c *fiber.Ctx) error {
+	userID := middleware.GetUserID(c)
+	if userID == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	wallets, err := h.repo.GetWalletsByUserID(uint(parsedUserID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	res := ListWalletsRes{Wallets: make([]dto.Wallet, 0, len(wallets))}
+	for _, w := range wallets {
+		res.Wallets = append(res.Wallets, dto.Wallet{Data: w})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(res)
+}
+
+func (h *Handler) create(c *fiber.Ctx) error {
+	var req CreateWalletReq
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+
+	if req.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "name is required"})
+	}
+	if req.Type == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "type is required"})
+	}
+
+	userID := middleware.GetUserID(c)
+	if userID == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	created, err := h.repo.CreateWallet(&domain.Wallet{
+		UserID:    uint(parsedUserID),
+		Name:      req.Name,
+		Type:      req.Type,
+		IsDefault: req.IsDefault,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	if req.IsDefault {
+		_ = h.repo.SetDefaultWallet(created.UserID, created.ID)
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(CreateWalletRes{dto.Wallet{Data: *created}})
+}
+
+func (h *Handler) get(c *fiber.Ctx) error {
+	id := c.Params("id")
+	parsedID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+	wallet, err := h.repo.GetWalletByID(uint(parsedID))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: err.Error()})
+	}
+
+	userID := middleware.GetUserID(c)
+	if strconv.FormatUint(uint64(wallet.UserID), 10) != userID {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(GetWalletRes{dto.Wallet{Data: *wallet}})
+}
+
+func (h *Handler) update(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var req UpdateWalletReq
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+
+	parsedID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+
+	wallet, err := h.repo.GetWalletByID(uint(parsedID))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: err.Error()})
+	}
+
+	userID := middleware.GetUserID(c)
+	if strconv.FormatUint(uint64(wallet.UserID), 10) != userID {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	if req.Name != nil {
+		wallet.Name = *req.Name
+	}
+	if req.Type != nil {
+		wallet.Type = *req.Type
+	}
+	if req.IsDefault != nil {
+		wallet.IsDefault = *req.IsDefault
+	}
+
+	updated, err := h.repo.UpdateWallet(wallet)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	if wallet.IsDefault {
+		_ = h.repo.SetDefaultWallet(updated.UserID, updated.ID)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(UpdateWalletRes{dto.Wallet{Data: *updated}})
+}
+
+func (h *Handler) delete(c *fiber.Ctx) error {
+	id := c.Params("id")
+	parsedID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+	wallet, err := h.repo.GetWalletByID(uint(parsedID))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: err.Error()})
+	}
+
+	userID := middleware.GetUserID(c)
+	if strconv.FormatUint(uint64(wallet.UserID), 10) != userID {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	if err := h.repo.DeleteWallet(uint(parsedID)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(DeleteWalletRes{Message: "wallet deleted"})
+}

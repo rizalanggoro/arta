@@ -1,0 +1,6 @@
+# Added by code-review-graph
+.code-review-graph/
+# .agents
+# .github
+# .vscode
+.env

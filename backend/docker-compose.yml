@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: arta-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: arta
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - arta-network
+
+  api:
+    build: .
+    container_name: arta-api
+    environment:
+      SERVER_PORT: 3000
+      SERVER_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: arta
+      JWT_SECRET: your-secret-key-change-in-production
+      JWT_EXPIRATION: 168
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - arta-network
+    command: ./api
+
+volumes:
+  postgres_data:
+
+networks:
+  arta-network:
+    driver: bridge

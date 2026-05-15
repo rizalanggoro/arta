@@ -1,0 +1,797 @@
+basePath: /api
+definitions:
+  CreateCategoryRes:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Category'
+    required:
+    - data
+    type: object
+  CreateGoldRes:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Gold'
+    required:
+    - data
+    type: object
+  DeleteCategoryRes:
+    properties:
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  DeleteGoldRes:
+    properties:
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  GetCategoryRes:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Category'
+    required:
+    - data
+    type: object
+  GetGoldRes:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Gold'
+    required:
+    - data
+    type: object
+  GoldSummaryRes:
+    properties:
+      by_type:
+        additionalProperties: true
+        type: object
+      total_grams:
+        type: number
+      total_value:
+        type: number
+    required:
+    - by_type
+    - total_grams
+    - total_value
+    type: object
+  LoginReq:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  LoginRes:
+    properties:
+      currency:
+        type: string
+      email:
+        type: string
+      expires_at:
+        type: string
+      name:
+        type: string
+      token:
+        type: string
+      token_type:
+        type: string
+      user_id:
+        type: string
+    required:
+    - currency
+    - email
+    - expires_at
+    - name
+    - token
+    - token_type
+    - user_id
+    type: object
+  LogoutRes:
+    properties:
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  MeRes:
+    properties:
+      data:
+        $ref: '#/definitions/domain.User'
+      updated_at:
+        type: string
+    required:
+    - data
+    - updated_at
+    type: object
+  RegisterReq:
+    properties:
+      currency:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - currency
+    - email
+    - name
+    - password
+    type: object
+  RegisterRes:
+    properties:
+      currency:
+        type: string
+      email:
+        type: string
+      expires_at:
+        type: string
+      name:
+        type: string
+      token:
+        type: string
+      token_type:
+        type: string
+      user_id:
+        type: string
+    required:
+    - currency
+    - email
+    - expires_at
+    - name
+    - token
+    - token_type
+    - user_id
+    type: object
+  UpdateCategoryRes:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Category'
+    required:
+    - data
+    type: object
+  UpdateGoldRes:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Gold'
+    required:
+    - data
+    type: object
+  category.CreateCategoryReq:
+    properties:
+      color:
+        type: string
+      icon:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+    required:
+    - name
+    - type
+    type: object
+  category.ListCategoriesRes:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/dto.Category'
+        type: array
+    required:
+    - categories
+    type: object
+  category.UpdateCategoryReq:
+    properties:
+      color:
+        type: string
+      icon:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  domain.Category:
+    properties:
+      color:
+        type: string
+      created_at:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      is_custom:
+        type: boolean
+      is_default:
+        type: boolean
+      name:
+        type: string
+      type:
+        description: income, expense, general
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        description: nil for default categories
+        type: integer
+    required:
+    - color
+    - created_at
+    - icon
+    - id
+    - is_custom
+    - is_default
+    - name
+    - type
+    - updated_at
+    type: object
+  domain.Gold:
+    properties:
+      createdAt:
+        type: string
+      date:
+        type: string
+      grams:
+        format: float64
+        type: number
+      id:
+        type: integer
+      notes:
+        type: string
+      pricePerGram:
+        format: float64
+        type: number
+      purityPercent:
+        description: For reference
+        format: float64
+        type: number
+      totalValue:
+        format: float64
+        type: number
+      type:
+        description: pure_24k, jewelry_ring, etc
+        type: string
+      updatedAt:
+        type: string
+      walletID:
+        type: integer
+    type: object
+  domain.User:
+    properties:
+      created_at:
+        type: string
+      currency:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      updated_at:
+        type: string
+      wallets:
+        items:
+          $ref: '#/definitions/domain.Wallet'
+        type: array
+    required:
+    - created_at
+    - currency
+    - email
+    - id
+    - is_active
+    - name
+    - updated_at
+    type: object
+  domain.Wallet:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      isDefault:
+        type: boolean
+      name:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: integer
+    type: object
+  dto.Category:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Category'
+    required:
+    - data
+    type: object
+  dto.Error:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    required:
+    - code
+    - message
+    type: object
+  dto.Gold:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Gold'
+    required:
+    - data
+    type: object
+  gold.CreateGoldReq:
+    properties:
+      date:
+        type: string
+      grams:
+        type: number
+      notes:
+        type: string
+      price_per_gram:
+        type: number
+      purity_percent:
+        type: number
+      type:
+        type: string
+      wallet_id:
+        type: integer
+    required:
+    - date
+    - grams
+    - price_per_gram
+    - type
+    - wallet_id
+    type: object
+  gold.ListGoldsRes:
+    properties:
+      golds:
+        items:
+          $ref: '#/definitions/dto.Gold'
+        type: array
+    required:
+    - golds
+    type: object
+  gold.UpdateGoldReq:
+    properties:
+      date:
+        type: string
+      grams:
+        type: number
+      notes:
+        type: string
+      price_per_gram:
+        type: number
+      purity_percent:
+        type: number
+      type:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: API untuk aplikasi manajemen keuangan dan pencatatan emas - ARTA
+  title: ARTA API
+  version: "1.0"
+paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Validate credentials and issue a session token.
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/LoginRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Login a user
+      tags:
+      - auth
+  /api/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Revoke the current session token.
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/LogoutRes'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - Bearer: []
+      summary: Logout current session
+      tags:
+      - auth
+  /api/auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Return the authenticated user's profile.
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/MeRes'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - Bearer: []
+      summary: Get current user
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new account and issue the first session token.
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/RegisterReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/RegisterRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Register a new user
+      tags:
+      - auth
+  /api/category:
+    get:
+      consumes:
+      - application/json
+      operationId: ListCategories
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/category.ListCategoriesRes'
+      tags:
+      - category
+    post:
+      consumes:
+      - application/json
+      operationId: CreateCategory
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/category.CreateCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/CreateCategoryRes'
+      tags:
+      - category
+  /api/category/{id}:
+    delete:
+      consumes:
+      - application/json
+      operationId: DeleteCategory
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: category id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/DeleteCategoryRes'
+      tags:
+      - category
+    get:
+      consumes:
+      - application/json
+      operationId: GetCategory
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: category id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GetCategoryRes'
+      tags:
+      - category
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateCategory
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: category id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/category.UpdateCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UpdateCategoryRes'
+      tags:
+      - category
+  /api/gold:
+    get:
+      consumes:
+      - application/json
+      operationId: ListGolds
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gold.ListGoldsRes'
+      tags:
+      - gold
+    post:
+      consumes:
+      - application/json
+      operationId: CreateGold
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/gold.CreateGoldReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/CreateGoldRes'
+      tags:
+      - gold
+  /api/gold/{id}:
+    delete:
+      consumes:
+      - application/json
+      operationId: DeleteGold
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: gold id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/DeleteGoldRes'
+      tags:
+      - gold
+    get:
+      consumes:
+      - application/json
+      operationId: GetGold
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: gold id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GetGoldRes'
+      tags:
+      - gold
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateGold
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: gold id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/gold.UpdateGoldReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UpdateGoldRes'
+      tags:
+      - gold
+  /api/gold/summary:
+    get:
+      consumes:
+      - application/json
+      operationId: GoldSummary
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GoldSummaryRes'
+      tags:
+      - gold
+schemes:
+- http
+- https
+securityDefinitions:
+  Bearer:
+    description: '"Type ''Bearer TOKEN''"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
