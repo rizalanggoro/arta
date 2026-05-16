@@ -7,6 +7,4 @@ import kotlinx.serialization.Serializable
 data class CreateCategoryRequestDto(
 	@SerialName("name") val name: String,
 	@SerialName("type") val type: String,
-	@SerialName("icon") val icon: String = "",
-	@SerialName("color") val color: String = "",
 )

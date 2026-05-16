@@ -204,10 +204,6 @@ private fun CategoryCard(
 					verticalAlignment = Alignment.CenterVertically,
 					horizontalArrangement = Arrangement.spacedBy(12.dp),
 				) {
-					Text(
-						text = category.icon.ifBlank { "🏷️" },
-						style = MaterialTheme.typography.headlineSmall,
-					)
 					Column {
 						Text(
 							text = category.name,
@@ -225,11 +221,6 @@ private fun CategoryCard(
 					label = { Text(if (category.isCustom) "Custom" else "Default") },
 				)
 			}
-
-			Text(
-				text = "Warna ${category.color.ifBlank { "-" }}",
-				color = MaterialTheme.colorScheme.onSurfaceVariant,
-			)
 
 			if (category.isCustom) {
 				Row(

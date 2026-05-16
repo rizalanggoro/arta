@@ -13,9 +13,7 @@ type Category struct {
 	ID        uint      `json:"id"`
 	UserID    *uint     `json:"user_id,omitempty"` // nil for default categories
 	Name      string    `json:"name"`
-	Type      string    `json:"type"` // income, expense, general
-	Icon      string    `json:"icon"`
-	Color     string    `json:"color"`
+	Type      string    `json:"type"` // income, expense
 	IsCustom  bool      `json:"is_custom"`
 	IsDefault bool      `json:"is_default"`
 	CreatedAt time.Time `json:"created_at"`
@@ -39,8 +37,6 @@ func FromCategoryModel(m *model.Category) *Category {
 		UserID:    userID,
 		Name:      m.Name,
 		Type:      m.Type,
-		Icon:      m.Icon,
-		Color:     m.Color,
 		IsCustom:  m.IsCustom,
 		IsDefault: m.IsDefault,
 		CreatedAt: m.CreatedAt,
@@ -65,8 +61,6 @@ func (c *Category) ToModel() *model.Category {
 		UserID:    userID,
 		Name:      c.Name,
 		Type:      c.Type,
-		Icon:      c.Icon,
-		Color:     c.Color,
 		IsCustom:  c.IsCustom,
 		IsDefault: c.IsDefault,
 	}

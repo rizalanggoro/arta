@@ -54,15 +54,11 @@ fun UpdateCategoryScreen(
 		snackbarHostState = snackbarHostState,
 		name = uiState.name,
 		type = uiState.type,
-		icon = uiState.icon,
-		color = uiState.color,
 		nameError = uiState.nameError,
 		errorMessage = uiState.errorMessage,
 		isLoading = uiState.isLoading,
 		onChangeName = vm::onChangeName,
 		onChangeType = vm::onChangeType,
-		onChangeIcon = vm::onChangeIcon,
-		onChangeColor = vm::onChangeColor,
 		onClickSubmit = vm::updateCategory,
 		onClickBack = { backStack.removeLastOrNull() },
 	)
@@ -73,22 +69,17 @@ private fun Content(
 	snackbarHostState: SnackbarHostState,
 	name: String = "",
 	type: String = "expense",
-	icon: String = "🧾",
-	color: String = "#E11D48",
 	nameError: String? = null,
 	errorMessage: String? = null,
 	isLoading: Boolean = false,
 	onChangeName: (String) -> Unit = {},
 	onChangeType: (String) -> Unit = {},
-	onChangeIcon: (String) -> Unit = {},
-	onChangeColor: (String) -> Unit = {},
 	onClickSubmit: () -> Unit = {},
 	onClickBack: () -> Unit = {},
 ) {
 	val typeOptions = listOf(
 		CategoryTypeOption(label = "Pengeluaran", value = "expense"),
 		CategoryTypeOption(label = "Pemasukan", value = "income"),
-		CategoryTypeOption(label = "Umum", value = "general"),
 	)
 
 	Column(
@@ -103,16 +94,16 @@ private fun Content(
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 		)
 		Text(
-			text = "Ubah kategori transaksi.",
+			text = "Ubah nama kategori dan tipenya.",
 			style = MaterialTheme.typography.headlineMedium,
 		)
 		Text(
-			text = "Sesuaikan nama, tipe, ikon, dan warna agar kategori tetap mudah dikenali.",
+			text = "Kategori tidak lagi memakai ikon atau warna.",
 			style = MaterialTheme.typography.bodyLarge,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 		)
 		Text(
-			text = "Edit kategori  ·  Ikon  ·  Warna",
+			text = "Income  ·  Expense",
 			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 		)
@@ -120,7 +111,7 @@ private fun Content(
 
 		Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
 			Text(
-				text = "Perbarui informasi kategori custom.",
+				text = "Perbarui nama kategori.",
 				style = MaterialTheme.typography.bodyLarge,
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
 			)
@@ -162,25 +153,6 @@ private fun Content(
 					}
 				}
 			}
-
-			OutlinedTextField(
-				value = icon,
-				onValueChange = onChangeIcon,
-				label = { Text("Ikon") },
-				modifier = Modifier.fillMaxWidth(),
-				enabled = !isLoading,
-				singleLine = true,
-			)
-
-			OutlinedTextField(
-				value = color,
-				onValueChange = onChangeColor,
-				label = { Text("Warna") },
-				modifier = Modifier.fillMaxWidth(),
-				supportingText = { Text("Contoh: #E11D48") },
-				enabled = !isLoading,
-				singleLine = true,
-			)
 
 			Button(
 				onClick = onClickSubmit,

@@ -37,7 +37,7 @@ func (r *Repository) GetCategoryByID(id uint) (*domain.Category, error) {
 // GetCategoriesByUserID returns default categories and those created by the user.
 func (r *Repository) GetCategoriesByUserID(userID uint) ([]domain.Category, error) {
 	var m []model.Category
-	if err := r.db.Where("user_id IS NULL OR user_id = ?", userID).Find(&m).Error; err != nil {
+	if err := r.db.Where("(user_id IS NULL OR user_id = ?) AND type IN ?", userID, []string{"income", "expense"}).Find(&m).Error; err != nil {
 		return nil, err
 	}
 

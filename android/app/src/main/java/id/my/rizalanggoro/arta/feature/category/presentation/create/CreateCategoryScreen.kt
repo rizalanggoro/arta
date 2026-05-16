@@ -47,14 +47,10 @@ fun CreateCategoryScreen(vm: CreateCategoryVM = viewModel(factory = CreateCatego
 		snackbarHostState = snackbarHostState,
 		name = uiState.name,
 		type = uiState.type,
-		icon = uiState.icon,
-		color = uiState.color,
 		nameError = uiState.nameError,
 		isLoading = uiState.isLoading,
 		onChangeName = vm::onChangeName,
 		onChangeType = vm::onChangeType,
-		onChangeIcon = vm::onChangeIcon,
-		onChangeColor = vm::onChangeColor,
 		onClickSubmit = vm::createCategory,
 		onClickBack = { backStack.removeLastOrNull() },
 	)
@@ -65,21 +61,16 @@ private fun Content(
 	snackbarHostState: SnackbarHostState,
 	name: String = "",
 	type: String = "expense",
-	icon: String = "🧾",
-	color: String = "#E11D48",
 	nameError: String? = null,
 	isLoading: Boolean = false,
 	onChangeName: (String) -> Unit = {},
 	onChangeType: (String) -> Unit = {},
-	onChangeIcon: (String) -> Unit = {},
-	onChangeColor: (String) -> Unit = {},
 	onClickSubmit: () -> Unit = {},
 	onClickBack: () -> Unit = {},
 ) {
 	val typeOptions = listOf(
 		CategoryTypeOption(label = "Pengeluaran", value = "expense"),
 		CategoryTypeOption(label = "Pemasukan", value = "income"),
-		CategoryTypeOption(label = "Umum", value = "general"),
 	)
 
 	Column(
@@ -94,16 +85,16 @@ private fun Content(
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 		)
 		Text(
-			text = "Buat kategori tabungan uang baru.",
+			text = "Buat kategori baru untuk pemasukan atau pengeluaran.",
 			style = MaterialTheme.typography.headlineMedium,
 		)
 		Text(
-			text = "Kategori custom membantu transaksi lebih rapi dan mudah dipilih saat input.",
+			text = "Kategori hanya punya nama dan tipe, tanpa ikon atau warna.",
 			style = MaterialTheme.typography.bodyLarge,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 		)
 		Text(
-			text = "Tabungan uang  ·  Custom  ·  Transaksi",
+			text = "Income  ·  Expense",
 			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 		)
@@ -111,7 +102,7 @@ private fun Content(
 
 		Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
 			Text(
-				text = "Isi detail kategori untuk tabungan uang.",
+				text = "Isi nama kategori dan pilih tipenya.",
 				style = MaterialTheme.typography.bodyLarge,
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
 			)
@@ -145,25 +136,6 @@ private fun Content(
 					}
 				}
 			}
-
-			OutlinedTextField(
-				value = icon,
-				onValueChange = onChangeIcon,
-				label = { Text("Ikon") },
-				modifier = Modifier.fillMaxWidth(),
-				enabled = !isLoading,
-				singleLine = true,
-			)
-
-			OutlinedTextField(
-				value = color,
-				onValueChange = onChangeColor,
-				label = { Text("Warna") },
-				modifier = Modifier.fillMaxWidth(),
-				supportingText = { Text("Contoh: #E11D48") },
-				enabled = !isLoading,
-				singleLine = true,
-			)
 
 			Button(
 				onClick = onClickSubmit,

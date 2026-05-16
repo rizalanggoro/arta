@@ -21,8 +21,6 @@ class CategoryRepository(
 	suspend fun createCategory(
 		name: String,
 		type: String,
-		icon: String,
-		color: String,
 	): Result<Category> {
 		val authorization = authorizationHeader()
 			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
@@ -32,8 +30,6 @@ class CategoryRepository(
 			request = CreateCategoryRequestDto(
 				name = name,
 				type = type,
-				icon = icon,
-				color = color,
 			),
 		).toDomainResult()
 	}
@@ -56,8 +52,6 @@ class CategoryRepository(
 		id: Int,
 		name: String,
 		type: String,
-		icon: String,
-		color: String,
 	): Result<Category> {
 		val authorization = authorizationHeader()
 			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
@@ -68,8 +62,6 @@ class CategoryRepository(
 			request = UpdateCategoryRequestDto(
 				name = name,
 				type = type,
-				icon = icon,
-				color = color,
 			),
 		).toDomainResult()
 	}

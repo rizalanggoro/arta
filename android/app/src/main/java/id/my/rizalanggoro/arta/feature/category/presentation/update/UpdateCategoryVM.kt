@@ -44,8 +44,6 @@ class UpdateCategoryVM(
 							categoryId = category.id,
 							name = category.name,
 							type = category.type,
-							icon = category.icon.ifBlank { defaultIconForType(category.type) },
-							color = category.color.ifBlank { defaultColorForType(category.type) },
 							isLoading = false,
 							errorMessage = null,
 						)
@@ -67,22 +65,7 @@ class UpdateCategoryVM(
 	}
 
 	fun onChangeType(value: String) {
-		_uiState.update {
-			it.copy(
-				type = value,
-				icon = defaultIconForType(value),
-				color = defaultColorForType(value),
-				nameError = null,
-			)
-		}
-	}
-
-	fun onChangeIcon(value: String) {
-		_uiState.update { it.copy(icon = value) }
-	}
-
-	fun onChangeColor(value: String) {
-		_uiState.update { it.copy(color = value) }
+		_uiState.update { it.copy(type = value, nameError = null) }
 	}
 
 	fun updateCategory() {
@@ -110,8 +93,6 @@ class UpdateCategoryVM(
 				id = categoryId,
 				name = current.name,
 				type = current.type,
-				icon = current.icon.ifBlank { defaultIconForType(current.type) },
-				color = current.color.ifBlank { defaultColorForType(current.type) },
 			)
 				.onSuccess { category ->
 					_effect.emit(UpdateCategoryEffect.ShowMessage("Kategori ${category.name} berhasil diperbarui"))
@@ -124,21 +105,6 @@ class UpdateCategoryVM(
 		}
 	}
 
-	private fun defaultIconForType(type: String): String {
-		return when (type) {
-			"income" -> "💰"
-			"general" -> "🏷️"
-			else -> "🧾"
-		}
-	}
-
-	private fun defaultColorForType(type: String): String {
-		return when (type) {
-			"income" -> "#16A34A"
-			"general" -> "#2563EB"
-			else -> "#E11D48"
-		}
-	}
 }
 
 sealed interface UpdateCategoryEffect {

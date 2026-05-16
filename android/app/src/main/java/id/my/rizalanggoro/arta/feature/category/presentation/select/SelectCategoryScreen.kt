@@ -150,10 +150,6 @@ private fun SelectCategoryCard(
                 text = category.type.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Text(
-                text = category.icon.ifBlank { "🏷️" },
-                style = MaterialTheme.typography.bodyLarge,
-            )
         }
     }
 }

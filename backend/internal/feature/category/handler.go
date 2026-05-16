@@ -2,6 +2,7 @@ package category
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
@@ -81,6 +82,9 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	if req.Name == "" || req.Type == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "name and type are required"})
 	}
+	if !isAllowedCategoryType(req.Type) {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "type must be income or expense"})
+	}
 
 	userID := middleware.GetUserID(c)
 	if userID == "" {
@@ -96,8 +100,6 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		UserID:    func() *uint { u := uint(parsedUserID); return &u }(),
 		Name:      req.Name,
 		Type:      req.Type,
-		Icon:      req.Icon,
-		Color:     req.Color,
 		IsCustom:  true,
 		IsDefault: false,
 	})
@@ -173,13 +175,10 @@ func (h *Handler) update(c *fiber.Ctx) error {
 		cat.Name = *req.Name
 	}
 	if req.Type != nil {
+		if !isAllowedCategoryType(*req.Type) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "type must be income or expense"})
+		}
 		cat.Type = *req.Type
-	}
-	if req.Icon != nil {
-		cat.Icon = *req.Icon
-	}
-	if req.Color != nil {
-		cat.Color = *req.Color
 	}
 
 	updated, err := h.repo.UpdateCategory(cat)
@@ -219,4 +218,13 @@ func (h *Handler) delete(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(DeleteCategoryRes{Message: "category deleted"})
+}
+
+func isAllowedCategoryType(value string) bool {
+	switch strings.ToLower(value) {
+	case "income", "expense":
+		return true
+	default:
+		return false
+	}
 }

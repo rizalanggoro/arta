@@ -19,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,185 +28,188 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
+// ... (rest of imports)
+// Keep the rest of the file structure as is for now, I will insert Scaffold around Content
+
 @Composable
 fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
-	val uiState by vm.uiState.collectAsState()
-	val backStack = LocalBackStack.current
+    val uiState by vm.uiState.collectAsState()
+    val backStack = LocalBackStack.current
 
-	val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-	LaunchedEffect(Unit) {
-		vm.messageEvent.collect { message ->
-			snackbarHostState.showSnackbar(message)
-		}
-	}
+    LaunchedEffect(Unit) {
+        vm.messageEvent.collect { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
 
-	Content(
-		snackbarHostState = snackbarHostState,
-		isLoading = uiState.isLoading,
-		name = uiState.name,
-		email = uiState.email,
-		password = uiState.password,
-		confirmPassword = uiState.confirmPassword,
-		nameError = uiState.nameError,
-		emailError = uiState.emailError,
-		passwordError = uiState.passwordError,
-		confirmPasswordError = uiState.confirmPasswordError,
-		onChangeName = vm::onChangeName,
-		onChangeEmail = vm::onChangeEmail,
-		onChangePassword = vm::onChangePassword,
-		onChangeConfirmPassword = vm::onChangeConfirmPassword,
-		onClickSubmit = vm::register,
-		onClickLogin = { backStack.removeLastOrNull() },
-	)
+    Content(
+        snackbarHostState = snackbarHostState,
+        isLoading = uiState.isLoading,
+        name = uiState.name,
+        email = uiState.email,
+        password = uiState.password,
+        confirmPassword = uiState.confirmPassword,
+        nameError = uiState.nameError,
+        emailError = uiState.emailError,
+        passwordError = uiState.passwordError,
+        confirmPasswordError = uiState.confirmPasswordError,
+        onChangeName = vm::onChangeName,
+        onChangeEmail = vm::onChangeEmail,
+        onChangePassword = vm::onChangePassword,
+        onChangeConfirmPassword = vm::onChangeConfirmPassword,
+        onClickSubmit = vm::register,
+        onClickLogin = { backStack.removeLastOrNull() },
+    )
 }
 
 @Composable
 private fun Content(
-	snackbarHostState: SnackbarHostState,
-	isLoading: Boolean = false,
-	name: String = "",
-	email: String = "",
-	password: String = "",
-	confirmPassword: String = "",
-	nameError: String? = null,
-	emailError: String? = null,
-	passwordError: String? = null,
-	confirmPasswordError: String? = null,
-	onChangeName: (String) -> Unit = {},
-	onChangeEmail: (String) -> Unit = {},
-	onChangePassword: (String) -> Unit = {},
-	onChangeConfirmPassword: (String) -> Unit = {},
-	onClickSubmit: () -> Unit = {},
-	onClickLogin: () -> Unit = {},
+    snackbarHostState: SnackbarHostState,
+    isLoading: Boolean = false,
+    name: String = "",
+    email: String = "",
+    password: String = "",
+    confirmPassword: String = "",
+    nameError: String? = null,
+    emailError: String? = null,
+    passwordError: String? = null,
+    confirmPasswordError: String? = null,
+    onChangeName: (String) -> Unit = {},
+    onChangeEmail: (String) -> Unit = {},
+    onChangePassword: (String) -> Unit = {},
+    onChangeConfirmPassword: (String) -> Unit = {},
+    onClickSubmit: () -> Unit = {},
+    onClickLogin: () -> Unit = {},
 ) {
-	Column(
-		modifier = Modifier
+    Column(
+        modifier = Modifier
 			.fillMaxSize()
 			.padding(20.dp),
-		verticalArrangement = Arrangement.spacedBy(16.dp),
-	) {
-		Text(
-			text = "DAFTAR",
-			style = MaterialTheme.typography.labelLarge,
-			color = MaterialTheme.colorScheme.onSurfaceVariant,
-		)
-		Text(
-			text = "Buat akun baru yang siap dipakai untuk uang dan emas.",
-			style = MaterialTheme.typography.headlineMedium,
-		)
-		Text(
-			text = "Registrasi dibentuk untuk cepat, jelas, dan tetap nyaman dipakai di layar mobile.",
-			style = MaterialTheme.typography.bodyLarge,
-			color = MaterialTheme.colorScheme.onSurfaceVariant,
-		)
-		SnackbarHost(hostState = snackbarHostState)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = "DAFTAR",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = "Buat akun baru yang siap dipakai untuk uang dan emas.",
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        Text(
+            text = "Registrasi dibentuk untuk cepat, jelas, dan tetap nyaman dipakai di layar mobile.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        SnackbarHost(hostState = snackbarHostState)
 
-		Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-			Text(
-				text = "Lengkapi data berikut",
-				style = MaterialTheme.typography.titleLarge,
-			)
-			Text(
-				text = "Gunakan data diri yang konsisten agar pengaturan wallet lebih mudah diatur.",
-				style = MaterialTheme.typography.bodyMedium,
-				color = MaterialTheme.colorScheme.onSurfaceVariant,
-			)
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                text = "Lengkapi data berikut",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = "Gunakan data diri yang konsisten agar pengaturan wallet lebih mudah diatur.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
 
-			Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-				OutlinedTextField(
-					value = name,
-					onValueChange = onChangeName,
-					label = { Text("Nama lengkap") },
-					modifier = Modifier.fillMaxWidth(),
-					isError = nameError != null,
-					supportingText = {
-						if (nameError != null) Text(nameError)
-					},
-					enabled = !isLoading,
-					singleLine = true,
-					keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-						keyboardType = KeyboardType.Text,
-						imeAction = ImeAction.Next,
-					),
-				)
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = onChangeName,
+                    label = { Text("Nama lengkap") },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = nameError != null,
+                    supportingText = {
+                        if (nameError != null) Text(nameError)
+                    },
+                    enabled = !isLoading,
+                    singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next,
+                    ),
+                )
 
-				OutlinedTextField(
-					value = email,
-					onValueChange = onChangeEmail,
-					label = { Text("Alamat email") },
-					modifier = Modifier.fillMaxWidth(),
-					isError = emailError != null,
-					supportingText = {
-						if (emailError != null) Text(emailError)
-					},
-					enabled = !isLoading,
-					singleLine = true,
-					keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-						keyboardType = KeyboardType.Email,
-						imeAction = ImeAction.Next,
-					),
-				)
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = onChangeEmail,
+                    label = { Text("Alamat email") },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = emailError != null,
+                    supportingText = {
+                        if (emailError != null) Text(emailError)
+                    },
+                    enabled = !isLoading,
+                    singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next,
+                    ),
+                )
 
-				OutlinedTextField(
-					value = password,
-					onValueChange = onChangePassword,
-					label = { Text("Kata sandi") },
-					modifier = Modifier.fillMaxWidth(),
-					isError = passwordError != null,
-					supportingText = {
-						if (passwordError != null) Text(passwordError)
-					},
-					enabled = !isLoading,
-					singleLine = true,
-					keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-						keyboardType = KeyboardType.Password,
-						imeAction = ImeAction.Next,
-					),
-				)
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = onChangePassword,
+                    label = { Text("Kata sandi") },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = passwordError != null,
+                    supportingText = {
+                        if (passwordError != null) Text(passwordError)
+                    },
+                    enabled = !isLoading,
+                    singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Next,
+                    ),
+                )
 
-				OutlinedTextField(
-					value = confirmPassword,
-					onValueChange = onChangeConfirmPassword,
-					label = { Text("Konfirmasi kata sandi") },
-					modifier = Modifier.fillMaxWidth(),
-					isError = confirmPasswordError != null,
-					supportingText = {
-						if (confirmPasswordError != null) Text(confirmPasswordError)
-					},
-					enabled = !isLoading,
-					singleLine = true,
-					keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-						keyboardType = KeyboardType.Password,
-						imeAction = ImeAction.Done,
-					),
-				)
-			}
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = onChangeConfirmPassword,
+                    label = { Text("Konfirmasi kata sandi") },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = confirmPasswordError != null,
+                    supportingText = {
+                        if (confirmPasswordError != null) Text(confirmPasswordError)
+                    },
+                    enabled = !isLoading,
+                    singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done,
+                    ),
+                )
+            }
 
-			Button(
-				onClick = onClickSubmit,
-				modifier = Modifier.fillMaxWidth(),
-				enabled = !isLoading,
-			) {
-				if (isLoading) {
-					CircularProgressIndicator(
-						modifier = Modifier.size(20.dp),
-						strokeWidth = 2.dp,
-					)
-				} else {
-					Text("Daftar")
-				}
-			}
+            Button(
+                onClick = onClickSubmit,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading,
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Text("Daftar")
+                }
+            }
 
-			TextButton(
-				onClick = onClickLogin,
-				modifier = Modifier.fillMaxWidth(),
-				enabled = !isLoading,
-			) {
-				Text("Sudah punya akun? Masuk sekarang")
-			}
-		}
-	}
+            TextButton(
+                onClick = onClickLogin,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading,
+            ) {
+                Text("Sudah punya akun? Masuk sekarang")
+            }
+        }
+    }
 }
 
 // ViewModel is initialized directly on the composable parameter per project convention
@@ -215,34 +217,34 @@ private fun Content(
 @Preview(showBackground = true, group = "Register")
 @Composable
 private fun RegisterPreview() {
-	ArtaTheme {
-		Content(
-			snackbarHostState = remember { SnackbarHostState() },
-		)
-	}
+    ArtaTheme {
+        Content(
+            snackbarHostState = remember { SnackbarHostState() },
+        )
+    }
 }
 
 @Preview(showBackground = true, group = "Register")
 @Composable
 private fun RegisterLoadingPreview() {
-	ArtaTheme {
-		Content(
-			snackbarHostState = remember { SnackbarHostState() },
-			isLoading = true,
-		)
-	}
+    ArtaTheme {
+        Content(
+            snackbarHostState = remember { SnackbarHostState() },
+            isLoading = true,
+        )
+    }
 }
 
 @Preview(showBackground = true, group = "Register")
 @Composable
 private fun RegisterErrorPreview() {
-	ArtaTheme {
-		Content(
-			snackbarHostState = remember { SnackbarHostState() },
-			nameError = "Nama wajib diisi",
-			emailError = "Email wajib diisi",
-			passwordError = "Kata sandi wajib diisi",
-			confirmPasswordError = "Konfirmasi kata sandi wajib diisi",
-		)
-	}
+    ArtaTheme {
+        Content(
+            snackbarHostState = remember { SnackbarHostState() },
+            nameError = "Nama wajib diisi",
+            emailError = "Email wajib diisi",
+            passwordError = "Kata sandi wajib diisi",
+            confirmPasswordError = "Konfirmasi kata sandi wajib diisi",
+        )
+    }
 }

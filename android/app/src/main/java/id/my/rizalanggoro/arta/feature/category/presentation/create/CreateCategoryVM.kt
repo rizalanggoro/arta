@@ -42,19 +42,9 @@ class CreateCategoryVM(
 		_uiState.update {
 			it.copy(
 				type = value,
-				icon = defaultIconForType(value),
-				color = defaultColorForType(value),
 				nameError = null,
 			)
 		}
-	}
-
-	fun onChangeIcon(value: String) {
-		_uiState.update { it.copy(icon = value) }
-	}
-
-	fun onChangeColor(value: String) {
-		_uiState.update { it.copy(color = value) }
 	}
 
 	fun createCategory() {
@@ -73,8 +63,6 @@ class CreateCategoryVM(
 			categoryRepository.createCategory(
 				name = current.name,
 				type = current.type,
-				icon = current.icon.ifBlank { defaultIconForType(current.type) },
-				color = current.color.ifBlank { defaultColorForType(current.type) },
 			)
 				.onSuccess { category ->
 					_effect.emit(CreateCategoryEffect.ShowMessage("Kategori ${category.name} berhasil dibuat"))
@@ -84,22 +72,6 @@ class CreateCategoryVM(
 					_effect.emit(CreateCategoryEffect.ShowMessage(throwable.message ?: "Gagal membuat kategori"))
 				}
 			_uiState.update { it.copy(isLoading = false) }
-		}
-	}
-
-	private fun defaultIconForType(type: String): String {
-		return when (type) {
-			"income" -> "💰"
-			"general" -> "🏷️"
-			else -> "🧾"
-		}
-	}
-
-	private fun defaultColorForType(type: String): String {
-		return when (type) {
-			"income" -> "#16A34A"
-			"general" -> "#2563EB"
-			else -> "#E11D48"
 		}
 	}
 }
