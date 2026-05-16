@@ -7,8 +7,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
-import id.my.rizalanggoro.arta.feature.category.data.CategoryRepository
 import id.my.rizalanggoro.arta.domain.Category
+import id.my.rizalanggoro.arta.domain.Wallet
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,10 +17,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import id.my.rizalanggoro.arta.feature.category.presentation.select.CategorySelectionBus
+import id.my.rizalanggoro.arta.feature.wallet.presentation.select.WalletSelectionBus
 
 class CreateTransactionVM(
     private val transactionRepository: TransactionRepository,
-    private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
@@ -32,8 +33,23 @@ class CreateTransactionVM(
                     ),
                     authSessionProvider = { app.authPrefs.currentSession.value },
                 )
-                val categoryRepo = app.categoryRepository
-                CreateTransactionVM(transactionRepository = repo, categoryRepository = categoryRepo)
+                CreateTransactionVM(transactionRepository = repo)
+            }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            CategorySelectionBus.selectedCategory.collect { category ->
+                onSelectCategory(category)
+            }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            WalletSelectionBus.selectedWallet.collect { wallet ->
+                onSelectWallet(wallet)
             }
         }
     }
@@ -45,7 +61,7 @@ class CreateTransactionVM(
     val effect: SharedFlow<CreateTransactionEffect> = _effect.asSharedFlow()
 
     fun onWalletIdChanged(value: String) {
-        _uiState.update { it.copy(walletId = value, walletIdError = null) }
+        _uiState.update { it.copy(walletId = value, selectedWalletName = "", walletIdError = null) }
     }
 
     fun onTypeChanged(value: String) {
@@ -57,19 +73,25 @@ class CreateTransactionVM(
     }
 
     fun onCategoryIdChanged(value: String) {
-        _uiState.update { it.copy(categoryId = value) }
+        _uiState.update { it.copy(categoryId = value, selectedCategoryName = "") }
     }
 
     fun onSelectCategory(category: Category) {
-        _uiState.update { it.copy(categoryId = category.id.toString()) }
+        _uiState.update {
+            it.copy(
+                categoryId = category.id.toString(),
+                selectedCategoryName = category.name,
+            )
+        }
     }
 
-    private fun loadCategories() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(categoriesLoading = true) }
-            categoryRepository.getCategories()
-                .onSuccess { list -> _uiState.update { it.copy(categories = list, categoriesLoading = false) } }
-                .onFailure { _uiState.update { it.copy(categoriesLoading = false) } }
+    fun onSelectWallet(wallet: Wallet) {
+        _uiState.update {
+            it.copy(
+                walletId = wallet.id.toString(),
+                selectedWalletName = wallet.name,
+                walletIdError = null,
+            )
         }
     }
 
@@ -113,8 +135,6 @@ class CreateTransactionVM(
         }
 
         viewModelScope.launch {
-            // ensure categories loaded (harmless if already loaded)
-            loadCategories()
             _uiState.update { it.copy(isLoading = true) }
             transactionRepository.createTransaction(
                 walletId = walletId!!,

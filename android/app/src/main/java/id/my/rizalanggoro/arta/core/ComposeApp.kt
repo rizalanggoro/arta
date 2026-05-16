@@ -14,6 +14,7 @@ import androidx.navigation3.ui.NavDisplay
 import id.my.rizalanggoro.arta.core.Routes.AuthRoute
 import id.my.rizalanggoro.arta.core.Routes.CategoryCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
+import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
 import id.my.rizalanggoro.arta.core.Routes.CategoryUpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.ForgotPasswordRoute
 import id.my.rizalanggoro.arta.core.Routes.LoginRoute
@@ -25,6 +26,7 @@ import id.my.rizalanggoro.arta.core.Routes.DashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionListRoute
 import id.my.rizalanggoro.arta.core.Routes.SettingsRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
+import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletUpdateRoute
 import id.my.rizalanggoro.arta.feature.auth.presentation.forgotpassword.ForgotPasswordScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
@@ -36,11 +38,13 @@ import id.my.rizalanggoro.arta.feature.transaction.presentation.update.UpdateTra
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.create.CreateCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategoryScreen
+import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.update.UpdateCategoryScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.create.CreateGoldScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.update.UpdateGoldScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
+import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.update.UpdateWalletScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldListContent
@@ -74,6 +78,7 @@ fun ComposeApp() {
 				entryProvider =
 					entryProvider {
 						entry<CategoryRoute> { ListCategoryScreen() }
+						entry<CategorySelectRoute> { SelectCategoryScreen() }
 						entry<CategoryCreateRoute> { CreateCategoryScreen() }
 						entry<CategoryUpdateRoute> { route -> UpdateCategoryScreen(categoryId = route.categoryId) }
 						entry<GoldFormRoute> { route ->
@@ -97,6 +102,7 @@ fun ComposeApp() {
 						entry<TransactionListRoute> { HomeTransactionListContent() }
 						entry<SettingsRoute> { HomeSettingContent(walletType = HomeWalletType.CashSavings) }
 						entry<WalletRoute> { ListWalletScreen() }
+						entry<WalletSelectRoute> { SelectWalletScreen() }
 						entry<WalletUpdateRoute> { route -> UpdateWalletScreen(walletId = route.walletId) }
 						entry<LoginRoute> { LoginScreen() }
 						entry<RegisterRoute> { RegisterScreen() }

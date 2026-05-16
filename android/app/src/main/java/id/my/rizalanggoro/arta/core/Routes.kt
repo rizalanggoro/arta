@@ -50,6 +50,9 @@ object Routes {
     data object WalletRoute : NavKey
 
     @Serializable
+    data object WalletSelectRoute : NavKey
+
+    @Serializable
     data class WalletUpdateRoute(
         val walletId: Int,
     ) : NavKey
@@ -61,6 +64,9 @@ object Routes {
 
     @Serializable
     data object CategoryRoute : NavKey
+
+    @Serializable
+    data object CategorySelectRoute : NavKey
 
     @Serializable
     data object CategoryCreateRoute : NavKey

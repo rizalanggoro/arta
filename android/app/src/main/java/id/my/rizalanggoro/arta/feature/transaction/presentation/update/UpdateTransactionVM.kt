@@ -7,8 +7,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
-import id.my.rizalanggoro.arta.feature.category.data.CategoryRepository
+import id.my.rizalanggoro.arta.feature.category.presentation.select.CategorySelectionBus
 import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionUiState
+import id.my.rizalanggoro.arta.domain.Category
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -20,7 +21,6 @@ import kotlinx.coroutines.launch
 
 class UpdateTransactionVM(
     private val transactionRepository: TransactionRepository,
-    private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
@@ -32,8 +32,15 @@ class UpdateTransactionVM(
                     ),
                     authSessionProvider = { app.authPrefs.currentSession.value },
                 )
-                val categoryRepo = app.categoryRepository
-                UpdateTransactionVM(transactionRepository = repo, categoryRepository = categoryRepo)
+                UpdateTransactionVM(transactionRepository = repo)
+            }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            CategorySelectionBus.selectedCategory.collect { category ->
+                onSelectCategory(category)
             }
         }
     }
@@ -46,12 +53,6 @@ class UpdateTransactionVM(
 
     fun load(transactionId: Int) {
         viewModelScope.launch {
-            // load categories for picker
-            _uiState.update { it.copy(categoriesLoading = true) }
-            categoryRepository.getCategories()
-                .onSuccess { list -> _uiState.update { it.copy(categories = list, categoriesLoading = false) } }
-                .onFailure { _uiState.update { it.copy(categoriesLoading = false) } }
-
             transactionRepository.getTransactionById(transactionId)
                 .onSuccess { tx ->
                     _uiState.update {
@@ -60,6 +61,7 @@ class UpdateTransactionVM(
                             type = tx.type,
                             amount = tx.amount.toString(),
                             categoryId = tx.categoryId.toString(),
+                            selectedCategoryName = if (tx.categoryId > 0) "Kategori #${tx.categoryId}" else "",
                             description = tx.description,
                             date = tx.date,
                         )
@@ -72,9 +74,18 @@ class UpdateTransactionVM(
     fun onWalletIdChanged(value: String) { _uiState.update { it.copy(walletId = value) } }
     fun onTypeChanged(value: String) { _uiState.update { it.copy(type = value) } }
     fun onAmountChanged(value: String) { _uiState.update { it.copy(amount = value) } }
-    fun onCategoryIdChanged(value: String) { _uiState.update { it.copy(categoryId = value) } }
+    fun onCategoryIdChanged(value: String) { _uiState.update { it.copy(categoryId = value, selectedCategoryName = "") } }
     fun onDescriptionChanged(value: String) { _uiState.update { it.copy(description = value) } }
     fun onDateChanged(value: String) { _uiState.update { it.copy(date = value) } }
+
+    fun onSelectCategory(category: Category) {
+        _uiState.update {
+            it.copy(
+                categoryId = category.id.toString(),
+                selectedCategoryName = category.name,
+            )
+        }
+    }
 
     fun updateTransaction(id: Int) {
         val current = _uiState.value

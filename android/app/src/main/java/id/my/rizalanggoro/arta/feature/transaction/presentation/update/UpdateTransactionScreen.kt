@@ -14,9 +14,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
@@ -25,6 +22,7 @@ import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTra
 import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionVM
 import id.my.rizalanggoro.arta.feature.transaction.presentation.update.UpdateTransactionVM
 import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.material3.SnackbarHost
@@ -81,6 +79,7 @@ fun UpdateTransactionScreen(
         val amount = uiState.amount
         val amountError = uiState.amountError
         val categoryId = uiState.categoryId
+        val selectedCategoryName = uiState.selectedCategoryName
         val date = uiState.date
         val dateError = uiState.dateError
         val description = uiState.description
@@ -99,29 +98,20 @@ fun UpdateTransactionScreen(
 
             OutlinedTextField(value = amount, onValueChange = vm::onAmountChanged, label = { Text("Jumlah") }, modifier = Modifier.fillMaxWidth(), isError = amountError != null, supportingText = { amountError?.let { Text(it) } }, singleLine = true)
 
-            // Category dropdown
-            val expanded = remember { mutableStateOf(false) }
-            val displayCategory = remember(categoryId, uiState.categories) { uiState.categories.firstOrNull { it.id.toString() == categoryId }?.name ?: if (categoryId.isBlank()) "Pilih kategori (opsional)" else categoryId }
-            ExposedDropdownMenuBox(expanded = expanded.value, onExpandedChange = { expanded.value = it }) {
-                OutlinedTextField(
-                    value = displayCategory,
-                    onValueChange = {},
-                    label = { Text("Kategori") },
-                    modifier = Modifier.fillMaxWidth(),
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value) }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = "Kategori", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    text = selectedCategoryName.ifBlank { "Belum dipilih" },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                ExposedDropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
-                    if (uiState.categoriesLoading) {
-                        DropdownMenuItem(text = { Text("Muat kategori...") }, onClick = { })
-                    } else {
-                        uiState.categories.forEach { c ->
-                            DropdownMenuItem(text = { Text(c.name) }, onClick = {
-                                vm.onCategoryIdChanged(c.id.toString())
-                                expanded.value = false
-                            })
-                        }
-                    }
+                TextButton(onClick = { backStack.add(CategorySelectRoute) }, enabled = !uiState.isLoading) {
+                    Text("Pilih kategori")
+                }
+                if (categoryId.isNotBlank()) {
+                    Text(
+                        text = "ID kategori: $categoryId",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
 

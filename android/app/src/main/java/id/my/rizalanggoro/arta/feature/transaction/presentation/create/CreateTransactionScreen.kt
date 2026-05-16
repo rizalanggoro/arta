@@ -43,6 +43,8 @@ import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
+import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,11 +72,11 @@ fun CreateTransactionScreen(
     Content(
         snackbarHostState = snackbarHostState,
         walletId = uiState.walletId,
+        selectedWalletName = uiState.selectedWalletName,
         type = uiState.type,
         amount = uiState.amount,
         categoryId = uiState.categoryId,
-        categories = uiState.categories,
-        categoriesLoading = uiState.categoriesLoading,
+        selectedCategoryName = uiState.selectedCategoryName,
         description = uiState.description,
         date = uiState.date,
         walletIdError = uiState.walletIdError,
@@ -85,9 +87,10 @@ fun CreateTransactionScreen(
         onWalletIdChanged = vm::onWalletIdChanged,
         onTypeChanged = vm::onTypeChanged,
         onAmountChanged = vm::onAmountChanged,
-        onCategoryIdChanged = vm::onCategoryIdChanged,
         onDescriptionChanged = vm::onDescriptionChanged,
         onDateChanged = vm::onDateChanged,
+        onClickSelectWallet = { backStack.add(WalletSelectRoute) },
+        onClickSelectCategory = { backStack.add(CategorySelectRoute) },
         onClickSave = vm::createTransaction,
         onClickBack = { backStack.removeLastOrNull() },
     )
@@ -98,11 +101,11 @@ fun CreateTransactionScreen(
 private fun Content(
     snackbarHostState: SnackbarHostState,
     walletId: String = "",
+    selectedWalletName: String = "",
     type: String = "",
     amount: String = "",
     categoryId: String = "",
-    categories: List<Category> = emptyList(),
-    categoriesLoading: Boolean = false,
+    selectedCategoryName: String = "",
     description: String = "",
     date: String = "",
     walletIdError: String? = null,
@@ -113,9 +116,10 @@ private fun Content(
     onWalletIdChanged: (String) -> Unit = {},
     onTypeChanged: (String) -> Unit = {},
     onAmountChanged: (String) -> Unit = {},
-    onCategoryIdChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
     onDateChanged: (String) -> Unit = {},
+    onClickSelectWallet: () -> Unit = {},
+    onClickSelectCategory: () -> Unit = {},
     onClickSave: () -> Unit = {},
     onClickBack: () -> Unit = {},
 ) {
@@ -140,7 +144,19 @@ private fun Content(
             Text(text = "Masukkan detail transaksi.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             SnackbarHost(hostState = snackbarHostState)
 
-            OutlinedTextField(value = walletId, onValueChange = onWalletIdChanged, label = { Text("Wallet ID") }, modifier = Modifier.fillMaxWidth(), isError = walletIdError != null, supportingText = { if (walletIdError != null) Text(walletIdError) }, enabled = !isLoading, singleLine = true)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = "Wallet", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    text = selectedWalletName.ifBlank { if (walletId.isBlank()) "Belum dipilih" else "Wallet ID: $walletId" },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                TextButton(onClick = onClickSelectWallet, enabled = !isLoading) {
+                    Text("Pilih wallet")
+                }
+                if (walletIdError != null) {
+                    Text(walletIdError, color = MaterialTheme.colorScheme.error)
+                }
+            }
 
             // Type selector as chips
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -152,31 +168,20 @@ private fun Content(
 
             OutlinedTextField(value = amount, onValueChange = onAmountChanged, label = { Text("Jumlah") }, modifier = Modifier.fillMaxWidth(), isError = amountError != null, supportingText = { if (amountError != null) Text(amountError) }, enabled = !isLoading, singleLine = true)
 
-            // Category picker using exposed dropdown
-            val expanded = remember { mutableStateOf(false) }
-            val displayCategory = remember(categoryId, categories) {
-                categories.firstOrNull { it.id.toString() == categoryId }?.name ?: "Pilih kategori (opsional)"
-            }
-            ExposedDropdownMenuBox(expanded = expanded.value, onExpandedChange = { expanded.value = it }) {
-                OutlinedTextField(
-                    value = displayCategory,
-                    onValueChange = {},
-                    label = { Text("Kategori") },
-                    modifier = Modifier.fillMaxWidth(),
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value) }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = "Kategori", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    text = selectedCategoryName.ifBlank { "Belum dipilih" },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                ExposedDropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
-                    if (categoriesLoading) {
-                        DropdownMenuItem(text = { Text("Muat kategori...") }, onClick = { })
-                    } else {
-                        categories.forEach { c ->
-                            DropdownMenuItem(text = { Text(c.name) }, onClick = {
-                                onCategoryIdChanged(c.id.toString())
-                                expanded.value = false
-                            })
-                        }
-                    }
+                TextButton(onClick = onClickSelectCategory, enabled = !isLoading) {
+                    Text("Pilih kategori")
+                }
+                if (categoryId.isNotBlank()) {
+                    Text(
+                        text = "ID kategori: $categoryId",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
 
