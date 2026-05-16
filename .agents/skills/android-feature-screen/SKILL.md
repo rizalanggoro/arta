@@ -51,6 +51,8 @@ Rules:
 
 - keep business logic out of the screen
 - keep UI state collection in the screen entry point
+- `LocalBackStack` MUST only be initialized or read inside `Screen`
+- `Content` MUST NOT access `LocalBackStack` directly
 - do not place layout-heavy code directly inside `Screen` if it can be moved into `Content`
 
 ---
@@ -69,6 +71,7 @@ Rules:
 - use parameter-based state hoisting
 - keep `Content` private unless the project explicitly needs otherwise
 - keep the UI declarative and reusable
+- keep navigation dependencies such as `LocalBackStack` out of `Content`
 - do not call the ViewModel from `Content`
 
 ---
@@ -250,5 +253,7 @@ Example prompts:
 This skill is intentionally strict.
 
 If a file is a screen file, it should have a clear `Screen` composable and a private `Content` composable.
+
+`LocalBackStack` is a screen-scoped dependency and must never be initialized or consumed inside `Content`.
 
 If the screen has multiple scenarios, provide previews for each important scenario.

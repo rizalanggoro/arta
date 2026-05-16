@@ -1,7 +1,7 @@
 package id.my.rizalanggoro.arta.feature.auth.data
 
 import id.my.rizalanggoro.arta.domain.AuthSession
-import id.my.rizalanggoro.arta.feature.auth.data.dto.ApiErrorDto
+import id.my.rizalanggoro.arta.core.dto.ApiErrorDto
 import id.my.rizalanggoro.arta.feature.auth.data.dto.LoginRequestDto
 import id.my.rizalanggoro.arta.feature.auth.data.dto.RegisterRequestDto
 import id.my.rizalanggoro.arta.feature.auth.data.mapper.toDomain

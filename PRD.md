@@ -140,7 +140,25 @@ Menjadi aplikasi manajemen keuangan pilihan utama bagi masyarakat yang concern t
   - Bar chart transaksi per bulan
   - Progress visualization aset emas
 
-#### E. Kategori Transaksi
+#### E. Home dan Navigasi Utama
+
+- **Halaman Home**
+  - Menjadi entry point setelah user login
+  - Menampilkan bottom navigation bar yang mengikuti jenis wallet aktif saat ini
+  - Menyediakan navigasi utama yang berbeda untuk wallet tabungan uang dan wallet tabungan emas
+
+- **Bottom Navigation untuk Wallet Tabungan Uang**
+  - Dashboard ringkasan
+  - Daftar semua transaksi
+  - Chart view
+  - Setting
+
+- **Bottom Navigation untuk Wallet Tabungan Emas**
+  - Dashboard ringkasan
+  - Daftar semua emas
+  - Setting
+
+#### F. Kategori Transaksi
 
 - **Manajemen Kategori**
   - Lihat daftar kategori
@@ -149,7 +167,7 @@ Menjadi aplikasi manajemen keuangan pilihan utama bagi masyarakat yang concern t
   - Hapus kategori
   - Ikon/warna untuk setiap kategori
 
-#### F. Autentikasi & User Account
+#### G. Autentikasi & User Account
 
 - **Registrasi Pengguna**
   - Sign up dengan email dan password
@@ -274,7 +292,14 @@ Menjadi aplikasi manajemen keuangan pilihan utama bagi masyarakat yang concern t
 6. Tap Simpan
 7. Lihat update di dashboard
 
-### 7.6 View Dashboard
+### 7.6 View Home
+
+1. User membuka app dan berhasil login
+2. Masuk ke halaman home sesuai wallet aktif saat ini
+3. Bottom navigation menampilkan destinasi yang relevan untuk jenis wallet aktif
+4. User berpindah antar destinasi utama dari bottom navigation
+
+### 7.7 View Dashboard
 
 1. User membuka app
 2. Lihat overview saldo & transaksi
@@ -310,29 +335,38 @@ Menjadi aplikasi manajemen keuangan pilihan utama bagi masyarakat yang concern t
    - Charts
    - Recent transactions
 
+- Bottom navigation bar yang berubah sesuai jenis wallet aktif
+
 4. **Transaction List**
    - List semua transaksi
    - Filter & search
    - Swipe untuk edit/delete
 
 5. **Add Transaction**
-  - Form sederhana
-  - Pilih wallet tabungan uang
-   - Quick category selection
-   - Date/time picker
+
+- Form sederhana
+- Pilih wallet tabungan uang
+- Quick category selection
+- Date/time picker
 
 6. **Gold Tracking**
-  - Summary emas per jenis pada wallet tabungan emas (Pure, Jewelry, Investment)
-   - Total gram dan nilai per jenis
-   - Breakdown ringkas setiap jenis emas
-   - List data emas dengan filter per jenis
-   - Add/Edit/Delete dengan pemilihan jenis
 
-7. **Categories**
+- Summary emas per jenis pada wallet tabungan emas (Pure, Jewelry, Investment)
+- Total gram dan nilai per jenis
+- Breakdown ringkas setiap jenis emas
+- List data emas dengan filter per jenis
+- Add/Edit/Delete dengan pemilihan jenis
+
+7. **Home Navigation**
+
+- Bottom navigation untuk wallet uang: Dashboard, Transaksi, Chart, Setting
+- Bottom navigation untuk wallet emas: Dashboard, Emas, Setting
+
+8. **Categories**
    - Manage kategoris
    - Custom kategori
 
-8. **Settings/Profile**
+9. **Settings/Profile**
    - Profile settings
    - Change password
    - Currency preference

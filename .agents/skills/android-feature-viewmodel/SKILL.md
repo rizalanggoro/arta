@@ -57,6 +57,7 @@ Rules:
 - expose state as `StateFlow`
 - use `viewModelScope` for async work
 - keep event handling inside the ViewModel when needed
+- the matching screen should pass the ViewModel directly in the composable parameter
 
 Recommended state pattern:
 
@@ -105,6 +106,7 @@ Rules:
 - do not move this factory into a separate file by default
 - do not make screens construct repositories directly
 - do not bypass the ViewModel factory with ad-hoc object creation in UI code
+- do not hide the factory behind a helper function in the screen file
 
 ---
 
@@ -140,7 +142,27 @@ Rules:
 - avoid mutable public state
 - do not store screen state in the Composable when the ViewModel should own it
 
+---
+
+## Screen Wiring Rule
+
+The screen composable MUST initialize the ViewModel directly in its parameter default value.
+
 Required pattern:
+
+```kotlin
+@Composable
+fun AuthScreen(vm: AuthVM = viewModel(factory = AuthVM.Factory)) {
+```
+
+Rules:
+
+- use `viewModel(factory = AuthVM.Factory)` directly in the composable parameter
+- do not create a helper function like `private fun loginViewModel()` just to return `viewModel(factory = ...)`
+- do not wrap ViewModel creation in another composable or utility function inside the screen file unless the project explicitly requires a shared screen factory
+- keep the screen signature self-contained and easy to scan
+
+State pattern:
 
 ```kotlin
 private val _uiState = MutableStateFlow(AuthUiState())
@@ -209,6 +231,7 @@ A valid feature ViewModel should satisfy all of these:
 - UI state lives in a separate `UiState` file
 - the ViewModel contains business logic, not Compose UI
 - dependencies are injected through the factory, not manually created in the screen
+- the screen initializes the ViewModel directly in the composable parameter
 
 ---
 
@@ -222,6 +245,7 @@ Before considering the ViewModel complete, verify:
 - the factory uses `viewModelFactory { initializer { ... } }`
 - the ViewModel uses `MutableStateFlow` and `asStateFlow()`
 - the screen does not create dependencies that belong in the ViewModel
+- the screen does not hide ViewModel creation behind a helper function
 - the file naming clearly matches the feature and subfeature
 
 ---

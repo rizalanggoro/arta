@@ -18,12 +18,16 @@ import kotlinx.coroutines.launch
 
 class RegisterVM(
 	private val authRepository: AuthRepository,
+	private val application: MyApplication,
 ) : ViewModel() {
 	companion object {
 		val Factory = viewModelFactory {
 			initializer {
-				val authRepository = (this[APPLICATION_KEY] as MyApplication).appContainer.authRepository
-				RegisterVM(authRepository = authRepository)
+				val app = (this[APPLICATION_KEY] as MyApplication)
+				RegisterVM(
+					authRepository = app.authRepository,
+					application = app,
+				)
 			}
 		}
 	}
@@ -94,9 +98,10 @@ class RegisterVM(
 				password = current.password,
 				currency = "IDR",
 			)
-				.onSuccess { session ->
-					_messageEvent.emit("Registrasi berhasil untuk ${session.name}")
-				}
+                	.onSuccess { session ->
+						application.authPrefs.setSession(session)
+                		_messageEvent.emit("Registrasi berhasil untuk ${session.name}")
+                	}
 				.onFailure { throwable ->
 					_messageEvent.emit(throwable.message ?: "Registrasi gagal")
 				}

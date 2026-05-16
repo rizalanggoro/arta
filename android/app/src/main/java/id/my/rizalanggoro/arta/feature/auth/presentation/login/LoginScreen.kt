@@ -2,36 +2,39 @@ package id.my.rizalanggoro.arta.feature.auth.presentation.login
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes.ForgotPasswordRoute
+import id.my.rizalanggoro.arta.core.Routes.RegisterRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(vm: LoginVM = loginViewModel()) {
+fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
 	val uiState by vm.uiState.collectAsState()
+	val backStack = LocalBackStack.current
 
 	val snackbarHostState = remember { SnackbarHostState() }
 
@@ -51,10 +54,11 @@ fun LoginScreen(vm: LoginVM = loginViewModel()) {
 		onChangeEmail = vm::onChangeEmail,
 		onChangePassword = vm::onChangePassword,
 		onClickSubmit = vm::login,
+		onClickRegister = { backStack.add(RegisterRoute) },
+		onClickForgotPassword = { backStack.add(ForgotPasswordRoute) },
 	)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
 	snackbarHostState: SnackbarHostState,
@@ -66,26 +70,40 @@ private fun Content(
 	onChangeEmail: (String) -> Unit = {},
 	onChangePassword: (String) -> Unit = {},
 	onClickSubmit: () -> Unit = {},
+	onClickRegister: () -> Unit = {},
+	onClickForgotPassword: () -> Unit = {},
 ) {
-	Scaffold(
-		topBar = {
-			TopAppBar(
-				title = { Text("Login") }
-			)
-		},
-		snackbarHost = {
-			SnackbarHost(hostState = snackbarHostState)
-		}
-	) { paddingValues ->
-		Column(
-			modifier = Modifier
-				.padding(paddingValues)
-				.padding(16.dp),
-			verticalArrangement = Arrangement.spacedBy(16.dp)
-		) {
+	Column(
+		modifier = Modifier
+			.fillMaxSize()
+			.padding(20.dp),
+		verticalArrangement = Arrangement.spacedBy(16.dp),
+	) {
+		Text(
+			text = "MASUK",
+			style = MaterialTheme.typography.labelLarge,
+			color = MaterialTheme.colorScheme.onSurfaceVariant,
+		)
+		Text(
+			text = "Kelola uang dan emas dalam satu alur yang rapi.",
+			style = MaterialTheme.typography.headlineMedium,
+		)
+		Text(
+			text = "Masuk untuk melihat ringkasan, transaksi, dan navigasi wallet yang sesuai tipe akun Anda.",
+			style = MaterialTheme.typography.bodyLarge,
+			color = MaterialTheme.colorScheme.onSurfaceVariant,
+		)
+		SnackbarHost(hostState = snackbarHostState)
+
+		Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
 			Text(
-				text = "Masuk ke akun Anda",
-				style = MaterialTheme.typography.headlineSmall
+				text = "Masukkan kredensial Anda",
+				style = MaterialTheme.typography.titleLarge,
+			)
+			Text(
+				text = "Gunakan email aktif dan kata sandi yang terdaftar di Arta.",
+				style = MaterialTheme.typography.bodyMedium,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
 			)
 
 			Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -100,6 +118,10 @@ private fun Content(
 					},
 					enabled = !isLoading,
 					singleLine = true,
+					keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+						keyboardType = KeyboardType.Email,
+						imeAction = ImeAction.Next,
+					),
 				)
 
 				OutlinedTextField(
@@ -113,35 +135,50 @@ private fun Content(
 					},
 					enabled = !isLoading,
 					singleLine = true,
+					keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+						keyboardType = KeyboardType.Password,
+						imeAction = ImeAction.Done,
+					),
 				)
 			}
 
-			when (isLoading) {
-				true -> CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-				false -> Button(
-					onClick = onClickSubmit,
-					modifier = Modifier.fillMaxWidth(),
-					enabled = !isLoading,
-				) {
-					Text("Login")
+			Button(
+				onClick = onClickSubmit,
+				modifier = Modifier.fillMaxWidth(),
+				enabled = !isLoading,
+			) {
+				if (isLoading) {
+					CircularProgressIndicator(
+						modifier = Modifier
+							.size(20.dp)
+							.align(Alignment.CenterVertically),
+						strokeWidth = 2.dp,
+					)
+				} else {
+					Text("Masuk")
 				}
 			}
 
 			TextButton(
-				onClick = onClickSubmit,
+				onClick = onClickForgotPassword,
+				modifier = Modifier.fillMaxWidth(),
+				enabled = !isLoading,
+			) {
+				Text("Lupa kata sandi")
+			}
+
+			TextButton(
+				onClick = onClickRegister,
 				modifier = Modifier.align(Alignment.CenterHorizontally),
 				enabled = !isLoading,
 			) {
-				Text("Lupa kata sandi?")
+				Text("Belum punya akun? Daftar")
 			}
 		}
 	}
 }
 
-@Composable
-private fun loginViewModel(): LoginVM {
-	return viewModel(factory = LoginVM.Factory)
-}
+// ViewModel is initialized directly on the composable parameter per project convention
 
 @Preview(showBackground = true, group = "Login")
 @Composable

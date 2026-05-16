@@ -1,7 +1,6 @@
 package id.my.rizalanggoro.arta.feature.auth.presentation.login
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -19,12 +18,16 @@ import kotlinx.coroutines.launch
 
 class LoginVM(
 	private val authRepository: AuthRepository,
+	private val application: MyApplication,
 ) : ViewModel() {
 	companion object {
 		val Factory = viewModelFactory {
 			initializer {
-				val authRepository = (this[APPLICATION_KEY] as MyApplication).appContainer.authRepository
-				LoginVM(authRepository = authRepository)
+				val app = (this[APPLICATION_KEY] as MyApplication)
+				LoginVM(
+					authRepository = app.authRepository,
+					application = app,
+				)
 			}
 		}
 	}
@@ -66,10 +69,11 @@ class LoginVM(
 
 		viewModelScope.launch {
 			_uiState.update { it.copy(isLoading = true) }
-			authRepository.login(current.email, current.password)
-				.onSuccess { session ->
-					_messageEvent.emit("Login berhasil untuk ${session.name}")
-				}
+                authRepository.login(current.email, current.password)
+                	.onSuccess { session ->
+						application.authPrefs.setSession(session)
+                		_messageEvent.emit("Login berhasil untuk ${session.name}")
+                	}
 				.onFailure { throwable ->
 					_messageEvent.emit(throwable.message ?: "Login gagal")
 				}
