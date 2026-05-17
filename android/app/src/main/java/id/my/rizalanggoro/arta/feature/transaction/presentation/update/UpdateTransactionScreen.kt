@@ -1,45 +1,45 @@
 package id.my.rizalanggoro.arta.feature.transaction.presentation.update
 
-import androidx.compose.runtime.Composable
+import android.app.DatePickerDialog
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import android.app.DatePickerDialog
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
+import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
+import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionUiState
+import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import androidx.compose.material3.FilterChip
-import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.Alignment
-import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionUiState
-import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionUiState as UiState
-import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionVM
-import id.my.rizalanggoro.arta.feature.transaction.presentation.update.UpdateTransactionVM
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.remember
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Text
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.tooling.preview.Preview
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +51,9 @@ fun UpdateTransactionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val backStack = LocalBackStack.current
 
-    LaunchedEffect(transactionId) { vm.load(transactionId) }
+    LaunchedEffect(transactionId) {
+        vm.load(transactionId)
+    }
 
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
@@ -62,41 +64,178 @@ fun UpdateTransactionScreen(
         }
     }
 
-    // reuse simple content from create screen but wired to vm
-    Scaffold(topBar = {
-        TopAppBar(title = { Text("Ubah Transaksi") }, navigationIcon = { TextButton(onClick = { backStack.removeLastOrNull() }) { Text("Batal") } })
-    }, bottomBar = {
-        Column(modifier = Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = { vm.updateTransaction(transactionId) }, modifier = Modifier.fillMaxWidth(), enabled = !uiState.isLoading) {
-                if (uiState.isLoading) CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp) else Text("Simpan Perubahan")
+    Content(
+        snackbarHostState = snackbarHostState,
+        walletId = uiState.walletId,
+        selectedWalletName = uiState.selectedWalletName,
+        type = uiState.type,
+        amount = uiState.amount,
+        categoryId = uiState.categoryId,
+        selectedCategoryName = uiState.selectedCategoryName,
+        description = uiState.description,
+        date = uiState.date,
+        walletIdError = uiState.walletIdError,
+        typeError = uiState.typeError,
+        amountError = uiState.amountError,
+        dateError = uiState.dateError,
+        isLoading = uiState.isLoading,
+        onWalletIdChanged = vm::onWalletIdChanged,
+        onTypeChanged = vm::onTypeChanged,
+        onAmountChanged = vm::onAmountChanged,
+        onDescriptionChanged = vm::onDescriptionChanged,
+        onDateChanged = vm::onDateChanged,
+        onClickSelectWallet = { backStack.add(WalletSelectRoute) },
+        onClickSelectCategory = { backStack.add(CategorySelectRoute) },
+        onClickSave = { vm.updateTransaction(transactionId) },
+        onClickBack = { backStack.removeLastOrNull() },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Content(
+    snackbarHostState: SnackbarHostState,
+    walletId: String = "",
+    selectedWalletName: String = "",
+    type: String = "",
+    amount: String = "",
+    categoryId: String = "",
+    selectedCategoryName: String = "",
+    description: String = "",
+    date: String = "",
+    walletIdError: String? = null,
+    typeError: String? = null,
+    amountError: String? = null,
+    dateError: String? = null,
+    isLoading: Boolean = false,
+    onWalletIdChanged: (String) -> Unit = {},
+    onTypeChanged: (String) -> Unit = {},
+    onAmountChanged: (String) -> Unit = {},
+    onDescriptionChanged: (String) -> Unit = {},
+    onDateChanged: (String) -> Unit = {},
+    onClickSelectWallet: () -> Unit = {},
+    onClickSelectCategory: () -> Unit = {},
+    onClickSave: () -> Unit = {},
+    onClickBack: () -> Unit = {},
+) {
+    val context = LocalContext.current
+    val dateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+    val selectedDate = remember(date) {
+        runCatching { ZonedDateTime.parse(date).toLocalDate() }
+            .getOrNull()
+            ?: runCatching { LocalDate.parse(date.take(10)) }.getOrNull()
+            ?: LocalDate.now()
+    }
+    val datePicker = remember(date) {
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val localDate = LocalDate.of(year, month + 1, dayOfMonth)
+                val zoned = localDate.atStartOfDay(ZoneId.systemDefault())
+                onDateChanged(zoned.format(dateFormatter))
+            },
+            selectedDate.year,
+            selectedDate.monthValue - 1,
+            selectedDate.dayOfMonth,
+        )
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Ubah Transaksi") },
+                navigationIcon = {
+                    TextButton(onClick = onClickBack) {
+                        Text("Batal")
+                    }
+                },
+            )
+        },
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Button(
+                    onClick = onClickSave,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Text("Simpan Perubahan")
+                    }
+                }
             }
-        }
-    }) { paddingValues ->
-        val walletId = uiState.walletId
-        val walletIdError = uiState.walletIdError
-        val type = uiState.type
-        val typeError = uiState.typeError
-        val amount = uiState.amount
-        val amountError = uiState.amountError
-        val categoryId = uiState.categoryId
-        val selectedCategoryName = uiState.selectedCategoryName
-        val date = uiState.date
-        val dateError = uiState.dateError
-        val description = uiState.description
+        },
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "Perbarui data transaksi.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
 
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             SnackbarHost(hostState = snackbarHostState)
-            OutlinedTextField(value = walletId, onValueChange = vm::onWalletIdChanged, label = { Text("Wallet ID") }, modifier = Modifier.fillMaxWidth(), isError = walletIdError != null, supportingText = { walletIdError?.let { Text(it) } }, singleLine = true)
 
-            // Type chips
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val types = listOf("income", "expense")
-                types.forEach { t ->
-                    FilterChip(selected = type == t, onClick = { vm.onTypeChanged(t) }, label = { Text(t.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }) })
+            OutlinedTextField(
+                value = walletId,
+                onValueChange = onWalletIdChanged,
+                label = { Text("Wallet ID") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = walletIdError != null,
+                supportingText = { walletIdError?.let { Text(it) } },
+                enabled = !isLoading,
+                singleLine = true,
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = "Wallet", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    text = selectedWalletName.ifBlank { if (walletId.isBlank()) "Belum dipilih" else "Wallet ID: $walletId" },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                TextButton(onClick = onClickSelectWallet, enabled = !isLoading) {
+                    Text("Pilih wallet")
                 }
             }
 
-            OutlinedTextField(value = amount, onValueChange = vm::onAmountChanged, label = { Text("Jumlah") }, modifier = Modifier.fillMaxWidth(), isError = amountError != null, supportingText = { amountError?.let { Text(it) } }, singleLine = true)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("income", "expense").forEach { option ->
+                    FilterChip(
+                        selected = type == option,
+                        onClick = { onTypeChanged(option) },
+                        label = { Text(option.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }) },
+                    )
+                }
+            }
+
+            if (typeError != null) {
+                Text(text = typeError, color = MaterialTheme.colorScheme.error)
+            }
+
+            OutlinedTextField(
+                value = amount,
+                onValueChange = onAmountChanged,
+                label = { Text("Jumlah") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = amountError != null,
+                supportingText = { amountError?.let { Text(it) } },
+                enabled = !isLoading,
+                singleLine = true,
+            )
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(text = "Kategori", style = MaterialTheme.typography.labelLarge)
@@ -104,7 +243,7 @@ fun UpdateTransactionScreen(
                     text = selectedCategoryName.ifBlank { "Belum dipilih" },
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                TextButton(onClick = { backStack.add(CategorySelectRoute) }, enabled = !uiState.isLoading) {
+                TextButton(onClick = onClickSelectCategory, enabled = !isLoading) {
                     Text("Pilih kategori")
                 }
                 if (categoryId.isNotBlank()) {
@@ -115,36 +254,84 @@ fun UpdateTransactionScreen(
                 }
             }
 
-            // Date picker
-            val context = LocalContext.current
-            val dateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-            val now = remember { ZonedDateTime.now() }
-            val calendarDefault = now.toLocalDate()
-            val datePicker = remember {
-                DatePickerDialog(
-                    context,
-                    { _, year, month, dayOfMonth ->
-                        val localDate = LocalDate.of(year, month + 1, dayOfMonth)
-                        val zoned = localDate.atStartOfDay(ZoneId.systemDefault())
-                        val iso = zoned.format(dateFormatter)
-                        vm.onDateChanged(iso)
-                    },
-                    calendarDefault.year,
-                    calendarDefault.monthValue - 1,
-                    calendarDefault.dayOfMonth
-                )
-            }
+            OutlinedTextField(
+                value = date,
+                onValueChange = {},
+                label = { Text("Tanggal (ISO 8601)") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = dateError != null,
+                supportingText = { if (dateError != null) Text(dateError) else Text("Contoh: 2026-05-16T10:30:00+07:00") },
+                enabled = !isLoading,
+                singleLine = true,
+                readOnly = true,
+                trailingIcon = {
+                    TextButton(onClick = { datePicker.show() }, enabled = !isLoading) {
+                        Text("Pilih")
+                    }
+                },
+            )
 
-            OutlinedTextField(value = date, onValueChange = {}, label = { Text("Tanggal (ISO 8601)") }, modifier = Modifier.fillMaxWidth(), isError = dateError != null, supportingText = { if (dateError != null) Text(dateError) else Text("Contoh: 2026-05-16T10:30:00+07:00") }, singleLine = true, readOnly = true, trailingIcon = { TextButton(onClick = { datePicker.show() }) { Text("Pilih") } })
-
-            OutlinedTextField(value = description, onValueChange = vm::onDescriptionChanged, label = { Text("Deskripsi") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = description,
+                onValueChange = onDescriptionChanged,
+                label = { Text("Deskripsi") },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading,
+            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Update Transaction - Default")
 @Composable
 private fun UpdateTransactionPreview() {
-    ArtaTheme { /* cannot preview ViewModel */ }
+    ArtaTheme {
+        Content(
+            snackbarHostState = remember { SnackbarHostState() },
+            walletId = "12",
+            selectedWalletName = "Wallet Utama",
+            type = "expense",
+            amount = "50000",
+            categoryId = "3",
+            selectedCategoryName = "Makanan",
+            description = "Contoh transaksi",
+            date = "2026-05-16T10:30:00+07:00",
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, name = "Update Transaction - Loading")
+@Composable
+private fun UpdateTransactionLoadingPreview() {
+    ArtaTheme {
+        Content(
+            snackbarHostState = remember { SnackbarHostState() },
+            isLoading = true,
+            walletId = "12",
+            selectedWalletName = "Wallet Utama",
+            type = "expense",
+            amount = "50000",
+            categoryId = "3",
+            selectedCategoryName = "Makanan",
+            description = "Contoh transaksi",
+            date = "2026-05-16T10:30:00+07:00",
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, name = "Update Transaction - Error")
+@Composable
+private fun UpdateTransactionErrorPreview() {
+    ArtaTheme {
+        Content(
+            snackbarHostState = remember { SnackbarHostState() },
+            walletIdError = "Wallet ID wajib diisi",
+            typeError = "Tipe transaksi wajib dipilih",
+            amountError = "Jumlah tidak valid",
+            dateError = "Tanggal wajib diisi",
+        )
+    }
 }

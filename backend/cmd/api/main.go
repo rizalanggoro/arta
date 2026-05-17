@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/artafinance/backend/internal/cron/fxrate"
+	"github.com/artafinance/backend/internal/cron/goldprice"
 	"github.com/artafinance/backend/internal/feature/auth"
 	"github.com/artafinance/backend/internal/feature/category"
 	"github.com/artafinance/backend/internal/feature/transaction"
@@ -50,6 +53,16 @@ func main() {
 
 	transactionRepo := transaction.NewRepository(db)
 	transactionHandler := transaction.NewHandler(transactionRepo, jwtManager, authRepo)
+
+	goldPriceRepo := goldprice.NewRepository(db)
+	goldPriceClient := goldprice.NewClient()
+	goldPriceJob := goldprice.NewScheduler(goldPriceRepo, goldPriceClient, log.Default())
+	go goldPriceJob.Start(context.Background())
+
+	fxRateRepo := fxrate.NewRepository(db)
+	fxRateClient := fxrate.NewClient()
+	fxRateJob := fxrate.NewScheduler(fxRateRepo, fxRateClient, log.Default())
+	go fxRateJob.Start(context.Background())
 
 	app := fiber.New()
 	api := app.Group("/api")

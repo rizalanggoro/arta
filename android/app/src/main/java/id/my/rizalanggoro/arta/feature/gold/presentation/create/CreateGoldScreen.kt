@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import android.app.DatePickerDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,12 +26,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
@@ -116,6 +122,27 @@ private fun Content(
 		GoldTypeOption("Emas Investasi", "investment_gold"),
 		GoldTypeOption("Lainnya", "other"),
 	)
+	val context = LocalContext.current
+	val dateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+	val selectedDate = remember(date) {
+		runCatching { ZonedDateTime.parse(date).toLocalDate() }
+			.getOrNull()
+			?: runCatching { LocalDate.parse(date.take(10)) }.getOrNull()
+			?: LocalDate.now()
+	}
+	val datePicker = remember(date) {
+		DatePickerDialog(
+			context,
+			{ _, year, month, dayOfMonth ->
+				val localDate = LocalDate.of(year, month + 1, dayOfMonth)
+				val zoned = localDate.atStartOfDay(ZoneId.systemDefault())
+				onDateChanged(zoned.format(dateFormatter))
+			},
+			selectedDate.year,
+			selectedDate.monthValue - 1,
+			selectedDate.dayOfMonth,
+		)
+	}
 
 	val estimatedValue = runCatching {
 		grams.toDouble() * pricePerGram.toDouble()
@@ -193,7 +220,7 @@ private fun Content(
 
 			OutlinedTextField(
 				value = date,
-				onValueChange = onDateChanged,
+				onValueChange = {},
 				label = { Text("Tanggal (ISO 8601)") },
 				modifier = Modifier.fillMaxWidth(),
 				isError = dateError != null,
@@ -203,6 +230,12 @@ private fun Content(
 				},
 				enabled = !isLoading,
 				singleLine = true,
+				readOnly = true,
+				trailingIcon = {
+					TextButton(onClick = { datePicker.show() }, enabled = !isLoading) {
+						Text("Pilih")
+					}
+				},
 			)
 
 			OutlinedTextField(

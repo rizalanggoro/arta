@@ -81,25 +81,23 @@ private fun Content(
     Scaffold(
         topBar = {
             TopAppBar(
-				title = {
-                Text("Masuk")
-            }
-			)
+                title = {
+                    Text("Masuk")
+                }
+            )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) {
         Column(
             modifier = Modifier
-				.fillMaxSize()
-				.padding(it),
+                .fillMaxSize()
+                .padding(it),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = "MASUK",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = "Kelola uang dan emas dalam satu alur yang rapi.",
+                text = "Kelola uang dan emas dalam satu alur yang rapi",
                 style = MaterialTheme.typography.headlineMedium,
             )
             Text(
@@ -107,20 +105,9 @@ private fun Content(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            SnackbarHost(hostState = snackbarHostState)
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "Masukkan kredensial Anda",
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Text(
-                    text = "Gunakan email aktif dan kata sandi yang terdaftar di Arta.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = email,
                         onValueChange = onChangeEmail,
@@ -164,8 +151,8 @@ private fun Content(
                     if (isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier
-								.size(20.dp)
-								.align(Alignment.CenterVertically),
+                                .size(20.dp)
+                                .align(Alignment.CenterVertically),
                             strokeWidth = 2.dp,
                         )
                     } else {

@@ -6,9 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 object Routes {
     @Serializable
-    data object AuthRoute : NavKey
-
-    @Serializable
     data object LoginRoute : NavKey
 
     @Serializable
@@ -16,9 +13,6 @@ object Routes {
 
     @Serializable
     data object ForgotPasswordRoute : NavKey
-
-    @Serializable
-    data object OnboardingRoute : NavKey
 
     @Serializable
     data object DashboardRoute : NavKey

@@ -22,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import android.app.DatePickerDialog
 import java.time.LocalDate
@@ -185,12 +184,15 @@ private fun Content(
                 }
             }
 
-            // Date picker: open native DatePickerDialog and format to ISO offset
             val context = LocalContext.current
             val dateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-            val now = remember { ZonedDateTime.now() }
-            val calendarDefault = now.toLocalDate()
-            val datePicker = remember {
+            val selectedDate = remember(date) {
+                runCatching { ZonedDateTime.parse(date).toLocalDate() }
+                    .getOrNull()
+                    ?: runCatching { LocalDate.parse(date.take(10)) }.getOrNull()
+                    ?: LocalDate.now()
+            }
+            val datePicker = remember(date) {
                 DatePickerDialog(
                     context,
                     { _, year, month, dayOfMonth ->
@@ -199,13 +201,24 @@ private fun Content(
                         val iso = zoned.format(dateFormatter)
                         onDateChanged(iso)
                     },
-                    calendarDefault.year,
-                    calendarDefault.monthValue - 1,
-                    calendarDefault.dayOfMonth
+                    selectedDate.year,
+                    selectedDate.monthValue - 1,
+                    selectedDate.dayOfMonth,
                 )
             }
 
-            OutlinedTextField(value = date, onValueChange = {}, label = { Text("Tanggal (ISO 8601)") }, modifier = Modifier.fillMaxWidth(), isError = dateError != null, supportingText = { if (dateError != null) Text(dateError) else Text("Contoh: 2026-05-16T10:30:00+07:00") }, enabled = !isLoading, singleLine = true, readOnly = true, trailingIcon = { TextButton(onClick = { datePicker.show() }) { Text("Pilih") } })
+            OutlinedTextField(
+                value = date,
+                onValueChange = {},
+                label = { Text("Tanggal (ISO 8601)") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = dateError != null,
+                supportingText = { if (dateError != null) Text(dateError) else Text("Contoh: 2026-05-16T10:30:00+07:00") },
+                enabled = !isLoading,
+                singleLine = true,
+                readOnly = true,
+                trailingIcon = { TextButton(onClick = { datePicker.show() }, enabled = !isLoading) { Text("Pilih") } },
+            )
 
             OutlinedTextField(value = description, onValueChange = onDescriptionChanged, label = { Text("Deskripsi (opsional)") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading, singleLine = false)
         }

@@ -10,11 +10,15 @@ import (
 // GoldPrice represents gold price history in the domain layer
 // @name GoldPrice
 type GoldPrice struct {
-	ID           uint
-	Date         time.Time
-	PricePerGram float64
-	Currency     string
-	CreatedAt    time.Time
+	ID                uint
+	Symbol            string
+	Currency          string
+	CurrencySymbol    string
+	ExchangeRate      float64
+	PricePerOunceUSD  float64
+	SourceUpdatedAt   time.Time
+	SourceReadableAge string
+	CreatedAt         time.Time
 }
 
 // FromGoldPriceModel maps a gold price model to the domain layer.
@@ -24,11 +28,15 @@ func FromGoldPriceModel(m *model.GoldPrice) *GoldPrice {
 	}
 
 	return &GoldPrice{
-		ID:           m.ID,
-		Date:         m.Date,
-		PricePerGram: m.PricePerGram,
-		Currency:     m.Currency,
-		CreatedAt:    m.CreatedAt,
+		ID:                m.ID,
+		Symbol:            m.Symbol,
+		Currency:          m.Currency,
+		CurrencySymbol:    m.CurrencySymbol,
+		ExchangeRate:      m.ExchangeRate,
+		PricePerOunceUSD:  m.PricePerOunceUSD,
+		SourceUpdatedAt:   m.SourceUpdatedAt,
+		SourceReadableAge: m.SourceReadableAge,
+		CreatedAt:         m.CreatedAt,
 	}
 }
 
@@ -39,9 +47,13 @@ func (g *GoldPrice) ToModel() *model.GoldPrice {
 	}
 
 	return &model.GoldPrice{
-		Model:        gorm.Model{ID: g.ID},
-		Date:         g.Date,
-		PricePerGram: g.PricePerGram,
-		Currency:     g.Currency,
+		Model:             gorm.Model{ID: g.ID},
+		Symbol:            g.Symbol,
+		Currency:          g.Currency,
+		CurrencySymbol:    g.CurrencySymbol,
+		ExchangeRate:      g.ExchangeRate,
+		PricePerOunceUSD:  g.PricePerOunceUSD,
+		SourceUpdatedAt:   g.SourceUpdatedAt,
+		SourceReadableAge: g.SourceReadableAge,
 	}
 }

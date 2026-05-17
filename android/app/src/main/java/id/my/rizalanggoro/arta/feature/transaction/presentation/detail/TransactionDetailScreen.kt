@@ -18,6 +18,8 @@ import id.my.rizalanggoro.arta.core.LocalBackStack
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.core.Routes
+import androidx.compose.ui.tooling.preview.Preview
+import id.my.rizalanggoro.arta.domain.Transaction
 
 @Composable
 fun TransactionDetailScreen(
@@ -29,21 +31,35 @@ fun TransactionDetailScreen(
 
     LaunchedEffect(transactionId) { vm.load(transactionId) }
 
+    Content(
+        tx = tx,
+        onEdit = { t -> backStack.add(Routes.TransactionFormRoute(transactionId = t.id, walletId = t.walletId)) }
+    )
+}
+
+@Composable
+private fun Content(tx: Transaction?, onEdit: (Transaction) -> Unit = {}) {
     Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (tx == null) {
                 Text(text = "Memuat transaksi...", style = MaterialTheme.typography.bodyMedium)
             } else {
-                Text(text = "Tipe: ${tx!!.type}")
-                Text(text = "Jumlah: ${tx!!.amount}")
-                Text(text = "Kategori ID: ${tx!!.categoryId}")
-                Text(text = "Deskripsi: ${tx!!.description}")
-                Text(text = "Tanggal: ${tx!!.date}")
+                Text(text = "Tipe: ${tx.type}")
+                Text(text = "Jumlah: ${tx.amount}")
+                Text(text = "Kategori ID: ${tx.categoryId}")
+                Text(text = "Deskripsi: ${tx.description}")
+                Text(text = "Tanggal: ${tx.date}")
 
-                Button(onClick = { backStack.add(Routes.TransactionFormRoute(transactionId = tx!!.id, walletId = tx!!.walletId)) }) {
+                Button(onClick = { onEdit(tx) }) {
                     Text("Ubah")
                 }
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionDetailScreenPreview() {
+    Content(tx = Transaction(id = 1, walletId = 1, type = "income", amount = 100000.0, categoryId = 1, description = "Contoh transaksi", date = "2026-05-16"))
 }

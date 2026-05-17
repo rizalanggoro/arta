@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
+import id.my.rizalanggoro.arta.core.Routes.LoginRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -58,7 +59,7 @@ fun HomeScreen(
 			// clear session and navigate to auth
 			val app = context.applicationContext as? id.my.rizalanggoro.arta.core.application.MyApplication
 			app?.authPrefs?.clear()
-			backStack.add(id.my.rizalanggoro.arta.core.Routes.AuthRoute)
+			backStack.add(LoginRoute)
 		},
 		onToggleTheme = { /* no-op: theme persistence not implemented */ },
 	)
