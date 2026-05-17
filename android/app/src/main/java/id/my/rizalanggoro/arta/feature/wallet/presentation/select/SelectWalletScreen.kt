@@ -61,67 +61,86 @@ fun SelectWalletScreen(
             )
         },
     ) { paddingValues ->
-        Column(
+        Content(
+            wallets = uiState.wallets,
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.errorMessage,
+            onReload = vm::loadWallets,
+            onSelect = vm::selectWallet,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = "Pilih wallet yang akan dipakai di transaksi.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        )
+    }
+}
 
-            when {
-                uiState.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
+@Composable
+private fun Content(
+    wallets: List<Wallet> = emptyList(),
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    onReload: () -> Unit = {},
+    onSelect: (Wallet) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = "Pilih wallet yang akan dipakai di transaksi.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
                 }
+            }
 
-                uiState.errorMessage != null -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text(uiState.errorMessage ?: "Gagal memuat wallet")
-                            Button(onClick = vm::loadWallets) { Text("Muat ulang") }
-                        }
-                    }
-                }
-
-                uiState.wallets.isEmpty() -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text("Belum ada wallet.")
-                            Text(
-                                text = "Buat wallet dulu agar bisa dipakai di transaksi.",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+            errorMessage != null -> {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(uiState.wallets, key = { it.id }) { wallet ->
-                            SelectWalletCard(
-                                wallet = wallet,
-                                onClick = { vm.selectWallet(wallet) },
-                            )
-                        }
+                        Text(errorMessage ?: "Gagal memuat wallet")
+                        Button(onClick = onReload) { Text("Muat ulang") }
+                    }
+                }
+            }
+
+            wallets.isEmpty() -> {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text("Belum ada wallet.")
+                        Text(
+                            text = "Buat wallet dulu agar bisa dipakai di transaksi.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(wallets, key = { it.id }) { wallet ->
+                        SelectWalletCard(
+                            wallet = wallet,
+                            onClick = { onSelect(wallet) },
+                        )
                     }
                 }
             }
@@ -167,5 +186,27 @@ private fun walletTypeLabel(type: String): String {
 @Preview(showBackground = true, name = "Wallet Selector")
 @Composable
 private fun SelectWalletPreview() {
-    ArtaTheme { }
+    ArtaTheme {
+        Content()
+    }
+}
+
+@Preview(showBackground = true, name = "Wallet Selector - Loading")
+@Composable
+private fun SelectWalletLoadingPreview() {
+    ArtaTheme { Content() }
+}
+
+@Preview(showBackground = true, name = "Wallet Selector - Empty")
+@Composable
+private fun SelectWalletEmptyPreview() {
+    ArtaTheme { Content() }
+}
+
+@Preview(showBackground = true, name = "Wallet Selector - With Items")
+@Composable
+private fun SelectWalletItemsPreview() {
+    ArtaTheme {
+        Content()
+    }
 }

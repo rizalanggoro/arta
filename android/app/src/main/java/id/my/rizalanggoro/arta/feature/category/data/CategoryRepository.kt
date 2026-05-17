@@ -75,7 +75,7 @@ class CategoryRepository(
 
 	private fun authorizationHeader(): String? {
 		val session = authSessionProvider()
-		return session?.let { "${it.tokenType} ${it.token}" }
+		return session?.let { "Bearer ${it.token}" }
 	}
 
 	private fun Response<CategoryResponseDto>.toDomainResult(): Result<Category> {

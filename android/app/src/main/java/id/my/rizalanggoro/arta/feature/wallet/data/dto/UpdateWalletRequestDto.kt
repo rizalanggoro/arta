@@ -7,5 +7,4 @@ import kotlinx.serialization.Serializable
 data class UpdateWalletRequestDto(
 	@SerialName("name") val name: String? = null,
 	@SerialName("type") val type: String? = null,
-	@SerialName("is_default") val isDefault: Boolean? = null,
 )

@@ -11,6 +11,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -22,22 +23,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import android.app.DatePickerDialog
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.domain.Category
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,19 +66,16 @@ fun CreateTransactionScreen(
         snackbarHostState = snackbarHostState,
         walletId = uiState.walletId,
         selectedWalletName = uiState.selectedWalletName,
-        type = uiState.type,
         amount = uiState.amount,
         categoryId = uiState.categoryId,
         selectedCategoryName = uiState.selectedCategoryName,
         description = uiState.description,
         date = uiState.date,
         walletIdError = uiState.walletIdError,
-        typeError = uiState.typeError,
         amountError = uiState.amountError,
+        categoryError = uiState.categoryError,
         dateError = uiState.dateError,
         isLoading = uiState.isLoading,
-        onWalletIdChanged = vm::onWalletIdChanged,
-        onTypeChanged = vm::onTypeChanged,
         onAmountChanged = vm::onAmountChanged,
         onDescriptionChanged = vm::onDescriptionChanged,
         onDateChanged = vm::onDateChanged,
@@ -101,19 +92,16 @@ private fun Content(
     snackbarHostState: SnackbarHostState,
     walletId: String = "",
     selectedWalletName: String = "",
-    type: String = "",
     amount: String = "",
     categoryId: String = "",
     selectedCategoryName: String = "",
     description: String = "",
     date: String = "",
     walletIdError: String? = null,
-    typeError: String? = null,
     amountError: String? = null,
+    categoryError: String? = null,
     dateError: String? = null,
     isLoading: Boolean = false,
-    onWalletIdChanged: (String) -> Unit = {},
-    onTypeChanged: (String) -> Unit = {},
     onAmountChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
     onDateChanged: (String) -> Unit = {},
@@ -144,24 +132,24 @@ private fun Content(
             SnackbarHost(hostState = snackbarHostState)
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Wallet", style = MaterialTheme.typography.labelLarge)
-                Text(
-                    text = selectedWalletName.ifBlank { if (walletId.isBlank()) "Belum dipilih" else "Wallet ID: $walletId" },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                TextButton(onClick = onClickSelectWallet, enabled = !isLoading) {
-                    Text("Pilih wallet")
-                }
-                if (walletIdError != null) {
-                    Text(walletIdError, color = MaterialTheme.colorScheme.error)
-                }
-            }
-
-            // Type selector as chips
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val types = listOf("income", "expense")
-                types.forEach { t ->
-                    FilterChip(selected = type == t, onClick = { onTypeChanged(t) }, label = { Text(t.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }) })
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.Start,
+                    ) {
+                        Text(text = "Wallet aktif", style = MaterialTheme.typography.labelLarge)
+                        Text(
+                            text = selectedWalletName.ifBlank { if (walletId.isBlank()) "Belum dipilih" else "Wallet ID: $walletId" },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        TextButton(onClick = onClickSelectWallet, enabled = !isLoading) {
+                            Text("Pilih wallet")
+                        }
+                        if (walletIdError != null) {
+                            Text(walletIdError, color = MaterialTheme.colorScheme.error)
+                        }
+                    }
                 }
             }
 
@@ -176,11 +164,10 @@ private fun Content(
                 TextButton(onClick = onClickSelectCategory, enabled = !isLoading) {
                     Text("Pilih kategori")
                 }
-                if (categoryId.isNotBlank()) {
-                    Text(
-                        text = "ID kategori: $categoryId",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                if (categoryError != null) {
+                    Text(text = categoryError, color = MaterialTheme.colorScheme.error)
+                } else if (categoryId.isNotBlank()) {
+                    Text(text = "ID kategori: $categoryId", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -229,4 +216,26 @@ private fun Content(
 @Composable
 private fun CreateTransactionPreview() {
     ArtaTheme { Content(snackbarHostState = remember { SnackbarHostState() }) }
+}
+
+@Preview(showBackground = true, name = "Create Transaction - Loading")
+@Composable
+private fun CreateTransactionLoadingPreview() {
+    ArtaTheme { Content(snackbarHostState = remember { SnackbarHostState() }, isLoading = true) }
+}
+
+@Preview(showBackground = true, name = "Create Transaction - Error")
+@Composable
+private fun CreateTransactionErrorPreview() {
+    ArtaTheme {
+        Content(
+            snackbarHostState = remember { SnackbarHostState() },
+            walletId = "12",
+            selectedWalletName = "Tabungan Uang",
+            walletIdError = "Wallet aktif belum dipilih",
+            amountError = "Jumlah tidak valid",
+            categoryError = "Kategori wajib dipilih",
+            dateError = "Tanggal wajib diisi",
+        )
+    }
 }

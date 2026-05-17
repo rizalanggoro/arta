@@ -11,8 +11,6 @@ fun CategoryDto.toDomain(): Category {
 		type = type,
 		icon = icon,
 		color = color,
-		isCustom = isCustom,
-		isDefault = isDefault,
 		createdAt = createdAt,
 		updatedAt = updatedAt,
 	)

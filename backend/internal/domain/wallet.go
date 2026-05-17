@@ -14,7 +14,6 @@ type Wallet struct {
 	UserID    uint
 	Name      string
 	Type      string
-	IsDefault bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -30,7 +29,6 @@ func FromWalletModel(m *model.Wallet) *Wallet {
 		UserID:    m.UserID,
 		Name:      m.Name,
 		Type:      m.Type,
-		IsDefault: m.IsDefault,
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
 	}
@@ -43,10 +41,9 @@ func (w *Wallet) ToModel() *model.Wallet {
 	}
 
 	return &model.Wallet{
-		Model:     gorm.Model{ID: w.ID},
-		UserID:    w.UserID,
-		Name:      w.Name,
-		Type:      w.Type,
-		IsDefault: w.IsDefault,
+		Model:  gorm.Model{ID: w.ID},
+		UserID: w.UserID,
+		Name:   w.Name,
+		Type:   w.Type,
 	}
 }

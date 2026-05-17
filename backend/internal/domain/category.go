@@ -14,8 +14,6 @@ type Category struct {
 	UserID    *uint     `json:"user_id,omitempty"` // nil for default categories
 	Name      string    `json:"name"`
 	Type      string    `json:"type"` // income, expense
-	IsCustom  bool      `json:"is_custom"`
-	IsDefault bool      `json:"is_default"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -37,8 +35,6 @@ func FromCategoryModel(m *model.Category) *Category {
 		UserID:    userID,
 		Name:      m.Name,
 		Type:      m.Type,
-		IsCustom:  m.IsCustom,
-		IsDefault: m.IsDefault,
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
 	}
@@ -57,11 +53,9 @@ func (c *Category) ToModel() *model.Category {
 	}
 
 	return &model.Category{
-		Model:     gorm.Model{ID: c.ID},
-		UserID:    userID,
-		Name:      c.Name,
-		Type:      c.Type,
-		IsCustom:  c.IsCustom,
-		IsDefault: c.IsDefault,
+		Model:  gorm.Model{ID: c.ID},
+		UserID: userID,
+		Name:   c.Name,
+		Type:   c.Type,
 	}
 }

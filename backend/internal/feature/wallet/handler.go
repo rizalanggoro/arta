@@ -81,17 +81,12 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	}
 
 	created, err := h.repo.CreateWallet(&domain.Wallet{
-		UserID:    uint(parsedUserID),
-		Name:      req.Name,
-		Type:      req.Type,
-		IsDefault: req.IsDefault,
+		UserID: uint(parsedUserID),
+		Name:   req.Name,
+		Type:   req.Type,
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
-	}
-
-	if req.IsDefault {
-		_ = h.repo.SetDefaultWallet(created.UserID, created.ID)
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(CreateWalletRes{dto.Wallet{Data: *created}})
@@ -144,17 +139,10 @@ func (h *Handler) update(c *fiber.Ctx) error {
 	if req.Type != nil {
 		wallet.Type = *req.Type
 	}
-	if req.IsDefault != nil {
-		wallet.IsDefault = *req.IsDefault
-	}
 
 	updated, err := h.repo.UpdateWallet(wallet)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
-	}
-
-	if wallet.IsDefault {
-		_ = h.repo.SetDefaultWallet(updated.UserID, updated.ID)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(UpdateWalletRes{dto.Wallet{Data: *updated}})

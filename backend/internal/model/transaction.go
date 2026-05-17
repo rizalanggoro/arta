@@ -10,7 +10,6 @@ import (
 type Transaction struct {
 	gorm.Model
 	WalletID    uint      `gorm:"not null;index"`
-	Type        string    `gorm:"not null;type:varchar(50)"` // income or expense
 	Amount      float64   `gorm:"not null;type:numeric(15,2)"`
 	CategoryID  uint      `gorm:"not null;index"`
 	Description string    `gorm:"type:text"`

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -68,19 +67,17 @@ fun UpdateTransactionScreen(
         snackbarHostState = snackbarHostState,
         walletId = uiState.walletId,
         selectedWalletName = uiState.selectedWalletName,
-        type = uiState.type,
         amount = uiState.amount,
         categoryId = uiState.categoryId,
         selectedCategoryName = uiState.selectedCategoryName,
         description = uiState.description,
         date = uiState.date,
         walletIdError = uiState.walletIdError,
-        typeError = uiState.typeError,
         amountError = uiState.amountError,
+        categoryError = uiState.categoryError,
         dateError = uiState.dateError,
         isLoading = uiState.isLoading,
         onWalletIdChanged = vm::onWalletIdChanged,
-        onTypeChanged = vm::onTypeChanged,
         onAmountChanged = vm::onAmountChanged,
         onDescriptionChanged = vm::onDescriptionChanged,
         onDateChanged = vm::onDateChanged,
@@ -97,19 +94,17 @@ private fun Content(
     snackbarHostState: SnackbarHostState,
     walletId: String = "",
     selectedWalletName: String = "",
-    type: String = "",
     amount: String = "",
     categoryId: String = "",
     selectedCategoryName: String = "",
     description: String = "",
     date: String = "",
     walletIdError: String? = null,
-    typeError: String? = null,
     amountError: String? = null,
+    categoryError: String? = null,
     dateError: String? = null,
     isLoading: Boolean = false,
     onWalletIdChanged: (String) -> Unit = {},
-    onTypeChanged: (String) -> Unit = {},
     onAmountChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
     onDateChanged: (String) -> Unit = {},
@@ -212,20 +207,6 @@ private fun Content(
                 }
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("income", "expense").forEach { option ->
-                    FilterChip(
-                        selected = type == option,
-                        onClick = { onTypeChanged(option) },
-                        label = { Text(option.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }) },
-                    )
-                }
-            }
-
-            if (typeError != null) {
-                Text(text = typeError, color = MaterialTheme.colorScheme.error)
-            }
-
             OutlinedTextField(
                 value = amount,
                 onValueChange = onAmountChanged,
@@ -246,11 +227,10 @@ private fun Content(
                 TextButton(onClick = onClickSelectCategory, enabled = !isLoading) {
                     Text("Pilih kategori")
                 }
-                if (categoryId.isNotBlank()) {
-                    Text(
-                        text = "ID kategori: $categoryId",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                if (categoryError != null) {
+                    Text(text = categoryError, color = MaterialTheme.colorScheme.error)
+                } else if (categoryId.isNotBlank()) {
+                    Text(text = "ID kategori: $categoryId", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -291,7 +271,6 @@ private fun UpdateTransactionPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             walletId = "12",
             selectedWalletName = "Wallet Utama",
-            type = "expense",
             amount = "50000",
             categoryId = "3",
             selectedCategoryName = "Makanan",
@@ -311,7 +290,6 @@ private fun UpdateTransactionLoadingPreview() {
             isLoading = true,
             walletId = "12",
             selectedWalletName = "Wallet Utama",
-            type = "expense",
             amount = "50000",
             categoryId = "3",
             selectedCategoryName = "Makanan",
@@ -329,8 +307,8 @@ private fun UpdateTransactionErrorPreview() {
         Content(
             snackbarHostState = remember { SnackbarHostState() },
             walletIdError = "Wallet ID wajib diisi",
-            typeError = "Tipe transaksi wajib dipilih",
             amountError = "Jumlah tidak valid",
+            categoryError = "Kategori wajib dipilih",
             dateError = "Tanggal wajib diisi",
         )
     }

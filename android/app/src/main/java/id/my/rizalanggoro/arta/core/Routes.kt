@@ -15,6 +15,9 @@ object Routes {
     data object ForgotPasswordRoute : NavKey
 
     @Serializable
+    data object HomeRoute : NavKey
+
+    @Serializable
     data object DashboardRoute : NavKey
 
     @Serializable
@@ -45,6 +48,9 @@ object Routes {
 
     @Serializable
     data object WalletSelectRoute : NavKey
+
+    @Serializable
+    data object WalletCreateRoute : NavKey
 
     @Serializable
     data class WalletUpdateRoute(

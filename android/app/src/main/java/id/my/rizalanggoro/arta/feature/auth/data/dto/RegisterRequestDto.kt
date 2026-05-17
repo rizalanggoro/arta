@@ -8,5 +8,4 @@ data class RegisterRequestDto(
     @SerialName("name") val name: String,
     @SerialName("email") val email: String,
     @SerialName("password") val password: String,
-    @SerialName("currency") val currency: String = "IDR",
 )

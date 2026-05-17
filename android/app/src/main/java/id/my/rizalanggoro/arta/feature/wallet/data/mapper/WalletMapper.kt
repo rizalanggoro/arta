@@ -9,7 +9,6 @@ fun WalletDto.toDomain(): Wallet {
 		userId = userId,
 		name = name,
 		type = type,
-		isDefault = isDefault,
 		createdAt = createdAt,
 		updatedAt = updatedAt,
 	)

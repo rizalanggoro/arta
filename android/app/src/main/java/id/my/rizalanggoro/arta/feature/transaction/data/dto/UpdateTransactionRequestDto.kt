@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UpdateTransactionRequestDto(
     @SerialName("wallet_id") val walletId: Int? = null,
-    @SerialName("type") val type: String? = null,
     @SerialName("amount") val amount: Double? = null,
     @SerialName("category_id") val categoryId: Int? = null,
     @SerialName("description") val description: String? = null,

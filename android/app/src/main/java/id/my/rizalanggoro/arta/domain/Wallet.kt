@@ -8,7 +8,6 @@ data class Wallet(
     val userId: Int,
     val name: String,
     val type: String,
-    val isDefault: Boolean = false,
     val createdAt: String = "",
     val updatedAt: String = "",
 )

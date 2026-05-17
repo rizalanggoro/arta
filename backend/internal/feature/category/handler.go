@@ -97,11 +97,9 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	}
 
 	created, err := h.repo.CreateCategory(&domain.Category{
-		UserID:    func() *uint { u := uint(parsedUserID); return &u }(),
-		Name:      req.Name,
-		Type:      req.Type,
-		IsCustom:  true,
-		IsDefault: false,
+		UserID: func() *uint { u := uint(parsedUserID); return &u }(),
+		Name:   req.Name,
+		Type:   req.Type,
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})

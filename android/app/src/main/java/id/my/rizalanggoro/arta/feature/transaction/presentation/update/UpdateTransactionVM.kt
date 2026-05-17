@@ -58,7 +58,6 @@ class UpdateTransactionVM(
                     _uiState.update {
                         it.copy(
                             walletId = tx.walletId.toString(),
-                            type = tx.type,
                             amount = tx.amount.toString(),
                             categoryId = tx.categoryId.toString(),
                             selectedCategoryName = if (tx.categoryId > 0) "Kategori #${tx.categoryId}" else "",
@@ -72,7 +71,6 @@ class UpdateTransactionVM(
     }
 
     fun onWalletIdChanged(value: String) { _uiState.update { it.copy(walletId = value) } }
-    fun onTypeChanged(value: String) { _uiState.update { it.copy(type = value) } }
     fun onAmountChanged(value: String) { _uiState.update { it.copy(amount = value) } }
     fun onCategoryIdChanged(value: String) { _uiState.update { it.copy(categoryId = value, selectedCategoryName = "") } }
     fun onDescriptionChanged(value: String) { _uiState.update { it.copy(description = value) } }
@@ -94,7 +92,6 @@ class UpdateTransactionVM(
             transactionRepository.updateTransaction(
                 id = id,
                 walletId = current.walletId.toIntOrNull(),
-                type = current.type.ifBlank { null },
                 amount = current.amount.toDoubleOrNull(),
                 categoryId = current.categoryId.toIntOrNull(),
                 description = current.description.ifBlank { null },

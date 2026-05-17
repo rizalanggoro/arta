@@ -7,7 +7,6 @@ fun TransactionDto.toDomain(): Transaction {
     return Transaction(
         id = id,
         walletId = walletId,
-        type = type,
         amount = amount,
         categoryId = categoryId,
         description = description,

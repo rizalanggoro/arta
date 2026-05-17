@@ -195,7 +195,7 @@ private fun WalletCard(
 
 				AssistChip(
 					onClick = {},
-					label = { Text(if (wallet.isDefault) "Default" else "Custom") },
+					label = { Text("Wallet") },
 				)
 			}
 
@@ -241,7 +241,6 @@ private fun WalletListPreview() {
 					userId = 10,
 					name = "Utama",
 					type = "cash_savings",
-					isDefault = true,
 				),
 				Wallet(
 					id = 2,
@@ -252,4 +251,22 @@ private fun WalletListPreview() {
 			),
 		)
 	}
+}
+
+@Preview(showBackground = true, name = "Wallet List - Loading")
+@Composable
+private fun WalletListLoadingPreview() {
+	ArtaTheme { Content(isLoading = true) }
+}
+
+@Preview(showBackground = true, name = "Wallet List - Empty")
+@Composable
+private fun WalletListEmptyPreview() {
+	ArtaTheme { Content() }
+}
+
+@Preview(showBackground = true, name = "Wallet List - Error")
+@Composable
+private fun WalletListErrorPreview() {
+	ArtaTheme { Content(errorMessage = "Gagal memuat wallet") }
 }

@@ -4,7 +4,7 @@ data class UpdateWalletUiState(
 	val walletId: Int? = null,
 	val name: String = "",
 	val type: String = "cash_savings",
-	val isDefault: Boolean = false,
+	
 	val nameError: String? = null,
 	val typeError: String? = null,
 	val errorMessage: String? = null,

@@ -116,8 +116,7 @@ private fun Content(
 
             Text(text = "Tanggal: ${gold.date}")
             Text(text = "Berat (gram): ${gold.grams}")
-            Text(text = "Harga/gram: ${gold.pricePerGram}")
-            Text(text = "Total nilai: ${gold.totalValue}")
+            Text(text = "Harga total: ${gold.price}")
             Text(text = "Tipe: ${gold.type}")
             Text(text = "Kemurnian: ${gold.purityPercent}")
             Text(text = "Catatan: ${gold.notes}")
@@ -165,8 +164,7 @@ private fun GoldDetailScreenPreview() {
                 walletId = 2,
                 date = "2026-05-16",
                 grams = 10.0,
-                pricePerGram = 900000.0,
-                totalValue = 9000000.0,
+                price = 9000000.0,
                 type = "pure_gold",
                 purityPercent = 99.9,
                 notes = "Contoh catatan",

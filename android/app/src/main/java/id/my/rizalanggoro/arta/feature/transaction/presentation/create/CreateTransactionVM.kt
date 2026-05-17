@@ -22,6 +22,7 @@ import id.my.rizalanggoro.arta.feature.wallet.presentation.select.WalletSelectio
 
 class CreateTransactionVM(
     private val transactionRepository: TransactionRepository,
+    private val selectedWalletPrefs: id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
@@ -33,7 +34,7 @@ class CreateTransactionVM(
                     ),
                     authSessionProvider = { app.authPrefs.currentSession.value },
                 )
-                CreateTransactionVM(transactionRepository = repo)
+                CreateTransactionVM(transactionRepository = repo, selectedWalletPrefs = app.selectedWalletPrefs)
             }
         }
     }
@@ -54,6 +55,14 @@ class CreateTransactionVM(
         }
     }
 
+    init {
+        viewModelScope.launch {
+            selectedWalletPrefs.selectedWalletId.collect { id ->
+                if (id != null) onWalletIdChanged(id.toString())
+            }
+        }
+    }
+
     private val _uiState = MutableStateFlow(CreateTransactionUiState())
     val uiState: StateFlow<CreateTransactionUiState> = _uiState.asStateFlow()
 
@@ -64,16 +73,12 @@ class CreateTransactionVM(
         _uiState.update { it.copy(walletId = value, selectedWalletName = "", walletIdError = null) }
     }
 
-    fun onTypeChanged(value: String) {
-        _uiState.update { it.copy(type = value, typeError = null) }
+    fun onCategoryIdChanged(value: String) {
+        _uiState.update { it.copy(categoryId = value, selectedCategoryName = "", categoryError = null) }
     }
 
     fun onAmountChanged(value: String) {
         _uiState.update { it.copy(amount = value, amountError = null) }
-    }
-
-    fun onCategoryIdChanged(value: String) {
-        _uiState.update { it.copy(categoryId = value, selectedCategoryName = "") }
     }
 
     fun onSelectCategory(category: Category) {
@@ -81,6 +86,7 @@ class CreateTransactionVM(
             it.copy(
                 categoryId = category.id.toString(),
                 selectedCategoryName = category.name,
+                categoryError = null,
             )
         }
     }
@@ -113,16 +119,17 @@ class CreateTransactionVM(
             hasError = true
         }
 
-        if (current.type.isBlank()) {
-            _uiState.update { it.copy(typeError = "Tipe transaksi wajib diisi") }
-            hasError = true
-        }
-
         val amount = current.amount.toDoubleOrNull()
         if (amount == null || amount <= 0) {
             _uiState.update { it.copy(amountError = "Jumlah harus berupa angka lebih dari 0") }
             hasError = true
         }
+
+		val categoryId = current.categoryId.toIntOrNull()
+		if (categoryId == null || categoryId <= 0) {
+			_uiState.update { it.copy(categoryError = "Kategori wajib dipilih") }
+			hasError = true
+		}
 
         if (current.date.isBlank()) {
             _uiState.update { it.copy(dateError = "Tanggal wajib diisi") }
@@ -138,9 +145,8 @@ class CreateTransactionVM(
             _uiState.update { it.copy(isLoading = true) }
             transactionRepository.createTransaction(
                 walletId = walletId!!,
-                type = current.type,
                 amount = amount!!,
-                categoryId = current.categoryId.toIntOrNull(),
+                categoryId = categoryId!!,
                 description = current.description,
                 date = current.date,
             ).onSuccess { tx ->

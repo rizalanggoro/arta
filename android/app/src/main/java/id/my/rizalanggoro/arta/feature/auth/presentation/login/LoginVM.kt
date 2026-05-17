@@ -71,8 +71,15 @@ class LoginVM(
 			_uiState.update { it.copy(isLoading = true) }
                 authRepository.login(current.email, current.password)
                 	.onSuccess { session ->
-						application.authPrefs.setSession(session)
-                		_messageEvent.emit("Login berhasil untuk ${session.name}")
+					application.authPrefs.setSession(session)
+					_messageEvent.emit("Login berhasil untuk ${session.name}")
+					// Save first wallet as selected wallet if available
+					val walletsResult = application.walletRepository.getWallets()
+					walletsResult.onSuccess { wallets ->
+						if (wallets.isNotEmpty()) {
+							application.selectedWalletPrefs.saveSelectedWalletId(wallets.first().id)
+						}
+					}
                 	}
 				.onFailure { throwable ->
 					_messageEvent.emit(throwable.message ?: "Login gagal")

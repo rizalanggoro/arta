@@ -2,6 +2,7 @@ package id.my.rizalanggoro.arta.feature.gold.data
 
 import id.my.rizalanggoro.arta.feature.gold.data.dto.CreateGoldRequestDto
 import id.my.rizalanggoro.arta.feature.gold.data.dto.GoldResponseDto
+import id.my.rizalanggoro.arta.feature.gold.data.dto.GoldListResponseDto
 import id.my.rizalanggoro.arta.feature.gold.data.dto.UpdateGoldRequestDto
 import id.my.rizalanggoro.arta.feature.gold.data.dto.DeleteResponseDto
 import retrofit2.Response
@@ -9,6 +10,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Query
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -38,4 +40,9 @@ interface GoldApiService {
 		@Header("Authorization") authorization: String,
 		@Path("id") id: Int,
 	): Response<DeleteResponseDto>
+
+	@GET("api/gold")
+	suspend fun list(
+		@Header("Authorization") authorization: String,
+	): Response<GoldListResponseDto>
 }

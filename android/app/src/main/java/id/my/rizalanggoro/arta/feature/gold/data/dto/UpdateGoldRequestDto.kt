@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class UpdateGoldRequestDto(
     @SerialName("date") val date: String? = null,
     @SerialName("grams") val grams: Double? = null,
-    @SerialName("price_per_gram") val pricePerGram: Double? = null,
+    @SerialName("price") val price: Double? = null,
     @SerialName("type") val type: String? = null,
     @SerialName("purity_percent") val purityPercent: Double? = null,
     @SerialName("notes") val notes: String? = null,

@@ -5,7 +5,6 @@ type RegisterReq struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
-	Currency string `json:"currency"`
 } // @name RegisterReq
 
 // LoginReq represents user login input.

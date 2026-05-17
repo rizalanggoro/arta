@@ -30,8 +30,9 @@ import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateWalletScreen(vm: CreateWalletVM = viewModel()) {
+fun CreateWalletScreen(vm: CreateWalletVM = viewModel(factory = CreateWalletVM.Factory)) {
 	val uiState by vm.uiState.collectAsState()
+	val backStack = id.my.rizalanggoro.arta.core.LocalBackStack.current
 
 	val snackbarHostState = remember { SnackbarHostState() }
 
@@ -41,17 +42,25 @@ fun CreateWalletScreen(vm: CreateWalletVM = viewModel()) {
 		}
 	}
 
+	LaunchedEffect(Unit) {
+		vm.effect.collect { effect ->
+			when (effect) {
+				is id.my.rizalanggoro.arta.feature.wallet.presentation.create.CreateWalletEffect.NavigateBack -> {
+					backStack.removeLastOrNull()
+				}
+			}
+		}
+	}
+
 	Content(
 		snackbarHostState = snackbarHostState,
 		isLoading = uiState.isLoading,
 		name = uiState.name,
 		type = uiState.type,
-		isDefault = uiState.isDefault,
 		nameError = uiState.nameError,
 		typeError = uiState.typeError,
 		onChangeName = vm::onChangeName,
 		onChangeType = vm::onChangeType,
-		onToggleDefault = vm::onToggleDefault,
 		onClickSubmit = vm::create,
 	)
 }
@@ -63,12 +72,10 @@ private fun Content(
 	isLoading: Boolean = false,
 	name: String = "",
 	type: String = "",
-	isDefault: Boolean = false,
 	nameError: String? = null,
 	typeError: String? = null,
 	onChangeName: (String) -> Unit = {},
 	onChangeType: (String) -> Unit = {},
-	onToggleDefault: (Boolean) -> Unit = {},
 	onClickSubmit: () -> Unit = {},
 ) {
 	Scaffold(
@@ -108,10 +115,7 @@ private fun Content(
 					singleLine = true,
 				)
 
-				Row(verticalAlignment = Alignment.CenterVertically) {
-					Checkbox(checked = isDefault, onCheckedChange = onToggleDefault)
-					Text(text = "Jadikan default", modifier = Modifier.padding(start = 8.dp))
-				}
+				// default wallet option removed; selection persisted via global prefs
 			}
 
 			when (isLoading) {

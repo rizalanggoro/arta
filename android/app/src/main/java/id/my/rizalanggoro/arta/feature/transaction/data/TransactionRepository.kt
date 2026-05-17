@@ -6,6 +6,7 @@ import id.my.rizalanggoro.arta.domain.Transaction
 import id.my.rizalanggoro.arta.feature.transaction.data.dto.CreateTransactionRequestDto
 import id.my.rizalanggoro.arta.feature.transaction.data.dto.UpdateTransactionRequestDto
 import id.my.rizalanggoro.arta.feature.transaction.data.dto.TransactionResponseDto
+import id.my.rizalanggoro.arta.feature.transaction.data.dto.TransactionListResponseDto
 import id.my.rizalanggoro.arta.feature.transaction.data.mapper.toDomain
 import kotlinx.serialization.json.Json
 import retrofit2.Response
@@ -18,9 +19,8 @@ class TransactionRepository(
 
     suspend fun createTransaction(
         walletId: Int,
-        type: String,
         amount: Double,
-        categoryId: Int? = null,
+        categoryId: Int,
         description: String = "",
         date: String,
     ): Result<Transaction> {
@@ -30,7 +30,6 @@ class TransactionRepository(
             authorization = authorization,
             request = CreateTransactionRequestDto(
                 walletId = walletId,
-                type = type,
                 amount = amount,
                 categoryId = categoryId,
                 description = description,
@@ -41,7 +40,7 @@ class TransactionRepository(
 
     private fun authorizationHeader(): String? {
         val session = authSessionProvider()
-        return session?.let { "${it.tokenType} ${it.token}" }
+        return session?.let { "Bearer ${it.token}" }
     }
 
     private fun Response<TransactionResponseDto>.toDomainResult(): Result<Transaction> {
@@ -76,11 +75,25 @@ class TransactionRepository(
 
         return apiService.get(authorization = authorization, id = id).toDomainResult()
     }
+    
+    suspend fun listTransactionsByWallet(walletId: Int): Result<List<Transaction>> {
+        val authorization = authorizationHeader() ?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+        
+        return apiService.list(authorization = authorization, walletId = walletId).toListDomainResult()
+    }
+    
+    private fun Response<TransactionListResponseDto>.toListDomainResult(): Result<List<Transaction>> {
+        if (!isSuccessful) {
+            return Result.failure(apiError(message = errorMessage()))
+        }
+        
+        val body = body() ?: return Result.failure(apiError("Respons server kosong"))
+        return Result.success(body.transactions.map { it.data.toDomain() })
+    }
 
     suspend fun updateTransaction(
         id: Int,
         walletId: Int? = null,
-        type: String? = null,
         amount: Double? = null,
         categoryId: Int? = null,
         description: String? = null,
@@ -93,7 +106,6 @@ class TransactionRepository(
             id = id,
             request = UpdateTransactionRequestDto(
                 walletId = walletId,
-                type = type,
                 amount = amount,
                 categoryId = categoryId,
                 description = description,

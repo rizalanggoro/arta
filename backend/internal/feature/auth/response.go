@@ -8,24 +8,18 @@ import (
 
 // RegisterRes represents register response payload.
 type RegisterRes struct {
-	UserID    string    `json:"user_id"`
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	Currency  string    `json:"currency"`
-	Token     string    `json:"token"`
-	TokenType string    `json:"token_type"`
-	ExpiresAt time.Time `json:"expires_at"`
+	UserID string `json:"user_id"`
+	Email  string `json:"email"`
+	Name   string `json:"name"`
+	Token  string `json:"token"`
 } // @name RegisterRes
 
 // LoginRes represents login response payload.
 type LoginRes struct {
-	UserID    string    `json:"user_id"`
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	Currency  string    `json:"currency"`
-	Token     string    `json:"token"`
-	TokenType string    `json:"token_type"`
-	ExpiresAt time.Time `json:"expires_at"`
+	UserID string `json:"user_id"`
+	Email  string `json:"email"`
+	Name   string `json:"name"`
+	Token  string `json:"token"`
 } // @name LoginRes
 
 // MeRes represents current user response payload.

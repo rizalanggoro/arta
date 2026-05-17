@@ -63,67 +63,86 @@ fun SelectCategoryScreen(
             )
         },
     ) { paddingValues ->
-        Column(
+        Content(
+            categories = uiState.categories,
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.errorMessage,
+            onReload = vm::loadCategories,
+            onSelect = vm::selectCategory,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = "Pilih kategori yang akan dipakai di transaksi.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        )
+    }
+}
 
-            when {
-                uiState.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
+@Composable
+private fun Content(
+    categories: List<Category> = emptyList(),
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    onReload: () -> Unit = {},
+    onSelect: (Category) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = "Pilih kategori yang akan dipakai di transaksi.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
                 }
+            }
 
-                uiState.errorMessage != null -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text(uiState.errorMessage ?: "Gagal memuat kategori")
-                            Button(onClick = vm::loadCategories) { Text("Muat ulang") }
-                        }
-                    }
-                }
-
-                uiState.categories.isEmpty() -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text("Belum ada kategori.")
-                            Text(
-                                text = "Buat kategori dulu agar bisa dipakai di transaksi.",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+            errorMessage != null -> {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(uiState.categories, key = { it.id }) { category ->
-                            SelectCategoryCard(
-                                category = category,
-                                onClick = { vm.selectCategory(category) },
-                            )
-                        }
+                        Text(errorMessage ?: "Gagal memuat kategori")
+                        Button(onClick = onReload) { Text("Muat ulang") }
+                    }
+                }
+            }
+
+            categories.isEmpty() -> {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text("Belum ada kategori.")
+                        Text(
+                            text = "Buat kategori dulu agar bisa dipakai di transaksi.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(categories, key = { it.id }) { category ->
+                        SelectCategoryCard(
+                            category = category,
+                            onClick = { onSelect(category) },
+                        )
                     }
                 }
             }
@@ -157,5 +176,24 @@ private fun SelectCategoryCard(
 @Preview(showBackground = true)
 @Composable
 private fun SelectCategoryPreview() {
-    ArtaTheme { }
+    ArtaTheme {
+        Content()
+    }
+}
+
+@Preview(showBackground = true, name = "Select Category - With Items")
+@Composable
+private fun SelectCategoryItemsPreview() {
+    ArtaTheme {
+        Content(categories = listOf(
+            id.my.rizalanggoro.arta.domain.Category(id = 1, userId = null, name = "Makanan", type = "expense", icon = "🍜", color = "#F97316"),
+            id.my.rizalanggoro.arta.domain.Category(id = 2, userId = 10, name = "Gaji", type = "income", icon = "💰", color = "#10B981"),
+        ))
+    }
+}
+
+@Preview(showBackground = true, name = "Select Category - Loading")
+@Composable
+private fun SelectCategoryLoadingPreview() {
+    ArtaTheme { Content() }
 }

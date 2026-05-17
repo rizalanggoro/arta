@@ -14,8 +14,6 @@ type User struct {
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
 	Password  string    `json:"-"`
-	Currency  string    `json:"currency"`
-	IsActive  bool      `json:"is_active"`
 	Wallets   []Wallet  `json:"wallets,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -32,8 +30,6 @@ func FromUserModel(m *model.User) *User {
 		Email:     m.Email,
 		Name:      m.Name,
 		Password:  m.Password,
-		Currency:  m.Currency,
-		IsActive:  m.IsActive,
 		Wallets:   make([]Wallet, 0, len(m.Wallets)),
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
@@ -51,7 +47,5 @@ func (u *User) ToModel() *model.User {
 		Email:    u.Email,
 		Name:     u.Name,
 		Password: u.Password,
-		Currency: u.Currency,
-		IsActive: u.IsActive,
 	}
 }

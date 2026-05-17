@@ -218,11 +218,11 @@ private fun CategoryCard(
 
 				AssistChip(
 					onClick = {},
-					label = { Text(if (category.isCustom) "Custom" else "Default") },
+					label = { Text(if (category.userId != null) "Custom" else "Default") },
 				)
 			}
 
-			if (category.isCustom) {
+			if (category.userId != null) {
 				Row(
 					modifier = Modifier.fillMaxWidth(),
 					horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -258,20 +258,19 @@ private fun ListCategoryDefaultPreview() {
 			categories = listOf(
 				Category(
 					id = 1,
+					userId = null,
 					name = "Makanan",
 					type = "expense",
 					icon = "🍜",
 					color = "#F97316",
-					isCustom = false,
-					isDefault = true,
 				),
 				Category(
 					id = 2,
+					userId = 123,
 					name = "Transport",
 					type = "expense",
 					icon = "🚌",
 					color = "#0EA5E9",
-					isCustom = true,
 				),
 			),
 			deleteTarget = null,

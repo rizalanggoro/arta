@@ -10,8 +10,7 @@ data class Category(
     val type: String,
     val icon: String = "",
     val color: String = "",
-    val isCustom: Boolean = false,
-    val isDefault: Boolean = false,
+    // `userId == null` indicates a system default category
     val createdAt: String = "",
     val updatedAt: String = "",
 )

@@ -10,18 +10,23 @@ import (
 // Gold represents gold holdings in the domain layer
 // @name Gold
 type Gold struct {
-	ID            uint
-	WalletID      uint
-	Date          time.Time
-	Grams         float64
-	PricePerGram  float64
-	TotalValue    float64
+	ID       uint
+	WalletID uint
+	Date     time.Time
+	Grams    float64
+	// Price is the total purchase price for this gold entry (for the recorded grams)
+	Price         float64
 	Type          string  // pure_24k, jewelry_ring, etc
 	PurityPercent float64 // For reference
 	Notes         string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
+
+const (
+	GoldTypePure    = "pure_gold"
+	GoldTypeJewelry = "gold_jewelry"
+)
 
 // FromGoldModel maps a gold model to the domain layer.
 func FromGoldModel(m *model.Gold) *Gold {
@@ -34,8 +39,7 @@ func FromGoldModel(m *model.Gold) *Gold {
 		WalletID:      m.WalletID,
 		Date:          m.Date,
 		Grams:         m.Grams,
-		PricePerGram:  m.PricePerGram,
-		TotalValue:    m.TotalValue,
+		Price:         m.Price,
 		Type:          m.Type,
 		PurityPercent: m.PurityPercent,
 		Notes:         m.Notes,
@@ -55,8 +59,7 @@ func (g *Gold) ToModel() *model.Gold {
 		WalletID:      g.WalletID,
 		Date:          g.Date,
 		Grams:         g.Grams,
-		PricePerGram:  g.PricePerGram,
-		TotalValue:    g.TotalValue,
+		Price:         g.Price,
 		Type:          g.Type,
 		PurityPercent: g.PurityPercent,
 		Notes:         g.Notes,

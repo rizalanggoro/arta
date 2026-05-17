@@ -15,11 +15,11 @@ import id.my.rizalanggoro.arta.core.Routes.CategoryCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
 import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
 import id.my.rizalanggoro.arta.core.Routes.CategoryUpdateRoute
-import id.my.rizalanggoro.arta.core.Routes.DashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.ForgotPasswordRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldDetailRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldFormRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldRoute
+import id.my.rizalanggoro.arta.core.Routes.HomeRoute
 import id.my.rizalanggoro.arta.core.Routes.LoginRoute
 import id.my.rizalanggoro.arta.core.Routes.RegisterRoute
 import id.my.rizalanggoro.arta.core.Routes.SettingsRoute
@@ -29,6 +29,7 @@ import id.my.rizalanggoro.arta.core.Routes.TransactionListRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletUpdateRoute
+import id.my.rizalanggoro.arta.core.Routes.WalletCreateRoute
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.feature.auth.presentation.forgotpassword.ForgotPasswordScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
@@ -40,32 +41,36 @@ import id.my.rizalanggoro.arta.feature.category.presentation.update.UpdateCatego
 import id.my.rizalanggoro.arta.feature.gold.presentation.create.CreateGoldScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.update.UpdateGoldScreen
+import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldListContent
 import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeWalletType
-import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingContent
-import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionListContent
+import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingScreen
+import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionListScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.update.UpdateTransactionScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletScreen
+import id.my.rizalanggoro.arta.feature.wallet.presentation.create.CreateWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.update.UpdateWalletScreen
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
 fun ComposeApp() {
-    ArtaTheme {
-        val app = LocalContext.current.applicationContext as MyApplication
-        val session by app.authPrefs.currentSession.collectAsState()
+    val app = LocalContext.current.applicationContext as MyApplication
+    val session by app.authPrefs.currentSession.collectAsState()
+    val isDarkTheme by app.themePrefs.isDarkTheme.collectAsState()
+
+    ArtaTheme(darkTheme = isDarkTheme) {
 
         val startRoute = when {
             session != null -> CategoryRoute
             else -> LoginRoute
         }
 
-        val backStack = rememberNavBackStack(startRoute)
-		
+        val backStack = rememberNavBackStack(Routes.HomeRoute)
+
         CompositionLocalProvider(LocalBackStack provides backStack) {
             Surface {
                 NavDisplay(
@@ -100,11 +105,14 @@ fun ComposeApp() {
                         }
                         entry<GoldDetailRoute> { route -> GoldDetailScreen(goldId = route.id) }
                         entry<GoldRoute> { HomeGoldListContent() }
-                        entry<DashboardRoute> { HomeScreen() }
-                        entry<TransactionListRoute> { HomeTransactionListContent() }
-                        entry<SettingsRoute> { HomeSettingContent(walletType = HomeWalletType.CashSavings) }
+                        entry<HomeRoute> {
+                            HomeScreen()
+                        }
+                        entry<TransactionListRoute> { HomeTransactionListScreen() }
+                        entry<SettingsRoute> { HomeSettingScreen() }
                         entry<WalletRoute> { ListWalletScreen() }
                         entry<WalletSelectRoute> { SelectWalletScreen() }
+                        entry<WalletCreateRoute> { CreateWalletScreen() }
                         entry<WalletUpdateRoute> { route -> UpdateWalletScreen(walletId = route.walletId) }
                         entry<LoginRoute> { LoginScreen() }
                         entry<RegisterRoute> { RegisterScreen() }

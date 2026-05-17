@@ -7,5 +7,4 @@ import kotlinx.serialization.Serializable
 data class CreateWalletRequestDto(
 	@SerialName("name") val name: String,
 	@SerialName("type") val type: String,
-	@SerialName("is_default") val isDefault: Boolean,
 )

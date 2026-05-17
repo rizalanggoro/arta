@@ -23,13 +23,12 @@ class AuthRepository(
         ).toDomainResult()
     }
 
-    suspend fun register(name: String, email: String, password: String, currency: String = "IDR"): Result<AuthSession> {
+    suspend fun register(name: String, email: String, password: String): Result<AuthSession> {
         return apiService.register(
             RegisterRequestDto(
                 name = name,
                 email = email,
                 password = password,
-                currency = currency,
             ),
         ).toDomainResult()
     }

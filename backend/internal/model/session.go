@@ -1,19 +1,12 @@
 package model
 
-import (
-	"time"
+import "gorm.io/gorm"
 
-	"gorm.io/gorm"
-)
-
-// Session represents JWT session tokens.
+// Session represents a stored JWT session token.
 type Session struct {
 	gorm.Model
-	UserID    uint      `gorm:"not null;index"`
-	Token     string    `gorm:"not null;type:text;uniqueIndex"`
-	TokenType string    `gorm:"not null;type:varchar(50);default:'Bearer'"`
-	ExpiresAt time.Time `gorm:"not null;index"`
-	Revoked   bool      `gorm:"not null;default:false"`
+	UserID uint   `gorm:"not null;index"`
+	Token  string `gorm:"not null;type:text;uniqueIndex"`
 
 	// Foreign key
 	User *User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE"`

@@ -44,7 +44,6 @@ class UpdateWalletVM(
 							walletId = wallet.id,
 							name = wallet.name,
 							type = wallet.type,
-							isDefault = wallet.isDefault,
 							isLoading = false,
 							errorMessage = null,
 						)
@@ -70,7 +69,7 @@ class UpdateWalletVM(
 	}
 
 	fun onToggleDefault(value: Boolean) {
-		_uiState.update { it.copy(isDefault = value) }
+		// isDefault removed; no-op
 	}
 
 	fun updateWallet() {
@@ -102,7 +101,6 @@ class UpdateWalletVM(
 				id = walletId,
 				name = current.name,
 				type = current.type,
-				isDefault = current.isDefault,
 			)
 				.onSuccess { wallet ->
 					_effect.emit(UpdateWalletEffect.ShowMessage("Wallet ${wallet.name} berhasil diperbarui"))

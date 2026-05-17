@@ -5,6 +5,7 @@ import (
 
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
+	categoryfeature "github.com/artafinance/backend/internal/feature/category"
 	"github.com/artafinance/backend/pkg/jwt"
 	"github.com/artafinance/backend/pkg/middleware"
 	"github.com/gofiber/fiber/v2"
@@ -12,14 +13,15 @@ import (
 
 // Handler exposes transaction HTTP endpoints.
 type Handler struct {
-	repo    *Repository
-	jwtMgr  *jwt.Manager
-	checker middleware.TokenStatusChecker
+	repo         *Repository
+	categoryRepo *categoryfeature.Repository
+	jwtMgr       *jwt.Manager
+	checker      middleware.TokenStatusChecker
 }
 
 // NewHandler creates a new transaction handler.
-func NewHandler(repo *Repository, jwtMgr *jwt.Manager, checker middleware.TokenStatusChecker) *Handler {
-	return &Handler{repo: repo, jwtMgr: jwtMgr, checker: checker}
+func NewHandler(repo *Repository, categoryRepo *categoryfeature.Repository, jwtMgr *jwt.Manager, checker middleware.TokenStatusChecker) *Handler {
+	return &Handler{repo: repo, categoryRepo: categoryRepo, jwtMgr: jwtMgr, checker: checker}
 }
 
 // RegisterRoutes registers transaction routes.
@@ -91,14 +93,20 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
-	// minimal validation
-	if req.Type == "" || req.Amount <= 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid type or amount"})
+	if req.CategoryID == 0 || req.Amount <= 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid category or amount"})
+	}
+
+	category, err := h.categoryRepo.GetCategoryByID(req.CategoryID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid category"})
+	}
+	if category.UserID != nil && strconv.FormatUint(uint64(*category.UserID), 10) != userID {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
 	created, err := h.repo.CreateTransaction(&domain.Transaction{
 		WalletID:    req.WalletID,
-		Type:        req.Type,
 		Amount:      req.Amount,
 		CategoryID:  req.CategoryID,
 		Description: req.Description,
@@ -163,13 +171,17 @@ func (h *Handler) update(c *fiber.Ctx) error {
 	if req.WalletID != nil {
 		tx.WalletID = *req.WalletID
 	}
-	if req.Type != nil {
-		tx.Type = *req.Type
-	}
 	if req.Amount != nil {
 		tx.Amount = *req.Amount
 	}
 	if req.CategoryID != nil {
+		category, err := h.categoryRepo.GetCategoryByID(*req.CategoryID)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid category"})
+		}
+		if category.UserID != nil && strconv.FormatUint(uint64(*category.UserID), 10) != userID {
+			return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+		}
 		tx.CategoryID = *req.CategoryID
 	}
 	if req.Description != nil {

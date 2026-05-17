@@ -3,7 +3,9 @@ package id.my.rizalanggoro.arta.feature.transaction.data
 import id.my.rizalanggoro.arta.feature.transaction.data.dto.CreateTransactionRequestDto
 import id.my.rizalanggoro.arta.feature.transaction.data.dto.UpdateTransactionRequestDto
 import id.my.rizalanggoro.arta.feature.transaction.data.dto.TransactionResponseDto
+import id.my.rizalanggoro.arta.feature.transaction.data.dto.TransactionListResponseDto
 import retrofit2.Response
+import retrofit2.http.Query
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -37,4 +39,10 @@ interface TransactionApiService {
         @Header("Authorization") authorization: String,
         @Path("id") id: Int,
     ): Response<Unit>
+
+    @GET("/transaction")
+    suspend fun list(
+        @Header("Authorization") authorization: String,
+        @Query("wallet_id") walletId: Int,
+    ): Response<TransactionListResponseDto>
 }

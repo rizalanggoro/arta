@@ -11,8 +11,7 @@ data class CategoryDto(
 	@SerialName("type") val type: String,
 	@SerialName("icon") val icon: String = "",
 	@SerialName("color") val color: String = "",
-	@SerialName("is_custom") val isCustom: Boolean = false,
-	@SerialName("is_default") val isDefault: Boolean = false,
+	// is_custom / is_default removed; use user_id == null to detect defaults
 	@SerialName("created_at") val createdAt: String = "",
 	@SerialName("updated_at") val updatedAt: String = "",
 )

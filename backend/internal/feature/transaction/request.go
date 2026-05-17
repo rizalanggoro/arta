@@ -5,7 +5,6 @@ import "time"
 // CreateTransactionReq defines payload for creating a transaction.
 type CreateTransactionReq struct {
 	WalletID    uint      `json:"wallet_id"`
-	Type        string    `json:"type"`
 	Amount      float64   `json:"amount"`
 	CategoryID  uint      `json:"category_id"`
 	Description string    `json:"description,omitempty"`
@@ -15,7 +14,6 @@ type CreateTransactionReq struct {
 // UpdateTransactionReq defines payload for updating a transaction.
 type UpdateTransactionReq struct {
 	WalletID    *uint      `json:"wallet_id,omitempty"`
-	Type        *string    `json:"type,omitempty"`
 	Amount      *float64   `json:"amount,omitempty"`
 	CategoryID  *uint      `json:"category_id,omitempty"`
 	Description *string    `json:"description,omitempty"`

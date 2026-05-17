@@ -17,9 +17,21 @@ import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
-fun HomeChartContent(modifier: Modifier = Modifier) {
-    val vm: ChartVM = viewModel(factory = ChartVM.Factory)
+fun HomeChartScreen(vm: ChartVM = viewModel(factory = ChartVM.Factory)) {
     val uiState by vm.uiState.collectAsState()
+
+    Content(
+        title = uiState.title,
+        description = uiState.description,
+    )
+}
+
+@Composable
+private fun Content(
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier,
+) {
 
     Card(modifier = modifier.fillMaxWidth()) {
         Column(
@@ -27,10 +39,10 @@ fun HomeChartContent(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = uiState.title,
+                text = title,
                 style = MaterialTheme.typography.titleMedium,
             )
-            Text(text = uiState.description)
+            Text(text = description)
         }
     }
 }
@@ -39,6 +51,9 @@ fun HomeChartContent(modifier: Modifier = Modifier) {
 @Composable
 private fun HomeChartPreview() {
     ArtaTheme {
-        HomeChartContent()
+        Content(
+            title = "Chart",
+            description = "Visualisasi transaksi dan pola pengeluaran.",
+        )
     }
 }

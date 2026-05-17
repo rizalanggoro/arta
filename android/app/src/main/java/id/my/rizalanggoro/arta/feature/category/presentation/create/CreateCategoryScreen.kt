@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -29,6 +30,7 @@ import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun CreateCategoryScreen(vm: CreateCategoryVM = viewModel(factory = CreateCategoryVM.Factory)) {
 	val uiState by vm.uiState.collectAsState()
 	val snackbarHostState = remember { SnackbarHostState() }
@@ -57,6 +59,7 @@ fun CreateCategoryScreen(vm: CreateCategoryVM = viewModel(factory = CreateCatego
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
 	snackbarHostState: SnackbarHostState,
 	name: String = "",
@@ -72,91 +75,97 @@ private fun Content(
 		CategoryTypeOption(label = "Pengeluaran", value = "expense"),
 		CategoryTypeOption(label = "Pemasukan", value = "income"),
 	)
-
-	Column(
-		modifier = Modifier
-			.fillMaxSize()
-			.padding(20.dp),
-		verticalArrangement = Arrangement.spacedBy(16.dp),
-	) {
-		Text(
-			text = "KATEGORI",
-			style = MaterialTheme.typography.labelLarge,
-			color = MaterialTheme.colorScheme.onSurfaceVariant,
-		)
-		Text(
-			text = "Buat kategori baru untuk pemasukan atau pengeluaran.",
-			style = MaterialTheme.typography.headlineMedium,
-		)
-		Text(
-			text = "Kategori hanya punya nama dan tipe, tanpa ikon atau warna.",
-			style = MaterialTheme.typography.bodyLarge,
-			color = MaterialTheme.colorScheme.onSurfaceVariant,
-		)
-		Text(
-			text = "Income  ·  Expense",
-			style = MaterialTheme.typography.bodyMedium,
-			color = MaterialTheme.colorScheme.onSurfaceVariant,
-		)
-		SnackbarHost(hostState = snackbarHostState)
-
-		Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+	androidx.compose.material3.Scaffold(
+		topBar = {
+			androidx.compose.material3.TopAppBar(title = { Text("Buat Kategori") })
+		},
+		snackbarHost = { androidx.compose.material3.SnackbarHost(hostState = snackbarHostState) },
+	) { paddingValues ->
+		Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(paddingValues)
+				.padding(20.dp),
+			verticalArrangement = Arrangement.spacedBy(16.dp),
+		) {
 			Text(
-				text = "Isi nama kategori dan pilih tipenya.",
+				text = "KATEGORI",
+				style = MaterialTheme.typography.labelLarge,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+			)
+			Text(
+				text = "Buat kategori baru untuk pemasukan atau pengeluaran.",
+				style = MaterialTheme.typography.headlineMedium,
+			)
+			Text(
+				text = "Kategori hanya punya nama dan tipe, tanpa ikon atau warna.",
 				style = MaterialTheme.typography.bodyLarge,
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
 			)
-
-			OutlinedTextField(
-				value = name,
-				onValueChange = onChangeName,
-				label = { Text("Nama kategori") },
-				modifier = Modifier.fillMaxWidth(),
-				isError = nameError != null,
-				supportingText = {
-					if (nameError != null) Text(nameError)
-				},
-				enabled = !isLoading,
-				singleLine = true,
+			Text(
+				text = "Income  ·  Expense",
+				style = MaterialTheme.typography.bodyMedium,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
 			)
 
-			Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+			Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
 				Text(
-					text = "Tipe kategori",
-					style = MaterialTheme.typography.labelLarge,
+					text = "Isi nama kategori dan pilih tipenya.",
+					style = MaterialTheme.typography.bodyLarge,
+					color = MaterialTheme.colorScheme.onSurfaceVariant,
 				)
-				Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-					typeOptions.forEach { option ->
-						FilterChip(
-							selected = type == option.value,
-							onClick = { onChangeType(option.value) },
-							label = { Text(option.label) },
-							enabled = !isLoading,
-						)
+
+				OutlinedTextField(
+					value = name,
+					onValueChange = onChangeName,
+					label = { Text("Nama kategori") },
+					modifier = Modifier.fillMaxWidth(),
+					isError = nameError != null,
+					supportingText = {
+						if (nameError != null) Text(nameError)
+					},
+					enabled = !isLoading,
+					singleLine = true,
+				)
+
+				Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+					Text(
+						text = "Tipe kategori",
+						style = MaterialTheme.typography.labelLarge,
+					)
+					Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+						typeOptions.forEach { option ->
+							FilterChip(
+								selected = type == option.value,
+								onClick = { onChangeType(option.value) },
+								label = { Text(option.label) },
+								enabled = !isLoading,
+							)
+						}
 					}
 				}
-			}
 
-			Button(
-				onClick = onClickSubmit,
-				modifier = Modifier.fillMaxWidth(),
-				enabled = !isLoading,
-			) {
-				if (isLoading) {
-					CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-				} else {
-					Text("Simpan Kategori")
+				Button(
+					onClick = onClickSubmit,
+					modifier = Modifier.fillMaxWidth(),
+					enabled = !isLoading,
+				) {
+					if (isLoading) {
+						CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+					} else {
+						Text("Simpan Kategori")
+					}
+				}
+
+				FilledTonalButton(
+					onClick = onClickBack,
+					modifier = Modifier.fillMaxWidth(),
+					enabled = !isLoading,
+				) {
+					Text("Batal")
 				}
 			}
-
-			FilledTonalButton(
-				onClick = onClickBack,
-				modifier = Modifier.fillMaxWidth(),
-				enabled = !isLoading,
-			) {
-				Text("Batal")
-			}
-			}
+		}
 	}
 }
 

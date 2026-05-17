@@ -19,12 +19,13 @@ import kotlinx.coroutines.launch
 
 class SelectWalletVM(
     private val walletRepository: WalletRepository,
+    private val selectedWalletPrefs: id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
-                SelectWalletVM(walletRepository = app.walletRepository)
+                SelectWalletVM(walletRepository = app.walletRepository, selectedWalletPrefs = app.selectedWalletPrefs)
             }
         }
     }
@@ -50,6 +51,8 @@ class SelectWalletVM(
 
     fun selectWallet(wallet: Wallet) {
         viewModelScope.launch {
+            // persist selection to SharedPreferences for global selection
+            selectedWalletPrefs.saveSelectedWalletId(wallet.id)
             WalletSelectionBus.emit(wallet)
             _effect.emit(SelectWalletEffect.NavigateBack)
         }

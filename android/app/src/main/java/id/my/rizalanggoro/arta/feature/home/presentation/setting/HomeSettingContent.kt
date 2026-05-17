@@ -2,43 +2,63 @@ package id.my.rizalanggoro.arta.feature.home.presentation.setting
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
+import id.my.rizalanggoro.arta.core.Routes.LoginRoute
+import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeWalletType
 
 @Composable
-fun HomeSettingContent(
-    walletType: HomeWalletType,
-    modifier: Modifier = Modifier,
-    isDarkTheme: Boolean = false,
-    onToggleTheme: (Boolean) -> Unit = {},
-    onLogout: () -> Unit = {},
-    onManageCategory: () -> Unit = {},
-    onClickManageWallet: () -> Unit = {},
+fun HomeSettingScreen(
+    vm: HomeSettingVM = viewModel(factory = HomeSettingVM.Factory),
 ) {
-    val context = LocalContext.current.applicationContext as? MyApplication
-    val session = context?.authPrefs?.currentSession?.value
+    val uiState by vm.uiState.collectAsState()
+    val backStack = LocalBackStack.current
 
+    Content(
+        sessionName = uiState.sessionName,
+        sessionEmail = uiState.sessionEmail,
+        isDarkTheme = uiState.isDarkTheme,
+        onToggleTheme = vm::onToggleTheme,
+        onManageCategory = { backStack.add(CategoryRoute) },
+        onClickManageWallet = { backStack.add(WalletRoute) },
+        onLogout = {
+            vm.onLogout()
+            backStack.add(LoginRoute)
+        },
+    )
+}
+
+@Composable
+private fun Content(
+    sessionName: String,
+    sessionEmail: String,
+    isDarkTheme: Boolean,
+    onToggleTheme: (Boolean) -> Unit,
+    onLogout: () -> Unit,
+    onManageCategory: () -> Unit,
+    onClickManageWallet: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Card(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -49,22 +69,18 @@ fun HomeSettingContent(
                 style = MaterialTheme.typography.titleMedium,
             )
 
-            // user info
-            Text(text = "Nama: ${session?.name ?: "-"}")
-            Text(text = "Akun: ${session?.email ?: "-"}")
+            Text(text = "Nama: $sessionName")
+            Text(text = "Akun: $sessionEmail")
 
-            // theme toggle
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "Tema gelap")
                 Spacer(modifier = Modifier.width(8.dp))
-                val checked by remember { mutableStateOf(isDarkTheme) }
                 Switch(
-                    checked = checked,
-                    onCheckedChange = { checkedNow -> onToggleTheme(checkedNow) },
+                    checked = isDarkTheme,
+                    onCheckedChange = onToggleTheme,
                 )
             }
 
-            // navigation options
             OutlinedButton(onClick = onManageCategory) {
                 Text("Kelola kategori")
             }
@@ -73,7 +89,6 @@ fun HomeSettingContent(
                 Text("Kelola wallet")
             }
 
-            // logout
             OutlinedButton(onClick = onLogout) {
                 Text("Logout")
             }
@@ -81,18 +96,18 @@ fun HomeSettingContent(
     }
 }
 
-@Preview(showBackground = true, name = "Setting - Cash")
+@Preview(showBackground = true, name = "Setting")
 @Composable
-private fun HomeSettingCashPreview() {
+private fun HomeSettingPreview() {
     ArtaTheme {
-        HomeSettingContent(walletType = HomeWalletType.CashSavings)
-    }
-}
-
-@Preview(showBackground = true, name = "Setting - Gold")
-@Composable
-private fun HomeSettingGoldPreview() {
-    ArtaTheme {
-        HomeSettingContent(walletType = HomeWalletType.GoldSavings)
+        Content(
+            sessionName = "Rizal",
+            sessionEmail = "rizal@example.com",
+            isDarkTheme = true,
+            onToggleTheme = {},
+            onLogout = {},
+            onManageCategory = {},
+            onClickManageWallet = {},
+        )
     }
 }

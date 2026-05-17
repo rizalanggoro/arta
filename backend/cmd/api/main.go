@@ -9,6 +9,8 @@ import (
 	"github.com/artafinance/backend/internal/cron/goldprice"
 	"github.com/artafinance/backend/internal/feature/auth"
 	"github.com/artafinance/backend/internal/feature/category"
+	"github.com/artafinance/backend/internal/feature/dashboard"
+	"github.com/artafinance/backend/internal/feature/gold"
 	"github.com/artafinance/backend/internal/feature/transaction"
 	"github.com/artafinance/backend/internal/feature/wallet"
 	"github.com/artafinance/backend/pkg/config"
@@ -51,8 +53,10 @@ func main() {
 	categoryRepo := category.NewRepository(db)
 	categoryHandler := category.NewHandler(categoryRepo, jwtManager, authRepo)
 
+	goldRepo := gold.NewRepository(db)
+
 	transactionRepo := transaction.NewRepository(db)
-	transactionHandler := transaction.NewHandler(transactionRepo, jwtManager, authRepo)
+	transactionHandler := transaction.NewHandler(transactionRepo, categoryRepo, jwtManager, authRepo)
 
 	goldPriceRepo := goldprice.NewRepository(db)
 	goldPriceClient := goldprice.NewClient()
@@ -64,12 +68,15 @@ func main() {
 	fxRateJob := fxrate.NewScheduler(fxRateRepo, fxRateClient, log.Default())
 	go fxRateJob.Start(context.Background())
 
+	dashboardHandler := dashboard.NewHandler(walletRepo, goldRepo, goldPriceRepo, fxRateRepo, transactionRepo, categoryRepo, jwtManager, authRepo)
+
 	app := fiber.New()
 	api := app.Group("/api")
 	authHandler.RegisterRoutes(api)
 	walletHandler.RegisterRoutes(api)
 	categoryHandler.RegisterRoutes(api)
 	transactionHandler.RegisterRoutes(api)
+	dashboardHandler.RegisterRoutes(api)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})

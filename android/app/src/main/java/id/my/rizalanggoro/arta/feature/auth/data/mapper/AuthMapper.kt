@@ -8,9 +8,6 @@ fun AuthResponseDto.toDomain(): AuthSession {
         userId = userId,
         email = email,
         name = name,
-        currency = currency,
         token = token,
-        tokenType = tokenType,
-        expiresAt = expiresAt,
     )
 }

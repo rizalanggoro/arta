@@ -74,14 +74,4 @@ func (r *Repository) DeleteWallet(id uint) error {
 }
 
 // SetDefaultWallet sets the given wallet as default and clears others for the user.
-func (r *Repository) SetDefaultWallet(userID uint, walletID uint) error {
-	// clear other defaults
-	if err := r.db.Model(&model.Wallet{}).Where("user_id = ?", userID).Update("is_default", false).Error; err != nil {
-		return err
-	}
-	// set this wallet
-	if err := r.db.Model(&model.Wallet{}).Where("id = ?", walletID).Update("is_default", true).Error; err != nil {
-		return err
-	}
-	return nil
-}
+// SetDefaultWallet removed: client-side selection will be used instead.

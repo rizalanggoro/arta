@@ -6,6 +6,7 @@ import id.my.rizalanggoro.arta.domain.Gold
 import id.my.rizalanggoro.arta.feature.gold.data.dto.CreateGoldRequestDto
 import id.my.rizalanggoro.arta.feature.gold.data.dto.GoldResponseDto
 import id.my.rizalanggoro.arta.feature.gold.data.dto.UpdateGoldRequestDto
+import id.my.rizalanggoro.arta.feature.gold.data.dto.GoldListResponseDto
 import id.my.rizalanggoro.arta.feature.gold.data.mapper.toDomain
 import kotlinx.serialization.json.Json
 import retrofit2.Response
@@ -20,7 +21,7 @@ class GoldRepository(
 		walletId: Int,
 		date: String,
 		grams: Double,
-		pricePerGram: Double,
+		price: Double,
 		type: String,
 		purityPercent: Double,
 		notes: String,
@@ -34,7 +35,7 @@ class GoldRepository(
 				walletId = walletId,
 				date = date,
 				grams = grams,
-				pricePerGram = pricePerGram,
+				price = price,
 				type = type,
 				purityPercent = purityPercent,
 				notes = notes,
@@ -44,7 +45,7 @@ class GoldRepository(
 
 	private fun authorizationHeader(): String? {
 		val session = authSessionProvider()
-		return session?.let { "${it.tokenType} ${it.token}" }
+		return session?.let { "Bearer ${it.token}" }
 	}
 
 	private fun Response<GoldResponseDto>.toDomainResult(): Result<Gold> {
@@ -67,7 +68,7 @@ class GoldRepository(
 		id: Int,
 		date: String? = null,
 		grams: Double? = null,
-		pricePerGram: Double? = null,
+		price: Double? = null,
 		type: String? = null,
 		purityPercent: Double? = null,
 		notes: String? = null,
@@ -81,12 +82,26 @@ class GoldRepository(
 			request = UpdateGoldRequestDto(
 				date = date,
 				grams = grams,
-				pricePerGram = pricePerGram,
+				price = price,
 				type = type,
 				purityPercent = purityPercent,
 				notes = notes,
 			),
 		).toDomainResult()
+	}
+
+	suspend fun listGolds(): Result<List<Gold>> {
+		val authorization = authorizationHeader()
+			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+
+		val response = apiService.list(authorization = authorization)
+		if (!response.isSuccessful) {
+			return Result.failure(apiError(message = response.message()))
+		}
+
+		val body = response.body() ?: return Result.failure(apiError("Respons server kosong"))
+		val list = body.golds.map { it.data.toDomain() }
+		return Result.success(list)
 	}
 
 	suspend fun deleteGold(id: Int): Result<Unit> {

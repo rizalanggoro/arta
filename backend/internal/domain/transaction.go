@@ -12,7 +12,6 @@ import (
 type Transaction struct {
 	ID          uint      `json:"id"`
 	WalletID    uint      `json:"wallet_id"`
-	Type        string    `json:"type"` // income or expense
 	Amount      float64   `json:"amount"`
 	CategoryID  uint      `json:"category_id"`
 	Description string    `json:"description"`
@@ -30,7 +29,6 @@ func FromTransactionModel(m *model.Transaction) *Transaction {
 	return &Transaction{
 		ID:          m.ID,
 		WalletID:    m.WalletID,
-		Type:        m.Type,
 		Amount:      m.Amount,
 		CategoryID:  m.CategoryID,
 		Description: m.Description,
@@ -49,7 +47,6 @@ func (t *Transaction) ToModel() *model.Transaction {
 	return &model.Transaction{
 		Model:       gorm.Model{ID: t.ID},
 		WalletID:    t.WalletID,
-		Type:        t.Type,
 		Amount:      t.Amount,
 		CategoryID:  t.CategoryID,
 		Description: t.Description,

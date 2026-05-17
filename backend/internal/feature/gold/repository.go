@@ -106,12 +106,12 @@ func (r *Repository) GetSummary(userID uint) (float64, float64, map[string]inter
 	typeAgg := make(map[string]map[string]float64)
 	for _, g := range golds {
 		totalGrams += g.Grams
-		totalValue += g.TotalValue
+		totalValue += g.Price
 		if _, ok := typeAgg[g.Type]; !ok {
 			typeAgg[g.Type] = map[string]float64{"grams": 0, "value": 0}
 		}
 		typeAgg[g.Type]["grams"] += g.Grams
-		typeAgg[g.Type]["value"] += g.TotalValue
+		typeAgg[g.Type]["value"] += g.Price
 	}
 	for k, v := range typeAgg {
 		byType[k] = v

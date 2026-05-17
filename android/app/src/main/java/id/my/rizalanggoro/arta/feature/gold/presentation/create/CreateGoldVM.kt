@@ -18,12 +18,14 @@ import kotlinx.coroutines.launch
 
 class CreateGoldVM(
 	private val goldRepository: GoldRepository,
+	private val selectedWalletPrefs: id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs,
 ) : ViewModel() {
 	companion object {
 		val Factory = viewModelFactory {
 			initializer {
-				val goldRepository = (this[APPLICATION_KEY] as MyApplication).goldRepository
-				CreateGoldVM(goldRepository = goldRepository)
+				val app = (this[APPLICATION_KEY] as MyApplication)
+				val goldRepository = app.goldRepository
+				CreateGoldVM(goldRepository = goldRepository, selectedWalletPrefs = app.selectedWalletPrefs)
 			}
 		}
 	}
@@ -34,10 +36,6 @@ class CreateGoldVM(
 	private val _effect = MutableSharedFlow<CreateGoldEffect>()
 	val effect: SharedFlow<CreateGoldEffect> = _effect.asSharedFlow()
 
-	fun onWalletIdChanged(value: String) {
-		_uiState.update { it.copy(walletId = value, walletIdError = null) }
-	}
-
 	fun onDateChanged(value: String) {
 		_uiState.update { it.copy(date = value, dateError = null) }
 	}
@@ -47,7 +45,7 @@ class CreateGoldVM(
 	}
 
 	fun onPricePerGramChanged(value: String) {
-		_uiState.update { it.copy(pricePerGram = value, pricePerGramError = null) }
+		_uiState.update { it.copy(price = value, priceError = null) }
 	}
 
 	fun onTypeChanged(value: String) {
@@ -68,9 +66,13 @@ class CreateGoldVM(
 		_uiState.update { it.copy(notes = value) }
 	}
 
-	fun onWalletIdPrefilled(walletId: Int?) {
-		if (walletId != null && _uiState.value.walletId.isBlank()) {
-			_uiState.update { it.copy(walletId = walletId.toString()) }
+	init {
+		viewModelScope.launch {
+			selectedWalletPrefs.selectedWalletId.collect { id ->
+				if (id != null && _uiState.value.walletId.isBlank()) {
+					_uiState.update { it.copy(walletId = id.toString(), walletIdError = null) }
+				}
+			}
 		}
 	}
 
@@ -78,9 +80,9 @@ class CreateGoldVM(
 		val current = _uiState.value
 		var hasError = false
 
-		val walletId = current.walletId.toIntOrNull()
+		val walletId = current.walletId.toIntOrNull() ?: selectedWalletPrefs.selectedWalletId.value
 		if (walletId == null || walletId <= 0) {
-			_uiState.update { it.copy(walletIdError = "Wallet ID wajib diisi") }
+			_uiState.update { it.copy(walletIdError = "Wallet aktif belum dipilih") }
 			hasError = true
 		}
 
@@ -95,9 +97,9 @@ class CreateGoldVM(
 			hasError = true
 		}
 
-		val pricePerGram = current.pricePerGram.toDoubleOrNull()
-		if (pricePerGram == null || pricePerGram <= 0) {
-			_uiState.update { it.copy(pricePerGramError = "Harga per gram wajib berupa angka lebih dari 0") }
+		val price = current.price.toDoubleOrNull()
+		if (price == null || price <= 0) {
+			_uiState.update { it.copy(priceError = "Harga beli wajib berupa angka lebih dari 0") }
 			hasError = true
 		}
 
@@ -120,7 +122,7 @@ class CreateGoldVM(
 				walletId = walletId!!,
 				date = current.date,
 				grams = grams!!,
-				pricePerGram = pricePerGram!!,
+				price = price!!,
 				type = current.type,
 				purityPercent = purityPercent!!,
 				notes = current.notes,
@@ -140,7 +142,6 @@ class CreateGoldVM(
 		return when (type) {
 			"pure_gold" -> "99.9"
 			"gold_jewelry" -> "75.0"
-			"investment_gold" -> "99.9"
 			else -> "0.0"
 		}
 	}

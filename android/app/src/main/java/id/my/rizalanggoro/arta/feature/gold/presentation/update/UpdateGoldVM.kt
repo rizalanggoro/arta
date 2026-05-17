@@ -44,7 +44,7 @@ class UpdateGoldVM(
                             id = gold.id,
                             date = gold.date,
                             grams = gold.grams.toString(),
-                            pricePerGram = gold.pricePerGram.toString(),
+                            price = gold.price.toString(),
                             type = gold.type,
                             purityPercent = gold.purityPercent.toString(),
                             notes = gold.notes,
@@ -66,8 +66,8 @@ class UpdateGoldVM(
         _uiState.update { it.copy(grams = value) }
     }
 
-    fun onPricePerGramChanged(value: String) {
-        _uiState.update { it.copy(pricePerGram = value) }
+    fun onPriceChanged(value: String) {
+        _uiState.update { it.copy(price = value) }
     }
 
     fun onTypeChanged(value: String) {
@@ -90,7 +90,7 @@ class UpdateGoldVM(
         }
 
         val grams = current.grams.toDoubleOrNull()
-        val pricePerGram = current.pricePerGram.toDoubleOrNull()
+        val price = current.price.toDoubleOrNull()
         val purity = current.purityPercent.toDoubleOrNull()
 
         viewModelScope.launch {
@@ -99,7 +99,7 @@ class UpdateGoldVM(
                 id = id,
                 date = current.date.ifBlank { null },
                 grams = grams,
-                pricePerGram = pricePerGram,
+                price = current.price.toDoubleOrNull(),
                 type = current.type.ifBlank { null },
                 purityPercent = purity,
                 notes = current.notes.ifBlank { null },

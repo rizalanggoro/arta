@@ -58,10 +58,6 @@ func (h *Handler) register(c *fiber.Ctx) error {
 
 	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
 	req.Name = strings.TrimSpace(req.Name)
-	req.Currency = strings.ToUpper(strings.TrimSpace(req.Currency))
-	if req.Currency == "" {
-		req.Currency = "IDR"
-	}
 
 	if !util.ValidateEmail(req.Email) {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid email"})
@@ -88,36 +84,28 @@ func (h *Handler) register(c *fiber.Ctx) error {
 		Email:    req.Email,
 		Name:     req.Name,
 		Password: hashedPassword,
-		Currency: req.Currency,
-		IsActive: true,
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	token, expiresAt, err := h.jwtManager.GenerateToken(strconv.FormatUint(uint64(createdUser.ID), 10), createdUser.Email)
+	token, _, err := h.jwtManager.GenerateToken(strconv.FormatUint(uint64(createdUser.ID), 10), createdUser.Email)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	if _, err := h.repo.CreateSession(&domain.Session{
-		UserID:    createdUser.ID,
-		Token:     token,
-		TokenType: "Bearer",
-		ExpiresAt: expiresAt,
-		Revoked:   false,
+		UserID: createdUser.ID,
+		Token:  token,
 	}); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(RegisterRes{
-		UserID:    strconv.FormatUint(uint64(createdUser.ID), 10),
-		Email:     createdUser.Email,
-		Name:      createdUser.Name,
-		Currency:  createdUser.Currency,
-		Token:     token,
-		TokenType: "Bearer",
-		ExpiresAt: expiresAt,
+		UserID: strconv.FormatUint(uint64(createdUser.ID), 10),
+		Email:  createdUser.Email,
+		Name:   createdUser.Name,
+		Token:  token,
 	})
 }
 
@@ -153,36 +141,30 @@ func (h *Handler) login(c *fiber.Ctx) error {
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
-	if user == nil || !user.IsActive {
+	if user == nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "invalid credentials"})
 	}
 	if !util.VerifyPassword(user.Password, req.Password) {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "invalid credentials"})
 	}
 
-	token, expiresAt, err := h.jwtManager.GenerateToken(strconv.FormatUint(uint64(user.ID), 10), user.Email)
+	token, _, err := h.jwtManager.GenerateToken(strconv.FormatUint(uint64(user.ID), 10), user.Email)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	if _, err := h.repo.CreateSession(&domain.Session{
-		UserID:    user.ID,
-		Token:     token,
-		TokenType: "Bearer",
-		ExpiresAt: expiresAt,
-		Revoked:   false,
+		UserID: user.ID,
+		Token:  token,
 	}); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(LoginRes{
-		UserID:    strconv.FormatUint(uint64(user.ID), 10),
-		Email:     user.Email,
-		Name:      user.Name,
-		Currency:  user.Currency,
-		Token:     token,
-		TokenType: "Bearer",
-		ExpiresAt: expiresAt,
+		UserID: strconv.FormatUint(uint64(user.ID), 10),
+		Email:  user.Email,
+		Name:   user.Name,
+		Token:  token,
 	})
 }
 
@@ -225,7 +207,7 @@ func (h *Handler) me(c *fiber.Ctx) error {
 }
 
 // @Summary Logout current session
-// @Description Revoke the current session token.
+// @Description Delete the current session token.
 // @Tags auth
 // @Accept json
 // @Produce json
@@ -241,7 +223,7 @@ func (h *Handler) logout(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
-	if err := h.repo.RevokeSessionByToken(token); err != nil {
+	if err := h.repo.DeleteSessionByToken(token); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 

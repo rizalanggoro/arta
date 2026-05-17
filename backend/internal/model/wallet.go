@@ -5,10 +5,10 @@ import "gorm.io/gorm"
 // Wallet represents a financial wallet owned by a user.
 type Wallet struct {
 	gorm.Model
-	UserID    uint   `gorm:"not null;index"`
-	Name      string `gorm:"not null;type:varchar(255)"`
-	Type      string `gorm:"not null;type:varchar(50);index"` // cash_savings or gold_savings
-	IsDefault bool   `gorm:"not null;default:false"`
+	UserID uint   `gorm:"not null;index"`
+	Name   string `gorm:"not null;type:varchar(255)"`
+	Type   string `gorm:"not null;type:varchar(50);index"` // cash_savings or gold_savings
+	// previously had IsDefault to mark default wallet; removed in favor of client-side selection
 
 	// Relations
 	User         *User         `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE"`

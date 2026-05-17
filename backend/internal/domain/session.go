@@ -13,9 +13,6 @@ type Session struct {
 	ID        uint      `json:"id"`
 	UserID    uint      `json:"user_id"`
 	Token     string    `json:"token"`
-	TokenType string    `json:"token_type"`
-	ExpiresAt time.Time `json:"expires_at"`
-	Revoked   bool      `json:"revoked"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -29,9 +26,6 @@ func FromSessionModel(m *model.Session) *Session {
 		ID:        m.ID,
 		UserID:    m.UserID,
 		Token:     m.Token,
-		TokenType: m.TokenType,
-		ExpiresAt: m.ExpiresAt,
-		Revoked:   m.Revoked,
 		CreatedAt: m.CreatedAt,
 	}
 }
@@ -43,11 +37,8 @@ func (s *Session) ToModel() *model.Session {
 	}
 
 	return &model.Session{
-		Model:     gorm.Model{ID: s.ID},
-		UserID:    s.UserID,
-		Token:     s.Token,
-		TokenType: s.TokenType,
-		ExpiresAt: s.ExpiresAt,
-		Revoked:   s.Revoked,
+		Model:  gorm.Model{ID: s.ID},
+		UserID: s.UserID,
+		Token:  s.Token,
 	}
 }

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class GoldPrice(
     val id: Int,
     val date: String,
-    val pricePerGram: Double,
+    val price: Double,
     val currency: String,
     val createdAt: String = "",
 )

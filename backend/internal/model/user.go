@@ -8,8 +8,6 @@ type User struct {
 	Email    string `gorm:"uniqueIndex;not null;type:varchar(255)"`
 	Name     string `gorm:"not null;type:varchar(255)"`
 	Password string `gorm:"not null;type:varchar(255)"` // bcrypt hashed
-	Currency string `gorm:"not null;type:varchar(3);default:'IDR'"`
-	IsActive bool   `gorm:"not null;default:true"`
 
 	// Relations
 	Wallets    []Wallet   `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE"`

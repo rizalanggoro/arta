@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.core.Routes
 import androidx.compose.ui.tooling.preview.Preview
 import id.my.rizalanggoro.arta.domain.Transaction
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 @Composable
 fun TransactionDetailScreen(
@@ -37,21 +38,27 @@ fun TransactionDetailScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(tx: Transaction?, onEdit: (Transaction) -> Unit = {}) {
-    Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (tx == null) {
-                Text(text = "Memuat transaksi...", style = MaterialTheme.typography.bodyMedium)
-            } else {
-                Text(text = "Tipe: ${tx.type}")
-                Text(text = "Jumlah: ${tx.amount}")
-                Text(text = "Kategori ID: ${tx.categoryId}")
-                Text(text = "Deskripsi: ${tx.description}")
-                Text(text = "Tanggal: ${tx.date}")
+    androidx.compose.material3.Scaffold(
+        topBar = { androidx.compose.material3.TopAppBar(title = { Text("Detail Transaksi") }) }
+    ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
+            Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (tx == null) {
+                        Text(text = "Memuat transaksi...", style = MaterialTheme.typography.bodyMedium)
+                    } else {
+                        Text(text = "Jumlah: ${tx.amount}")
+                        Text(text = "Kategori ID: ${tx.categoryId}")
+                        Text(text = "Deskripsi: ${tx.description}")
+                        Text(text = "Tanggal: ${tx.date}")
 
-                Button(onClick = { onEdit(tx) }) {
-                    Text("Ubah")
+                        Button(onClick = { onEdit(tx) }) {
+                            Text("Ubah")
+                        }
+                    }
                 }
             }
         }
@@ -61,5 +68,11 @@ private fun Content(tx: Transaction?, onEdit: (Transaction) -> Unit = {}) {
 @Preview(showBackground = true)
 @Composable
 private fun TransactionDetailScreenPreview() {
-    Content(tx = Transaction(id = 1, walletId = 1, type = "income", amount = 100000.0, categoryId = 1, description = "Contoh transaksi", date = "2026-05-16"))
+    Content(tx = Transaction(id = 1, walletId = 1, amount = 100000.0, categoryId = 1, description = "Contoh transaksi", date = "2026-05-16"))
+}
+
+@Preview(showBackground = true, name = "Transaction Detail - Loading")
+@Composable
+private fun TransactionDetailLoadingPreview() {
+    Content(tx = null)
 }

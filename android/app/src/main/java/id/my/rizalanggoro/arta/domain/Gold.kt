@@ -8,8 +8,8 @@ data class Gold(
     val walletId: Int,
     val date: String,
     val grams: Double,
-    val pricePerGram: Double,
-    val totalValue: Double,
+    // `price` is the total purchase price for this gold entry (for the recorded grams)
+    val price: Double,
     val type: String,
     val purityPercent: Double = 0.0,
     val notes: String = "",

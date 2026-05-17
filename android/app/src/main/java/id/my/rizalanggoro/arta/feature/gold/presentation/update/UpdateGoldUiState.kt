@@ -4,7 +4,7 @@ data class UpdateGoldUiState(
     val id: Int? = null,
     val date: String = "",
     val grams: String = "",
-    val pricePerGram: String = "",
+    val price: String = "",
     val type: String = "",
     val purityPercent: String = "",
     val notes: String = "",

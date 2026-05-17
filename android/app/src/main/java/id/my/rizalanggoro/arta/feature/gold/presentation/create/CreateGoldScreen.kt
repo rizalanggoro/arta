@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import android.app.DatePickerDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -26,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,10 +51,6 @@ fun CreateGoldScreen(
 	val snackbarHostState = remember { SnackbarHostState() }
 	val backStack = LocalBackStack.current
 
-	LaunchedEffect(walletId) {
-		vm.onWalletIdPrefilled(walletId)
-	}
-
 	LaunchedEffect(Unit) {
 		vm.effect.collect { effect ->
 			when (effect) {
@@ -67,20 +65,19 @@ fun CreateGoldScreen(
 		walletId = uiState.walletId,
 		date = uiState.date,
 		grams = uiState.grams,
-		pricePerGram = uiState.pricePerGram,
+		price = uiState.price,
 		type = uiState.type,
 		purityPercent = uiState.purityPercent,
 		notes = uiState.notes,
 		walletIdError = uiState.walletIdError,
 		dateError = uiState.dateError,
 		gramsError = uiState.gramsError,
-		pricePerGramError = uiState.pricePerGramError,
+		priceError = uiState.priceError,
 		purityPercentError = uiState.purityPercentError,
 		isLoading = uiState.isLoading,
-		onWalletIdChanged = vm::onWalletIdChanged,
 		onDateChanged = vm::onDateChanged,
 		onGramsChanged = vm::onGramsChanged,
-		onPricePerGramChanged = vm::onPricePerGramChanged,
+		onPriceChanged = vm::onPricePerGramChanged,
 		onTypeChanged = vm::onTypeChanged,
 		onPurityPercentChanged = vm::onPurityPercentChanged,
 		onNotesChanged = vm::onNotesChanged,
@@ -96,20 +93,19 @@ private fun Content(
 	walletId: String = "",
 	date: String = "",
 	grams: String = "",
-	pricePerGram: String = "",
+	price: String = "",
 	type: String = "pure_gold",
 	purityPercent: String = "99.9",
 	notes: String = "",
 	walletIdError: String? = null,
 	dateError: String? = null,
 	gramsError: String? = null,
-	pricePerGramError: String? = null,
+	priceError: String? = null,
 	purityPercentError: String? = null,
 	isLoading: Boolean = false,
-	onWalletIdChanged: (String) -> Unit = {},
 	onDateChanged: (String) -> Unit = {},
 	onGramsChanged: (String) -> Unit = {},
-	onPricePerGramChanged: (String) -> Unit = {},
+	onPriceChanged: (String) -> Unit = {},
 	onTypeChanged: (String) -> Unit = {},
 	onPurityPercentChanged: (String) -> Unit = {},
 	onNotesChanged: (String) -> Unit = {},
@@ -119,8 +115,6 @@ private fun Content(
 	val typeOptions = listOf(
 		GoldTypeOption("Emas Murni", "pure_gold"),
 		GoldTypeOption("Perhiasan Emas", "gold_jewelry"),
-		GoldTypeOption("Emas Investasi", "investment_gold"),
-		GoldTypeOption("Lainnya", "other"),
 	)
 	val context = LocalContext.current
 	val dateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
@@ -145,7 +139,7 @@ private fun Content(
 	}
 
 	val estimatedValue = runCatching {
-		grams.toDouble() * pricePerGram.toDouble()
+		grams.toDouble() * price.toDouble()
 	}.getOrNull()
 
 	Scaffold(
@@ -203,20 +197,27 @@ private fun Content(
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
 			)
 
-			SnackbarHost(hostState = snackbarHostState)
+			Card(modifier = Modifier.fillMaxWidth()) {
+				Column(
+					modifier = Modifier.padding(16.dp),
+					verticalArrangement = Arrangement.spacedBy(8.dp),
+					horizontalAlignment = Alignment.Start,
+				) {
+					Text(
+						text = "Wallet aktif",
+						style = MaterialTheme.typography.labelLarge,
+					)
+					Text(
+						text = if (walletId.isBlank()) "Belum ada wallet aktif" else "ID wallet: $walletId",
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
+					)
+					if (walletIdError != null) {
+						Text(walletIdError, color = MaterialTheme.colorScheme.error)
+					}
+				}
+			}
 
-			OutlinedTextField(
-				value = walletId,
-				onValueChange = onWalletIdChanged,
-				label = { Text("Wallet ID") },
-				modifier = Modifier.fillMaxWidth(),
-				isError = walletIdError != null,
-				supportingText = {
-					if (walletIdError != null) Text(walletIdError)
-				},
-				enabled = !isLoading,
-				singleLine = true,
-			)
+			SnackbarHost(hostState = snackbarHostState)
 
 			OutlinedTextField(
 				value = date,
@@ -252,13 +253,13 @@ private fun Content(
 			)
 
 			OutlinedTextField(
-				value = pricePerGram,
-				onValueChange = onPricePerGramChanged,
-				label = { Text("Harga per gram") },
+				value = price,
+				onValueChange = onPriceChanged,
+				label = { Text("Harga beli (total)") },
 				modifier = Modifier.fillMaxWidth(),
-				isError = pricePerGramError != null,
+				isError = priceError != null,
 				supportingText = {
-					if (pricePerGramError != null) Text(pricePerGramError)
+					if (priceError != null) Text(priceError)
 				},
 				enabled = !isLoading,
 				singleLine = true,
@@ -321,7 +322,7 @@ private fun CreateGoldDefaultPreview() {
 			walletId = "12",
 			date = "2026-05-16T10:30:00+07:00",
 			grams = "1.5",
-			pricePerGram = "1200000",
+			price = "1200000",
 		)
 	}
 }
@@ -333,6 +334,19 @@ private fun CreateGoldLoadingPreview() {
 		Content(
 			snackbarHostState = remember { SnackbarHostState() },
 			isLoading = true,
+		)
+	}
+}
+
+@Preview(showBackground = true, name = "Create Gold - Error")
+@Composable
+private fun CreateGoldErrorPreview() {
+	ArtaTheme {
+		Content(
+			snackbarHostState = remember { SnackbarHostState() },
+			walletIdError = "Wallet aktif belum dipilih",
+			gramsError = "Gram tidak valid",
+			priceError = "Harga tidak valid",
 		)
 	}
 }

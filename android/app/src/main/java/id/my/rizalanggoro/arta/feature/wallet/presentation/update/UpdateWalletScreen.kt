@@ -56,14 +56,12 @@ fun UpdateWalletScreen(
 		snackbarHostState = snackbarHostState,
 		name = uiState.name,
 		type = uiState.type,
-		isDefault = uiState.isDefault,
 		nameError = uiState.nameError,
 		typeError = uiState.typeError,
 		errorMessage = uiState.errorMessage,
 		isLoading = uiState.isLoading,
 		onChangeName = vm::onChangeName,
 		onChangeType = vm::onChangeType,
-		onToggleDefault = vm::onToggleDefault,
 		onClickSubmit = vm::updateWallet,
 		onClickBack = { backStack.removeLastOrNull() },
 	)
@@ -75,14 +73,12 @@ private fun Content(
 	snackbarHostState: SnackbarHostState,
 	name: String = "",
 	type: String = "cash_savings",
-	isDefault: Boolean = false,
 	nameError: String? = null,
 	typeError: String? = null,
 	errorMessage: String? = null,
 	isLoading: Boolean = false,
 	onChangeName: (String) -> Unit = {},
 	onChangeType: (String) -> Unit = {},
-	onToggleDefault: (Boolean) -> Unit = {},
 	onClickSubmit: () -> Unit = {},
 	onClickBack: () -> Unit = {},
 ) {
@@ -149,15 +145,7 @@ private fun Content(
 				}
 			}
 
-			Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-				Text(text = "Wallet default", style = MaterialTheme.typography.labelLarge)
-				Button(
-					onClick = { onToggleDefault(!isDefault) },
-					enabled = !isLoading,
-				) {
-					Text(if (isDefault) "Jadikan non-default" else "Jadikan default")
-				}
-			}
+			// default wallet selection removed; client-side selection persisted separately
 
 			Button(
 				onClick = onClickSubmit,
@@ -185,4 +173,16 @@ private fun UpdateWalletPreview() {
 	ArtaTheme {
 		Content(snackbarHostState = remember { SnackbarHostState() })
 	}
+}
+
+@Preview(showBackground = true, name = "Update Wallet - Loading")
+@Composable
+private fun UpdateWalletLoadingPreview() {
+	ArtaTheme { Content(snackbarHostState = remember { SnackbarHostState() }, isLoading = true) }
+}
+
+@Preview(showBackground = true, name = "Update Wallet - Error")
+@Composable
+private fun UpdateWalletErrorPreview() {
+	ArtaTheme { Content(snackbarHostState = remember { SnackbarHostState() }, nameError = "Nama wajib diisi", typeError = "Tipe tidak valid", errorMessage = "Gagal memperbarui") }
 }

@@ -2,6 +2,7 @@ package id.my.rizalanggoro.arta.core.application
 
 import android.app.Application
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.data.ThemePrefs
 import id.my.rizalanggoro.arta.feature.auth.data.AuthApiService
 import id.my.rizalanggoro.arta.feature.auth.data.AuthRepository
 import id.my.rizalanggoro.arta.feature.category.data.CategoryApiService
@@ -16,6 +17,9 @@ class MyApplication : Application() {
     lateinit var authPrefs: AuthPrefs
         private set
 
+    lateinit var themePrefs: ThemePrefs
+        private set
+
     lateinit var authRepository: AuthRepository
         private set
 
@@ -27,11 +31,15 @@ class MyApplication : Application() {
 
     lateinit var goldRepository: GoldRepository
         private set
+    lateinit var selectedWalletPrefs: id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
+        private set
 
     override fun onCreate() {
         super.onCreate()
 
         authPrefs = AuthPrefs(applicationContext)
+        themePrefs = ThemePrefs(applicationContext)
+        selectedWalletPrefs = id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs(applicationContext)
 
         val authApiService: AuthApiService = RetrofitProvider.create(AuthApiService::class.java)
         val categoryApiService: CategoryApiService = RetrofitProvider.create(CategoryApiService::class.java)
@@ -54,5 +62,6 @@ class MyApplication : Application() {
             apiService = goldApiService,
             authSessionProvider = { authPrefs.currentSession.value },
         )
+        // selectedWalletPrefs available via application instance
     }
 }

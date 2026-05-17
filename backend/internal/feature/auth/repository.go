@@ -3,7 +3,6 @@ package auth
 import (
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/model"
@@ -71,9 +70,9 @@ func (r *Repository) GetSessionByToken(token string) (*domain.Session, error) {
 	return domain.FromSessionModel(&sessionModel), nil
 }
 
-// RevokeSessionByToken marks a session as revoked.
-func (r *Repository) RevokeSessionByToken(token string) error {
-	result := r.db.Model(&model.Session{}).Where("token = ?", token).Update("revoked", true)
+// DeleteSessionByToken removes a session token from storage.
+func (r *Repository) DeleteSessionByToken(token string) error {
+	result := r.db.Where("token = ?", token).Delete(&model.Session{})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -84,7 +83,7 @@ func (r *Repository) RevokeSessionByToken(token string) error {
 	return nil
 }
 
-// IsTokenActive checks whether a token session is still active.
+// IsTokenActive checks whether a token session exists.
 func (r *Repository) IsTokenActive(token string) (bool, error) {
 	session, err := r.GetSessionByToken(token)
 	if err != nil {
@@ -94,13 +93,5 @@ func (r *Repository) IsTokenActive(token string) (bool, error) {
 		return false, err
 	}
 
-	if session.Revoked {
-		return false, nil
-	}
-
-	if !session.ExpiresAt.After(time.Now()) {
-		return false, nil
-	}
-
-	return true, nil
+	return session != nil, nil
 }

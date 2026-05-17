@@ -3,9 +3,9 @@ package id.my.rizalanggoro.arta.feature.wallet.data
 import id.my.rizalanggoro.arta.core.dto.ApiErrorDto
 import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.domain.Wallet
-import id.my.rizalanggoro.arta.feature.wallet.data.dto.CreateWalletRequestDto
 import id.my.rizalanggoro.arta.feature.wallet.data.dto.DeleteWalletResponseDto
 import id.my.rizalanggoro.arta.feature.wallet.data.dto.UpdateWalletRequestDto
+import id.my.rizalanggoro.arta.feature.wallet.data.dto.CreateWalletRequestDto
 import id.my.rizalanggoro.arta.feature.wallet.data.dto.WalletListResponseDto
 import id.my.rizalanggoro.arta.feature.wallet.data.dto.WalletResponseDto
 import id.my.rizalanggoro.arta.feature.wallet.data.mapper.toDomain
@@ -36,7 +36,6 @@ class WalletRepository(
 		id: Int,
 		name: String,
 		type: String,
-		isDefault: Boolean,
 	): Result<Wallet> {
 		val authorization = authorizationHeader()
 			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
@@ -47,8 +46,20 @@ class WalletRepository(
 			request = UpdateWalletRequestDto(
 				name = name,
 				type = type,
-				isDefault = isDefault,
 			),
+		).toDomainResult()
+	}
+
+	suspend fun createWallet(
+		name: String,
+		type: String,
+	): Result<Wallet> {
+		val authorization = authorizationHeader()
+			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+
+		return apiService.create(
+			authorization = authorization,
+			request = CreateWalletRequestDto(name = name, type = type),
 		).toDomainResult()
 	}
 
@@ -61,7 +72,7 @@ class WalletRepository(
 
 	private fun authorizationHeader(): String? {
 		val session = authSessionProvider()
-		return session?.let { "${it.tokenType} ${it.token}" }
+		return session?.let { "Bearer ${it.token}" }
 	}
 
 	private fun Response<WalletResponseDto>.toDomainResult(): Result<Wallet> {

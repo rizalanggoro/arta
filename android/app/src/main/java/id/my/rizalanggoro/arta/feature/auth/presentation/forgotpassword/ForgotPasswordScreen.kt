@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,59 +32,65 @@ fun ForgotPasswordScreen(vm: ForgotPasswordVM = viewModel(factory = ForgotPasswo
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
 	email: String,
 	isLoading: Boolean,
 	onClickBack: () -> Unit,
 ) {
-	Column(
-		modifier = Modifier
-			.fillMaxSize()
-			.padding(20.dp),
-		verticalArrangement = Arrangement.spacedBy(16.dp),
-	) {
-		Text(
-			text = "PEMULIHAN",
-			style = MaterialTheme.typography.labelLarge,
-			color = MaterialTheme.colorScheme.onSurfaceVariant,
-		)
-		Text(
-			text = "Atur ulang akses akun dengan langkah yang jelas.",
-			style = MaterialTheme.typography.headlineMedium,
-		)
-		Text(
-			text = "Masukkan email terdaftar, lalu lanjutkan ke alur reset saat backend siap.",
-			style = MaterialTheme.typography.bodyLarge,
-			color = MaterialTheme.colorScheme.onSurfaceVariant,
-		)
-
-		Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+	androidx.compose.material3.Scaffold(
+		topBar = { androidx.compose.material3.TopAppBar(title = { Text("Pemulihan Akun") }) }
+	) { paddingValues ->
+		Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(paddingValues)
+				.padding(20.dp),
+			verticalArrangement = Arrangement.spacedBy(16.dp),
+		) {
 			Text(
-				text = "Email terdaftar",
-				style = MaterialTheme.typography.titleLarge,
-			)
-			Text(
-				text = "Gunakan email yang sama dengan akun Arta Anda.",
-				style = MaterialTheme.typography.bodyMedium,
+				text = "PEMULIHAN",
+				style = MaterialTheme.typography.labelLarge,
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
 			)
-
 			Text(
-				text = "Email saat ini: ${if (email.isBlank()) "Belum diisi" else email}",
+				text = "Atur ulang akses akun dengan langkah yang jelas.",
+				style = MaterialTheme.typography.headlineMedium,
+			)
+			Text(
+				text = "Masukkan email terdaftar, lalu lanjutkan ke alur reset saat backend siap.",
 				style = MaterialTheme.typography.bodyLarge,
-			)
-			Text(
-				text = "Setelah backend reset password siap, tautan atau kode verifikasi bisa dikirim dari sini.",
-				style = MaterialTheme.typography.bodyMedium,
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
 			)
 
-			TextButton(
-				onClick = onClickBack,
-				modifier = Modifier.fillMaxWidth(),
-				enabled = !isLoading,
-			) {
-				Text("Kembali ke login")
+			Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+				Text(
+					text = "Email terdaftar",
+					style = MaterialTheme.typography.titleLarge,
+				)
+				Text(
+					text = "Gunakan email yang sama dengan akun Arta Anda.",
+					style = MaterialTheme.typography.bodyMedium,
+					color = MaterialTheme.colorScheme.onSurfaceVariant,
+				)
+
+				Text(
+					text = "Email saat ini: ${if (email.isBlank()) "Belum diisi" else email}",
+					style = MaterialTheme.typography.bodyLarge,
+				)
+				Text(
+					text = "Setelah backend reset password siap, tautan atau kode verifikasi bisa dikirim dari sini.",
+					style = MaterialTheme.typography.bodyMedium,
+					color = MaterialTheme.colorScheme.onSurfaceVariant,
+				)
+
+				TextButton(
+					onClick = onClickBack,
+					modifier = Modifier.fillMaxWidth(),
+					enabled = !isLoading,
+				) {
+					Text("Kembali ke login")
+				}
 			}
 		}
 	}

@@ -10,6 +10,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func isValidGoldType(value string) bool {
+	return value == domain.GoldTypePure || value == domain.GoldTypeJewelry
+}
+
 // Handler exposes gold HTTP endpoints.
 type Handler struct {
 	repo    *Repository
@@ -77,6 +81,9 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
 	}
+	if !isValidGoldType(req.Type) {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid gold type"})
+	}
 
 	userID := middleware.GetUserID(c)
 	if userID == "" {
@@ -96,8 +103,7 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		WalletID:      req.WalletID,
 		Date:          req.Date,
 		Grams:         req.Grams,
-		PricePerGram:  req.PricePerGram,
-		TotalValue:    req.Grams * req.PricePerGram,
+		Price:         req.Price,
 		Type:          req.Type,
 		PurityPercent: req.PurityPercent,
 		Notes:         req.Notes,
@@ -181,13 +187,13 @@ func (h *Handler) update(c *fiber.Ctx) error {
 	if req.Grams != nil {
 		g.Grams = *req.Grams
 	}
-	if req.PricePerGram != nil {
-		g.PricePerGram = *req.PricePerGram
-	}
-	if req.Grams != nil || req.PricePerGram != nil {
-		g.TotalValue = g.Grams * g.PricePerGram
+	if req.Price != nil {
+		g.Price = *req.Price
 	}
 	if req.Type != nil {
+		if !isValidGoldType(*req.Type) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid gold type"})
+		}
 		g.Type = *req.Type
 	}
 	if req.PurityPercent != nil {

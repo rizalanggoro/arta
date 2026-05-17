@@ -5,6 +5,5 @@ data class CreateWalletUiState(
 	val type: String = "",
 	val nameError: String? = null,
 	val typeError: String? = null,
-	val isDefault: Boolean = false,
 	val isLoading: Boolean = false,
 )
