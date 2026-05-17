@@ -123,8 +123,11 @@ private fun Content(
 				label = { Text("Nama wallet") },
 				modifier = Modifier.fillMaxWidth(),
 				isError = nameError != null,
-				supportingText = {
-					if (nameError != null) Text(nameError)
+				supportingText = when {
+					nameError != null -> {
+						{ Text(nameError) }
+					}
+					else -> null
 				},
 				enabled = !isLoading,
 				singleLine = true,

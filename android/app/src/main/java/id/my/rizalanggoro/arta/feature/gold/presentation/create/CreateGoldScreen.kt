@@ -225,9 +225,13 @@ private fun Content(
 				label = { Text("Tanggal (ISO 8601)") },
 				modifier = Modifier.fillMaxWidth(),
 				isError = dateError != null,
-				supportingText = {
-					if (dateError != null) Text(dateError)
-					else Text("Contoh: 2026-05-16T10:30:00+07:00")
+				supportingText = when {
+					dateError != null -> {
+						{ Text(dateError) }
+					}
+					else -> {
+						{ Text("Contoh: 2026-05-16T10:30:00+07:00") }
+					}
 				},
 				enabled = !isLoading,
 				singleLine = true,
@@ -245,8 +249,11 @@ private fun Content(
 				label = { Text("Gram") },
 				modifier = Modifier.fillMaxWidth(),
 				isError = gramsError != null,
-				supportingText = {
-					if (gramsError != null) Text(gramsError)
+				supportingText = when {
+					gramsError != null -> {
+						{ Text(gramsError) }
+					}
+					else -> null
 				},
 				enabled = !isLoading,
 				singleLine = true,
@@ -258,8 +265,11 @@ private fun Content(
 				label = { Text("Harga beli (total)") },
 				modifier = Modifier.fillMaxWidth(),
 				isError = priceError != null,
-				supportingText = {
-					if (priceError != null) Text(priceError)
+				supportingText = when {
+					priceError != null -> {
+						{ Text(priceError) }
+					}
+					else -> null
 				},
 				enabled = !isLoading,
 				singleLine = true,
@@ -288,9 +298,13 @@ private fun Content(
 				label = { Text("Persentase kemurnian") },
 				modifier = Modifier.fillMaxWidth(),
 				isError = purityPercentError != null,
-				supportingText = {
-					if (purityPercentError != null) Text(purityPercentError)
-					else Text("Contoh: 99.9")
+				supportingText = when {
+					purityPercentError != null -> {
+						{ Text(purityPercentError) }
+					}
+					else -> {
+						{ Text("Contoh: 99.9") }
+					}
 				},
 				enabled = !isLoading,
 				singleLine = true,

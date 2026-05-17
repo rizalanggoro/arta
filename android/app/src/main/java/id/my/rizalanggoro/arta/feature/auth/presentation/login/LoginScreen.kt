@@ -5,11 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -93,87 +92,92 @@ private fun Content(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(it)
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Kelola uang dan emas dalam satu alur yang rapi",
-                style = MaterialTheme.typography.headlineMedium,
-            )
-            Text(
-                text = "Masuk untuk melihat ringkasan, transaksi, dan navigasi wallet yang sesuai tipe akun Anda.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Kelola uang dan emas dalam satu alur yang rapi",
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Text(
+                    text = "Masuk untuk melihat ringkasan, transaksi, dan navigasi wallet yang sesuai tipe akun Anda.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
 
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = onChangeEmail,
-                        label = { Text("Alamat email") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = emailError != null,
-                        supportingText = {
-                            if (emailError != null) Text(emailError)
-                        },
-                        enabled = !isLoading,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next,
-                        ),
-                    )
-
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = onChangePassword,
-                        label = { Text("Kata sandi") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = passwordError != null,
-                        supportingText = {
-                            if (passwordError != null) Text(passwordError)
-                        },
-                        enabled = !isLoading,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done,
-                        ),
-                    )
-                }
-
-                Button(
-                    onClick = onClickSubmit,
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = onChangeEmail,
+                    label = { Text("Alamat email") },
                     modifier = Modifier.fillMaxWidth(),
+                    isError = emailError != null,
+                    supportingText = when {
+                        emailError != null -> {
+                            { Text(emailError) }
+                        }
+
+                        else -> null
+                    },
                     enabled = !isLoading,
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .align(Alignment.CenterVertically),
-                            strokeWidth = 2.dp,
-                        )
-                    } else {
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next,
+                    ),
+                )
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = onChangePassword,
+                    label = { Text("Kata sandi") },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = passwordError != null,
+                    supportingText = when {
+                        passwordError != null -> {
+                            { Text(passwordError) }
+                        }
+
+                        else -> null
+                    },
+                    enabled = !isLoading,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done,
+                    ),
+                )
+            }
+
+            when (isLoading) {
+                true -> LoadingIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+
+                else -> Column {
+                    Button(
+                        onClick = onClickSubmit,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
                         Text("Masuk")
                     }
-                }
 
-                TextButton(
-                    onClick = onClickForgotPassword,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading,
-                ) {
-                    Text("Lupa kata sandi")
-                }
+                    TextButton(
+                        onClick = onClickRegister,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Belum punya akun? Daftar sekarang")
+                    }
 
-                TextButton(
-                    onClick = onClickRegister,
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    enabled = !isLoading,
-                ) {
-                    Text("Belum punya akun? Daftar")
+                    TextButton(
+                        onClick = onClickForgotPassword,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Lupa kata sandi")
+                    }
                 }
             }
         }

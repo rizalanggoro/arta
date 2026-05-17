@@ -129,8 +129,11 @@ private fun Content(
                         label = { Text("Nama lengkap") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = nameError != null,
-                        supportingText = {
-                            if (nameError != null) Text(nameError)
+                        supportingText = when {
+                            nameError != null -> {
+                                { Text(nameError) }
+                            }
+                            else -> null
                         },
                         enabled = !isLoading,
                         singleLine = true,
@@ -146,8 +149,11 @@ private fun Content(
                         label = { Text("Alamat email") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = emailError != null,
-                        supportingText = {
-                            if (emailError != null) Text(emailError)
+                        supportingText = when {
+                            emailError != null -> {
+                                { Text(emailError) }
+                            }
+                            else -> null
                         },
                         enabled = !isLoading,
                         singleLine = true,
@@ -163,8 +169,11 @@ private fun Content(
                         label = { Text("Kata sandi") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = passwordError != null,
-                        supportingText = {
-                            if (passwordError != null) Text(passwordError)
+                        supportingText = when {
+                            passwordError != null -> {
+                                { Text(passwordError) }
+                            }
+                            else -> null
                         },
                         enabled = !isLoading,
                         singleLine = true,
@@ -180,8 +189,11 @@ private fun Content(
                         label = { Text("Konfirmasi kata sandi") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = confirmPasswordError != null,
-                        supportingText = {
-                            if (confirmPasswordError != null) Text(confirmPasswordError)
+                        supportingText = when {
+                            confirmPasswordError != null -> {
+                                { Text(confirmPasswordError) }
+                            }
+                            else -> null
                         },
                         enabled = !isLoading,
                         singleLine = true,

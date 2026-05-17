@@ -153,7 +153,12 @@ private fun Content(
                 }
             }
 
-            OutlinedTextField(value = amount, onValueChange = onAmountChanged, label = { Text("Jumlah") }, modifier = Modifier.fillMaxWidth(), isError = amountError != null, supportingText = { if (amountError != null) Text(amountError) }, enabled = !isLoading, singleLine = true)
+            OutlinedTextField(value = amount, onValueChange = onAmountChanged, label = { Text("Jumlah") }, modifier = Modifier.fillMaxWidth(), isError = amountError != null, supportingText = when {
+                amountError != null -> {
+                    { Text(amountError) }
+                }
+                else -> null
+            }, enabled = !isLoading, singleLine = true)
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(text = "Kategori", style = MaterialTheme.typography.labelLarge)
@@ -200,7 +205,14 @@ private fun Content(
                 label = { Text("Tanggal (ISO 8601)") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = dateError != null,
-                supportingText = { if (dateError != null) Text(dateError) else Text("Contoh: 2026-05-16T10:30:00+07:00") },
+                supportingText = when {
+                    dateError != null -> {
+                        { Text(dateError) }
+                    }
+                    else -> {
+                        { Text("Contoh: 2026-05-16T10:30:00+07:00") }
+                    }
+                },
                 enabled = !isLoading,
                 singleLine = true,
                 readOnly = true,

@@ -99,7 +99,12 @@ private fun Content(
 					label = { Text("Nama dompet") },
 					modifier = Modifier.fillMaxWidth(),
 					isError = nameError != null,
-					supportingText = { if (nameError != null) Text(nameError) },
+					supportingText = when {
+						nameError != null -> {
+							{ Text(nameError) }
+						}
+						else -> null
+					},
 					enabled = !isLoading,
 					singleLine = true,
 				)
@@ -110,7 +115,12 @@ private fun Content(
 					label = { Text("Tipe") },
 					modifier = Modifier.fillMaxWidth(),
 					isError = typeError != null,
-					supportingText = { if (typeError != null) Text(typeError) },
+					supportingText = when {
+						typeError != null -> {
+							{ Text(typeError) }
+						}
+						else -> null
+					},
 					enabled = !isLoading,
 					singleLine = true,
 				)

@@ -191,7 +191,12 @@ private fun Content(
                 label = { Text("Wallet ID") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = walletIdError != null,
-                supportingText = { walletIdError?.let { Text(it) } },
+                supportingText = when {
+                    walletIdError != null -> {
+                        { Text(walletIdError) }
+                    }
+                    else -> null
+                },
                 enabled = !isLoading,
                 singleLine = true,
             )
@@ -213,7 +218,12 @@ private fun Content(
                 label = { Text("Jumlah") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = amountError != null,
-                supportingText = { amountError?.let { Text(it) } },
+                supportingText = when {
+                    amountError != null -> {
+                        { Text(amountError) }
+                    }
+                    else -> null
+                },
                 enabled = !isLoading,
                 singleLine = true,
             )
@@ -240,7 +250,14 @@ private fun Content(
                 label = { Text("Tanggal (ISO 8601)") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = dateError != null,
-                supportingText = { if (dateError != null) Text(dateError) else Text("Contoh: 2026-05-16T10:30:00+07:00") },
+                supportingText = when {
+                    dateError != null -> {
+                        { Text(dateError) }
+                    }
+                    else -> {
+                        { Text("Contoh: 2026-05-16T10:30:00+07:00") }
+                    }
+                },
                 enabled = !isLoading,
                 singleLine = true,
                 readOnly = true,
