@@ -12,7 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -185,7 +185,7 @@ private fun Content(
 
             SnackbarHost(hostState = snackbarHostState)
 
-            OutlinedTextField(
+            TextField(
                 value = walletId,
                 onValueChange = onWalletIdChanged,
                 label = { Text("Wallet ID") },
@@ -212,7 +212,7 @@ private fun Content(
                 }
             }
 
-            OutlinedTextField(
+            TextField(
                 value = amount,
                 onValueChange = onAmountChanged,
                 label = { Text("Jumlah") },
@@ -244,7 +244,7 @@ private fun Content(
                 }
             }
 
-            OutlinedTextField(
+            TextField(
                 value = date,
                 onValueChange = {},
                 label = { Text("Tanggal (ISO 8601)") },
@@ -268,7 +268,7 @@ private fun Content(
                 },
             )
 
-            OutlinedTextField(
+            TextField(
                 value = description,
                 onValueChange = onDescriptionChanged,
                 label = { Text("Deskripsi") },

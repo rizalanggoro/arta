@@ -5,17 +5,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,8 +30,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.TextField
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
@@ -79,7 +78,7 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun Content(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     isLoading: Boolean = false,
@@ -135,6 +134,7 @@ private fun Content(
                         nameError != null -> {
                             { Text(nameError) }
                         }
+
                         else -> null
                     },
                     enabled = !isLoading,
@@ -155,6 +155,7 @@ private fun Content(
                         emailError != null -> {
                             { Text(emailError) }
                         }
+
                         else -> null
                     },
                     enabled = !isLoading,
@@ -175,6 +176,7 @@ private fun Content(
                         passwordError != null -> {
                             { Text(passwordError) }
                         }
+
                         else -> null
                     },
                     enabled = !isLoading,
@@ -195,6 +197,7 @@ private fun Content(
                         confirmPasswordError != null -> {
                             { Text(confirmPasswordError) }
                         }
+
                         else -> null
                     },
                     enabled = !isLoading,

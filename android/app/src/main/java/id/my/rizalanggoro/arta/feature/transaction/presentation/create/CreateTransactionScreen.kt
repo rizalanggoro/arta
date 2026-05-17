@@ -10,7 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
 import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -153,7 +153,7 @@ private fun Content(
                 }
             }
 
-            OutlinedTextField(value = amount, onValueChange = onAmountChanged, label = { Text("Jumlah") }, modifier = Modifier.fillMaxWidth(), isError = amountError != null, supportingText = when {
+            TextField(value = amount, onValueChange = onAmountChanged, label = { Text("Jumlah") }, modifier = Modifier.fillMaxWidth(), isError = amountError != null, supportingText = when {
                 amountError != null -> {
                     { Text(amountError) }
                 }
@@ -199,7 +199,7 @@ private fun Content(
                 )
             }
 
-            OutlinedTextField(
+            TextField(
                 value = date,
                 onValueChange = {},
                 label = { Text("Tanggal (ISO 8601)") },
@@ -219,7 +219,7 @@ private fun Content(
                 trailingIcon = { TextButton(onClick = { datePicker.show() }, enabled = !isLoading) { Text("Pilih") } },
             )
 
-            OutlinedTextField(value = description, onValueChange = onDescriptionChanged, label = { Text("Deskripsi (opsional)") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading, singleLine = false)
+            TextField(value = description, onValueChange = onDescriptionChanged, label = { Text("Deskripsi (opsional)") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading, singleLine = false)
         }
     }
 }

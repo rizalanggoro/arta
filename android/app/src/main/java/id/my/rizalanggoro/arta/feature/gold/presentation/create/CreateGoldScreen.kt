@@ -9,13 +9,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import android.app.DatePickerDialog
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -44,7 +49,6 @@ import java.util.Locale
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun CreateGoldScreen(
-	walletId: Int? = null,
 	vm: CreateGoldVM = viewModel(factory = CreateGoldVM.Factory),
 ) {
 	val uiState by vm.uiState.collectAsState()
@@ -145,10 +149,12 @@ private fun Content(
 	Scaffold(
 		topBar = {
 			TopAppBar(
-				title = { Text("Buat Data Emas") },
+				title = { Text("Tambah Emas") },
 				navigationIcon = {
-					TextButton(onClick = onClickBack) {
-						Text("Batal")
+					IconButton(onClick = onClickBack) {
+						Icon(
+							Icons.AutoMirrored.Rounded.ArrowBack,
+							contentDescription = null)
 					}
 				},
 			)
@@ -219,7 +225,7 @@ private fun Content(
 
 			SnackbarHost(hostState = snackbarHostState)
 
-			OutlinedTextField(
+			TextField(
 				value = date,
 				onValueChange = {},
 				label = { Text("Tanggal (ISO 8601)") },
@@ -243,7 +249,7 @@ private fun Content(
 				},
 			)
 
-			OutlinedTextField(
+			TextField(
 				value = grams,
 				onValueChange = onGramsChanged,
 				label = { Text("Gram") },
@@ -259,7 +265,7 @@ private fun Content(
 				singleLine = true,
 			)
 
-			OutlinedTextField(
+			TextField(
 				value = price,
 				onValueChange = onPriceChanged,
 				label = { Text("Harga beli (total)") },
@@ -292,7 +298,7 @@ private fun Content(
 				}
 			}
 
-			OutlinedTextField(
+			TextField(
 				value = purityPercent,
 				onValueChange = onPurityPercentChanged,
 				label = { Text("Persentase kemurnian") },
@@ -310,7 +316,7 @@ private fun Content(
 				singleLine = true,
 			)
 
-			OutlinedTextField(
+			TextField(
 				value = notes,
 				onValueChange = onNotesChanged,
 				label = { Text("Catatan") },

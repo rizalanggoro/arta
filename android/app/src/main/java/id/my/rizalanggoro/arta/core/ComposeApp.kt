@@ -26,10 +26,10 @@ import id.my.rizalanggoro.arta.core.Routes.SettingsRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionDetailRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionFormRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionListRoute
+import id.my.rizalanggoro.arta.core.Routes.WalletCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletUpdateRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletCreateRoute
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.feature.auth.presentation.forgotpassword.ForgotPasswordScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
@@ -41,18 +41,16 @@ import id.my.rizalanggoro.arta.feature.category.presentation.update.UpdateCatego
 import id.my.rizalanggoro.arta.feature.gold.presentation.create.CreateGoldScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.update.UpdateGoldScreen
-import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldListContent
 import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeScreen
-import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeWalletType
 import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionListScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.update.UpdateTransactionScreen
+import id.my.rizalanggoro.arta.feature.wallet.presentation.create.CreateWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletScreen
-import id.my.rizalanggoro.arta.feature.wallet.presentation.create.CreateWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.update.UpdateWalletScreen
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
@@ -88,7 +86,7 @@ fun ComposeApp() {
                             if (route.goldId != null) {
                                 UpdateGoldScreen(goldId = route.goldId)
                             } else {
-                                CreateGoldScreen(walletId = route.walletId)
+                                CreateGoldScreen()
                             }
                         }
                         entry<TransactionFormRoute> { route ->

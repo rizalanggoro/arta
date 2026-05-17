@@ -13,7 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -170,7 +170,7 @@ private fun Content(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            OutlinedTextField(
+            TextField(
                 value = date,
                 onValueChange = {},
                 label = { Text(text = "Tanggal (ISO)") },
@@ -184,7 +184,7 @@ private fun Content(
                     }
                 },
             )
-            OutlinedTextField(
+            TextField(
                 value = grams,
                 onValueChange = onGramsChanged,
                 label = { Text(text = "Gram") },
@@ -192,7 +192,7 @@ private fun Content(
                 enabled = !isLoading,
                 singleLine = true,
             )
-            OutlinedTextField(
+            TextField(
                 value = price,
                 onValueChange = onPricePerGramChanged,
                 label = { Text(text = "Harga beli (total)") },
@@ -200,7 +200,7 @@ private fun Content(
                 enabled = !isLoading,
                 singleLine = true,
             )
-            OutlinedTextField(
+            TextField(
                 value = type,
                 onValueChange = onTypeChanged,
                 label = { Text(text = "Tipe") },
@@ -208,7 +208,7 @@ private fun Content(
                 enabled = !isLoading,
                 singleLine = true,
             )
-            OutlinedTextField(
+            TextField(
                 value = purityPercent,
                 onValueChange = onPurityPercentChanged,
                 label = { Text(text = "Kemurnian (%)") },
@@ -216,7 +216,7 @@ private fun Content(
                 enabled = !isLoading,
                 singleLine = true,
             )
-            OutlinedTextField(
+            TextField(
                 value = notes,
                 onValueChange = onNotesChanged,
                 label = { Text(text = "Catatan") },

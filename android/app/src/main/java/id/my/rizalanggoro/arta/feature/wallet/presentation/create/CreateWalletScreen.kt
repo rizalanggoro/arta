@@ -10,7 +10,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -93,37 +93,33 @@ private fun Content(
 			Text(text = "Buat dompet baru", style = MaterialTheme.typography.headlineSmall)
 
 			Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-				OutlinedTextField(
-					value = name,
-					onValueChange = onChangeName,
-					label = { Text("Nama dompet") },
-					modifier = Modifier.fillMaxWidth(),
-					isError = nameError != null,
-					supportingText = when {
-						nameError != null -> {
-							{ Text(nameError) }
-						}
-						else -> null
-					},
-					enabled = !isLoading,
-					singleLine = true,
-				)
+					TextField(
+						value = name,
+						onValueChange = onChangeName,
+						label = { Text("Nama dompet") },
+						modifier = Modifier.fillMaxWidth(),
+						isError = nameError != null,
+						supportingText = when {
+							nameError != null -> { { Text(nameError) } }
+							else -> null
+						},
+						enabled = !isLoading,
+						singleLine = true,
+					)
 
-				OutlinedTextField(
-					value = type,
-					onValueChange = onChangeType,
-					label = { Text("Tipe") },
-					modifier = Modifier.fillMaxWidth(),
-					isError = typeError != null,
-					supportingText = when {
-						typeError != null -> {
-							{ Text(typeError) }
-						}
-						else -> null
-					},
-					enabled = !isLoading,
-					singleLine = true,
-				)
+					TextField(
+						value = type,
+						onValueChange = onChangeType,
+						label = { Text("Tipe") },
+						modifier = Modifier.fillMaxWidth(),
+						isError = typeError != null,
+						supportingText = when {
+							typeError != null -> { { Text(typeError) } }
+							else -> null
+						},
+						enabled = !isLoading,
+						singleLine = true,
+					)
 
 				// default wallet option removed; selection persisted via global prefs
 			}
