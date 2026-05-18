@@ -22,7 +22,7 @@ import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import id.my.rizalanggoro.arta.domain.Transaction
 
 @Composable
-fun HomeTransactionListScreen(vm: TransactionListVM = viewModel(factory = TransactionListVM.Factory)) {
+fun HomeTransactionScreen(vm: TransactionListVM = viewModel(factory = TransactionListVM.Factory)) {
     val uiState by vm.uiState.collectAsState()
 
     Content(
