@@ -55,11 +55,19 @@ class ListWalletVM(
 	}
 
 	fun onDeleteRequested(wallet: Wallet) {
-		_uiState.update { it.copy(deleteTarget = wallet) }
+		_uiState.update { it.copy(deleteTarget = wallet, selectedWallet = null) }
 	}
 
 	fun dismissDeleteDialog() {
 		_uiState.update { it.copy(deleteTarget = null) }
+	}
+
+	fun onWalletSelected(wallet: Wallet) {
+		_uiState.update { it.copy(selectedWallet = wallet) }
+	}
+
+	fun dismissWalletActions() {
+		_uiState.update { it.copy(selectedWallet = null) }
 	}
 
 	fun confirmDeleteWallet(wallet: Wallet) {

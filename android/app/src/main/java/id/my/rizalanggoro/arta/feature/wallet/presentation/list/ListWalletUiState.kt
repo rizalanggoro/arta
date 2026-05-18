@@ -7,4 +7,5 @@ data class ListWalletUiState(
 	val isLoading: Boolean = false,
 	val errorMessage: String? = null,
 	val deleteTarget: Wallet? = null,
+	val selectedWallet: Wallet? = null,
 )
