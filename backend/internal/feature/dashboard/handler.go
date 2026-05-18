@@ -179,7 +179,7 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: "cash wallet not found"})
 	}
 
-	categories, err := h.categoryRepo.GetCategoriesByUserID(uint(parsedUserID))
+	categories, err := h.categoryRepo.GetCategoriesByUserID(uint(parsedUserID), "")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}

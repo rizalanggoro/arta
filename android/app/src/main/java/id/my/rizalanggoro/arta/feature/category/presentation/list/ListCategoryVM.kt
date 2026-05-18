@@ -29,16 +29,18 @@ class ListCategoryVM(
 	private val _uiState = MutableStateFlow(ListCategoryUiState())
 	val uiState: StateFlow<ListCategoryUiState> = _uiState.asStateFlow()
 
-	fun loadCategories() {
+	fun loadCategories(type: String = _uiState.value.selectedType) {
 		viewModelScope.launch {
-			_uiState.update { it.copy(isLoading = true, errorMessage = null) }
-			categoryRepository.getCategories()
+			val selectedType = type.ifBlank { "expense" }
+			_uiState.update { it.copy(isLoading = true, errorMessage = null, selectedType = selectedType) }
+			categoryRepository.getCategories(type = selectedType)
 				.onSuccess { categories ->
 					_uiState.update {
 						it.copy(
 							categories = categories,
 							isLoading = false,
 							errorMessage = null,
+							actionTarget = null,
 							deleteTarget = null,
 						)
 					}
@@ -54,8 +56,26 @@ class ListCategoryVM(
 		}
 	}
 
+	fun onCategoryTypeSelected(type: String) {
+		if (_uiState.value.selectedType == type) {
+			return
+		}
+		loadCategories(type)
+	}
+
+	fun onCategoryClicked(category: Category) {
+		if (category.userId == null) {
+			return
+		}
+		_uiState.update { it.copy(actionTarget = category, deleteTarget = null) }
+	}
+
+	fun dismissActionSheet() {
+		_uiState.update { it.copy(actionTarget = null) }
+	}
+
 	fun onDeleteRequested(category: Category) {
-		_uiState.update { it.copy(deleteTarget = category) }
+		_uiState.update { it.copy(deleteTarget = category, actionTarget = null) }
 	}
 
 	fun dismissDeleteDialog() {

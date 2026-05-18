@@ -6,5 +6,7 @@ data class ListCategoryUiState(
 	val categories: List<Category> = emptyList(),
 	val isLoading: Boolean = false,
 	val errorMessage: String? = null,
+	val selectedType: String = "expense",
+	val actionTarget: Category? = null,
 	val deleteTarget: Category? = null,
 )

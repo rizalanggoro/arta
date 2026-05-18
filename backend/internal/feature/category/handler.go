@@ -47,12 +47,17 @@ func (h *Handler) list(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
+	categoryType := strings.TrimSpace(strings.ToLower(c.Query("type")))
+	if categoryType != "" && !isAllowedCategoryType(categoryType) {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "type must be income or expense"})
+	}
+
 	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	cats, err := h.repo.GetCategoriesByUserID(uint(parsedUserID))
+	cats, err := h.repo.GetCategoriesByUserID(uint(parsedUserID), categoryType)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}

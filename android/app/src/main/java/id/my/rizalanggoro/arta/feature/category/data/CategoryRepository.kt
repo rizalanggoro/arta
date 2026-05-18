@@ -36,12 +36,12 @@ class CategoryRepository(
 		}.getOrElse { Result.failure(it) }
 	}
 
-	suspend fun getCategories(): Result<List<Category>> {
+	suspend fun getCategories(type: String? = null): Result<List<Category>> {
 		return runCatching {
 			val authorization = authorizationHeader()
 				?: throw apiError("Sesi login tidak ditemukan")
 
-			apiService.list(authorization).toListResult()
+			apiService.list(authorization, type = type).toListResult()
 		}.getOrElse { Result.failure(it) }
 	}
 
