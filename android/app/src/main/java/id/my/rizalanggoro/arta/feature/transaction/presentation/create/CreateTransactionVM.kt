@@ -2,13 +2,16 @@ package id.my.rizalanggoro.arta.feature.transaction.presentation.create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
+import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.domain.Category
 import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.feature.category.presentation.select.CategorySelectionBus
+import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
+import id.my.rizalanggoro.arta.feature.wallet.presentation.select.WalletSelectionBus
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,50 +20,44 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import id.my.rizalanggoro.arta.feature.category.presentation.select.CategorySelectionBus
-import id.my.rizalanggoro.arta.feature.wallet.presentation.select.WalletSelectionBus
 
 class CreateTransactionVM(
     private val transactionRepository: TransactionRepository,
-    private val selectedWalletPrefs: id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs,
+    private val selectedWalletPrefs: SelectedWalletPrefs,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
-                val repo = id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository(
+                val repo = TransactionRepository(
                     apiService = id.my.rizalanggoro.arta.core.network.RetrofitProvider.create(
                         id.my.rizalanggoro.arta.feature.transaction.data.TransactionApiService::class.java
                     ),
                     authSessionProvider = { app.authPrefs.currentSession.value },
                 )
-                CreateTransactionVM(transactionRepository = repo, selectedWalletPrefs = app.selectedWalletPrefs)
+                CreateTransactionVM(
+                    transactionRepository = repo,
+                    selectedWalletPrefs = app.selectedWalletPrefs
+                )
             }
         }
     }
 
     init {
+        viewModelScope.launch {
+            selectedWalletPrefs.selectedWallet.collect { wallet ->
+                if (wallet != null && _uiState.value.walletId.isBlank()) {
+                    onSelectWallet(wallet)
+                }
+            }
+        }
+
         viewModelScope.launch {
             CategorySelectionBus.selectedCategory.collect { category ->
                 onSelectCategory(category)
             }
         }
-    }
 
-    init {
-        viewModelScope.launch {
-            WalletSelectionBus.selectedWallet.collect { wallet ->
-                onSelectWallet(wallet)
-            }
-        }
-    }
-
-    init {
-        viewModelScope.launch {
-            selectedWalletPrefs.selectedWalletId.collect { id ->
-                if (id != null) onWalletIdChanged(id.toString())
-            }
-        }
     }
 
     private val _uiState = MutableStateFlow(CreateTransactionUiState())
@@ -74,7 +71,13 @@ class CreateTransactionVM(
     }
 
     fun onCategoryIdChanged(value: String) {
-        _uiState.update { it.copy(categoryId = value, selectedCategoryName = "", categoryError = null) }
+        _uiState.update {
+            it.copy(
+                categoryId = value,
+                selectedCategoryName = "",
+                categoryError = null
+            )
+        }
     }
 
     fun onAmountChanged(value: String) {
@@ -125,11 +128,11 @@ class CreateTransactionVM(
             hasError = true
         }
 
-		val categoryId = current.categoryId.toIntOrNull()
-		if (categoryId == null || categoryId <= 0) {
-			_uiState.update { it.copy(categoryError = "Kategori wajib dipilih") }
-			hasError = true
-		}
+        val categoryId = current.categoryId.toIntOrNull()
+        if (categoryId == null || categoryId <= 0) {
+            _uiState.update { it.copy(categoryError = "Kategori wajib dipilih") }
+            hasError = true
+        }
 
         if (current.date.isBlank()) {
             _uiState.update { it.copy(dateError = "Tanggal wajib diisi") }
@@ -153,7 +156,11 @@ class CreateTransactionVM(
                 _effect.emit(CreateTransactionEffect.ShowMessage("Transaksi berhasil dibuat"))
                 _effect.emit(CreateTransactionEffect.NavigateBack)
             }.onFailure { throwable ->
-                _effect.emit(CreateTransactionEffect.ShowMessage(throwable.message ?: "Gagal membuat transaksi"))
+                _effect.emit(
+                    CreateTransactionEffect.ShowMessage(
+                        throwable.message ?: "Gagal membuat transaksi"
+                    )
+                )
             }
             _uiState.update { it.copy(isLoading = false) }
         }

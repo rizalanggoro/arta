@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes.WalletCreateFirstRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
@@ -50,8 +51,8 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
             when (effect) {
-                is id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterEffect.NavigateToCreateWallet -> {
-                    backStack.add(id.my.rizalanggoro.arta.core.Routes.WalletCreateRoute)
+                is id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterEffect.NavigateToCreateFirstWallet -> {
+                    backStack.add(WalletCreateFirstRoute)
                 }
             }
         }

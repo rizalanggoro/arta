@@ -52,7 +52,7 @@ class SelectWalletVM(
     fun selectWallet(wallet: Wallet) {
         viewModelScope.launch {
             // persist selection to SharedPreferences for global selection
-            selectedWalletPrefs.saveSelectedWalletId(wallet.id)
+            selectedWalletPrefs.saveSelectedWallet(wallet)
             WalletSelectionBus.emit(wallet)
             _effect.emit(SelectWalletEffect.NavigateBack)
         }

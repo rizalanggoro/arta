@@ -42,16 +42,11 @@ import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun CreateTransactionScreen(
-    walletId: Int? = null,
     vm: CreateTransactionVM = viewModel(factory = CreateTransactionVM.Factory),
 ) {
     val uiState by vm.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val backStack = LocalBackStack.current
-
-    LaunchedEffect(walletId) {
-        if (walletId != null && uiState.walletId.isBlank()) vm.onWalletIdChanged(walletId.toString())
-    }
 
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->

@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 object Routes {
+    // auth
     @Serializable
     data object LoginRoute : NavKey
 
@@ -14,35 +15,26 @@ object Routes {
     @Serializable
     data object ForgotPasswordRoute : NavKey
 
+    // home
     @Serializable
     data object HomeRoute : NavKey
 
     @Serializable
-    data object DashboardRoute : NavKey
+    data object HomeCashDashboardRoute : NavKey
 
     @Serializable
-    data object TransactionListRoute : NavKey
+    data object HomeGoldDashboardRoute : NavKey
 
     @Serializable
-    data class TransactionFormRoute(
-        val transactionId: Int? = null,
-        val walletId: Int? = null,
-    ) : NavKey
+    data object HomeTransactionRoute : NavKey
 
     @Serializable
-    data class TransactionDetailRoute(
-        val id: Int,
-    ) : NavKey
+    data object HomeGoldRoute : NavKey
 
     @Serializable
-    data object GoldRoute : NavKey
+    data object HomeSettingRoute : NavKey
 
-    @Serializable
-    data class GoldFormRoute(
-        val goldId: Int? = null,
-        val walletId: Int? = null,
-    ) : NavKey
-
+    // wallet
     @Serializable
     data object WalletRoute : NavKey
 
@@ -53,8 +45,20 @@ object Routes {
     data object WalletCreateRoute : NavKey
 
     @Serializable
+    data object WalletCreateFirstRoute : NavKey
+
+    @Serializable
     data class WalletUpdateRoute(
         val walletId: Int,
+    ) : NavKey
+
+    // gold
+    @Serializable
+    data object GoldCreateRoute : NavKey
+
+    @Serializable
+    data class GoldUpdateRoute(
+        val goldId: Int,
     ) : NavKey
 
     @Serializable
@@ -62,6 +66,7 @@ object Routes {
         val id: Int,
     ) : NavKey
 
+    // category
     @Serializable
     data object CategoryRoute : NavKey
 
@@ -76,9 +81,17 @@ object Routes {
         val categoryId: Int,
     ) : NavKey
 
+    // transaction
     @Serializable
-    data object ProfileRoute : NavKey
+    data object TransactionCreateRoute : NavKey
 
     @Serializable
-    data object SettingsRoute : NavKey
+    data class TransactionUpdateRoute(
+        val transactionId: Int,
+    ) : NavKey
+
+    @Serializable
+    data class TransactionDetailRoute(
+        val id: Int,
+    ) : NavKey
 }

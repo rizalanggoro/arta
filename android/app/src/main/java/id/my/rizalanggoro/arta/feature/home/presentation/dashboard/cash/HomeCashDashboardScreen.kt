@@ -7,22 +7,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
@@ -56,96 +54,97 @@ private fun Content(
     onRetry: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxWidth(),
-        topBar = {
-            TopAppBar(title = { Text(text = "Tabungan Uang") })
-        },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text(
-                            text = activeWalletName,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                        Text(text = greeting, style = MaterialTheme.typography.headlineSmall)
-                        Text(
-                            text = "Saldo saat ini",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Text(text = balanceDisplay, style = MaterialTheme.typography.headlineMedium)
-                    }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = activeWalletName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(text = greeting, style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        text = "Saldo saat ini",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(text = balanceDisplay, style = MaterialTheme.typography.headlineMedium)
                 }
             }
+        }
 
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                    SummaryCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Pemasukan hari ini",
-                        value = todayIncomeDisplay,
-                    )
-                    SummaryCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Pengeluaran hari ini",
-                        value = todayExpenseDisplay,
-                    )
-                }
+        item {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                SummaryCard(
+                    modifier = Modifier.weight(1f),
+                    title = "Pemasukan hari ini",
+                    value = todayIncomeDisplay,
+                )
+                SummaryCard(
+                    modifier = Modifier.weight(1f),
+                    title = "Pengeluaran hari ini",
+                    value = todayExpenseDisplay,
+                )
             }
+        }
 
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Text(text = "5 transaksi terbaru", style = MaterialTheme.typography.titleMedium)
-                        val visibleTransactions = recentTransactions.take(5)
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = "5 transaksi terbaru",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    val visibleTransactions = recentTransactions.take(5)
 
-                        when {
-                            isLoading -> {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    CircularProgressIndicator()
-                                    Text(text = "Memuat transaksi terbaru...")
-                                }
+                    when {
+                        isLoading -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                CircularProgressIndicator()
+                                Text(text = "Memuat transaksi terbaru...")
                             }
+                        }
 
-                            !errorMessage.isNullOrBlank() -> {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
-                                    Button(onClick = onRetry) {
-                                        Text("Coba lagi")
-                                    }
-                                }
-                            }
-
-                            recentTransactions.isEmpty() -> {
+                        !errorMessage.isNullOrBlank() -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(
-                                    text = "Belum ada transaksi yang bisa ditampilkan.",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    text = errorMessage,
+                                    color = MaterialTheme.colorScheme.error
                                 )
+                                Button(onClick = onRetry) {
+                                    Text("Coba lagi")
+                                }
                             }
+                        }
 
-                            else -> {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    visibleTransactions.forEachIndexed { index, transaction ->
-                                        TransactionRow(transaction = transaction)
-                                        if (index < visibleTransactions.lastIndex) {
-                                            HorizontalDivider()
-                                        }
+                        recentTransactions.isEmpty() -> {
+                            Text(
+                                text = "Belum ada transaksi yang bisa ditampilkan.",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        else -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                visibleTransactions.forEachIndexed { index, transaction ->
+                                    TransactionRow(transaction = transaction)
+                                    if (index < visibleTransactions.lastIndex) {
+                                        HorizontalDivider()
                                     }
                                 }
                             }
@@ -168,7 +167,11 @@ private fun SummaryCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text(text = title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Text(text = value, style = MaterialTheme.typography.titleMedium)
         }
     }
@@ -203,11 +206,36 @@ private fun HomeCashDashboardPreviewMorning() {
             todayIncomeDisplay = "Rp 1.250.000",
             todayExpenseDisplay = "Rp 430.000",
             recentTransactions = listOf(
-                CashDashboardTransactionUiState("Gaji bulanan", "Transfer masuk · 09:15", "+Rp 1.500.000", true),
-                CashDashboardTransactionUiState("Belanja kebutuhan pokok", "Supermarket · 11:20", "-Rp 175.000", false),
-                CashDashboardTransactionUiState("Top up e-wallet", "Dompet digital · 12:10", "-Rp 100.000", false),
-                CashDashboardTransactionUiState("Pemasukan freelance", "Transfer masuk · 14:05", "+Rp 750.000", true),
-                CashDashboardTransactionUiState("Transport", "Ojek online · 16:40", "-Rp 55.000", false),
+                CashDashboardTransactionUiState(
+                    "Gaji bulanan",
+                    "Transfer masuk · 09:15",
+                    "+Rp 1.500.000",
+                    true
+                ),
+                CashDashboardTransactionUiState(
+                    "Belanja kebutuhan pokok",
+                    "Supermarket · 11:20",
+                    "-Rp 175.000",
+                    false
+                ),
+                CashDashboardTransactionUiState(
+                    "Top up e-wallet",
+                    "Dompet digital · 12:10",
+                    "-Rp 100.000",
+                    false
+                ),
+                CashDashboardTransactionUiState(
+                    "Pemasukan freelance",
+                    "Transfer masuk · 14:05",
+                    "+Rp 750.000",
+                    true
+                ),
+                CashDashboardTransactionUiState(
+                    "Transport",
+                    "Ojek online · 16:40",
+                    "-Rp 55.000",
+                    false
+                ),
             ),
             isLoading = false,
             errorMessage = null,
@@ -227,11 +255,36 @@ private fun HomeCashDashboardPreviewAfternoon() {
             todayIncomeDisplay = "Rp 1.250.000",
             todayExpenseDisplay = "Rp 430.000",
             recentTransactions = listOf(
-                CashDashboardTransactionUiState("Gaji bulanan", "Transfer masuk · 09:15", "+Rp 1.500.000", true),
-                CashDashboardTransactionUiState("Belanja kebutuhan pokok", "Supermarket · 11:20", "-Rp 175.000", false),
-                CashDashboardTransactionUiState("Top up e-wallet", "Dompet digital · 12:10", "-Rp 100.000", false),
-                CashDashboardTransactionUiState("Pemasukan freelance", "Transfer masuk · 14:05", "+Rp 750.000", true),
-                CashDashboardTransactionUiState("Transport", "Ojek online · 16:40", "-Rp 55.000", false),
+                CashDashboardTransactionUiState(
+                    "Gaji bulanan",
+                    "Transfer masuk · 09:15",
+                    "+Rp 1.500.000",
+                    true
+                ),
+                CashDashboardTransactionUiState(
+                    "Belanja kebutuhan pokok",
+                    "Supermarket · 11:20",
+                    "-Rp 175.000",
+                    false
+                ),
+                CashDashboardTransactionUiState(
+                    "Top up e-wallet",
+                    "Dompet digital · 12:10",
+                    "-Rp 100.000",
+                    false
+                ),
+                CashDashboardTransactionUiState(
+                    "Pemasukan freelance",
+                    "Transfer masuk · 14:05",
+                    "+Rp 750.000",
+                    true
+                ),
+                CashDashboardTransactionUiState(
+                    "Transport",
+                    "Ojek online · 16:40",
+                    "-Rp 55.000",
+                    false
+                ),
             ),
             isLoading = false,
             errorMessage = null,
@@ -251,11 +304,36 @@ private fun HomeCashDashboardPreviewEvening() {
             todayIncomeDisplay = "Rp 1.250.000",
             todayExpenseDisplay = "Rp 430.000",
             recentTransactions = listOf(
-                CashDashboardTransactionUiState("Gaji bulanan", "Transfer masuk · 09:15", "+Rp 1.500.000", true),
-                CashDashboardTransactionUiState("Belanja kebutuhan pokok", "Supermarket · 11:20", "-Rp 175.000", false),
-                CashDashboardTransactionUiState("Top up e-wallet", "Dompet digital · 12:10", "-Rp 100.000", false),
-                CashDashboardTransactionUiState("Pemasukan freelance", "Transfer masuk · 14:05", "+Rp 750.000", true),
-                CashDashboardTransactionUiState("Transport", "Ojek online · 16:40", "-Rp 55.000", false),
+                CashDashboardTransactionUiState(
+                    "Gaji bulanan",
+                    "Transfer masuk · 09:15",
+                    "+Rp 1.500.000",
+                    true
+                ),
+                CashDashboardTransactionUiState(
+                    "Belanja kebutuhan pokok",
+                    "Supermarket · 11:20",
+                    "-Rp 175.000",
+                    false
+                ),
+                CashDashboardTransactionUiState(
+                    "Top up e-wallet",
+                    "Dompet digital · 12:10",
+                    "-Rp 100.000",
+                    false
+                ),
+                CashDashboardTransactionUiState(
+                    "Pemasukan freelance",
+                    "Transfer masuk · 14:05",
+                    "+Rp 750.000",
+                    true
+                ),
+                CashDashboardTransactionUiState(
+                    "Transport",
+                    "Ojek online · 16:40",
+                    "-Rp 55.000",
+                    false
+                ),
             ),
             isLoading = false,
             errorMessage = null,

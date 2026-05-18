@@ -19,17 +19,21 @@ class WalletRepository(
 	private val json = Json { ignoreUnknownKeys = true }
 
 	suspend fun getWallets(): Result<List<Wallet>> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.list(authorization).toListResult()
+			apiService.list(authorization).toListResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	suspend fun getWalletById(id: Int): Result<Wallet> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.get(authorization, id).toDomainResult()
+			apiService.get(authorization, id).toDomainResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	suspend fun updateWallet(
@@ -37,37 +41,43 @@ class WalletRepository(
 		name: String,
 		type: String,
 	): Result<Wallet> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.update(
-			authorization = authorization,
-			id = id,
-			request = UpdateWalletRequestDto(
-				name = name,
-				type = type,
-			),
-		).toDomainResult()
+			apiService.update(
+				authorization = authorization,
+				id = id,
+				request = UpdateWalletRequestDto(
+					name = name,
+					type = type,
+				),
+			).toDomainResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	suspend fun createWallet(
 		name: String,
 		type: String,
 	): Result<Wallet> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.create(
-			authorization = authorization,
-			request = CreateWalletRequestDto(name = name, type = type),
-		).toDomainResult()
+			apiService.create(
+				authorization = authorization,
+				request = CreateWalletRequestDto(name = name, type = type),
+			).toDomainResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	suspend fun deleteWallet(id: Int): Result<Unit> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.delete(authorization, id).toUnitResult()
+			apiService.delete(authorization, id).toUnitResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	private fun authorizationHeader(): String? {

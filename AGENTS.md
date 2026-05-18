@@ -1,5 +1,9 @@
 <!-- code-review-graph MCP tools -->
 
+## Project Skills
+
+**IMPORTANT: This project has a set of domain-specific skills located in `.agents/skills/`. ALWAYS check and apply the relevant skill before implementing or refactoring features to ensure consistency with project standards (e.g., Android Compose Navigation 3, Golang Project Structure, etc.).**
+
 ## MCP Tools: code-review-graph
 
 **IMPORTANT: This project has a knowledge graph. ALWAYS use the

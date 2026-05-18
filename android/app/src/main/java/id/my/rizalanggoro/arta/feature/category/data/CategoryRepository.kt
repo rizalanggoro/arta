@@ -22,30 +22,36 @@ class CategoryRepository(
 		name: String,
 		type: String,
 	): Result<Category> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.create(
-			authorization = authorization,
-			request = CreateCategoryRequestDto(
-				name = name,
-				type = type,
-			),
-		).toDomainResult()
+			apiService.create(
+				authorization = authorization,
+				request = CreateCategoryRequestDto(
+					name = name,
+					type = type,
+				),
+			).toDomainResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	suspend fun getCategories(): Result<List<Category>> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.list(authorization).toListResult()
+			apiService.list(authorization).toListResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	suspend fun getCategoryById(id: Int): Result<Category> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.get(authorization, id).toDomainResult()
+			apiService.get(authorization, id).toDomainResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	suspend fun updateCategory(
@@ -53,24 +59,28 @@ class CategoryRepository(
 		name: String,
 		type: String,
 	): Result<Category> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.update(
-			authorization = authorization,
-			id = id,
-			request = UpdateCategoryRequestDto(
-				name = name,
-				type = type,
-			),
-		).toDomainResult()
+			apiService.update(
+				authorization = authorization,
+				id = id,
+				request = UpdateCategoryRequestDto(
+					name = name,
+					type = type,
+				),
+			).toDomainResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	suspend fun deleteCategory(id: Int): Result<Unit> {
-		val authorization = authorizationHeader()
-			?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
 
-		return apiService.delete(authorization, id).toUnitResult()
+			apiService.delete(authorization, id).toUnitResult()
+		}.getOrElse { Result.failure(it) }
 	}
 
 	private fun authorizationHeader(): String? {

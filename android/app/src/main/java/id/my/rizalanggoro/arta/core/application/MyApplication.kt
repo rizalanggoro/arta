@@ -46,7 +46,10 @@ class MyApplication : Application() {
         val walletApiService: WalletApiService = RetrofitProvider.create(WalletApiService::class.java)
         val goldApiService: GoldApiService = RetrofitProvider.create(GoldApiService::class.java)
 
-        authRepository = AuthRepository(authApiService)
+        authRepository = AuthRepository(
+            apiService = authApiService,
+            authSessionProvider = { authPrefs.currentSession.value },
+        )
 
         categoryRepository = CategoryRepository(
             apiService = categoryApiService,

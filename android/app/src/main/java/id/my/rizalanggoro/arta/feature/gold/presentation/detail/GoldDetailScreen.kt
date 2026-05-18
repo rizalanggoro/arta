@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.Routes.GoldUpdateRoute
 import id.my.rizalanggoro.arta.domain.Gold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
@@ -51,7 +52,7 @@ fun GoldDetailScreen(goldId: Int) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is GoldDetailEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-                is GoldDetailEffect.NavigateToEdit -> backStack.add(Routes.GoldFormRoute(goldId = effect.goldId))
+                is GoldDetailEffect.NavigateToEdit -> backStack.add(GoldUpdateRoute(goldId = effect.goldId))
                 GoldDetailEffect.NavigateBack -> backStack.removeLastOrNull()
             }
         }

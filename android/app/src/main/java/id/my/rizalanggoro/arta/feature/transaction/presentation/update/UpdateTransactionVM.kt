@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
 import id.my.rizalanggoro.arta.feature.category.presentation.select.CategorySelectionBus
-import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionUiState
 import id.my.rizalanggoro.arta.domain.Category
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,8 +44,8 @@ class UpdateTransactionVM(
         }
     }
 
-    private val _uiState = MutableStateFlow(CreateTransactionUiState())
-    val uiState: StateFlow<CreateTransactionUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(UpdateTransactionUiState())
+    val uiState: StateFlow<UpdateTransactionUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<UpdateTransactionEffect>()
     val effect: SharedFlow<UpdateTransactionEffect> = _effect.asSharedFlow()

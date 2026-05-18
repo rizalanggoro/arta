@@ -33,7 +33,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
-import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionUiState
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import java.time.LocalDate
 import java.time.ZoneId

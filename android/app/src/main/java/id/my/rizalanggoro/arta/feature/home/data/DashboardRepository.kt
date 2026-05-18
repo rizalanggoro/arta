@@ -17,17 +17,21 @@ class DashboardRepository(
     private val json = Json { ignoreUnknownKeys = true }
 
     suspend fun getCashDashboard(): Result<CashDashboardOverview> {
-        val authorization = authorizationHeader()
-            ?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+        return runCatching {
+            val authorization = authorizationHeader()
+                ?: throw apiError("Sesi login tidak ditemukan")
 
-        return apiService.getCashDashboard(authorization).toDomainResult()
+            apiService.getCashDashboard(authorization).toDomainResult()
+        }.getOrElse { Result.failure(it) }
     }
 
     suspend fun getGoldDashboard(): Result<GoldDashboardOverview> {
-        val authorization = authorizationHeader()
-            ?: return Result.failure(apiError("Sesi login tidak ditemukan"))
+        return runCatching {
+            val authorization = authorizationHeader()
+                ?: throw apiError("Sesi login tidak ditemukan")
 
-        return apiService.getGoldDashboard(authorization).toGoldDomainResult()
+            apiService.getGoldDashboard(authorization).toGoldDomainResult()
+        }.getOrElse { Result.failure(it) }
     }
 
     private fun authorizationHeader(): String? {

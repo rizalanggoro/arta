@@ -103,7 +103,7 @@ class RegisterVM(
                 .onSuccess { session ->
                     application.authPrefs.setSession(session)
                     _messageEvent.emit("Registrasi berhasil untuk ${session.name}")
-                    _effect.emit(RegisterEffect.NavigateToCreateWallet)
+                    _effect.emit(RegisterEffect.NavigateToCreateFirstWallet)
                 }
                 .onFailure { throwable ->
                     _messageEvent.emit(throwable.message ?: "Registrasi gagal")
@@ -114,5 +114,5 @@ class RegisterVM(
 }
 
 sealed class RegisterEffect {
-    object NavigateToCreateWallet : RegisterEffect()
+    object NavigateToCreateFirstWallet : RegisterEffect()
 }

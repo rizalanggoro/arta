@@ -1,10 +1,10 @@
-package id.my.rizalanggoro.arta.feature.wallet.presentation.create
+package id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.feature.wallet.data.WalletRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CreateWalletVM(
+class CreateFirstWalletVM(
 	private val walletRepository: WalletRepository,
 	private val application: MyApplication,
 ) : ViewModel() {
@@ -24,7 +24,7 @@ class CreateWalletVM(
 		val Factory = viewModelFactory {
 			initializer {
 				val app = (this[APPLICATION_KEY] as MyApplication)
-				CreateWalletVM(
+				CreateFirstWalletVM(
 					walletRepository = app.walletRepository,
 					application = app,
 				)
@@ -32,14 +32,14 @@ class CreateWalletVM(
 		}
 	}
 
-	private val _uiState = MutableStateFlow(CreateWalletUiState())
-	val uiState: StateFlow<CreateWalletUiState> = _uiState.asStateFlow()
+	private val _uiState = MutableStateFlow(CreateFirstWalletUiState())
+	val uiState: StateFlow<CreateFirstWalletUiState> = _uiState.asStateFlow()
 
 	private val _messageEvent = MutableSharedFlow<String>()
 	val messageEvent: SharedFlow<String> = _messageEvent.asSharedFlow()
 
-	private val _effect = MutableSharedFlow<CreateWalletEffect>()
-	val effect: SharedFlow<CreateWalletEffect> = _effect.asSharedFlow()
+	private val _effect = MutableSharedFlow<CreateFirstWalletEffect>()
+	val effect: SharedFlow<CreateFirstWalletEffect> = _effect.asSharedFlow()
 
 	fun onChangeName(value: String) {
 		_uiState.update { it.copy(name = value, nameError = null) }
@@ -47,10 +47,6 @@ class CreateWalletVM(
 
 	fun onChangeType(value: String) {
 		_uiState.update { it.copy(type = value, typeError = null) }
-	}
-
-	fun onToggleDefault(value: Boolean) {
-		// isDefault removed; no-op
 	}
 
 	fun create() {
@@ -68,27 +64,26 @@ class CreateWalletVM(
 		}
 
 		if (hasError) {
-			viewModelScope.launch { _messageEvent.emit("Periksa kembali isian wallet") }
+			viewModelScope.launch { _messageEvent.emit("Periksa kembali isian wallet pertama") }
 			return
 		}
 
 		viewModelScope.launch {
 			_uiState.update { it.copy(isLoading = true) }
-			val result = walletRepository.createWallet(name = current.name, type = current.type)
-			result
+			walletRepository.createWallet(name = current.name, type = current.type)
 				.onSuccess { wallet ->
 					application.selectedWalletPrefs.saveSelectedWallet(wallet)
-					_messageEvent.emit("Wallet dibuat: ${wallet.name}")
-					_effect.emit(CreateWalletEffect.NavigateBack)
+					_messageEvent.emit("Wallet pertama dibuat: ${wallet.name}")
+					_effect.emit(CreateFirstWalletEffect.NavigateHome)
 				}
-				.onFailure { t ->
-					_messageEvent.emit(t.message ?: "Gagal membuat wallet")
+				.onFailure { throwable ->
+					_messageEvent.emit(throwable.message ?: "Gagal membuat wallet pertama")
 				}
 			_uiState.update { it.copy(isLoading = false) }
 		}
 	}
 }
 
-sealed class CreateWalletEffect {
-	object NavigateBack : CreateWalletEffect()
+sealed class CreateFirstWalletEffect {
+	object NavigateHome : CreateFirstWalletEffect()
 }

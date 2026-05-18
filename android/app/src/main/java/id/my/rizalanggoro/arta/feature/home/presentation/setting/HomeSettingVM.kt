@@ -6,11 +6,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeSettingVM(
@@ -27,6 +28,9 @@ class HomeSettingVM(
 
     private val _uiState = MutableStateFlow(HomeSettingUiState())
     val uiState: StateFlow<HomeSettingUiState> = _uiState.asStateFlow()
+
+    private val _event = MutableSharedFlow<HomeSettingEvent>()
+    val event = _event.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -50,12 +54,17 @@ class HomeSettingVM(
     }
 
     fun onLogout() {
-        app.authPrefs.clear()
-        _uiState.update {
-            it.copy(
-                sessionName = "-",
-                sessionEmail = "-",
-            )
+        viewModelScope.launch {
+            runCatching {
+                app.authRepository.logout()
+            }
+            app.selectedWalletPrefs.clear()
+            app.authPrefs.clear()
+            _event.emit(HomeSettingEvent.LogoutSuccess)
         }
     }
+}
+
+sealed class HomeSettingEvent {
+    data object LogoutSuccess : HomeSettingEvent()
 }

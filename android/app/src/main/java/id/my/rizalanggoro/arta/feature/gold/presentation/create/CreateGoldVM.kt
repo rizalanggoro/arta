@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
+import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.feature.gold.data.GoldRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class CreateGoldVM(
 	private val goldRepository: GoldRepository,
-	private val selectedWalletPrefs: id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs,
+	private val selectedWalletPrefs: SelectedWalletPrefs,
 ) : ViewModel() {
 	companion object {
 		val Factory = viewModelFactory {
@@ -68,9 +69,9 @@ class CreateGoldVM(
 
 	init {
 		viewModelScope.launch {
-			selectedWalletPrefs.selectedWalletId.collect { id ->
-				if (id != null && _uiState.value.walletId.isBlank()) {
-					_uiState.update { it.copy(walletId = id.toString(), walletIdError = null) }
+			selectedWalletPrefs.selectedWallet.collect { wallet ->
+				if (wallet != null && _uiState.value.walletId.isBlank()) {
+					_uiState.update { it.copy(walletId = wallet.id.toString(), walletIdError = null) }
 				}
 			}
 		}
@@ -80,7 +81,7 @@ class CreateGoldVM(
 		val current = _uiState.value
 		var hasError = false
 
-		val walletId = current.walletId.toIntOrNull() ?: selectedWalletPrefs.selectedWalletId.value
+		val walletId = current.walletId.toIntOrNull() ?: selectedWalletPrefs.selectedWallet.value?.id
 		if (walletId == null || walletId <= 0) {
 			_uiState.update { it.copy(walletIdError = "Wallet aktif belum dipilih") }
 			hasError = true
