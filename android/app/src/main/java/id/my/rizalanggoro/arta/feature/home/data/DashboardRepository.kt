@@ -3,7 +3,7 @@ package id.my.rizalanggoro.arta.feature.home.data
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.domain.CashDashboard
-import id.my.rizalanggoro.arta.domain.GoldDashboardOverview
+import id.my.rizalanggoro.arta.domain.GoldDashboard
 import id.my.rizalanggoro.arta.feature.home.data.dto.CashDashboardResponseDto
 import id.my.rizalanggoro.arta.feature.home.data.dto.GoldDashboardResponseDto
 import id.my.rizalanggoro.arta.feature.home.data.mapper.toDomain
@@ -28,7 +28,7 @@ class DashboardRepository(
         }.getOrElse { Result.failure(it) }
     }
 
-    suspend fun getGoldDashboard(): Result<GoldDashboardOverview> {
+    suspend fun getGoldDashboard(): Result<GoldDashboard> {
         return runCatching {
             val authorization = authorizationHeader()
                 ?: throw apiError("Sesi login tidak ditemukan")
@@ -51,7 +51,7 @@ class DashboardRepository(
         return Result.success(body.toDomain())
     }
 
-    private fun Response<GoldDashboardResponseDto>.toGoldDomainResult(): Result<GoldDashboardOverview> {
+    private fun Response<GoldDashboardResponseDto>.toGoldDomainResult(): Result<GoldDashboard> {
         if (!isSuccessful) {
             return Result.failure(apiError(message = errorMessage(json)))
         }
@@ -60,7 +60,6 @@ class DashboardRepository(
         return Result.success(body.toDomain())
     }
 
-    
 
     private fun apiError(message: String): Throwable {
         return IllegalStateException(message)

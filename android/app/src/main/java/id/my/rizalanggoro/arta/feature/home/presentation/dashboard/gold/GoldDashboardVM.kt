@@ -7,19 +7,19 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.network.RetrofitProvider
-import id.my.rizalanggoro.arta.domain.GoldDashboardOverview
+import id.my.rizalanggoro.arta.domain.GoldDashboard
 import id.my.rizalanggoro.arta.feature.home.data.DashboardApiService
 import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.text.NumberFormat
-import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.util.Locale
 
 class GoldDashboardVM(
     private val dashboardRepository: DashboardRepository,
@@ -75,7 +75,7 @@ class GoldDashboardVM(
         }
     }
 
-    private fun GoldDashboardOverview.toUiState(): GoldDashboardUiState {
+    private fun GoldDashboard.toUiState(): GoldDashboardUiState {
         return GoldDashboardUiState(
             activeWalletName = activeWalletName,
             totalAsset = formatMoney(totalAsset),

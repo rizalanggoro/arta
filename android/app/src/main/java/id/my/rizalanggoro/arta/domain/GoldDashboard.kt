@@ -3,7 +3,7 @@ package id.my.rizalanggoro.arta.domain
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GoldDashboardOverview(
+data class GoldDashboard(
     val activeWalletName: String,
     val totalAsset: Double,
     val buyPrice: Double,
@@ -12,19 +12,5 @@ data class GoldDashboardOverview(
     val totalGoldItems: Int,
     val latestDollarPrice: Double,
     val latestGoldPricePerGramIdr: Double,
-    val recentGolds: List<GoldDashboardGold> = emptyList(),
-)
-
-@Serializable
-data class GoldDashboardGold(
-    val id: Int,
-    val walletId: Int,
-    val date: String,
-    val grams: Double,
-    val price: Double,
-    val type: String,
-    val purityPercent: Double = 0.0,
-    val notes: String = "",
-    val createdAt: String = "",
-    val updatedAt: String = "",
+    val recentGolds: List<Gold> = emptyList(),
 )
