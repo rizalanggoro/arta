@@ -1,14 +1,15 @@
 package id.my.rizalanggoro.arta.feature.home.data.mapper
 
-import id.my.rizalanggoro.arta.domain.CashDashboardOverview
-import id.my.rizalanggoro.arta.domain.CashDashboardTransaction
+import id.my.rizalanggoro.arta.domain.CashDashboard
+import id.my.rizalanggoro.arta.domain.Category
+import id.my.rizalanggoro.arta.domain.Transaction
 import id.my.rizalanggoro.arta.feature.home.data.dto.CashDashboardCategoryDto
 import id.my.rizalanggoro.arta.feature.home.data.dto.CashDashboardResponseDto
 import id.my.rizalanggoro.arta.feature.home.data.dto.CashDashboardTransactionDataDto
 import id.my.rizalanggoro.arta.feature.home.data.dto.CashDashboardTransactionDto
 
-fun CashDashboardResponseDto.toDomain(): CashDashboardOverview {
-    return CashDashboardOverview(
+fun CashDashboardResponseDto.toDomain(): CashDashboard {
+    return CashDashboard(
         activeWalletName = activeWalletName,
         currentBalance = financialSummary.currentBalance,
         todayIncome = financialSummary.todayIncome,
@@ -17,14 +18,13 @@ fun CashDashboardResponseDto.toDomain(): CashDashboardOverview {
     )
 }
 
-fun CashDashboardTransactionDto.toDomain(): CashDashboardTransaction {
-    return CashDashboardTransaction(
+fun CashDashboardTransactionDto.toDomain(): Transaction {
+    return Transaction(
         id = data.id,
         walletId = data.walletId,
         amount = data.amount,
         categoryId = data.categoryId,
-        categoryName = category.name,
-        categoryType = category.type,
+        category = category.toDomain(),
         description = data.description,
         date = data.date,
         createdAt = data.createdAt,
@@ -32,17 +32,24 @@ fun CashDashboardTransactionDto.toDomain(): CashDashboardTransaction {
     )
 }
 
-fun CashDashboardTransactionDataDto.toDomain(category: CashDashboardCategoryDto): CashDashboardTransaction {
-    return CashDashboardTransaction(
+fun CashDashboardTransactionDataDto.toDomain(category: CashDashboardCategoryDto): Transaction {
+    return Transaction(
         id = id,
         walletId = walletId,
         amount = amount,
         categoryId = categoryId,
-        categoryName = category.name,
-        categoryType = category.type,
+        category = category.toDomain(),
         description = description,
         date = date,
         createdAt = createdAt,
         updatedAt = updatedAt,
+    )
+}
+
+private fun CashDashboardCategoryDto.toDomain(): Category {
+    return Category(
+        id = id,
+        name = name,
+        type = type,
     )
 }

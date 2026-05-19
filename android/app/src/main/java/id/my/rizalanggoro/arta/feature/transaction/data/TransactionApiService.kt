@@ -21,26 +21,26 @@ interface TransactionApiService {
         @Body request: CreateTransactionRequestDto,
     ): Response<TransactionResponseDto>
 
-    @GET("/transaction/{id}")
+    @GET("/api/transaction/{id}")
     suspend fun get(
         @Header("Authorization") authorization: String,
         @Path("id") id: Int,
     ): Response<TransactionResponseDto>
 
-    @PUT("/transaction/{id}")
+    @PUT("/api/transaction/{id}")
     suspend fun update(
         @Header("Authorization") authorization: String,
         @Path("id") id: Int,
         @Body request: UpdateTransactionRequestDto,
     ): Response<TransactionResponseDto>
 
-    @DELETE("/transaction/{id}")
+    @DELETE("/api/transaction/{id}")
     suspend fun delete(
         @Header("Authorization") authorization: String,
         @Path("id") id: Int,
     ): Response<Unit>
 
-    @GET("/transaction")
+    @GET("/api/transaction")
     suspend fun list(
         @Header("Authorization") authorization: String,
         @Query("wallet_id") walletId: Int,

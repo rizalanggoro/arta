@@ -8,6 +8,7 @@ data class Transaction(
     val walletId: Int,
     val amount: Double,
     val categoryId: Int,
+    val category: Category? = null,
     val description: String = "",
     val date: String,
     val createdAt: String = "",

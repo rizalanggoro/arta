@@ -9,6 +9,7 @@ fun TransactionDto.toDomain(): Transaction {
         walletId = walletId,
         amount = amount,
         categoryId = categoryId,
+        category = null,
         description = description,
         date = date,
         createdAt = createdAt,

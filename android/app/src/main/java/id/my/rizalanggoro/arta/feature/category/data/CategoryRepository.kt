@@ -1,6 +1,6 @@
 package id.my.rizalanggoro.arta.feature.category.data
 
-import id.my.rizalanggoro.arta.core.dto.ApiErrorDto
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.domain.Category
 import id.my.rizalanggoro.arta.feature.category.data.dto.CategoryListResponseDto
@@ -90,30 +90,18 @@ class CategoryRepository(
 
 	private fun Response<CategoryResponseDto>.toDomainResult(): Result<Category> {
 		if (!isSuccessful) {
-			return Result.failure(apiError(message = errorMessage()))
+			return Result.failure(apiError(message = errorMessage(json)))
 		}
 
 		val body = body() ?: return Result.failure(apiError("Respons server kosong"))
 		return Result.success(body.data.toDomain())
 	}
 
-	private fun Response<*>.errorMessage(): String {
-		val errorBody = errorBody()?.string().orEmpty()
-		val message = runCatching {
-			json.decodeFromString(ApiErrorDto.serializer(), errorBody).message
-		}.getOrNull()
-
-		return when {
-			!message.isNullOrBlank() -> message
-			code() in 400..499 -> "Permintaan tidak valid"
-			code() >= 500 -> "Terjadi kesalahan pada server"
-			else -> "Terjadi kesalahan tidak diketahui"
-		}
-	}
+    
 
 	private fun Response<CategoryListResponseDto>.toListResult(): Result<List<Category>> {
 		if (!isSuccessful) {
-			return Result.failure(apiError(message = errorMessage()))
+			return Result.failure(apiError(message = errorMessage(json)))
 		}
 
 		val body = body() ?: return Result.failure(apiError("Respons server kosong"))
@@ -122,7 +110,7 @@ class CategoryRepository(
 
 	private fun Response<DeleteCategoryResponseDto>.toUnitResult(): Result<Unit> {
 		if (!isSuccessful) {
-			return Result.failure(apiError(message = errorMessage()))
+			return Result.failure(apiError(message = errorMessage(json)))
 		}
 
 		return Result.success(Unit)

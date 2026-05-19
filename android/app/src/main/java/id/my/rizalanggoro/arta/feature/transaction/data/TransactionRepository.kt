@@ -1,7 +1,6 @@
 package id.my.rizalanggoro.arta.feature.transaction.data
 
-import android.util.Log
-import id.my.rizalanggoro.arta.core.dto.ApiErrorDto
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.domain.Transaction
 import id.my.rizalanggoro.arta.feature.transaction.data.dto.CreateTransactionRequestDto
@@ -126,7 +125,7 @@ class TransactionRepository(
 
     private fun Response<TransactionResponseDto>.toDomainResult(): Result<Transaction> {
         if (!isSuccessful) {
-            return Result.failure(apiError(message = errorMessage()))
+            return Result.failure(apiError(message = errorMessage(json)))
         }
 
         val body = body() ?: return Result.failure(apiError("Respons server kosong"))
@@ -135,27 +134,14 @@ class TransactionRepository(
 
     private fun Response<TransactionListResponseDto>.toListDomainResult(): Result<List<Transaction>> {
         if (!isSuccessful) {
-            return Result.failure(apiError(message = errorMessage()))
+            return Result.failure(apiError(message = errorMessage(json)))
         }
 
         val body = body() ?: return Result.failure(apiError("Respons server kosong"))
         return Result.success(body.transactions.map { it.data.toDomain() })
     }
 
-    private fun Response<*>.errorMessage(): String {
-        Log.d("TransactionRepository", "errorMessage: ${this.message()}")
-        val errorBody = errorBody()?.string().orEmpty()
-        val message = runCatching {
-            json.decodeFromString(ApiErrorDto.serializer(), errorBody).message
-        }.getOrNull()
-
-        return when {
-            !message.isNullOrBlank() -> message
-            code() in 400..499 -> "Permintaan tidak valid"
-            code() >= 500 -> "Terjadi kesalahan pada server"
-            else -> "Terjadi kesalahan tidak diketahui"
-        }
-    }
+    
 
     private fun apiError(message: String): Throwable {
         return IllegalStateException(message)

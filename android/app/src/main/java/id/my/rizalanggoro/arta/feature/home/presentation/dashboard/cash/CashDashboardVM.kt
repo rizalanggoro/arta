@@ -7,20 +7,19 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.network.RetrofitProvider
-import id.my.rizalanggoro.arta.domain.CashDashboardOverview
+import id.my.rizalanggoro.arta.domain.CashDashboard
 import id.my.rizalanggoro.arta.feature.home.data.DashboardApiService
 import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
-import java.time.LocalTime
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
-import java.text.NumberFormat
-import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.time.LocalTime
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.roundToLong
 
 class CashDashboardVM(
@@ -78,7 +77,7 @@ class CashDashboardVM(
         }
     }
 
-    private fun CashDashboardOverview.toUiState(sessionName: String?): CashDashboardUiState {
+    private fun CashDashboard.toUiState(sessionName: String?): CashDashboardUiState {
         return CashDashboardUiState(
             activeWalletName = activeWalletName,
             greeting = greetingForName(sessionName),
@@ -86,14 +85,20 @@ class CashDashboardVM(
             todayIncomeDisplay = formatMoney(todayIncome),
             todayExpenseDisplay = formatMoney(todayExpense),
             recentTransactions = recentTransactions.map { transaction ->
+                val category = transaction.category
                 CashDashboardTransactionUiState(
-                    title = transaction.description.ifBlank { transaction.categoryName.ifBlank { "Transaksi" } },
+                    title = transaction.description.ifBlank {
+                        category?.name?.ifBlank { "Transaksi" } ?: "Transaksi"
+                    },
                     subtitle = listOfNotNull(
-                        transaction.categoryName.takeIf { it.isNotBlank() },
+                        category?.name?.takeIf { it.isNotBlank() },
                         formatTransactionDate(transaction.date),
                     ).joinToString(" · "),
-                    amountDisplay = buildAmountDisplay(transaction.amount, transaction.categoryType),
-                    isIncome = transaction.categoryType == "income",
+                    amountDisplay = buildAmountDisplay(
+                        transaction.amount,
+                        category?.type.orEmpty()
+                    ),
+                    isIncome = category?.type == "income",
                 )
             },
             isLoading = false,
@@ -126,7 +131,8 @@ class CashDashboardVM(
 
     private fun formatTransactionDate(dateValue: String): String {
         val parsed = runCatching { OffsetDateTime.parse(dateValue) }.getOrNull()
-            ?: runCatching { java.time.LocalDateTime.parse(dateValue) }.getOrNull()?.atOffset(java.time.ZoneOffset.UTC)
+            ?: runCatching { java.time.LocalDateTime.parse(dateValue) }.getOrNull()
+                ?.atOffset(java.time.ZoneOffset.UTC)
             ?: return dateValue
 
         val formatter = DateTimeFormatter.ofPattern("dd MMM HH:mm", Locale.forLanguageTag("id-ID"))

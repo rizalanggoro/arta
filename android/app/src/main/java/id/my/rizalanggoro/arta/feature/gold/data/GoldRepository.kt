@@ -1,6 +1,6 @@
 package id.my.rizalanggoro.arta.feature.gold.data
 
-import id.my.rizalanggoro.arta.core.dto.ApiErrorDto
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.domain.Gold
 import id.my.rizalanggoro.arta.feature.gold.data.dto.CreateGoldRequestDto
@@ -98,7 +98,7 @@ class GoldRepository(
 
             val response = apiService.list(authorization = authorization)
             if (!response.isSuccessful) {
-                return@runCatching Result.failure(apiError(message = response.errorMessage()))
+                return@runCatching Result.failure(apiError(message = response.errorMessage(json)))
             }
 
             val body = response.body() ?: return@runCatching Result.failure(apiError("Respons server kosong"))
@@ -116,7 +116,7 @@ class GoldRepository(
 
             val response = apiService.delete(authorization = authorization, id = id)
             if (!response.isSuccessful) {
-                return@runCatching Result.failure(apiError(message = response.errorMessage()))
+                return@runCatching Result.failure(apiError(message = response.errorMessage(json)))
             }
 
             Result.success(Unit)
@@ -133,25 +133,11 @@ class GoldRepository(
 
     private fun Response<GoldResponseDto>.toDomainResult(): Result<Gold> {
         if (!isSuccessful) {
-            return Result.failure(apiError(message = errorMessage()))
+            return Result.failure(apiError(message = errorMessage(json)))
         }
 
         val body = body() ?: return Result.failure(apiError("Respons server kosong"))
         return Result.success(body.data.toDomain())
-    }
-
-    private fun Response<*>.errorMessage(): String {
-        val errorBody = errorBody()?.string().orEmpty()
-        val message = runCatching {
-            json.decodeFromString(ApiErrorDto.serializer(), errorBody).message
-        }.getOrNull()
-
-        return when {
-            !message.isNullOrBlank() -> message
-            code() in 400..499 -> "Permintaan tidak valid"
-            code() >= 500 -> "Terjadi kesalahan pada server"
-            else -> "Terjadi kesalahan tidak diketahui"
-        }
     }
 
     private fun apiError(message: String): Throwable {

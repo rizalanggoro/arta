@@ -73,7 +73,7 @@ fun ComposeApp() {
             else -> LoginRoute
         }
 
-        val backStack = rememberNavBackStack(Routes.TransactionCreateRoute)
+        val backStack = rememberNavBackStack(startRoute)
 
         CompositionLocalProvider(LocalBackStack provides backStack) {
             Surface {
