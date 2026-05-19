@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
@@ -105,12 +106,17 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
+	parsedDate, err := time.Parse("2006-01-02", req.Date)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid date format"})
+	}
+
 	created, err := h.repo.CreateTransaction(&domain.Transaction{
 		WalletID:    req.WalletID,
 		Amount:      req.Amount,
 		CategoryID:  req.CategoryID,
 		Description: req.Description,
-		Date:        req.Date,
+		Date:        parsedDate,
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
@@ -188,7 +194,11 @@ func (h *Handler) update(c *fiber.Ctx) error {
 		tx.Description = *req.Description
 	}
 	if req.Date != nil {
-		tx.Date = *req.Date
+		parsedDate, err := time.Parse("2006-01-02", *req.Date)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid date format"})
+		}
+		tx.Date = parsedDate
 	}
 
 	updated, err := h.repo.UpdateTransaction(tx)
