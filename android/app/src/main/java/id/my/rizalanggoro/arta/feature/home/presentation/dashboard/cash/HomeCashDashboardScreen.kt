@@ -21,10 +21,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import id.my.rizalanggoro.arta.domain.Category
+import id.my.rizalanggoro.arta.domain.Transaction
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
-fun HomeCashDashboardScreen(vm: CashDashboardVM = viewModel(factory = CashDashboardVM.Factory)) {
+fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = viewModel(factory = HomeCashDashboardVM.Factory)) {
     val uiState by vm.uiState.collectAsState()
 
     Content(
@@ -48,18 +53,12 @@ private fun Content(
     greeting: String,
     todayIncomeDisplay: String,
     todayExpenseDisplay: String,
-    recentTransactions: List<CashDashboardTransactionUiState>,
+    recentTransactions: List<Transaction>,
     isLoading: Boolean,
     errorMessage: String?,
     onRetry: () -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(
@@ -179,20 +178,103 @@ private fun SummaryCard(
 
 @Composable
 private fun TransactionRow(
-    transaction: CashDashboardTransactionUiState,
+    transaction: Transaction,
     modifier: Modifier = Modifier,
 ) {
+    val category = transaction.category
+    val title = transaction.description.ifBlank {
+        category?.name?.ifBlank { "Transaksi" } ?: "Transaksi"
+    }
+    val subtitle = listOfNotNull(
+        category?.name?.takeIf { it.isNotBlank() },
+        formatTransactionDate(transaction.date),
+    ).joinToString(" · ")
+    val isIncome = category?.type == "income"
+
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(text = transaction.title, style = MaterialTheme.typography.titleSmall)
-            Text(text = transaction.subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = title, style = MaterialTheme.typography.titleSmall)
+            Text(text = subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Text(
-            text = transaction.amountDisplay,
+            text = buildAmountDisplay(transaction.amount, category?.type.orEmpty()),
             style = MaterialTheme.typography.titleSmall,
-            color = if (transaction.isIncome) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+            color = if (isIncome) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
         )
     }
+}
+
+private fun buildAmountDisplay(amount: Double, categoryType: String): String {
+    val prefix = if (categoryType == "income") "+" else "-"
+    return "$prefix${formatMoney(amount)}"
+}
+
+private fun formatMoney(value: Double): String {
+    val rounded = kotlin.math.round(value).toLong()
+    val formatter = java.text.NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).apply {
+        maximumFractionDigits = 0
+    }
+    return "Rp ${formatter.format(rounded)}"
+}
+
+private fun formatTransactionDate(dateValue: String): String {
+    val parsed = runCatching { OffsetDateTime.parse(dateValue) }.getOrNull()
+        ?: runCatching { java.time.LocalDateTime.parse(dateValue) }.getOrNull()
+            ?.atOffset(java.time.ZoneOffset.UTC)
+        ?: return dateValue
+
+    val formatter = DateTimeFormatter.ofPattern("dd MMM HH:mm", Locale.forLanguageTag("id-ID"))
+    return formatter.format(parsed)
+}
+
+private fun sampleTransactions(): List<Transaction> {
+    return listOf(
+        Transaction(
+            id = 1,
+            walletId = 1,
+            amount = 1_500_000.0,
+            categoryId = 1,
+            category = Category(id = 1, name = "Transfer masuk", type = "income"),
+            description = "Gaji bulanan",
+            date = "2026-05-19T09:15:00+07:00",
+        ),
+        Transaction(
+            id = 2,
+            walletId = 1,
+            amount = 175_000.0,
+            categoryId = 2,
+            category = Category(id = 2, name = "Supermarket", type = "expense"),
+            description = "Belanja kebutuhan pokok",
+            date = "2026-05-19T11:20:00+07:00",
+        ),
+        Transaction(
+            id = 3,
+            walletId = 1,
+            amount = 100_000.0,
+            categoryId = 3,
+            category = Category(id = 3, name = "Dompet digital", type = "expense"),
+            description = "Top up e-wallet",
+            date = "2026-05-19T12:10:00+07:00",
+        ),
+        Transaction(
+            id = 4,
+            walletId = 1,
+            amount = 750_000.0,
+            categoryId = 1,
+            category = Category(id = 1, name = "Transfer masuk", type = "income"),
+            description = "Pemasukan freelance",
+            date = "2026-05-19T14:05:00+07:00",
+        ),
+        Transaction(
+            id = 5,
+            walletId = 1,
+            amount = 55_000.0,
+            categoryId = 4,
+            category = Category(id = 4, name = "Ojek online", type = "expense"),
+            description = "Transport",
+            date = "2026-05-19T16:40:00+07:00",
+        ),
+    )
 }
 
 @Preview(showBackground = true, name = "Dashboard Uang - Pagi")
@@ -205,38 +287,7 @@ private fun HomeCashDashboardPreviewMorning() {
             balanceDisplay = "Rp 12.450.000",
             todayIncomeDisplay = "Rp 1.250.000",
             todayExpenseDisplay = "Rp 430.000",
-            recentTransactions = listOf(
-                CashDashboardTransactionUiState(
-                    "Gaji bulanan",
-                    "Transfer masuk · 09:15",
-                    "+Rp 1.500.000",
-                    true
-                ),
-                CashDashboardTransactionUiState(
-                    "Belanja kebutuhan pokok",
-                    "Supermarket · 11:20",
-                    "-Rp 175.000",
-                    false
-                ),
-                CashDashboardTransactionUiState(
-                    "Top up e-wallet",
-                    "Dompet digital · 12:10",
-                    "-Rp 100.000",
-                    false
-                ),
-                CashDashboardTransactionUiState(
-                    "Pemasukan freelance",
-                    "Transfer masuk · 14:05",
-                    "+Rp 750.000",
-                    true
-                ),
-                CashDashboardTransactionUiState(
-                    "Transport",
-                    "Ojek online · 16:40",
-                    "-Rp 55.000",
-                    false
-                ),
-            ),
+            recentTransactions = sampleTransactions(),
             isLoading = false,
             errorMessage = null,
             onRetry = {},
@@ -254,38 +305,7 @@ private fun HomeCashDashboardPreviewAfternoon() {
             balanceDisplay = "Rp 12.450.000",
             todayIncomeDisplay = "Rp 1.250.000",
             todayExpenseDisplay = "Rp 430.000",
-            recentTransactions = listOf(
-                CashDashboardTransactionUiState(
-                    "Gaji bulanan",
-                    "Transfer masuk · 09:15",
-                    "+Rp 1.500.000",
-                    true
-                ),
-                CashDashboardTransactionUiState(
-                    "Belanja kebutuhan pokok",
-                    "Supermarket · 11:20",
-                    "-Rp 175.000",
-                    false
-                ),
-                CashDashboardTransactionUiState(
-                    "Top up e-wallet",
-                    "Dompet digital · 12:10",
-                    "-Rp 100.000",
-                    false
-                ),
-                CashDashboardTransactionUiState(
-                    "Pemasukan freelance",
-                    "Transfer masuk · 14:05",
-                    "+Rp 750.000",
-                    true
-                ),
-                CashDashboardTransactionUiState(
-                    "Transport",
-                    "Ojek online · 16:40",
-                    "-Rp 55.000",
-                    false
-                ),
-            ),
+            recentTransactions = sampleTransactions(),
             isLoading = false,
             errorMessage = null,
             onRetry = {},
@@ -303,38 +323,7 @@ private fun HomeCashDashboardPreviewEvening() {
             balanceDisplay = "Rp 12.450.000",
             todayIncomeDisplay = "Rp 1.250.000",
             todayExpenseDisplay = "Rp 430.000",
-            recentTransactions = listOf(
-                CashDashboardTransactionUiState(
-                    "Gaji bulanan",
-                    "Transfer masuk · 09:15",
-                    "+Rp 1.500.000",
-                    true
-                ),
-                CashDashboardTransactionUiState(
-                    "Belanja kebutuhan pokok",
-                    "Supermarket · 11:20",
-                    "-Rp 175.000",
-                    false
-                ),
-                CashDashboardTransactionUiState(
-                    "Top up e-wallet",
-                    "Dompet digital · 12:10",
-                    "-Rp 100.000",
-                    false
-                ),
-                CashDashboardTransactionUiState(
-                    "Pemasukan freelance",
-                    "Transfer masuk · 14:05",
-                    "+Rp 750.000",
-                    true
-                ),
-                CashDashboardTransactionUiState(
-                    "Transport",
-                    "Ojek online · 16:40",
-                    "-Rp 55.000",
-                    false
-                ),
-            ),
+            recentTransactions = sampleTransactions(),
             isLoading = false,
             errorMessage = null,
             onRetry = {},

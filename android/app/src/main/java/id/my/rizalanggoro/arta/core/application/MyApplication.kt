@@ -11,6 +11,8 @@ import id.my.rizalanggoro.arta.feature.category.data.CategoryApiService
 import id.my.rizalanggoro.arta.feature.category.data.CategoryRepository
 import id.my.rizalanggoro.arta.feature.gold.data.GoldApiService
 import id.my.rizalanggoro.arta.feature.gold.data.GoldRepository
+import id.my.rizalanggoro.arta.feature.home.data.DashboardApiService
+import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionApiService
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
 import id.my.rizalanggoro.arta.feature.wallet.data.WalletApiService
@@ -24,6 +26,9 @@ class MyApplication : Application() {
         private set
 
     lateinit var authRepository: AuthRepository
+        private set
+
+    lateinit var dashboardRepository: DashboardRepository
         private set
 
     lateinit var categoryRepository: CategoryRepository
@@ -48,44 +53,40 @@ class MyApplication : Application() {
         themePrefs = ThemePrefs(applicationContext)
         selectedWalletPrefs = SelectedWalletPrefs(applicationContext)
 
-        val authApiService: AuthApiService = RetrofitProvider.create(
-            AuthApiService::class.java
-        )
-        val categoryApiService: CategoryApiService = RetrofitProvider.create(
-            CategoryApiService::class.java
-        )
-        val walletApiService: WalletApiService = RetrofitProvider.create(
-            WalletApiService::class.java
-        )
-        val transactionApiService = RetrofitProvider.create(
-            TransactionApiService::class.java
-        )
-        val goldApiService: GoldApiService = RetrofitProvider.create(
-            GoldApiService::class.java
-        )
+        val authApi = RetrofitProvider.create(AuthApiService::class.java)
+        val dashboardApi = RetrofitProvider.create(DashboardApiService::class.java)
+        val categoryApi = RetrofitProvider.create(CategoryApiService::class.java)
+        val walletApi = RetrofitProvider.create(WalletApiService::class.java)
+        val transactionApi = RetrofitProvider.create(TransactionApiService::class.java)
+        val goldApi = RetrofitProvider.create(GoldApiService::class.java)
 
         authRepository = AuthRepository(
-            apiService = authApiService,
+            apiService = authApi,
+            authSessionProvider = { authPrefs.currentSession.value },
+        )
+
+        dashboardRepository = DashboardRepository(
+            apiService = dashboardApi,
             authSessionProvider = { authPrefs.currentSession.value },
         )
 
         categoryRepository = CategoryRepository(
-            apiService = categoryApiService,
+            apiService = categoryApi,
             authSessionProvider = { authPrefs.currentSession.value },
         )
 
         walletRepository = WalletRepository(
-            apiService = walletApiService,
+            apiService = walletApi,
             authSessionProvider = { authPrefs.currentSession.value },
         )
 
         transactionRepository = TransactionRepository(
-            apiService = transactionApiService,
+            apiService = transactionApi,
             authSessionProvider = { authPrefs.currentSession.value },
         )
 
         goldRepository = GoldRepository(
-            apiService = goldApiService,
+            apiService = goldApi,
             authSessionProvider = { authPrefs.currentSession.value },
         )
     }

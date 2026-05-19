@@ -16,12 +16,15 @@ class DashboardRepository(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun getCashDashboard(): Result<CashDashboard> {
+    suspend fun getCashDashboard(walletId: Int? = null): Result<CashDashboard> {
         return runCatching {
             val authorization = authorizationHeader()
                 ?: throw apiError("Sesi login tidak ditemukan")
 
-            apiService.getCashDashboard(authorization).toDomainResult()
+            apiService.getCashDashboard(
+                authorization = authorization,
+                walletId = walletId,
+            ).toDomainResult()
         }.getOrElse { Result.failure(it) }
     }
 

@@ -74,7 +74,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Revoke the current session token.",
+                "description": "Delete the current session token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -216,9 +216,730 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/category": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "operationId": "ListCategories",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/category.ListCategoriesRes"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "operationId": "CreateCategory",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/category.CreateCategoryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/CreateCategoryRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/category/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "operationId": "GetCategory",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "category id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetCategoryRes"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "operationId": "UpdateCategory",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "category id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/category.UpdateCategoryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UpdateCategoryRes"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "operationId": "DeleteCategory",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "category id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/DeleteCategoryRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dashboard/cash": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Return the active cash wallet name, balance summary, today totals, and the latest 5 transactions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get cash dashboard overview",
+                "operationId": "GetCashDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Selected cash wallet ID",
+                        "name": "wallet_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/CashDashboardRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dashboard/gold": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Return the active gold wallet name, asset summary, current prices, and the latest 5 gold entries.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get gold dashboard overview",
+                "operationId": "GetGoldDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GoldDashboardRes"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/gold": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gold"
+                ],
+                "operationId": "ListGolds",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gold.ListGoldsRes"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gold"
+                ],
+                "operationId": "CreateGold",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gold.CreateGoldReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/CreateGoldRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/gold/summary": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gold"
+                ],
+                "operationId": "GoldSummary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GoldSummaryRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/gold/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gold"
+                ],
+                "operationId": "GetGold",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "gold id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetGoldRes"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gold"
+                ],
+                "operationId": "UpdateGold",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "gold id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gold.UpdateGoldReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UpdateGoldRes"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gold"
+                ],
+                "operationId": "DeleteGold",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "gold id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/DeleteGoldRes"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "CashDashboardRes": {
+            "type": "object",
+            "required": [
+                "active_wallet_name",
+                "financial_summary",
+                "recent_transactions"
+            ],
+            "properties": {
+                "active_wallet_name": {
+                    "type": "string"
+                },
+                "financial_summary": {
+                    "type": "object",
+                    "required": [
+                        "current_balance",
+                        "today_expense",
+                        "today_income"
+                    ],
+                    "properties": {
+                        "current_balance": {
+                            "type": "number"
+                        },
+                        "today_expense": {
+                            "type": "number"
+                        },
+                        "today_income": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "recent_transactions": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "category",
+                            "data"
+                        ],
+                        "properties": {
+                            "category": {
+                                "$ref": "#/definitions/domain.Category"
+                            },
+                            "data": {
+                                "$ref": "#/definitions/domain.Transaction"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "CreateCategoryRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Category"
+                }
+            }
+        },
+        "CreateGoldRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Gold"
+                }
+            }
+        },
+        "DeleteCategoryRes": {
+            "type": "object",
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeleteGoldRes": {
+            "type": "object",
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetCategoryRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Category"
+                }
+            }
+        },
+        "GetGoldRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Gold"
+                }
+            }
+        },
+        "GoldDashboardRes": {
+            "type": "object",
+            "required": [
+                "active_wallet_name",
+                "buy_price",
+                "latest_dollar_price",
+                "latest_gold_price_per_gram_idr",
+                "profit",
+                "recent_golds",
+                "total_asset",
+                "total_gold_items",
+                "total_weight"
+            ],
+            "properties": {
+                "active_wallet_name": {
+                    "type": "string"
+                },
+                "buy_price": {
+                    "type": "number"
+                },
+                "latest_dollar_price": {
+                    "type": "number"
+                },
+                "latest_gold_price_per_gram_idr": {
+                    "type": "number"
+                },
+                "profit": {
+                    "type": "number"
+                },
+                "recent_golds": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "data"
+                        ],
+                        "properties": {
+                            "data": {
+                                "$ref": "#/definitions/domain.Gold"
+                            }
+                        }
+                    }
+                },
+                "total_asset": {
+                    "type": "number"
+                },
+                "total_gold_items": {
+                    "type": "integer"
+                },
+                "total_weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "GoldSummaryRes": {
+            "type": "object",
+            "required": [
+                "by_type",
+                "total_grams",
+                "total_value"
+            ],
+            "properties": {
+                "by_type": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "total_grams": {
+                    "type": "number"
+                },
+                "total_value": {
+                    "type": "number"
+                }
+            }
+        },
         "LoginReq": {
             "type": "object",
             "required": [
@@ -237,31 +958,19 @@ const docTemplate = `{
         "LoginRes": {
             "type": "object",
             "required": [
-                "currency",
                 "email",
-                "expires_at",
                 "name",
                 "token",
-                "token_type",
                 "user_id"
             ],
             "properties": {
-                "currency": {
-                    "type": "string"
-                },
                 "email": {
-                    "type": "string"
-                },
-                "expires_at": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
                 "token": {
-                    "type": "string"
-                },
-                "token_type": {
                     "type": "string"
                 },
                 "user_id": {
@@ -298,15 +1007,11 @@ const docTemplate = `{
         "RegisterReq": {
             "type": "object",
             "required": [
-                "currency",
                 "email",
                 "name",
                 "password"
             ],
             "properties": {
-                "currency": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
@@ -321,22 +1026,13 @@ const docTemplate = `{
         "RegisterRes": {
             "type": "object",
             "required": [
-                "currency",
                 "email",
-                "expires_at",
                 "name",
                 "token",
-                "token_type",
                 "user_id"
             ],
             "properties": {
-                "currency": {
-                    "type": "string"
-                },
                 "email": {
-                    "type": "string"
-                },
-                "expires_at": {
                     "type": "string"
                 },
                 "name": {
@@ -345,11 +1041,182 @@ const docTemplate = `{
                 "token": {
                     "type": "string"
                 },
-                "token_type": {
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateCategoryRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Category"
+                }
+            }
+        },
+        "UpdateGoldRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Gold"
+                }
+            }
+        },
+        "category.CreateCategoryReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "category.ListCategoriesRes": {
+            "type": "object",
+            "required": [
+                "categories"
+            ],
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Category"
+                    }
+                }
+            }
+        },
+        "category.UpdateCategoryReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Category": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "name",
+                "type",
+                "updated_at"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "income, expense",
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
+                    "description": "nil for default categories",
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.Gold": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
                     "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "grams": {
+                    "type": "number",
+                    "format": "float64"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "price": {
+                    "description": "Price is the total purchase price for this gold entry (for the recorded grams)",
+                    "type": "number",
+                    "format": "float64"
+                },
+                "purityPercent": {
+                    "description": "For reference",
+                    "type": "number",
+                    "format": "float64"
+                },
+                "type": {
+                    "description": "pure_24k, jewelry_ring, etc",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "walletID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.Transaction": {
+            "type": "object",
+            "required": [
+                "amount",
+                "category_id",
+                "created_at",
+                "date",
+                "description",
+                "id",
+                "updated_at",
+                "wallet_id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "wallet_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -357,10 +1224,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "created_at",
-                "currency",
                 "email",
                 "id",
-                "is_active",
                 "name",
                 "updated_at"
             ],
@@ -368,17 +1233,11 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "currency": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
-                },
-                "is_active": {
-                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -403,9 +1262,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "isDefault": {
-                    "type": "boolean"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -420,6 +1276,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.Category": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Category"
+                }
+            }
+        },
         "dto.Error": {
             "type": "object",
             "required": [
@@ -431,6 +1298,88 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Gold": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Gold"
+                }
+            }
+        },
+        "gold.CreateGoldReq": {
+            "type": "object",
+            "required": [
+                "date",
+                "grams",
+                "price",
+                "type",
+                "wallet_id"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "grams": {
+                    "type": "number"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "price": {
+                    "description": "Price is the total purchase price for the recorded grams",
+                    "type": "number"
+                },
+                "purity_percent": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "wallet_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "gold.ListGoldsRes": {
+            "type": "object",
+            "required": [
+                "golds"
+            ],
+            "properties": {
+                "golds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Gold"
+                    }
+                }
+            }
+        },
+        "gold.UpdateGoldReq": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "grams": {
+                    "type": "number"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "purity_percent": {
+                    "type": "number"
+                },
+                "type": {
                     "type": "string"
                 }
             }

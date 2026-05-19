@@ -6,11 +6,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
+import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.core.network.RetrofitProvider
 import id.my.rizalanggoro.arta.domain.CashDashboard
-import id.my.rizalanggoro.arta.feature.home.data.DashboardApiService
+import id.my.rizalanggoro.arta.domain.Wallet
 import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,25 +20,21 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.time.LocalTime
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToLong
 
-class CashDashboardVM(
+class HomeCashDashboardVM(
     private val dashboardRepository: DashboardRepository,
+    private val selectedWalletPrefs: SelectedWalletPrefs,
     private val sessionName: String?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as MyApplication
-                val repository = DashboardRepository(
-                    apiService = RetrofitProvider.create(DashboardApiService::class.java),
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
-                CashDashboardVM(
-                    dashboardRepository = repository,
+                HomeCashDashboardVM(
+                    dashboardRepository = app.dashboardRepository,
+                    selectedWalletPrefs = app.selectedWalletPrefs,
                     sessionName = app.authPrefs.currentSession.value?.name,
                 )
             }
@@ -59,15 +55,20 @@ class CashDashboardVM(
     }
 
     private fun loadDashboard() {
+        val walletId = _uiState.value.selectedWallet?.id
+
         viewModelScope.launch {
-            dashboardRepository.getCashDashboard()
+            dashboardRepository.getCashDashboard(walletId)
                 .onSuccess { dashboard ->
-                    _uiState.value = dashboard.toUiState(sessionName)
+                    _uiState.value = dashboard.toUiState(
+                        sessionName = sessionName,
+                        selectedWallet = _uiState.value.selectedWallet,
+                    )
                 }
                 .onFailure { throwable ->
                     _uiState.update {
                         it.copy(
-                            activeWalletName = "Tabungan Uang",
+                            activeWalletName = it.selectedWallet?.name ?: "Tabungan Uang",
                             isLoading = false,
                             errorMessage = throwable.message ?: "Gagal memuat dashboard",
                         )
@@ -76,30 +77,18 @@ class CashDashboardVM(
         }
     }
 
-    private fun CashDashboard.toUiState(sessionName: String?): CashDashboardUiState {
+    private fun CashDashboard.toUiState(
+        sessionName: String?,
+        selectedWallet: Wallet?,
+    ): CashDashboardUiState {
         return CashDashboardUiState(
+            selectedWallet = selectedWallet,
             activeWalletName = activeWalletName,
             greeting = greetingForName(sessionName),
             balanceDisplay = formatMoney(currentBalance),
             todayIncomeDisplay = formatMoney(todayIncome),
             todayExpenseDisplay = formatMoney(todayExpense),
-            recentTransactions = recentTransactions.map { transaction ->
-                val category = transaction.category
-                CashDashboardTransactionUiState(
-                    title = transaction.description.ifBlank {
-                        category?.name?.ifBlank { "Transaksi" } ?: "Transaksi"
-                    },
-                    subtitle = listOfNotNull(
-                        category?.name?.takeIf { it.isNotBlank() },
-                        formatTransactionDate(transaction.date),
-                    ).joinToString(" · "),
-                    amountDisplay = buildAmountDisplay(
-                        transaction.amount,
-                        category?.type.orEmpty()
-                    ),
-                    isIncome = category?.type == "income",
-                )
-            },
+            recentTransactions = recentTransactions,
             isLoading = false,
             errorMessage = null,
         )
@@ -123,23 +112,20 @@ class CashDashboardVM(
         return "Rp ${formatter.format(rounded)}"
     }
 
-    private fun buildAmountDisplay(amount: Double, categoryType: String): String {
-        val prefix = if (categoryType == "income") "+" else "-"
-        return "$prefix${formatMoney(amount)}"
-    }
-
-    private fun formatTransactionDate(dateValue: String): String {
-        val parsed = runCatching { OffsetDateTime.parse(dateValue) }.getOrNull()
-            ?: runCatching { java.time.LocalDateTime.parse(dateValue) }.getOrNull()
-                ?.atOffset(java.time.ZoneOffset.UTC)
-            ?: return dateValue
-
-        val formatter = DateTimeFormatter.ofPattern("dd MMM HH:mm", Locale.forLanguageTag("id-ID"))
-        return formatter.format(parsed)
-    }
-
     init {
-        loadDashboard()
+        viewModelScope.launch {
+            selectedWalletPrefs.selectedWallet.collect { wallet ->
+                _uiState.update {
+                    it.copy(
+                        selectedWallet = wallet,
+                        activeWalletName = wallet?.name ?: it.activeWalletName,
+                        isLoading = true,
+                        errorMessage = null,
+                    )
+                }
+                loadDashboard()
+            }
+        }
 
         viewModelScope.launch {
             AppEventBus.event

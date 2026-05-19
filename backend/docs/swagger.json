@@ -72,7 +72,7 @@
                         "Bearer": []
                     }
                 ],
-                "description": "Revoke the current session token.",
+                "description": "Delete the current session token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -403,6 +403,130 @@
                 }
             }
         },
+        "/api/dashboard/cash": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Return the active cash wallet name, balance summary, today totals, and the latest 5 transactions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get cash dashboard overview",
+                "operationId": "GetCashDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Selected cash wallet ID",
+                        "name": "wallet_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/CashDashboardRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dashboard/gold": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Return the active gold wallet name, asset summary, current prices, and the latest 5 gold entries.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get gold dashboard overview",
+                "operationId": "GetGoldDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GoldDashboardRes"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/gold": {
             "get": {
                 "consumes": [
@@ -624,6 +748,56 @@
         }
     },
     "definitions": {
+        "CashDashboardRes": {
+            "type": "object",
+            "required": [
+                "active_wallet_name",
+                "financial_summary",
+                "recent_transactions"
+            ],
+            "properties": {
+                "active_wallet_name": {
+                    "type": "string"
+                },
+                "financial_summary": {
+                    "type": "object",
+                    "required": [
+                        "current_balance",
+                        "today_expense",
+                        "today_income"
+                    ],
+                    "properties": {
+                        "current_balance": {
+                            "type": "number"
+                        },
+                        "today_expense": {
+                            "type": "number"
+                        },
+                        "today_income": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "recent_transactions": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "category",
+                            "data"
+                        ],
+                        "properties": {
+                            "category": {
+                                "$ref": "#/definitions/domain.Category"
+                            },
+                            "data": {
+                                "$ref": "#/definitions/domain.Transaction"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "CreateCategoryRes": {
             "type": "object",
             "required": [
@@ -690,6 +864,60 @@
                 }
             }
         },
+        "GoldDashboardRes": {
+            "type": "object",
+            "required": [
+                "active_wallet_name",
+                "buy_price",
+                "latest_dollar_price",
+                "latest_gold_price_per_gram_idr",
+                "profit",
+                "recent_golds",
+                "total_asset",
+                "total_gold_items",
+                "total_weight"
+            ],
+            "properties": {
+                "active_wallet_name": {
+                    "type": "string"
+                },
+                "buy_price": {
+                    "type": "number"
+                },
+                "latest_dollar_price": {
+                    "type": "number"
+                },
+                "latest_gold_price_per_gram_idr": {
+                    "type": "number"
+                },
+                "profit": {
+                    "type": "number"
+                },
+                "recent_golds": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "data"
+                        ],
+                        "properties": {
+                            "data": {
+                                "$ref": "#/definitions/domain.Gold"
+                            }
+                        }
+                    }
+                },
+                "total_asset": {
+                    "type": "number"
+                },
+                "total_gold_items": {
+                    "type": "integer"
+                },
+                "total_weight": {
+                    "type": "number"
+                }
+            }
+        },
         "GoldSummaryRes": {
             "type": "object",
             "required": [
@@ -728,31 +956,19 @@
         "LoginRes": {
             "type": "object",
             "required": [
-                "currency",
                 "email",
-                "expires_at",
                 "name",
                 "token",
-                "token_type",
                 "user_id"
             ],
             "properties": {
-                "currency": {
-                    "type": "string"
-                },
                 "email": {
-                    "type": "string"
-                },
-                "expires_at": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
                 "token": {
-                    "type": "string"
-                },
-                "token_type": {
                     "type": "string"
                 },
                 "user_id": {
@@ -789,15 +1005,11 @@
         "RegisterReq": {
             "type": "object",
             "required": [
-                "currency",
                 "email",
                 "name",
                 "password"
             ],
             "properties": {
-                "currency": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
@@ -812,31 +1024,19 @@
         "RegisterRes": {
             "type": "object",
             "required": [
-                "currency",
                 "email",
-                "expires_at",
                 "name",
                 "token",
-                "token_type",
                 "user_id"
             ],
             "properties": {
-                "currency": {
-                    "type": "string"
-                },
                 "email": {
-                    "type": "string"
-                },
-                "expires_at": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
                 "token": {
-                    "type": "string"
-                },
-                "token_type": {
                     "type": "string"
                 },
                 "user_id": {
@@ -873,12 +1073,6 @@
                 "type"
             ],
             "properties": {
-                "color": {
-                    "type": "string"
-                },
-                "icon": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -904,12 +1098,6 @@
         "category.UpdateCategoryReq": {
             "type": "object",
             "properties": {
-                "color": {
-                    "type": "string"
-                },
-                "icon": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -921,40 +1109,24 @@
         "domain.Category": {
             "type": "object",
             "required": [
-                "color",
                 "created_at",
-                "icon",
                 "id",
-                "is_custom",
-                "is_default",
                 "name",
                 "type",
                 "updated_at"
             ],
             "properties": {
-                "color": {
-                    "type": "string"
-                },
                 "created_at": {
-                    "type": "string"
-                },
-                "icon": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "is_custom": {
-                    "type": "boolean"
-                },
-                "is_default": {
-                    "type": "boolean"
-                },
                 "name": {
                     "type": "string"
                 },
                 "type": {
-                    "description": "income, expense, general",
+                    "description": "income, expense",
                     "type": "string"
                 },
                 "updated_at": {
@@ -985,16 +1157,13 @@
                 "notes": {
                     "type": "string"
                 },
-                "pricePerGram": {
+                "price": {
+                    "description": "Price is the total purchase price for this gold entry (for the recorded grams)",
                     "type": "number",
                     "format": "float64"
                 },
                 "purityPercent": {
                     "description": "For reference",
-                    "type": "number",
-                    "format": "float64"
-                },
-                "totalValue": {
                     "type": "number",
                     "format": "float64"
                 },
@@ -1010,14 +1179,51 @@
                 }
             }
         },
+        "domain.Transaction": {
+            "type": "object",
+            "required": [
+                "amount",
+                "category_id",
+                "created_at",
+                "date",
+                "description",
+                "id",
+                "updated_at",
+                "wallet_id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "wallet_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "domain.User": {
             "type": "object",
             "required": [
                 "created_at",
-                "currency",
                 "email",
                 "id",
-                "is_active",
                 "name",
                 "updated_at"
             ],
@@ -1025,17 +1231,11 @@
                 "created_at": {
                     "type": "string"
                 },
-                "currency": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
-                },
-                "is_active": {
-                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -1059,9 +1259,6 @@
                 },
                 "id": {
                     "type": "integer"
-                },
-                "isDefault": {
-                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -1119,7 +1316,7 @@
             "required": [
                 "date",
                 "grams",
-                "price_per_gram",
+                "price",
                 "type",
                 "wallet_id"
             ],
@@ -1133,7 +1330,8 @@
                 "notes": {
                     "type": "string"
                 },
-                "price_per_gram": {
+                "price": {
+                    "description": "Price is the total purchase price for the recorded grams",
                     "type": "number"
                 },
                 "purity_percent": {
@@ -1173,7 +1371,7 @@
                 "notes": {
                     "type": "string"
                 },
-                "price_per_gram": {
+                "price": {
                     "type": "number"
                 },
                 "purity_percent": {

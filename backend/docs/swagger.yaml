@@ -1,5 +1,39 @@
 basePath: /api
 definitions:
+  CashDashboardRes:
+    properties:
+      active_wallet_name:
+        type: string
+      financial_summary:
+        properties:
+          current_balance:
+            type: number
+          today_expense:
+            type: number
+          today_income:
+            type: number
+        required:
+        - current_balance
+        - today_expense
+        - today_income
+        type: object
+      recent_transactions:
+        items:
+          properties:
+            category:
+              $ref: '#/definitions/domain.Category'
+            data:
+              $ref: '#/definitions/domain.Transaction'
+          required:
+          - category
+          - data
+          type: object
+        type: array
+    required:
+    - active_wallet_name
+    - financial_summary
+    - recent_transactions
+    type: object
   CreateCategoryRes:
     properties:
       data:
@@ -42,6 +76,44 @@ definitions:
     required:
     - data
     type: object
+  GoldDashboardRes:
+    properties:
+      active_wallet_name:
+        type: string
+      buy_price:
+        type: number
+      latest_dollar_price:
+        type: number
+      latest_gold_price_per_gram_idr:
+        type: number
+      profit:
+        type: number
+      recent_golds:
+        items:
+          properties:
+            data:
+              $ref: '#/definitions/domain.Gold'
+          required:
+          - data
+          type: object
+        type: array
+      total_asset:
+        type: number
+      total_gold_items:
+        type: integer
+      total_weight:
+        type: number
+    required:
+    - active_wallet_name
+    - buy_price
+    - latest_dollar_price
+    - latest_gold_price_per_gram_idr
+    - profit
+    - recent_golds
+    - total_asset
+    - total_gold_items
+    - total_weight
+    type: object
   GoldSummaryRes:
     properties:
       by_type:
@@ -68,27 +140,18 @@ definitions:
     type: object
   LoginRes:
     properties:
-      currency:
-        type: string
       email:
-        type: string
-      expires_at:
         type: string
       name:
         type: string
       token:
         type: string
-      token_type:
-        type: string
       user_id:
         type: string
     required:
-    - currency
     - email
-    - expires_at
     - name
     - token
-    - token_type
     - user_id
     type: object
   LogoutRes:
@@ -110,8 +173,6 @@ definitions:
     type: object
   RegisterReq:
     properties:
-      currency:
-        type: string
       email:
         type: string
       name:
@@ -119,34 +180,24 @@ definitions:
       password:
         type: string
     required:
-    - currency
     - email
     - name
     - password
     type: object
   RegisterRes:
     properties:
-      currency:
-        type: string
       email:
-        type: string
-      expires_at:
         type: string
       name:
         type: string
       token:
         type: string
-      token_type:
-        type: string
       user_id:
         type: string
     required:
-    - currency
     - email
-    - expires_at
     - name
     - token
-    - token_type
     - user_id
     type: object
   UpdateCategoryRes:
@@ -165,10 +216,6 @@ definitions:
     type: object
   category.CreateCategoryReq:
     properties:
-      color:
-        type: string
-      icon:
-        type: string
       name:
         type: string
       type:
@@ -188,10 +235,6 @@ definitions:
     type: object
   category.UpdateCategoryReq:
     properties:
-      color:
-        type: string
-      icon:
-        type: string
       name:
         type: string
       type:
@@ -199,22 +242,14 @@ definitions:
     type: object
   domain.Category:
     properties:
-      color:
-        type: string
       created_at:
-        type: string
-      icon:
         type: string
       id:
         type: integer
-      is_custom:
-        type: boolean
-      is_default:
-        type: boolean
       name:
         type: string
       type:
-        description: income, expense, general
+        description: income, expense
         type: string
       updated_at:
         type: string
@@ -222,12 +257,8 @@ definitions:
         description: nil for default categories
         type: integer
     required:
-    - color
     - created_at
-    - icon
     - id
-    - is_custom
-    - is_default
     - name
     - type
     - updated_at
@@ -245,14 +276,13 @@ definitions:
         type: integer
       notes:
         type: string
-      pricePerGram:
+      price:
+        description: Price is the total purchase price for this gold entry (for the
+          recorded grams)
         format: float64
         type: number
       purityPercent:
         description: For reference
-        format: float64
-        type: number
-      totalValue:
         format: float64
         type: number
       type:
@@ -263,18 +293,42 @@ definitions:
       walletID:
         type: integer
     type: object
+  domain.Transaction:
+    properties:
+      amount:
+        type: number
+      category_id:
+        type: integer
+      created_at:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      wallet_id:
+        type: integer
+    required:
+    - amount
+    - category_id
+    - created_at
+    - date
+    - description
+    - id
+    - updated_at
+    - wallet_id
+    type: object
   domain.User:
     properties:
       created_at:
-        type: string
-      currency:
         type: string
       email:
         type: string
       id:
         type: integer
-      is_active:
-        type: boolean
       name:
         type: string
       updated_at:
@@ -285,10 +339,8 @@ definitions:
         type: array
     required:
     - created_at
-    - currency
     - email
     - id
-    - is_active
     - name
     - updated_at
     type: object
@@ -298,8 +350,6 @@ definitions:
         type: string
       id:
         type: integer
-      isDefault:
-        type: boolean
       name:
         type: string
       type:
@@ -341,7 +391,8 @@ definitions:
         type: number
       notes:
         type: string
-      price_per_gram:
+      price:
+        description: Price is the total purchase price for the recorded grams
         type: number
       purity_percent:
         type: number
@@ -352,7 +403,7 @@ definitions:
     required:
     - date
     - grams
-    - price_per_gram
+    - price
     - type
     - wallet_id
     type: object
@@ -373,7 +424,7 @@ definitions:
         type: number
       notes:
         type: string
-      price_per_gram:
+      price:
         type: number
       purity_percent:
         type: number
@@ -425,7 +476,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Revoke the current session token.
+      description: Delete the current session token.
       parameters:
       - description: Bearer token
         in: header
@@ -641,6 +692,88 @@ paths:
             $ref: '#/definitions/UpdateCategoryRes'
       tags:
       - category
+  /api/dashboard/cash:
+    get:
+      consumes:
+      - application/json
+      description: Return the active cash wallet name, balance summary, today totals,
+        and the latest 5 transactions.
+      operationId: GetCashDashboard
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Selected cash wallet ID
+        in: query
+        name: wallet_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CashDashboardRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - Bearer: []
+      summary: Get cash dashboard overview
+      tags:
+      - dashboard
+  /api/dashboard/gold:
+    get:
+      consumes:
+      - application/json
+      description: Return the active gold wallet name, asset summary, current prices,
+        and the latest 5 gold entries.
+      operationId: GetGoldDashboard
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GoldDashboardRes'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - Bearer: []
+      summary: Get gold dashboard overview
+      tags:
+      - dashboard
   /api/gold:
     get:
       consumes:
