@@ -11,22 +11,19 @@ class SelectedWalletPrefs(context: Context) {
     private val prefs = context.getSharedPreferences("selected_wallet_prefs", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val _selectedWallet = MutableStateFlow<Wallet?>(getSelectedWallet())
+    private val _selectedWallet = MutableStateFlow(getSelectedWallet())
     val selectedWallet: StateFlow<Wallet?> = _selectedWallet.asStateFlow()
 
-    private val _selectedWalletId = MutableStateFlow<Int?>(_selectedWallet.value?.id)
-    val selectedWalletId: StateFlow<Int?> = _selectedWalletId.asStateFlow()
-
     fun saveSelectedWallet(wallet: Wallet) {
-        prefs.edit().putString(KEY_SELECTED_WALLET, json.encodeToString(Wallet.serializer(), wallet)).apply()
+        prefs.edit()
+            .putString(KEY_SELECTED_WALLET, json.encodeToString(Wallet.serializer(), wallet))
+            .apply()
         _selectedWallet.value = wallet
-        _selectedWalletId.value = wallet.id
     }
 
     fun clear() {
         prefs.edit().remove(KEY_SELECTED_WALLET).apply()
         _selectedWallet.value = null
-        _selectedWalletId.value = null
     }
 
     private fun getSelectedWallet(): Wallet? {

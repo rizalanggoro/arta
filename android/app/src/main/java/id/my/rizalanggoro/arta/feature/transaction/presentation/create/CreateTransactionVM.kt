@@ -7,11 +7,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
-import id.my.rizalanggoro.arta.domain.Category
-import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.core.extension.toApiFormat
 import id.my.rizalanggoro.arta.feature.category.presentation.select.CategorySelectionBus
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
-import id.my.rizalanggoro.arta.feature.wallet.presentation.select.WalletSelectionBus
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -29,96 +27,47 @@ class CreateTransactionVM(
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
-                val repo = TransactionRepository(
-                    apiService = id.my.rizalanggoro.arta.core.network.RetrofitProvider.create(
-                        id.my.rizalanggoro.arta.feature.transaction.data.TransactionApiService::class.java
-                    ),
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
                 CreateTransactionVM(
-                    transactionRepository = repo,
+                    transactionRepository = app.transactionRepository,
                     selectedWalletPrefs = app.selectedWalletPrefs
                 )
             }
         }
     }
 
-    init {
-        viewModelScope.launch {
-            selectedWalletPrefs.selectedWallet.collect { wallet ->
-                if (wallet != null && _uiState.value.walletId.isBlank()) {
-                    onSelectWallet(wallet)
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            CategorySelectionBus.selectedCategory.collect { category ->
-                onSelectCategory(category)
-            }
-        }
-
-    }
-
     private val _uiState = MutableStateFlow(CreateTransactionUiState())
     val uiState: StateFlow<CreateTransactionUiState> = _uiState.asStateFlow()
 
-    private val _effect = MutableSharedFlow<CreateTransactionEffect>()
-    val effect: SharedFlow<CreateTransactionEffect> = _effect.asSharedFlow()
-
-    fun onWalletIdChanged(value: String) {
-        _uiState.update { it.copy(walletId = value, selectedWalletName = "", walletIdError = null) }
-    }
-
-    fun onCategoryIdChanged(value: String) {
-        _uiState.update {
-            it.copy(
-                categoryId = value,
-                selectedCategoryName = "",
-                categoryError = null
-            )
-        }
-    }
+    private val _effect = MutableSharedFlow<CreateTransactionEvent>()
+    val effect: SharedFlow<CreateTransactionEvent> = _effect.asSharedFlow()
 
     fun onAmountChanged(value: String) {
         _uiState.update { it.copy(amount = value, amountError = null) }
-    }
-
-    fun onSelectCategory(category: Category) {
-        _uiState.update {
-            it.copy(
-                categoryId = category.id.toString(),
-                selectedCategoryName = category.name,
-                categoryError = null,
-            )
-        }
-    }
-
-    fun onSelectWallet(wallet: Wallet) {
-        _uiState.update {
-            it.copy(
-                walletId = wallet.id.toString(),
-                selectedWalletName = wallet.name,
-                walletIdError = null,
-            )
-        }
     }
 
     fun onDescriptionChanged(value: String) {
         _uiState.update { it.copy(description = value) }
     }
 
-    fun onDateChanged(value: String) {
-        _uiState.update { it.copy(date = value, dateError = null) }
+    fun onChangeDate(value: Long) = _uiState.update {
+        it.copy(
+            date = value,
+            dateError = null,
+            isDatePickerOpen = false
+        )
+    }
+
+    fun onChangeDatePickerDialog(isOpen: Boolean) = _uiState.update {
+        it.copy(isDatePickerOpen = isOpen)
     }
 
     fun createTransaction() {
         val current = _uiState.value
         var hasError = false
 
-        val walletId = current.walletId.toIntOrNull()
+        val walletId = current.wallet?.id
         if (walletId == null || walletId <= 0) {
-            _uiState.update { it.copy(walletIdError = "Wallet ID wajib diisi") }
+            _uiState.update { it.copy(walletError = "Wallet aktif wajib dipilih") }
             hasError = true
         }
 
@@ -128,19 +77,13 @@ class CreateTransactionVM(
             hasError = true
         }
 
-        val categoryId = current.categoryId.toIntOrNull()
-        if (categoryId == null || categoryId <= 0) {
+        if (current.category == null) {
             _uiState.update { it.copy(categoryError = "Kategori wajib dipilih") }
             hasError = true
         }
 
-        if (current.date.isBlank()) {
-            _uiState.update { it.copy(dateError = "Tanggal wajib diisi") }
-            hasError = true
-        }
-
         if (hasError) {
-            viewModelScope.launch { _effect.emit(CreateTransactionEffect.ShowMessage("Periksa kembali isian transaksi")) }
+            viewModelScope.launch { _effect.emit(CreateTransactionEvent.ShowMessage("Periksa kembali isian transaksi")) }
             return
         }
 
@@ -149,15 +92,15 @@ class CreateTransactionVM(
             transactionRepository.createTransaction(
                 walletId = walletId!!,
                 amount = amount!!,
-                categoryId = categoryId!!,
+                categoryId = current.category!!.id,
                 description = current.description,
-                date = current.date,
+                date = current.date.toApiFormat(),
             ).onSuccess { tx ->
-                _effect.emit(CreateTransactionEffect.ShowMessage("Transaksi berhasil dibuat"))
-                _effect.emit(CreateTransactionEffect.NavigateBack)
+                _effect.emit(CreateTransactionEvent.ShowMessage("Transaksi berhasil dibuat"))
+                _effect.emit(CreateTransactionEvent.Success)
             }.onFailure { throwable ->
                 _effect.emit(
-                    CreateTransactionEffect.ShowMessage(
+                    CreateTransactionEvent.ShowMessage(
                         throwable.message ?: "Gagal membuat transaksi"
                     )
                 )
@@ -165,9 +108,30 @@ class CreateTransactionVM(
             _uiState.update { it.copy(isLoading = false) }
         }
     }
+
+    init {
+        viewModelScope.launch {
+            selectedWalletPrefs.selectedWallet.collect { wallet ->
+                _uiState.update {
+                    it.copy(wallet = wallet)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            CategorySelectionBus.selectedCategory.collect { category ->
+                _uiState.update {
+                    it.copy(
+                        category = category,
+                        categoryError = null
+                    )
+                }
+            }
+        }
+    }
 }
 
-sealed interface CreateTransactionEffect {
-    data class ShowMessage(val message: String) : CreateTransactionEffect
-    data object NavigateBack : CreateTransactionEffect
+sealed interface CreateTransactionEvent {
+    data class ShowMessage(val message: String) : CreateTransactionEvent
+    data object Success : CreateTransactionEvent
 }

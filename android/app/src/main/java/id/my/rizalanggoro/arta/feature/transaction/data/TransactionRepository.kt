@@ -1,5 +1,6 @@
 package id.my.rizalanggoro.arta.feature.transaction.data
 
+import android.util.Log
 import id.my.rizalanggoro.arta.core.dto.ApiErrorDto
 import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.domain.Transaction
@@ -25,7 +26,8 @@ class TransactionRepository(
         date: String,
     ): Result<Transaction> {
         return runCatching {
-            val authorization = authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
+            val authorization =
+                authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
 
             apiService.create(
                 authorization = authorization,
@@ -45,7 +47,8 @@ class TransactionRepository(
 
     suspend fun getTransactionById(id: Int): Result<Transaction> {
         return runCatching {
-            val authorization = authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
+            val authorization =
+                authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
 
             apiService.get(authorization = authorization, id = id).toDomainResult()
         }.fold(
@@ -56,7 +59,8 @@ class TransactionRepository(
 
     suspend fun listTransactionsByWallet(walletId: Int): Result<List<Transaction>> {
         return runCatching {
-            val authorization = authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
+            val authorization =
+                authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
 
             apiService.list(authorization = authorization, walletId = walletId).toListDomainResult()
         }.fold(
@@ -74,7 +78,8 @@ class TransactionRepository(
         date: String? = null,
     ): Result<Transaction> {
         return runCatching {
-            val authorization = authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
+            val authorization =
+                authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
 
             apiService.update(
                 authorization = authorization,
@@ -95,11 +100,16 @@ class TransactionRepository(
 
     suspend fun deleteTransaction(id: Int): Result<Unit> {
         return runCatching {
-            val authorization = authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
+            val authorization =
+                authorizationHeader() ?: throw apiError("Sesi login tidak ditemukan")
 
             val response = apiService.delete(authorization = authorization, id = id)
             if (!response.isSuccessful) {
-                return@runCatching Result.failure(apiError(message = response.errorBody()?.string().orEmpty()))
+                return@runCatching Result.failure(
+                    apiError(
+                        message = response.errorBody()?.string().orEmpty()
+                    )
+                )
             }
 
             Result.success(Unit)
@@ -133,6 +143,7 @@ class TransactionRepository(
     }
 
     private fun Response<*>.errorMessage(): String {
+        Log.d("TransactionRepository", "errorMessage: ${this.message()}")
         val errorBody = errorBody()?.string().orEmpty()
         val message = runCatching {
             json.decodeFromString(ApiErrorDto.serializer(), errorBody).message

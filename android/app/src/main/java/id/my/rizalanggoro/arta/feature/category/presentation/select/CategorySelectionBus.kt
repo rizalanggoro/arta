@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 object CategorySelectionBus {
-    private val _selectedCategory = MutableSharedFlow<Category>(extraBufferCapacity = 1)
+    private val _selectedCategory = MutableSharedFlow<Category>()
     val selectedCategory: SharedFlow<Category> = _selectedCategory.asSharedFlow()
 
     suspend fun emit(category: Category) {

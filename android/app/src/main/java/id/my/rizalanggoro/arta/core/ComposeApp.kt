@@ -16,8 +16,8 @@ import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
 import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
 import id.my.rizalanggoro.arta.core.Routes.CategoryUpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.ForgotPasswordRoute
-import id.my.rizalanggoro.arta.core.Routes.GoldDetailRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldCreateRoute
+import id.my.rizalanggoro.arta.core.Routes.GoldDetailRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldUpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeRoute
@@ -25,11 +25,11 @@ import id.my.rizalanggoro.arta.core.Routes.HomeSettingRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeTransactionRoute
 import id.my.rizalanggoro.arta.core.Routes.LoginRoute
 import id.my.rizalanggoro.arta.core.Routes.RegisterRoute
-import id.my.rizalanggoro.arta.core.Routes.TransactionDetailRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionCreateRoute
+import id.my.rizalanggoro.arta.core.Routes.TransactionDetailRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionUpdateRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletCreateFirstRoute
+import id.my.rizalanggoro.arta.core.Routes.WalletCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletUpdateRoute
@@ -73,7 +73,7 @@ fun ComposeApp() {
             else -> LoginRoute
         }
 
-        val backStack = rememberNavBackStack(startRoute)
+        val backStack = rememberNavBackStack(Routes.TransactionCreateRoute)
 
         CompositionLocalProvider(LocalBackStack provides backStack) {
             Surface {
@@ -91,7 +91,11 @@ fun ComposeApp() {
                         entry<GoldCreateRoute> { CreateGoldScreen() }
                         entry<GoldUpdateRoute> { route -> UpdateGoldScreen(goldId = route.goldId) }
                         entry<TransactionCreateRoute> { CreateTransactionScreen() }
-                        entry<TransactionUpdateRoute> { route -> UpdateTransactionScreen(transactionId = route.transactionId) }
+                        entry<TransactionUpdateRoute> { route ->
+                            UpdateTransactionScreen(
+                                transactionId = route.transactionId
+                            )
+                        }
                         entry<TransactionDetailRoute> { route ->
                             TransactionDetailScreen(
                                 transactionId = route.id
