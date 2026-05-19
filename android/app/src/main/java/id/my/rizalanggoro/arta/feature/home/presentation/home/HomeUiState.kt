@@ -1,11 +1,8 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.home
 
-data class HomeUiState(
-	val walletType: HomeWalletType = HomeWalletType.CashSavings,
-	val selectedIndex: Int = 0,
-)
+import id.my.rizalanggoro.arta.domain.Wallet
 
-enum class HomeWalletType {
-	CashSavings,
-	GoldSavings,
-}
+data class HomeUiState(
+    val selectedIndex: Int = 0,
+    val selectedWallet: Wallet? = null
+)

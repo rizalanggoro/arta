@@ -20,12 +20,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -37,17 +35,14 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.Routes.GoldCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeCashDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeSettingRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeTransactionRoute
-import id.my.rizalanggoro.arta.core.Routes.GoldCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
-import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.domain.Wallet
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.HomeGoldDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
@@ -57,22 +52,19 @@ import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
 fun HomeScreen(
-    walletType: HomeWalletType = HomeWalletType.CashSavings,
     vm: HomeVM = viewModel(factory = HomeVM.Factory),
 ) {
-    val app = LocalContext.current.applicationContext as MyApplication
-    val selectedWallet by app.selectedWalletPrefs.selectedWallet.collectAsState()
-    val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
-    val effectiveWalletType = selectedWallet.toHomeWalletType() ?: walletType
-    val destinations = walletDestinations(effectiveWalletType)
+    val uiState by vm.uiState.collectAsState()
+    val destinations = walletDestinations(uiState.selectedWallet?.type)
 
-    LaunchedEffect(effectiveWalletType) {
-        vm.onWalletTypeChanged(effectiveWalletType)
+    val walletType = uiState.selectedWallet?.type
+
+    val homeBackStack: NavBackStack<NavKey>? = when (walletType) {
+        "cash_savings" -> rememberNavBackStack(HomeCashDashboardRoute)
+        "gold_savings" -> rememberNavBackStack(HomeGoldDashboardRoute)
+        else -> null
     }
-
-    // nested back stack for home children
-    val homeBackStack = rememberNavBackStack(HomeCashDashboardRoute)
 
     Content(
         destinations = destinations,
@@ -81,9 +73,9 @@ fun HomeScreen(
         onClickSelectWallet = { backStack.add(WalletSelectRoute) },
         homeBackStack = homeBackStack,
         onClickFab = {
-            when (effectiveWalletType) {
-                HomeWalletType.CashSavings -> backStack.add(TransactionCreateRoute)
-                HomeWalletType.GoldSavings -> backStack.add(GoldCreateRoute)
+            when (walletType) {
+                "cash_savings" -> backStack.add(TransactionCreateRoute)
+                "gold_savings" -> backStack.add(GoldCreateRoute)
             }
         },
         entryProvider = entryProvider {
@@ -103,8 +95,8 @@ private fun Content(
     selectedIndex: Int,
     onDestinationSelected: (Int) -> Unit,
     onClickSelectWallet: () -> Unit,
-    homeBackStack: NavBackStack<NavKey> = rememberNavBackStack(HomeCashDashboardRoute),
-    entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {},
+    homeBackStack: (NavBackStack<NavKey>)? = null,
+    entryProvider: ((NavKey) -> NavEntry<NavKey>)? = null,
     onClickFab: () -> Unit = {},
 ) {
     Scaffold(
@@ -122,25 +114,26 @@ private fun Content(
             )
         },
         bottomBar = {
-            NavigationBar {
-                destinations.forEachIndexed { index, destination ->
-                    NavigationBarItem(
-                        selected = selectedIndex == index,
-                        onClick = {
-                            onDestinationSelected(index)
-                            homeBackStack.removeFirstOrNull()
-                            homeBackStack.add(destination.route)
-                        },
-                        icon = {
-                            Icon(
-                                destination.icon,
-                                contentDescription = null
-                            )
-                        },
-                        label = { Text(destination.label) },
-                    )
+            if (destinations.isNotEmpty() && homeBackStack != null)
+                NavigationBar {
+                    destinations.forEachIndexed { index, destination ->
+                        NavigationBarItem(
+                            selected = selectedIndex == index,
+                            onClick = {
+                                onDestinationSelected(index)
+                                homeBackStack.removeFirstOrNull()
+                                homeBackStack.add(destination.route)
+                            },
+                            icon = {
+                                Icon(
+                                    destination.icon,
+                                    contentDescription = null
+                                )
+                            },
+                            label = { Text(destination.label) },
+                        )
+                    }
                 }
-            }
         },
         floatingActionButton = {
             if (selectedIndex in 0..1) {
@@ -158,14 +151,15 @@ private fun Content(
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
-            NavDisplay(
-                backStack = homeBackStack,
-                entryDecorators = listOf(
-                    rememberSaveableStateHolderNavEntryDecorator(),
-                    rememberViewModelStoreNavEntryDecorator(),
-                ),
-                entryProvider = entryProvider
-            )
+            if (homeBackStack != null && entryProvider != null)
+                NavDisplay(
+                    backStack = homeBackStack,
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator(),
+                    ),
+                    entryProvider = entryProvider
+                )
         }
     }
 }
@@ -176,52 +170,43 @@ private data class HomeDestination(
     val route: NavKey
 )
 
-private fun walletDestinations(walletType: HomeWalletType): List<HomeDestination> {
-    return when (walletType) {
-        HomeWalletType.CashSavings -> listOf(
-            HomeDestination(
-                label = "Ringkasan",
-                icon = Icons.Rounded.Dashboard,
-                route = HomeCashDashboardRoute
-            ),
+private fun walletDestinations(type: String?): List<HomeDestination> {
+    if (type == null) return emptyList()
+
+    val destinations = mutableListOf(
+        HomeDestination(
+            label = "Ringkasan",
+            icon = Icons.Rounded.Dashboard,
+            route = HomeCashDashboardRoute
+        ),
+        HomeDestination(
+            label = "Pengaturan",
+            icon = Icons.Rounded.Settings,
+            route = HomeSettingRoute
+        ),
+    )
+
+    when (type) {
+        "cash_savings" -> destinations.add(
+            1,
             HomeDestination(
                 label = "Transaksi",
                 icon = Icons.Rounded.Payment,
                 route = HomeTransactionRoute
-            ),
-            HomeDestination(
-                label = "Pengaturan",
-                icon = Icons.Rounded.Settings,
-                route = HomeSettingRoute
-            ),
+            )
         )
 
-        HomeWalletType.GoldSavings -> listOf(
-            HomeDestination(
-                label = "Ringkasan",
-                icon = Icons.Rounded.Dashboard,
-                route = HomeGoldDashboardRoute
-            ),
+        "gold_savings" -> destinations.add(
+            1,
             HomeDestination(
                 label = "Emas",
                 icon = Icons.Rounded.Balance,
                 route = HomeGoldRoute
-            ),
-            HomeDestination(
-                label = "Pengaturan",
-                icon = Icons.Rounded.Settings,
-                route = HomeSettingRoute
-            ),
+            )
         )
     }
-}
 
-private fun Wallet?.toHomeWalletType(): HomeWalletType? {
-    return when (this?.type) {
-        "cash_savings" -> HomeWalletType.CashSavings
-        "gold_savings" -> HomeWalletType.GoldSavings
-        else -> null
-    }
+    return destinations
 }
 
 @Preview(showBackground = true, name = "Cash Wallet Home")
@@ -229,7 +214,7 @@ private fun Wallet?.toHomeWalletType(): HomeWalletType? {
 private fun HomeCashPreview() {
     ArtaTheme {
         Content(
-            destinations = walletDestinations(HomeWalletType.CashSavings),
+            destinations = walletDestinations("cash_savings"),
             selectedIndex = 0,
             onDestinationSelected = {},
             onClickSelectWallet = {},
@@ -242,7 +227,7 @@ private fun HomeCashPreview() {
 private fun HomeGoldPreview() {
     ArtaTheme {
         Content(
-            destinations = walletDestinations(HomeWalletType.GoldSavings),
+            destinations = walletDestinations("gold_savings"),
             selectedIndex = 0,
             onDestinationSelected = {},
             onClickSelectWallet = {},
