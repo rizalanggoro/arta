@@ -72,7 +72,6 @@ fun CreateTransactionScreen(
         amount = uiState.amount,
         description = uiState.description,
         date = uiState.date,
-        walletError = uiState.walletError,
         amountError = uiState.amountError,
         categoryError = uiState.categoryError,
         dateError = uiState.dateError,
@@ -99,12 +98,11 @@ fun CreateTransactionScreen(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
-    snackbarHostState: SnackbarHostState,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     wallet: Wallet? = null,
     category: Category? = null,
     amount: String = "",
     description: String = "",
-    walletError: String? = null,
     amountError: String? = null,
     categoryError: String? = null,
     dateError: String? = null,
@@ -143,7 +141,7 @@ private fun Content(
             TextField(
                 value = amount,
                 onValueChange = onAmountChanged,
-                label = { Text("Jumlah") },
+                label = { Text("Nominal") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
@@ -172,14 +170,6 @@ private fun Content(
                 },
             )
 
-            if (walletError != null) {
-                Text(
-                    text = walletError,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                )
-            }
-
             ListItem(
                 leadingContent = {
                     Icon(
@@ -189,7 +179,14 @@ private fun Content(
                 },
                 headlineContent = { Text("Kategori") },
                 supportingContent = {
-                    Text((category?.name ?: "").ifBlank { "Pilih kategori" })
+                    when {
+                        categoryError != null -> Text(
+                            categoryError,
+                            color = MaterialTheme.colorScheme.error
+                        )
+
+                        else -> Text((category?.name ?: "").ifBlank { "Pilih kategori" })
+                    }
                 },
                 trailingContent = {
                     Icon(
@@ -211,7 +208,14 @@ private fun Content(
                 },
                 headlineContent = { Text("Tanggal") },
                 supportingContent = {
-                    Text(date.toIndonesianDate())
+                    when {
+                        dateError != null -> Text(
+                            dateError,
+                            color = MaterialTheme.colorScheme.error
+                        )
+
+                        else -> Text(date.toIndonesianDate())
+                    }
                 },
                 trailingContent = {
                     Icon(
@@ -223,14 +227,6 @@ private fun Content(
                     onClickSelectDate()
                 },
             )
-
-            if (dateError != null) {
-                Text(
-                    text = dateError,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                )
-            }
 
             TextField(
                 value = description,
@@ -278,7 +274,7 @@ private fun walletTypeLabel(type: String): String {
 @Composable
 private fun CreateTransactionPreview() {
     ArtaTheme {
-        Content(snackbarHostState = remember { SnackbarHostState() })
+        Content()
     }
 }
 
@@ -286,10 +282,7 @@ private fun CreateTransactionPreview() {
 @Composable
 private fun CreateTransactionLoadingPreview() {
     ArtaTheme {
-        Content(
-            snackbarHostState = remember { SnackbarHostState() },
-            isLoading = true,
-        )
+        Content(isLoading = true)
     }
 }
 
@@ -298,17 +291,15 @@ private fun CreateTransactionLoadingPreview() {
 private fun CreateTransactionErrorPreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
             wallet = Wallet(
                 id = 12,
                 userId = 10,
                 name = "Tabungan Uang",
                 type = "cash_savings",
             ),
-            walletError = "Wallet aktif belum dipilih",
-            amountError = "Jumlah tidak valid",
-            categoryError = "Kategori wajib dipilih",
-            dateError = "Tanggal wajib diisi",
+            amountError = "Nominal tidak valid",
+            categoryError = "Kategori tidak boleh kosong",
+            dateError = "Tanggal tidak boleh kosong",
         )
     }
 }

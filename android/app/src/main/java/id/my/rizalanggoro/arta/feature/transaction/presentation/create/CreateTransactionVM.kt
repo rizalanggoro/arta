@@ -7,8 +7,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.toApiFormat
-import id.my.rizalanggoro.arta.feature.category.presentation.select.CategorySelectionBus
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -65,20 +67,14 @@ class CreateTransactionVM(
         val current = _uiState.value
         var hasError = false
 
-        val walletId = current.wallet?.id
-        if (walletId == null || walletId <= 0) {
-            _uiState.update { it.copy(walletError = "Wallet aktif wajib dipilih") }
-            hasError = true
-        }
-
-        val amount = current.amount.toDoubleOrNull()
-        if (amount == null || amount <= 0) {
-            _uiState.update { it.copy(amountError = "Jumlah harus berupa angka lebih dari 0") }
+        val amount = current.amount.toDoubleOrNull() ?: 0.0
+        if (amount <= 0) {
+            _uiState.update { it.copy(amountError = "Nominal transaksi tidak valid!") }
             hasError = true
         }
 
         if (current.category == null) {
-            _uiState.update { it.copy(categoryError = "Kategori wajib dipilih") }
+            _uiState.update { it.copy(categoryError = "Kategori tidak boleh kosong!") }
             hasError = true
         }
 
@@ -90,18 +86,18 @@ class CreateTransactionVM(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             transactionRepository.createTransaction(
-                walletId = walletId!!,
-                amount = amount!!,
+                walletId = current.wallet!!.id,
+                amount = amount,
                 categoryId = current.category!!.id,
                 description = current.description,
                 date = current.date.toApiFormat(),
             ).onSuccess { tx ->
-                _effect.emit(CreateTransactionEvent.ShowMessage("Transaksi berhasil dibuat"))
                 _effect.emit(CreateTransactionEvent.Success)
+                AppEventBus.emit(AppEvent.TransactionChanged)
             }.onFailure { throwable ->
                 _effect.emit(
                     CreateTransactionEvent.ShowMessage(
-                        throwable.message ?: "Gagal membuat transaksi"
+                        throwable.message ?: "Terjadi kesalahan tak terduga!"
                     )
                 )
             }
@@ -119,14 +115,16 @@ class CreateTransactionVM(
         }
 
         viewModelScope.launch {
-            CategorySelectionBus.selectedCategory.collect { category ->
-                _uiState.update {
-                    it.copy(
-                        category = category,
-                        categoryError = null
-                    )
+            AppEventBus.event
+                .filterIsInstance<AppEvent.CategorySelected>()
+                .collect { event ->
+                    _uiState.update {
+                        it.copy(
+                            category = event.category,
+                            categoryError = null
+                        )
+                    }
                 }
-            }
         }
     }
 }

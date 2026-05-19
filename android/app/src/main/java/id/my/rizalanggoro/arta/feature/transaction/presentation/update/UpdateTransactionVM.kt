@@ -2,19 +2,20 @@ package id.my.rizalanggoro.arta.feature.transaction.presentation.update
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
-import id.my.rizalanggoro.arta.feature.category.presentation.select.CategorySelectionBus
-import id.my.rizalanggoro.arta.domain.Category
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -25,21 +26,9 @@ class UpdateTransactionVM(
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
-                val repo = id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository(
-                    apiService = id.my.rizalanggoro.arta.core.network.RetrofitProvider.create(
-                        id.my.rizalanggoro.arta.feature.transaction.data.TransactionApiService::class.java
-                    ),
-                    authSessionProvider = { app.authPrefs.currentSession.value },
+                UpdateTransactionVM(
+                    transactionRepository = app.transactionRepository
                 )
-                UpdateTransactionVM(transactionRepository = repo)
-            }
-        }
-    }
-
-    init {
-        viewModelScope.launch {
-            CategorySelectionBus.selectedCategory.collect { category ->
-                onSelectCategory(category)
             }
         }
     }
@@ -69,19 +58,20 @@ class UpdateTransactionVM(
         }
     }
 
-    fun onWalletIdChanged(value: String) { _uiState.update { it.copy(walletId = value) } }
-    fun onAmountChanged(value: String) { _uiState.update { it.copy(amount = value) } }
-    fun onCategoryIdChanged(value: String) { _uiState.update { it.copy(categoryId = value, selectedCategoryName = "") } }
-    fun onDescriptionChanged(value: String) { _uiState.update { it.copy(description = value) } }
-    fun onDateChanged(value: String) { _uiState.update { it.copy(date = value) } }
+    fun onWalletIdChanged(value: String) {
+        _uiState.update { it.copy(walletId = value) }
+    }
 
-    fun onSelectCategory(category: Category) {
-        _uiState.update {
-            it.copy(
-                categoryId = category.id.toString(),
-                selectedCategoryName = category.name,
-            )
-        }
+    fun onAmountChanged(value: String) {
+        _uiState.update { it.copy(amount = value) }
+    }
+
+    fun onDescriptionChanged(value: String) {
+        _uiState.update { it.copy(description = value) }
+    }
+
+    fun onDateChanged(value: String) {
+        _uiState.update { it.copy(date = value) }
     }
 
     fun updateTransaction(id: Int) {
@@ -99,9 +89,28 @@ class UpdateTransactionVM(
                 _effect.emit(UpdateTransactionEffect.ShowMessage("Transaksi berhasil diperbarui"))
                 _effect.emit(UpdateTransactionEffect.NavigateBack)
             }.onFailure { throwable ->
-                _effect.emit(UpdateTransactionEffect.ShowMessage(throwable.message ?: "Gagal memperbarui transaksi"))
+                _effect.emit(
+                    UpdateTransactionEffect.ShowMessage(
+                        throwable.message ?: "Gagal memperbarui transaksi"
+                    )
+                )
             }
             _uiState.update { it.copy(isLoading = false) }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            AppEventBus.event
+                .filterIsInstance<AppEvent.CategorySelected>()
+                .collect { event ->
+                    _uiState.update {
+                        it.copy(
+                            categoryId = event.category.id.toString(),
+                            selectedCategoryName = event.category.name,
+                        )
+                    }
+                }
         }
     }
 }

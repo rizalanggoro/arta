@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.network.RetrofitProvider
 import id.my.rizalanggoro.arta.domain.CashDashboard
 import id.my.rizalanggoro.arta.feature.home.data.DashboardApiService
@@ -13,6 +15,7 @@ import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -50,10 +53,6 @@ class CashDashboardVM(
         ),
     )
     val uiState: StateFlow<CashDashboardUiState> = _uiState.asStateFlow()
-
-    init {
-        loadDashboard()
-    }
 
     fun retry() {
         loadDashboard()
@@ -137,5 +136,15 @@ class CashDashboardVM(
 
         val formatter = DateTimeFormatter.ofPattern("dd MMM HH:mm", Locale.forLanguageTag("id-ID"))
         return formatter.format(parsed)
+    }
+
+    init {
+        loadDashboard()
+
+        viewModelScope.launch {
+            AppEventBus.event
+                .filter { it is AppEvent.TransactionChanged }
+                .collect { loadDashboard() }
+        }
     }
 }

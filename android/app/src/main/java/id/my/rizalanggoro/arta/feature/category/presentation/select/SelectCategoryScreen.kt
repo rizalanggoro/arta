@@ -28,8 +28,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.domain.Category
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,14 +43,10 @@ fun SelectCategoryScreen(
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
 
-    LaunchedEffect(Unit) { vm.loadCategories() }
-
     LaunchedEffect(Unit) {
-        vm.effect.collect { effect ->
-            when (effect) {
-                SelectCategoryEffect.NavigateBack -> backStack.removeLastOrNull()
-            }
-        }
+        AppEventBus.event
+            .filterIsInstance<AppEvent.CategorySelected>()
+            .collect { backStack.removeLastOrNull() }
     }
 
     Content(
@@ -178,10 +178,26 @@ private fun SelectCategoryPreview() {
 @Composable
 private fun SelectCategoryItemsPreview() {
     ArtaTheme {
-        Content(categories = listOf(
-            id.my.rizalanggoro.arta.domain.Category(id = 1, userId = null, name = "Makanan", type = "expense", icon = "🍜", color = "#F97316"),
-            id.my.rizalanggoro.arta.domain.Category(id = 2, userId = 10, name = "Gaji", type = "income", icon = "💰", color = "#10B981"),
-        ))
+        Content(
+            categories = listOf(
+                id.my.rizalanggoro.arta.domain.Category(
+                    id = 1,
+                    userId = null,
+                    name = "Makanan",
+                    type = "expense",
+                    icon = "🍜",
+                    color = "#F97316"
+                ),
+                id.my.rizalanggoro.arta.domain.Category(
+                    id = 2,
+                    userId = 10,
+                    name = "Gaji",
+                    type = "income",
+                    icon = "💰",
+                    color = "#10B981"
+                ),
+            )
+        )
     }
 }
 

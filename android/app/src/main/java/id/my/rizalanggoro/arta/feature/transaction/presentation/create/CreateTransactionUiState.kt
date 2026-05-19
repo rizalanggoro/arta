@@ -9,7 +9,6 @@ data class CreateTransactionUiState(
     val amount: String = "",
     val description: String = "",
     val date: Long = System.currentTimeMillis(),
-    val walletError: String? = null,
     val amountError: String? = null,
     val categoryError: String? = null,
     val dateError: String? = null,
