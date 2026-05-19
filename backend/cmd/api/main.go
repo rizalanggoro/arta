@@ -17,6 +17,7 @@ import (
 	"github.com/artafinance/backend/pkg/database"
 	"github.com/artafinance/backend/pkg/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 )
 
@@ -71,6 +72,7 @@ func main() {
 	dashboardHandler := dashboard.NewHandler(walletRepo, goldRepo, goldPriceRepo, fxRateRepo, transactionRepo, categoryRepo, jwtManager, authRepo)
 
 	app := fiber.New()
+	app.Use(logger.New())
 	api := app.Group("/api")
 	authHandler.RegisterRoutes(api)
 	walletHandler.RegisterRoutes(api)

@@ -1,7 +1,9 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.setting
 
+import id.my.rizalanggoro.arta.domain.AuthSession
+
 data class HomeSettingUiState(
-    val sessionName: String = "-",
-    val sessionEmail: String = "-",
+    val session: AuthSession? = null,
     val isDarkTheme: Boolean = false,
+    val isLogoutOpen: Boolean = false,
 )
