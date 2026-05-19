@@ -14,6 +14,7 @@ import id.my.rizalanggoro.arta.feature.wallet.data.WalletRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -72,6 +73,12 @@ class SelectWalletVM(
             selectedWalletPrefs.selectedWallet.collect { wallet ->
                 _uiState.update { it.copy(selectedWallet = wallet) }
             }
+        }
+
+        viewModelScope.launch {
+            AppEventBus.event
+                .filterIsInstance<AppEvent.WalletChanged>()
+                .collect { loadWallets() }
         }
     }
 }

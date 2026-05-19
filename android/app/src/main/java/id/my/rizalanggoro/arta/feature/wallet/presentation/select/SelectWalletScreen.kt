@@ -56,10 +56,6 @@ fun SelectWalletScreen(
         AppEventBus.event
             .filterIsInstance<AppEvent.WalletSelected>()
             .collect { backStack.removeLastOrNull() }
-
-        AppEventBus.event
-            .filterIsInstance<AppEvent.WalletChanged>()
-            .collect { vm.loadWallets() }
     }
 
     Content(
