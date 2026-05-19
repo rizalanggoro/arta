@@ -60,7 +60,7 @@ fun HomeScreen(
 
     val walletType = uiState.selectedWallet?.type
 
-    val homeBackStack: NavBackStack<NavKey>? = when (walletType) {
+    val homeBackStack = when (walletType) {
         "cash_savings" -> rememberNavBackStack(HomeCashDashboardRoute)
         "gold_savings" -> rememberNavBackStack(HomeGoldDashboardRoute)
         else -> null
@@ -172,41 +172,35 @@ private data class HomeDestination(
 
 private fun walletDestinations(type: String?): List<HomeDestination> {
     if (type == null) return emptyList()
-
-    val destinations = mutableListOf(
+    val isCash = type == "cash_savings"
+    return listOf(
         HomeDestination(
             label = "Ringkasan",
             icon = Icons.Rounded.Dashboard,
-            route = HomeCashDashboardRoute
+            route = when (isCash) {
+                true -> HomeCashDashboardRoute
+                else -> HomeGoldDashboardRoute
+            }
         ),
+        when (isCash) {
+            true -> HomeDestination(
+                label = "Transaksi",
+                icon = Icons.Rounded.Payment,
+                route = HomeTransactionRoute
+            )
+
+            else -> HomeDestination(
+                label = "Emas",
+                icon = Icons.Rounded.Balance,
+                route = HomeGoldRoute
+            )
+        },
         HomeDestination(
             label = "Pengaturan",
             icon = Icons.Rounded.Settings,
             route = HomeSettingRoute
         ),
     )
-
-    when (type) {
-        "cash_savings" -> destinations.add(
-            1,
-            HomeDestination(
-                label = "Transaksi",
-                icon = Icons.Rounded.Payment,
-                route = HomeTransactionRoute
-            )
-        )
-
-        "gold_savings" -> destinations.add(
-            1,
-            HomeDestination(
-                label = "Emas",
-                icon = Icons.Rounded.Balance,
-                route = HomeGoldRoute
-            )
-        )
-    }
-
-    return destinations
 }
 
 @Preview(showBackground = true, name = "Cash Wallet Home")
