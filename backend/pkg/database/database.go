@@ -48,7 +48,7 @@ func GetDB() *gorm.DB {
 
 // runMigrations runs all database migrations
 func runMigrations(database *gorm.DB) error {
-	return database.AutoMigrate(
+	if err := database.AutoMigrate(
 		&model.User{},
 		&model.Wallet{},
 		&model.Session{},
@@ -57,7 +57,45 @@ func runMigrations(database *gorm.DB) error {
 		&model.Gold{},
 		&model.GoldPrice{},
 		&model.FxRate{},
-	)
+	); err != nil {
+		return err
+	}
+
+	return backfillGoldCarat(database)
+}
+
+func backfillGoldCarat(database *gorm.DB) error {
+	var hasPurityPercent int64
+	if err := database.Raw(`
+		SELECT COUNT(*)
+		FROM information_schema.columns
+		WHERE table_schema = current_schema()
+			AND table_name = 'golds'
+			AND column_name = 'purity_percent'
+	`).Scan(&hasPurityPercent).Error; err != nil {
+		return err
+	}
+
+	var hasCarat int64
+	if err := database.Raw(`
+		SELECT COUNT(*)
+		FROM information_schema.columns
+		WHERE table_schema = current_schema()
+			AND table_name = 'golds'
+			AND column_name = 'carat'
+	`).Scan(&hasCarat).Error; err != nil {
+		return err
+	}
+
+	if hasPurityPercent == 0 || hasCarat == 0 {
+		return nil
+	}
+
+	return database.Exec(`
+		UPDATE golds
+		SET carat = COALESCE(carat, purity_percent)
+		WHERE carat IS NULL OR carat = 0
+	`).Error
 }
 
 // Close closes the database connection

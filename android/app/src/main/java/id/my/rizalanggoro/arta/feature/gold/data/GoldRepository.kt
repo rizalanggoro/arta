@@ -23,7 +23,7 @@ class GoldRepository(
         grams: Double,
         price: Double,
         type: String,
-        purityPercent: Double,
+        carat: Double,
         notes: String,
     ): Result<Gold> {
         return runCatching {
@@ -38,7 +38,7 @@ class GoldRepository(
                     grams = grams,
                     price = price,
                     type = type,
-                    purityPercent = purityPercent,
+                    carat = carat,
                     notes = notes,
                 ),
             ).toDomainResult()
@@ -66,7 +66,7 @@ class GoldRepository(
         grams: Double? = null,
         price: Double? = null,
         type: String? = null,
-        purityPercent: Double? = null,
+        carat: Double? = null,
         notes: String? = null,
     ): Result<Gold> {
         return runCatching {
@@ -81,7 +81,7 @@ class GoldRepository(
                     grams = grams,
                     price = price,
                     type = type,
-                    purityPercent = purityPercent,
+                    carat = carat,
                     notes = notes,
                 ),
             ).toDomainResult()

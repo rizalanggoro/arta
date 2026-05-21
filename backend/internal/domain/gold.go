@@ -16,8 +16,8 @@ type Gold struct {
 	Grams    float64
 	// Price is the total purchase price for this gold entry (for the recorded grams)
 	Price         float64
-	Type          string  // pure_24k, jewelry_ring, etc
-	PurityPercent float64 // For reference
+	Type          string  // pure_gold or jewelry
+	Carat         float64
 	Notes         string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
@@ -25,7 +25,7 @@ type Gold struct {
 
 const (
 	GoldTypePure    = "pure_gold"
-	GoldTypeJewelry = "gold_jewelry"
+	GoldTypeJewelry = "jewelry"
 )
 
 // FromGoldModel maps a gold model to the domain layer.
@@ -41,7 +41,7 @@ func FromGoldModel(m *model.Gold) *Gold {
 		Grams:         m.Grams,
 		Price:         m.Price,
 		Type:          m.Type,
-		PurityPercent: m.PurityPercent,
+		Carat:         m.Carat,
 		Notes:         m.Notes,
 		CreatedAt:     m.CreatedAt,
 		UpdatedAt:     m.UpdatedAt,
@@ -61,7 +61,7 @@ func (g *Gold) ToModel() *model.Gold {
 		Grams:         g.Grams,
 		Price:         g.Price,
 		Type:          g.Type,
-		PurityPercent: g.PurityPercent,
+		Carat:         g.Carat,
 		Notes:         g.Notes,
 	}
 }

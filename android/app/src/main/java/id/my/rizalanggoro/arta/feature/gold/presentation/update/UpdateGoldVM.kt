@@ -46,7 +46,7 @@ class UpdateGoldVM(
                             grams = gold.grams.toString(),
                             price = gold.price.toString(),
                             type = gold.type,
-                            purityPercent = gold.purityPercent.toString(),
+                            carat = gold.carat.toString(),
                             notes = gold.notes,
                         )
                     }
@@ -74,8 +74,8 @@ class UpdateGoldVM(
         _uiState.update { it.copy(type = value) }
     }
 
-    fun onPurityPercentChanged(value: String) {
-        _uiState.update { it.copy(purityPercent = value) }
+    fun onCaratChanged(value: String) {
+        _uiState.update { it.copy(carat = value) }
     }
 
     fun onNotesChanged(value: String) {
@@ -91,7 +91,7 @@ class UpdateGoldVM(
 
         val grams = current.grams.toDoubleOrNull()
         val price = current.price.toDoubleOrNull()
-        val purity = current.purityPercent.toDoubleOrNull()
+        val carat = current.carat.toDoubleOrNull()
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -101,7 +101,7 @@ class UpdateGoldVM(
                 grams = grams,
                 price = current.price.toDoubleOrNull(),
                 type = current.type.ifBlank { null },
-                purityPercent = purity,
+                carat = carat,
                 notes = current.notes.ifBlank { null },
             ).onSuccess {
                 _effect.emit(UpdateGoldEffect.NavigateBack)

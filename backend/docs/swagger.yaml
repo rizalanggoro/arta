@@ -12,10 +12,6 @@ definitions:
             type: number
           today_income:
             type: number
-        required:
-        - current_balance
-        - today_expense
-        - today_income
         type: object
       recent_transactions:
         items:
@@ -24,57 +20,38 @@ definitions:
               $ref: '#/definitions/domain.Category'
             data:
               $ref: '#/definitions/domain.Transaction'
-          required:
-          - category
-          - data
           type: object
         type: array
-    required:
-    - active_wallet_name
-    - financial_summary
-    - recent_transactions
     type: object
   CreateCategoryRes:
     properties:
       data:
         $ref: '#/definitions/domain.Category'
-    required:
-    - data
     type: object
   CreateGoldRes:
     properties:
       data:
         $ref: '#/definitions/domain.Gold'
-    required:
-    - data
     type: object
   DeleteCategoryRes:
     properties:
       message:
         type: string
-    required:
-    - message
     type: object
   DeleteGoldRes:
     properties:
       message:
         type: string
-    required:
-    - message
     type: object
   GetCategoryRes:
     properties:
       data:
         $ref: '#/definitions/domain.Category'
-    required:
-    - data
     type: object
   GetGoldRes:
     properties:
       data:
         $ref: '#/definitions/domain.Gold'
-    required:
-    - data
     type: object
   GoldDashboardRes:
     properties:
@@ -93,8 +70,6 @@ definitions:
           properties:
             data:
               $ref: '#/definitions/domain.Gold'
-          required:
-          - data
           type: object
         type: array
       total_asset:
@@ -103,16 +78,6 @@ definitions:
         type: integer
       total_weight:
         type: number
-    required:
-    - active_wallet_name
-    - buy_price
-    - latest_dollar_price
-    - latest_gold_price_per_gram_idr
-    - profit
-    - recent_golds
-    - total_asset
-    - total_gold_items
-    - total_weight
     type: object
   GoldSummaryRes:
     properties:
@@ -123,10 +88,6 @@ definitions:
         type: number
       total_value:
         type: number
-    required:
-    - by_type
-    - total_grams
-    - total_value
     type: object
   LoginReq:
     properties:
@@ -134,9 +95,6 @@ definitions:
         type: string
       password:
         type: string
-    required:
-    - email
-    - password
     type: object
   LoginRes:
     properties:
@@ -148,18 +106,11 @@ definitions:
         type: string
       user_id:
         type: string
-    required:
-    - email
-    - name
-    - token
-    - user_id
     type: object
   LogoutRes:
     properties:
       message:
         type: string
-    required:
-    - message
     type: object
   MeRes:
     properties:
@@ -167,9 +118,6 @@ definitions:
         $ref: '#/definitions/domain.User'
       updated_at:
         type: string
-    required:
-    - data
-    - updated_at
     type: object
   RegisterReq:
     properties:
@@ -179,10 +127,6 @@ definitions:
         type: string
       password:
         type: string
-    required:
-    - email
-    - name
-    - password
     type: object
   RegisterRes:
     properties:
@@ -194,25 +138,16 @@ definitions:
         type: string
       user_id:
         type: string
-    required:
-    - email
-    - name
-    - token
-    - user_id
     type: object
   UpdateCategoryRes:
     properties:
       data:
         $ref: '#/definitions/domain.Category'
-    required:
-    - data
     type: object
   UpdateGoldRes:
     properties:
       data:
         $ref: '#/definitions/domain.Gold'
-    required:
-    - data
     type: object
   category.CreateCategoryReq:
     properties:
@@ -220,9 +155,6 @@ definitions:
         type: string
       type:
         type: string
-    required:
-    - name
-    - type
     type: object
   category.ListCategoriesRes:
     properties:
@@ -230,8 +162,6 @@ definitions:
         items:
           $ref: '#/definitions/dto.Category'
         type: array
-    required:
-    - categories
     type: object
   category.UpdateCategoryReq:
     properties:
@@ -256,15 +186,12 @@ definitions:
       user_id:
         description: nil for default categories
         type: integer
-    required:
-    - created_at
-    - id
-    - name
-    - type
-    - updated_at
     type: object
   domain.Gold:
     properties:
+      carat:
+        format: float64
+        type: number
       createdAt:
         type: string
       date:
@@ -281,12 +208,8 @@ definitions:
           recorded grams)
         format: float64
         type: number
-      purityPercent:
-        description: For reference
-        format: float64
-        type: number
       type:
-        description: pure_24k, jewelry_ring, etc
+        description: pure_gold or jewelry
         type: string
       updatedAt:
         type: string
@@ -311,15 +234,6 @@ definitions:
         type: string
       wallet_id:
         type: integer
-    required:
-    - amount
-    - category_id
-    - created_at
-    - date
-    - description
-    - id
-    - updated_at
-    - wallet_id
     type: object
   domain.User:
     properties:
@@ -337,12 +251,6 @@ definitions:
         items:
           $ref: '#/definitions/domain.Wallet'
         type: array
-    required:
-    - created_at
-    - email
-    - id
-    - name
-    - updated_at
     type: object
   domain.Wallet:
     properties:
@@ -363,8 +271,6 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/domain.Category'
-    required:
-    - data
     type: object
   dto.Error:
     properties:
@@ -372,19 +278,16 @@ definitions:
         type: integer
       message:
         type: string
-    required:
-    - code
-    - message
     type: object
   dto.Gold:
     properties:
       data:
         $ref: '#/definitions/domain.Gold'
-    required:
-    - data
     type: object
   gold.CreateGoldReq:
     properties:
+      carat:
+        type: number
       date:
         type: string
       grams:
@@ -394,18 +297,10 @@ definitions:
       price:
         description: Price is the total purchase price for the recorded grams
         type: number
-      purity_percent:
-        type: number
       type:
         type: string
       wallet_id:
         type: integer
-    required:
-    - date
-    - grams
-    - price
-    - type
-    - wallet_id
     type: object
   gold.ListGoldsRes:
     properties:
@@ -413,11 +308,11 @@ definitions:
         items:
           $ref: '#/definitions/dto.Gold'
         type: array
-    required:
-    - golds
     type: object
   gold.UpdateGoldReq:
     properties:
+      carat:
+        type: number
       date:
         type: string
       grams:
@@ -425,8 +320,6 @@ definitions:
       notes:
         type: string
       price:
-        type: number
-      purity_percent:
         type: number
       type:
         type: string

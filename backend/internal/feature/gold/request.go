@@ -10,7 +10,7 @@ type CreateGoldReq struct {
 	// Price is the total purchase price for the recorded grams
 	Price         float64 `json:"price"`
 	Type          string  `json:"type"`
-	PurityPercent float64 `json:"purity_percent,omitempty"`
+	Carat         float64 `json:"carat,omitempty"`
 	Notes         string  `json:"notes,omitempty"`
 }
 
@@ -20,6 +20,6 @@ type UpdateGoldReq struct {
 	Grams         *float64   `json:"grams,omitempty"`
 	Price         *float64   `json:"price,omitempty"`
 	Type          *string    `json:"type,omitempty"`
-	PurityPercent *float64   `json:"purity_percent,omitempty"`
+	Carat         *float64   `json:"carat,omitempty"`
 	Notes         *string    `json:"notes,omitempty"`
 }

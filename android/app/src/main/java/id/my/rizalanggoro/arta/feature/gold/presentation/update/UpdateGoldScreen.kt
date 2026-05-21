@@ -27,6 +27,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -64,14 +66,14 @@ fun UpdateGoldScreen(goldId: Int) {
         grams = uiState.grams,
         price = uiState.price,
         type = uiState.type,
-        purityPercent = uiState.purityPercent,
+        carat = uiState.carat,
         notes = uiState.notes,
         isLoading = uiState.isLoading,
         onDateChanged = viewModel::onDateChanged,
         onGramsChanged = viewModel::onGramsChanged,
         onPricePerGramChanged = viewModel::onPriceChanged,
         onTypeChanged = viewModel::onTypeChanged,
-        onPurityPercentChanged = viewModel::onPurityPercentChanged,
+        onCaratChanged = viewModel::onCaratChanged,
         onNotesChanged = viewModel::onNotesChanged,
         onClickSave = viewModel::updateGold,
         onClickBack = { backStack.removeLastOrNull() },
@@ -86,14 +88,14 @@ private fun Content(
     grams: String = "",
     price: String = "",
     type: String = "",
-    purityPercent: String = "",
+    carat: String = "",
     notes: String = "",
     isLoading: Boolean = false,
     onDateChanged: (String) -> Unit = {},
     onGramsChanged: (String) -> Unit = {},
     onPricePerGramChanged: (String) -> Unit = {},
     onTypeChanged: (String) -> Unit = {},
-    onPurityPercentChanged: (String) -> Unit = {},
+    onCaratChanged: (String) -> Unit = {},
     onNotesChanged: (String) -> Unit = {},
     onClickSave: () -> Unit = {},
     onClickBack: () -> Unit = {},
@@ -186,17 +188,19 @@ private fun Content(
             )
             TextField(
                 value = grams,
-                onValueChange = onGramsChanged,
+                onValueChange = { if (it.matches(Regex("^\\d*\\.?\\d*$"))) onGramsChanged(it) },
                 label = { Text(text = "Gram") },
                 modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 enabled = !isLoading,
                 singleLine = true,
             )
             TextField(
                 value = price,
-                onValueChange = onPricePerGramChanged,
+                onValueChange = { if (it.matches(Regex("^\\d*\\.?\\d*$"))) onPricePerGramChanged(it) },
                 label = { Text(text = "Harga beli (total)") },
                 modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 enabled = !isLoading,
                 singleLine = true,
             )
@@ -209,10 +213,11 @@ private fun Content(
                 singleLine = true,
             )
             TextField(
-                value = purityPercent,
-                onValueChange = onPurityPercentChanged,
-                label = { Text(text = "Kemurnian (%)") },
+                value = carat,
+                onValueChange = { if (it.matches(Regex("^\\d*\\.?\\d*$"))) onCaratChanged(it) },
+                label = { Text(text = "Karat") },
                 modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 enabled = !isLoading,
                 singleLine = true,
             )
@@ -238,8 +243,8 @@ private fun UpdateGoldScreenPreview() {
             date = "2026-05-16",
             grams = "10",
             price = "900000",
-            type = "Antam",
-            purityPercent = "99.9",
+            type = "pure_gold",
+            carat = "24.0",
             notes = "Contoh catatan",
         )
     }

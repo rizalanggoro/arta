@@ -11,7 +11,7 @@ data class GoldDto(
 	@SerialName("grams") val grams: Double,
 	@SerialName("price") val price: Double,
 	@SerialName("type") val type: String,
-	@SerialName("purity_percent") val purityPercent: Double = 0.0,
+	@SerialName("carat") val carat: Double = 0.0,
 	@SerialName("notes") val notes: String = "",
 	@SerialName("created_at") val createdAt: String = "",
 	@SerialName("updated_at") val updatedAt: String = "",

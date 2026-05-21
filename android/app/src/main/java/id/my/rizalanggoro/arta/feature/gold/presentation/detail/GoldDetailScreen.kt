@@ -119,7 +119,7 @@ private fun Content(
             Text(text = "Berat (gram): ${gold.grams}")
             Text(text = "Harga total: ${gold.price}")
             Text(text = "Tipe: ${gold.type}")
-            Text(text = "Kemurnian: ${gold.purityPercent}")
+            Text(text = "Karat: ${gold.carat}")
             Text(text = "Catatan: ${gold.notes}")
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -167,7 +167,7 @@ private fun GoldDetailScreenPreview() {
                 grams = 10.0,
                 price = 9000000.0,
                 type = "pure_gold",
-                purityPercent = 99.9,
+                carat = 24.0,
                 notes = "Contoh catatan",
             ),
         )

@@ -55,6 +55,7 @@ func main() {
 	categoryHandler := category.NewHandler(categoryRepo, jwtManager, authRepo)
 
 	goldRepo := gold.NewRepository(db)
+	goldHandler := gold.NewHandler(goldRepo, jwtManager, authRepo)
 
 	transactionRepo := transaction.NewRepository(db)
 	transactionHandler := transaction.NewHandler(transactionRepo, categoryRepo, jwtManager, authRepo)
@@ -77,6 +78,7 @@ func main() {
 	authHandler.RegisterRoutes(api)
 	walletHandler.RegisterRoutes(api)
 	categoryHandler.RegisterRoutes(api)
+	goldHandler.RegisterRoutes(api)
 	transactionHandler.RegisterRoutes(api)
 	dashboardHandler.RegisterRoutes(api)
 

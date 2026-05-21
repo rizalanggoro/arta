@@ -32,7 +32,7 @@ fun GoldDashboardGoldDataDto.toDomain(): Gold {
         grams = grams,
         price = price,
         type = type,
-        purityPercent = purityPercent,
+        carat = carat,
         notes = notes,
         createdAt = createdAt,
         updatedAt = updatedAt,

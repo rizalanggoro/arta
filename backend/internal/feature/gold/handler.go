@@ -84,6 +84,9 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	if !isValidGoldType(req.Type) {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid gold type"})
 	}
+	if req.Carat <= 0 || req.Carat > 24 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "carat must be between 0 and 24"})
+	}
 
 	userID := middleware.GetUserID(c)
 	if userID == "" {
@@ -105,7 +108,7 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		Grams:         req.Grams,
 		Price:         req.Price,
 		Type:          req.Type,
-		PurityPercent: req.PurityPercent,
+		Carat:         req.Carat,
 		Notes:         req.Notes,
 	})
 	if err != nil {
@@ -196,8 +199,11 @@ func (h *Handler) update(c *fiber.Ctx) error {
 		}
 		g.Type = *req.Type
 	}
-	if req.PurityPercent != nil {
-		g.PurityPercent = *req.PurityPercent
+	if req.Carat != nil {
+		if *req.Carat <= 0 || *req.Carat > 24 {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "carat must be between 0 and 24"})
+		}
+		g.Carat = *req.Carat
 	}
 	if req.Notes != nil {
 		g.Notes = *req.Notes

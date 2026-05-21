@@ -6,7 +6,7 @@ data class UpdateGoldUiState(
     val grams: String = "",
     val price: String = "",
     val type: String = "",
-    val purityPercent: String = "",
+    val carat: String = "",
     val notes: String = "",
     val isLoading: Boolean = false,
 )
