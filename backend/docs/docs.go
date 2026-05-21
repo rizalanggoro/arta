@@ -629,6 +629,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/gold/tax": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gold"
+                ],
+                "operationId": "ListGoldTaxPreferences",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ListGoldTaxPreferencesRes"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gold"
+                ],
+                "operationId": "SaveGoldTaxPreferences",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gold.SaveGoldTaxPreferencesReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SaveGoldTaxPreferencesRes"
+                        }
+                    }
+                }
+            }
+        },
         "/api/gold/{id}": {
             "get": {
                 "consumes": [
@@ -752,12 +821,22 @@ const docTemplate = `{
     "definitions": {
         "CashDashboardRes": {
             "type": "object",
+            "required": [
+                "active_wallet_name",
+                "financial_summary",
+                "recent_transactions"
+            ],
             "properties": {
                 "active_wallet_name": {
                     "type": "string"
                 },
                 "financial_summary": {
                     "type": "object",
+                    "required": [
+                        "current_balance",
+                        "today_expense",
+                        "today_income"
+                    ],
                     "properties": {
                         "current_balance": {
                             "type": "number"
@@ -774,6 +853,10 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "object",
+                        "required": [
+                            "category",
+                            "data"
+                        ],
                         "properties": {
                             "category": {
                                 "$ref": "#/definitions/domain.Category"
@@ -788,6 +871,9 @@ const docTemplate = `{
         },
         "CreateCategoryRes": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
@@ -796,6 +882,9 @@ const docTemplate = `{
         },
         "CreateGoldRes": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Gold"
@@ -804,6 +893,9 @@ const docTemplate = `{
         },
         "DeleteCategoryRes": {
             "type": "object",
+            "required": [
+                "message"
+            ],
             "properties": {
                 "message": {
                     "type": "string"
@@ -812,6 +904,9 @@ const docTemplate = `{
         },
         "DeleteGoldRes": {
             "type": "object",
+            "required": [
+                "message"
+            ],
             "properties": {
                 "message": {
                     "type": "string"
@@ -820,6 +915,9 @@ const docTemplate = `{
         },
         "GetCategoryRes": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
@@ -828,6 +926,9 @@ const docTemplate = `{
         },
         "GetGoldRes": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Gold"
@@ -836,6 +937,17 @@ const docTemplate = `{
         },
         "GoldDashboardRes": {
             "type": "object",
+            "required": [
+                "active_wallet_name",
+                "buy_price",
+                "latest_dollar_price",
+                "latest_gold_price_per_gram_idr",
+                "profit",
+                "recent_golds",
+                "total_asset",
+                "total_gold_items",
+                "total_weight"
+            ],
             "properties": {
                 "active_wallet_name": {
                     "type": "string"
@@ -856,6 +968,9 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "object",
+                        "required": [
+                            "data"
+                        ],
                         "properties": {
                             "data": {
                                 "$ref": "#/definitions/domain.Gold"
@@ -876,6 +991,11 @@ const docTemplate = `{
         },
         "GoldSummaryRes": {
             "type": "object",
+            "required": [
+                "by_type",
+                "total_grams",
+                "total_value"
+            ],
             "properties": {
                 "by_type": {
                     "type": "object",
@@ -889,8 +1009,26 @@ const docTemplate = `{
                 }
             }
         },
+        "ListGoldTaxPreferencesRes": {
+            "type": "object",
+            "required": [
+                "preferences"
+            ],
+            "properties": {
+                "preferences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.GoldTaxPreference"
+                    }
+                }
+            }
+        },
         "LoginReq": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -902,6 +1040,12 @@ const docTemplate = `{
         },
         "LoginRes": {
             "type": "object",
+            "required": [
+                "email",
+                "name",
+                "token",
+                "user_id"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -919,6 +1063,9 @@ const docTemplate = `{
         },
         "LogoutRes": {
             "type": "object",
+            "required": [
+                "message"
+            ],
             "properties": {
                 "message": {
                     "type": "string"
@@ -927,6 +1074,10 @@ const docTemplate = `{
         },
         "MeRes": {
             "type": "object",
+            "required": [
+                "data",
+                "updated_at"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.User"
@@ -938,6 +1089,11 @@ const docTemplate = `{
         },
         "RegisterReq": {
             "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -952,6 +1108,12 @@ const docTemplate = `{
         },
         "RegisterRes": {
             "type": "object",
+            "required": [
+                "email",
+                "name",
+                "token",
+                "user_id"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -967,8 +1129,25 @@ const docTemplate = `{
                 }
             }
         },
+        "SaveGoldTaxPreferencesRes": {
+            "type": "object",
+            "required": [
+                "preferences"
+            ],
+            "properties": {
+                "preferences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.GoldTaxPreference"
+                    }
+                }
+            }
+        },
         "UpdateCategoryRes": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
@@ -977,6 +1156,9 @@ const docTemplate = `{
         },
         "UpdateGoldRes": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Gold"
@@ -985,6 +1167,10 @@ const docTemplate = `{
         },
         "category.CreateCategoryReq": {
             "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -996,6 +1182,9 @@ const docTemplate = `{
         },
         "category.ListCategoriesRes": {
             "type": "object",
+            "required": [
+                "categories"
+            ],
             "properties": {
                 "categories": {
                     "type": "array",
@@ -1018,6 +1207,13 @@ const docTemplate = `{
         },
         "domain.Category": {
             "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "name",
+                "type",
+                "updated_at"
+            ],
             "properties": {
                 "created_at": {
                     "type": "string"
@@ -1083,6 +1279,16 @@ const docTemplate = `{
         },
         "domain.Transaction": {
             "type": "object",
+            "required": [
+                "amount",
+                "category_id",
+                "created_at",
+                "date",
+                "description",
+                "id",
+                "updated_at",
+                "wallet_id"
+            ],
             "properties": {
                 "amount": {
                     "type": "number"
@@ -1112,6 +1318,13 @@ const docTemplate = `{
         },
         "domain.User": {
             "type": "object",
+            "required": [
+                "created_at",
+                "email",
+                "id",
+                "name",
+                "updated_at"
+            ],
             "properties": {
                 "created_at": {
                     "type": "string"
@@ -1161,6 +1374,9 @@ const docTemplate = `{
         },
         "dto.Category": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
@@ -1169,6 +1385,10 @@ const docTemplate = `{
         },
         "dto.Error": {
             "type": "object",
+            "required": [
+                "code",
+                "message"
+            ],
             "properties": {
                 "code": {
                     "type": "integer"
@@ -1180,14 +1400,55 @@ const docTemplate = `{
         },
         "dto.Gold": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Gold"
                 }
             }
         },
+        "dto.GoldTaxPreference": {
+            "type": "object",
+            "required": [
+                "carat",
+                "created_at",
+                "id",
+                "tax_rate",
+                "updated_at",
+                "user_id"
+            ],
+            "properties": {
+                "carat": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "tax_rate": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "gold.CreateGoldReq": {
             "type": "object",
+            "required": [
+                "date",
+                "grams",
+                "price",
+                "type",
+                "wallet_id"
+            ],
             "properties": {
                 "carat": {
                     "type": "number"
@@ -1215,11 +1476,43 @@ const docTemplate = `{
         },
         "gold.ListGoldsRes": {
             "type": "object",
+            "required": [
+                "golds"
+            ],
             "properties": {
                 "golds": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.Gold"
+                    }
+                }
+            }
+        },
+        "gold.SaveGoldTaxPreferenceItemReq": {
+            "type": "object",
+            "required": [
+                "carat",
+                "tax_rate"
+            ],
+            "properties": {
+                "carat": {
+                    "type": "number"
+                },
+                "tax_rate": {
+                    "type": "number"
+                }
+            }
+        },
+        "gold.SaveGoldTaxPreferencesReq": {
+            "type": "object",
+            "required": [
+                "preferences"
+            ],
+            "properties": {
+                "preferences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gold.SaveGoldTaxPreferenceItemReq"
                     }
                 }
             }

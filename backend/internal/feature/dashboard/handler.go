@@ -115,6 +115,15 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
+	taxPreferences, err := h.goldRepo.GetTaxPreferencesByUserID(uint(parsedUserID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+	taxByCarat := make(map[float64]float64, len(taxPreferences))
+	for i := range taxPreferences {
+		taxByCarat[taxPreferences[i].Carat] = taxPreferences[i].TaxRate
+	}
+
 	latestFxRate, err := h.fxRateRepo.GetLatest()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
@@ -143,7 +152,13 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 
 	latestDollarPrice := float64(latestFxRate.Rate)
 	latestGoldPricePerGramIDR := (latestGoldPrice.PricePerOunceUSD * latestDollarPrice) / gramsPerTroyOunce
-	totalAsset := math.Round(totalWeight*latestGoldPricePerGramIDR*100) / 100
+	totalAsset := 0.0
+	for i := range golds {
+		taxRate := taxByCarat[golds[i].Carat]
+		sellValue := golds[i].Grams * latestGoldPricePerGramIDR * (1 - (taxRate / 100))
+		totalAsset += sellValue
+	}
+	totalAsset = math.Round(totalAsset*100) / 100
 	profit := math.Round((totalAsset-buyPrice)*100) / 100
 
 	res := GoldDashboardRes{}

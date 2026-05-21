@@ -3,11 +3,14 @@ package id.my.rizalanggoro.arta.feature.gold.data
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.domain.Gold
+import id.my.rizalanggoro.arta.domain.GoldTaxPreference
 import id.my.rizalanggoro.arta.feature.gold.data.dto.CreateGoldRequestDto
 import id.my.rizalanggoro.arta.feature.gold.data.dto.GoldListResponseDto
 import id.my.rizalanggoro.arta.feature.gold.data.dto.GoldResponseDto
 import id.my.rizalanggoro.arta.feature.gold.data.dto.UpdateGoldRequestDto
 import id.my.rizalanggoro.arta.feature.gold.data.mapper.toDomain
+import id.my.rizalanggoro.arta.feature.gold.data.mapper.toTaxPreferenceRequestDto
+import id.my.rizalanggoro.arta.feature.gold.data.mapper.toTaxDomain
 import kotlinx.serialization.json.Json
 import retrofit2.Response
 
@@ -103,6 +106,87 @@ class GoldRepository(
 
             val body = response.body() ?: return@runCatching Result.failure(apiError("Respons server kosong"))
             Result.success(body.golds.map { it.data.toDomain() })
+        }.fold(
+            onSuccess = { it },
+            onFailure = { Result.failure(it) },
+        )
+    }
+
+    suspend fun getTaxPreferences(): Result<List<GoldTaxPreference>> {
+        return runCatching {
+            val authorization = authorizationHeader()
+                ?: throw apiError("Sesi login tidak ditemukan")
+
+            val response = apiService.getTaxPreferences(authorization = authorization)
+            if (!response.isSuccessful) {
+                return@runCatching Result.failure(apiError(message = response.errorMessage(json)))
+            }
+
+            val body = response.body() ?: return@runCatching Result.failure(apiError("Respons server kosong"))
+            Result.success(body.preferences.map { it.toTaxDomain() })
+        }.fold(
+            onSuccess = { it },
+            onFailure = { Result.failure(it) },
+        )
+    }
+
+    suspend fun createTaxPreference(preference: GoldTaxPreference): Result<GoldTaxPreference> {
+        return runCatching {
+            val authorization = authorizationHeader()
+                ?: throw apiError("Sesi login tidak ditemukan")
+
+            val response = apiService.createTaxPreference(
+                authorization = authorization,
+                request = preference.toTaxPreferenceRequestDto(),
+            )
+            if (!response.isSuccessful) {
+                return@runCatching Result.failure(apiError(message = response.errorMessage(json)))
+            }
+
+            val body = response.body() ?: return@runCatching Result.failure(apiError("Respons server kosong"))
+            Result.success(body.preference.toTaxDomain())
+        }.fold(
+            onSuccess = { it },
+            onFailure = { Result.failure(it) },
+        )
+    }
+
+    suspend fun updateTaxPreference(preferenceId: Int, preference: GoldTaxPreference): Result<GoldTaxPreference> {
+		return runCatching {
+			val authorization = authorizationHeader()
+				?: throw apiError("Sesi login tidak ditemukan")
+
+			val response = apiService.updateTaxPreference(
+				authorization = authorization,
+				id = preferenceId,
+                request = preference.toTaxPreferenceRequestDto(),
+			)
+			if (!response.isSuccessful) {
+				return@runCatching Result.failure(apiError(message = response.errorMessage(json)))
+			}
+
+			val body = response.body() ?: return@runCatching Result.failure(apiError("Respons server kosong"))
+			Result.success(body.preference.toTaxDomain())
+		}.fold(
+			onSuccess = { it },
+			onFailure = { Result.failure(it) },
+		)
+	}
+
+    suspend fun deleteTaxPreference(preferenceId: Int): Result<Unit> {
+        return runCatching {
+            val authorization = authorizationHeader()
+                ?: throw apiError("Sesi login tidak ditemukan")
+
+            val response = apiService.deleteTaxPreference(
+                authorization = authorization,
+                id = preferenceId,
+            )
+            if (!response.isSuccessful) {
+                return@runCatching Result.failure(apiError(message = response.errorMessage(json)))
+            }
+
+            Result.success(Unit)
         }.fold(
             onSuccess = { it },
             onFailure = { Result.failure(it) },

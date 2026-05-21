@@ -118,3 +118,80 @@ func (r *Repository) GetSummary(userID uint) (float64, float64, map[string]inter
 	}
 	return totalGrams, totalValue, byType, nil
 }
+
+// GetTaxPreferencesByUserID returns gold tax preferences for a user.
+func (r *Repository) GetTaxPreferencesByUserID(userID uint) ([]domain.GoldTaxPreference, error) {
+	var records []model.GoldTaxPreference
+	if err := r.db.Where("user_id = ?", userID).Order("carat asc").Find(&records).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]domain.GoldTaxPreference, 0, len(records))
+	for i := range records {
+		result = append(result, *domain.FromGoldTaxPreferenceModel(&records[i]))
+	}
+
+	return result, nil
+}
+
+// CreateTaxPreference inserts a new gold tax preference for a user.
+func (r *Repository) CreateTaxPreference(userID uint, preference *domain.GoldTaxPreference) (*domain.GoldTaxPreference, error) {
+	if preference == nil {
+		return nil, gorm.ErrInvalidData
+	}
+
+	preference.UserID = userID
+	modelValue := preference.ToModel()
+	if err := r.db.Create(modelValue).Error; err != nil {
+		return nil, err
+	}
+
+	return r.GetTaxPreferenceByID(userID, modelValue.ID)
+}
+
+// GetTaxPreferenceByID returns a single gold tax preference owned by the user.
+func (r *Repository) GetTaxPreferenceByID(userID, id uint) (*domain.GoldTaxPreference, error) {
+	var record model.GoldTaxPreference
+	if err := r.db.Where("id = ? AND user_id = ?", id, userID).First(&record).Error; err != nil {
+		return nil, err
+	}
+
+	return domain.FromGoldTaxPreferenceModel(&record), nil
+}
+
+// UpdateTaxPreference updates an existing gold tax preference for a user.
+func (r *Repository) UpdateTaxPreference(userID uint, preference *domain.GoldTaxPreference) (*domain.GoldTaxPreference, error) {
+	if preference == nil {
+		return nil, gorm.ErrInvalidData
+	}
+
+	updates := map[string]any{
+		"carat":      preference.Carat,
+		"tax_rate":   preference.TaxRate,
+		"updated_at": gorm.Expr("CURRENT_TIMESTAMP"),
+	}
+
+	result := r.db.Model(&model.GoldTaxPreference{}).
+		Where("id = ? AND user_id = ?", preference.ID, userID).
+		Updates(updates)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return r.GetTaxPreferenceByID(userID, preference.ID)
+}
+
+// DeleteTaxPreference deletes an existing gold tax preference for a user.
+func (r *Repository) DeleteTaxPreference(userID, id uint) error {
+	result := r.db.Where("id = ? AND user_id = ?", id, userID).Delete(&model.GoldTaxPreference{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

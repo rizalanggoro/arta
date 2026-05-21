@@ -1,7 +1,6 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.home
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,7 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -27,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
@@ -39,6 +36,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.GoldCreateRoute
+import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeCashDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
@@ -85,7 +83,11 @@ fun HomeScreen(
             entry<HomeCashDashboardRoute> { HomeCashDashboardScreen() }
             entry<HomeGoldDashboardRoute> { HomeGoldDashboardScreen() }
             entry<HomeTransactionRoute> { HomeTransactionScreen() }
-            entry<HomeGoldRoute> { HomeGoldScreen() }
+            entry<HomeGoldRoute> {
+                HomeGoldScreen(
+                    onClickManageTax = { backStack.add(GoldTaxListRoute) },
+                )
+            }
             entry<HomeSettingRoute> { HomeSettingScreen() }
         }
     )

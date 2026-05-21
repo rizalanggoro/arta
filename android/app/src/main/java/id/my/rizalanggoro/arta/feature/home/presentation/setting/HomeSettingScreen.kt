@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
+import androidx.compose.material.icons.rounded.Balance
 import androidx.compose.material.icons.rounded.Category
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Wallet
@@ -37,8 +39,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
 import id.my.rizalanggoro.arta.core.Routes.LoginRoute
+import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
-import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
 
@@ -59,11 +61,11 @@ fun HomeSettingScreen(
     }
 
     Content(
-        session = uiState.session,
-        isDarkTheme = uiState.isDarkTheme,
+        uiState = uiState,
         onToggleTheme = vm::onToggleTheme,
         onClickManageCategory = { backStack.add(CategoryRoute) },
         onClickManageWallet = { backStack.add(WalletRoute) },
+        onClickManageGoldTax = { backStack.add(GoldTaxListRoute) },
         onClickLogout = vm::logout,
     )
 
@@ -76,12 +78,12 @@ fun HomeSettingScreen(
 
 @Composable
 private fun Content(
-    session: AuthSession? = null,
-    isDarkTheme: Boolean = false,
+    uiState: HomeSettingUiState = HomeSettingUiState(),
     onToggleTheme: (Boolean) -> Unit = {},
-    onClickLogout: () -> Unit = {},
-    onClickManageCategory: () -> Unit = {},
     onClickManageWallet: () -> Unit = {},
+    onClickManageCategory: () -> Unit = {},
+    onClickManageGoldTax: () -> Unit = {},
+    onClickLogout: () -> Unit = {},
 ) {
     Column {
         Row(
@@ -104,11 +106,11 @@ private fun Content(
             }
             Column {
                 Text(
-                    text = session?.name ?: "Tidak diketahui",
+                    text = uiState.session?.name ?: "Tidak diketahui",
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    text = session?.email ?: "Tidak diketahui",
+                    text = uiState.session?.email ?: "Tidak diketahui",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -126,7 +128,7 @@ private fun Content(
             },
             trailingContent = {
                 Switch(
-                    checked = isDarkTheme,
+                    checked = uiState.isDarkTheme,
                     onCheckedChange = onToggleTheme,
                 )
             }
@@ -145,6 +147,12 @@ private fun Content(
             supportingContent = {
                 Text("Kelola dompet tabungan uang dan emas")
             },
+            trailingContent = {
+                Icon(
+                    Icons.Rounded.ChevronRight,
+                    null
+                )
+            },
             modifier = Modifier.clickable { onClickManageWallet() }
         )
 
@@ -161,7 +169,35 @@ private fun Content(
             supportingContent = {
                 Text("Kelola kategori pengeluaran dan pemasukan transaksi")
             },
+            trailingContent = {
+                Icon(
+                    Icons.Rounded.ChevronRight,
+                    null
+                )
+            },
             modifier = Modifier.clickable { onClickManageCategory() }
+        )
+
+        ListItem(
+            leadingContent = {
+                Icon(
+                    Icons.Rounded.Balance,
+                    null
+                )
+            },
+            headlineContent = {
+                Text("Pajak emas")
+            },
+            supportingContent = {
+                Text("Atur preferensi pajak jual emas berdasarkan ukuran karat")
+            },
+            trailingContent = {
+                Icon(
+                    Icons.Rounded.ChevronRight,
+                    null
+                )
+            },
+            modifier = Modifier.clickable { onClickManageGoldTax() }
         )
 
         ListItem(
@@ -173,6 +209,12 @@ private fun Content(
             },
             headlineContent = {
                 Text("Keluar")
+            },
+            trailingContent = {
+                Icon(
+                    Icons.Rounded.ChevronRight,
+                    null
+                )
             },
             modifier = Modifier.clickable { onClickLogout() }
         )
@@ -223,7 +265,9 @@ private fun LogoutDialog(
 private fun HomeSettingPreview() {
     ArtaTheme {
         Content(
-            isDarkTheme = true,
+            uiState = HomeSettingUiState(
+                isDarkTheme = true
+            )
         )
     }
 }

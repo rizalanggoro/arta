@@ -2,12 +2,14 @@ package gold
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
 	"github.com/artafinance/backend/pkg/jwt"
 	"github.com/artafinance/backend/pkg/middleware"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 func isValidGoldType(value string) bool {
@@ -32,6 +34,10 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr, h.checker))
 	protected.Get("/", h.list)
 	protected.Post("/", h.create)
+	protected.Get("/tax", h.listTaxPreferences)
+	protected.Post("/tax", h.createTaxPreference)
+	protected.Put("/tax/:id", h.updateTaxPreference)
+	protected.Delete("/tax/:id", h.deleteTaxPreference)
 	protected.Get("/summary", h.summary)
 	protected.Get("/:id", h.get)
 	protected.Put("/:id", h.update)
@@ -103,19 +109,216 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	}
 
 	created, err := h.repo.CreateGold(&domain.Gold{
-		WalletID:      req.WalletID,
-		Date:          req.Date,
-		Grams:         req.Grams,
-		Price:         req.Price,
-		Type:          req.Type,
-		Carat:         req.Carat,
-		Notes:         req.Notes,
+		WalletID: req.WalletID,
+		Date:     req.Date,
+		Grams:    req.Grams,
+		Price:    req.Price,
+		Type:     req.Type,
+		Carat:    req.Carat,
+		Notes:    req.Notes,
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(CreateGoldRes{dto.Gold{Data: *created}})
+}
+
+// @id                   ListGoldTaxPreferences
+// @tags                 gold
+// @accept               json
+// @produce              json
+// @param                Authorization header string true "Bearer token"
+// @success              200 {object} ListGoldTaxPreferencesRes
+// @router               /api/gold/tax [get]
+func (h *Handler) listTaxPreferences(c *fiber.Ctx) error {
+	userID := middleware.GetUserID(c)
+	if userID == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	prefs, err := h.repo.GetTaxPreferencesByUserID(uint(parsedUserID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	res := ListGoldTaxPreferencesRes{Preferences: make([]dto.GoldTaxPreference, 0, len(prefs))}
+	for i := range prefs {
+		res.Preferences = append(res.Preferences, dto.GoldTaxPreference{
+			ID:        prefs[i].ID,
+			UserID:    prefs[i].UserID,
+			Carat:     prefs[i].Carat,
+			TaxRate:   prefs[i].TaxRate,
+			CreatedAt: prefs[i].CreatedAt.Format(time.RFC3339),
+			UpdatedAt: prefs[i].UpdatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(res)
+}
+
+// @id                   CreateGoldTaxPreference
+// @tags                 gold
+// @accept               json
+// @produce              json
+// @param                Authorization header string true "Bearer token"
+// @param                body body GoldTaxPreferenceReq true "body"
+// @success              201 {object} CreateGoldTaxPreferenceRes
+// @router               /api/gold/tax [post]
+func (h *Handler) createTaxPreference(c *fiber.Ctx) error {
+	var req GoldTaxPreferenceReq
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+
+	userID := middleware.GetUserID(c)
+	if userID == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	if req.Carat <= 0 || req.Carat > 24 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "carat must be between 0 and 24"})
+	}
+	if req.TaxRate < 0 || req.TaxRate > 100 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "tax rate must be between 0 and 100"})
+	}
+
+	existing, err := h.repo.GetTaxPreferencesByUserID(uint(parsedUserID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+	for _, preference := range existing {
+		if preference.Carat == req.Carat {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "duplicate carat preference"})
+		}
+	}
+
+	created, err := h.repo.CreateTaxPreference(uint(parsedUserID), &domain.GoldTaxPreference{
+		Carat:   req.Carat,
+		TaxRate: req.TaxRate,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(CreateGoldTaxPreferenceRes{Preference: dto.GoldTaxPreference{
+		ID:        created.ID,
+		UserID:    created.UserID,
+		Carat:     created.Carat,
+		TaxRate:   created.TaxRate,
+		CreatedAt: created.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: created.UpdatedAt.Format(time.RFC3339),
+	}})
+}
+
+// @id                   UpdateGoldTaxPreference
+// @tags                 gold
+// @accept               json
+// @produce              json
+// @param                Authorization header string true "Bearer token"
+// @param                id path int true "tax preference id"
+// @param                body body GoldTaxPreferenceReq true "body"
+// @success              200 {object} UpdateGoldTaxPreferenceRes
+// @router               /api/gold/tax/{id} [put]
+func (h *Handler) updateTaxPreference(c *fiber.Ctx) error {
+	var req GoldTaxPreferenceReq
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+
+	userID := middleware.GetUserID(c)
+	if userID == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	preferenceID, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+
+	if req.Carat <= 0 || req.Carat > 24 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "carat must be between 0 and 24"})
+	}
+	if req.TaxRate < 0 || req.TaxRate > 100 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "tax rate must be between 0 and 100"})
+	}
+
+	existing, err := h.repo.GetTaxPreferencesByUserID(uint(parsedUserID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+	for _, preference := range existing {
+		if preference.ID != uint(preferenceID) && preference.Carat == req.Carat {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "duplicate carat preference"})
+		}
+	}
+
+	updated, err := h.repo.UpdateTaxPreference(uint(parsedUserID), &domain.GoldTaxPreference{
+		ID:      uint(preferenceID),
+		Carat:   req.Carat,
+		TaxRate: req.TaxRate,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(UpdateGoldTaxPreferenceRes{Preference: dto.GoldTaxPreference{
+		ID:        updated.ID,
+		UserID:    updated.UserID,
+		Carat:     updated.Carat,
+		TaxRate:   updated.TaxRate,
+		CreatedAt: updated.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: updated.UpdatedAt.Format(time.RFC3339),
+	}})
+}
+
+// @id                   DeleteGoldTaxPreference
+// @tags                 gold
+// @accept               json
+// @produce              json
+// @param                Authorization header string true "Bearer token"
+// @param                id path int true "tax preference id"
+// @success              200 {object} DeleteGoldTaxPreferenceRes
+// @router               /api/gold/tax/{id} [delete]
+func (h *Handler) deleteTaxPreference(c *fiber.Ctx) error {
+	userID := middleware.GetUserID(c)
+	if userID == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	preferenceID, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+
+	if err := h.repo.DeleteTaxPreference(uint(parsedUserID), uint(preferenceID)); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: "tax preference not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(DeleteGoldTaxPreferenceRes{Message: "tax preference deleted"})
 }
 
 // @id                   GetGold

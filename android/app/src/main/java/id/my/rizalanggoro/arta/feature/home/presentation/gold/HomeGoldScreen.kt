@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.Inbox
 import androidx.compose.material3.HorizontalDivider
@@ -20,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -36,6 +39,7 @@ import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 @Composable
 fun HomeGoldScreen(
     vm: HomeGoldVM = viewModel(factory = HomeGoldVM.Factory),
+    onClickManageTax: () -> Unit = {},
 ) {
     val uiState by vm.uiState.collectAsState()
 
@@ -43,6 +47,7 @@ fun HomeGoldScreen(
         golds = uiState.golds,
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,
+        onClickManageTax = onClickManageTax,
     )
 }
 
@@ -51,31 +56,45 @@ private fun Content(
     golds: List<Gold> = emptyList(),
     isLoading: Boolean = false,
     errorMessage: String? = null,
+    onClickManageTax: () -> Unit = {},
 ) {
     when {
         isLoading -> Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
-            LoadingIndicator()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                TaxActions(onClickManageTax = onClickManageTax)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    LoadingIndicator()
+                }
+            }
         }
 
         golds.isEmpty() -> Column(
             modifier = Modifier.fillMaxSize(),
-            Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-            Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            TaxActions(onClickManageTax = onClickManageTax)
             Icon(
                 Icons.Rounded.Inbox,
                 null,
                 modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.outlineVariant
+                tint = MaterialTheme.colorScheme.outlineVariant,
             )
             Text(
                 "Belum ada emas yang ditambahkan",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         }
 
@@ -83,12 +102,25 @@ private fun Content(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            item {
+                TaxActions(onClickManageTax = onClickManageTax)
+            }
             items(golds) { gold ->
                 GoldItem(gold = gold)
             }
         }
+    }
+}
+
+@Composable
+private fun TaxActions(
+    onClickManageTax: () -> Unit,
+) {
+    OutlinedButton(onClick = onClickManageTax, modifier = Modifier.fillMaxWidth()) {
+        Icon(Icons.Rounded.Edit, contentDescription = null)
+        Text(text = "Kelola pajak emas")
     }
 }
 

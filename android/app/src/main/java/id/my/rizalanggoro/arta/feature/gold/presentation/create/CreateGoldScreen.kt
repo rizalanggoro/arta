@@ -354,7 +354,12 @@ private fun CreateGoldDefaultPreview() {
     ArtaTheme {
         Content(
             snackbarHostState = remember { SnackbarHostState() },
-            walletId = "12",
+            selectedWallet = Wallet(
+                id = 12,
+                userId = 1,
+                name = "Tabungan Emas",
+                type = "gold_savings",
+            ),
             date = "2026-05-16T10:30:00+07:00",
             grams = "1.5",
             price = "1200000",
@@ -381,7 +386,6 @@ private fun CreateGoldErrorPreview() {
     ArtaTheme {
         Content(
             snackbarHostState = remember { SnackbarHostState() },
-            walletIdError = "Wallet aktif belum dipilih",
             gramsError = "Gram tidak valid",
             priceError = "Harga tidak valid",
         )

@@ -55,6 +55,7 @@ func runMigrations(database *gorm.DB) error {
 		&model.Category{},
 		&model.Transaction{},
 		&model.Gold{},
+		&model.GoldTaxPreference{},
 		&model.GoldPrice{},
 		&model.FxRate{},
 	); err != nil {

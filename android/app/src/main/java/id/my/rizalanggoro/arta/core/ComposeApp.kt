@@ -18,6 +18,9 @@ import id.my.rizalanggoro.arta.core.Routes.CategoryUpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.ForgotPasswordRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldDetailRoute
+import id.my.rizalanggoro.arta.core.Routes.GoldTaxCreateRoute
+import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
+import id.my.rizalanggoro.arta.core.Routes.GoldTaxUpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldUpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeRoute
@@ -43,6 +46,9 @@ import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCatego
 import id.my.rizalanggoro.arta.feature.category.presentation.update.UpdateCategoryScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.create.CreateGoldScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
+import id.my.rizalanggoro.arta.feature.gold.presentation.createtax.CreateGoldTaxScreen
+import id.my.rizalanggoro.arta.feature.gold.presentation.tax.ListGoldTaxScreen
+import id.my.rizalanggoro.arta.feature.gold.presentation.updatetax.UpdateGoldTaxScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.update.UpdateGoldScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeScreen
@@ -89,6 +95,9 @@ fun ComposeApp() {
                         entry<CategoryCreateRoute> { CreateCategoryScreen() }
                         entry<CategoryUpdateRoute> { route -> UpdateCategoryScreen(categoryId = route.categoryId) }
                         entry<GoldCreateRoute> { CreateGoldScreen() }
+                        entry<GoldTaxListRoute> { ListGoldTaxScreen() }
+                        entry<GoldTaxCreateRoute> { CreateGoldTaxScreen() }
+                        entry<GoldTaxUpdateRoute> { route -> UpdateGoldTaxScreen(taxPreferenceId = route.taxPreferenceId) }
                         entry<GoldUpdateRoute> { route -> UpdateGoldScreen(goldId = route.goldId) }
                         entry<TransactionCreateRoute> { CreateTransactionScreen() }
                         entry<TransactionUpdateRoute> { route ->
