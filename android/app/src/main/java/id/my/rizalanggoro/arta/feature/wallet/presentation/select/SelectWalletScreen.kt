@@ -55,12 +55,9 @@ fun SelectWalletScreen(
     }
 
     Content(
-        selectedWallet = uiState.selectedWallet,
-        wallets = uiState.wallets,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
-        onReload = vm::loadWallets,
-        onClickWallet = vm::selectWallet,
+        uiState = uiState,
+        onClickRetry = vm::loadWallets,
+        onClickWallet = vm::onWalletSelected,
         onClickManageWallet = {
             backStack.removeLastOrNull()
             backStack.add(Routes.WalletRoute)
@@ -71,11 +68,8 @@ fun SelectWalletScreen(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
-    selectedWallet: Wallet? = null,
-    wallets: List<Wallet> = emptyList(),
-    isLoading: Boolean = false,
-    errorMessage: String? = null,
-    onReload: () -> Unit = {},
+    uiState: SelectWalletUiState = SelectWalletUiState(),
+    onClickRetry: () -> Unit = {},
     onClickWallet: (Wallet) -> Unit = {},
     onClickManageWallet: () -> Unit = {},
 ) {
@@ -102,7 +96,7 @@ private fun Content(
         }
 
         when {
-            isLoading -> {
+            uiState.isLoading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -113,13 +107,13 @@ private fun Content(
                 }
             }
 
-            errorMessage != null -> ErrorPlaceholder(
+            uiState.errorMessage != null -> ErrorPlaceholder(
                 modifier = Modifier.padding(16.dp),
-                message = errorMessage,
-                onClickRetry = onReload
+                message = uiState.errorMessage,
+                onClickRetry = onClickRetry
             )
 
-            wallets.isEmpty() -> EmptyPlaceholder(
+            uiState.wallets.isEmpty() -> EmptyPlaceholder(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -131,14 +125,14 @@ private fun Content(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                 ) {
-                    items(wallets) { wallet ->
+                    items(uiState.wallets) { wallet ->
                         ListItem(
                             colors = ListItemDefaults.colors(
                                 containerColor = Color.Transparent
                             ),
                             leadingContent = {
                                 RadioButton(
-                                    selected = selectedWallet?.id == wallet.id,
+                                    selected = uiState.selectedWallet?.id == wallet.id,
                                     onClick = { onClickWallet(wallet) },
                                 )
                             },
@@ -173,8 +167,12 @@ private fun walletTypeLabel(type: String): String {
 private fun SelectWalletPreview() {
     ArtaTheme {
         Content(
-            wallets = listOf(
-                Wallet(id = 1, userId = 1, name = "Dompet Harian", type = "cash_savings"),
+            uiState = SelectWalletUiState(
+                wallets = listOf(
+                    Wallet(id = 1, userId = 1, name = "Dompet Harian", type = "cash_savings"),
+                    Wallet(id = 1, userId = 1, name = "Dompet Harian", type = "cash_savings"),
+                    Wallet(id = 1, userId = 1, name = "Dompet Harian", type = "cash_savings"),
+                )
             ),
         )
     }
@@ -184,7 +182,11 @@ private fun SelectWalletPreview() {
 @Composable
 private fun SelectWalletLoadingPreview() {
     ArtaTheme {
-        Content(isLoading = true)
+        Content(
+            uiState = SelectWalletUiState(
+                isLoading = true
+            )
+        )
     }
 }
 
@@ -192,7 +194,11 @@ private fun SelectWalletLoadingPreview() {
 @Composable
 private fun SelectWalletErrorPreview() {
     ArtaTheme {
-        Content(errorMessage = "Gagal memuat data wallet")
+        Content(
+            uiState = SelectWalletUiState(
+                errorMessage = "Gagal memuat data wallet"
+            )
+        )
     }
 }
 
@@ -200,19 +206,10 @@ private fun SelectWalletErrorPreview() {
 @Composable
 private fun SelectWalletEmptyPreview() {
     ArtaTheme {
-        Content(wallets = emptyList())
-    }
-}
-
-@Preview(showBackground = true, name = "Wallet Selector - With Items")
-@Composable
-private fun SelectWalletItemsPreview() {
-    ArtaTheme {
         Content(
-            wallets = listOf(
-                Wallet(id = 1, userId = 1, name = "Dompet Harian", type = "cash_savings"),
-                Wallet(id = 2, userId = 1, name = "Tabungan Emas", type = "gold_savings"),
-            ),
+            uiState = SelectWalletUiState(
+                wallets = emptyList()
+            )
         )
     }
 }

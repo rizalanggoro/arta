@@ -37,33 +37,34 @@ class SelectWalletVM(
     private val _uiState = MutableStateFlow(SelectWalletUiState())
     val uiState: StateFlow<SelectWalletUiState> = _uiState.asStateFlow()
 
-    fun loadWallets() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            walletRepository.getWallets()
-                .onSuccess { wallets ->
-                    _uiState.update { it.copy(wallets = wallets, isLoading = false) }
+    fun loadWallets() = viewModelScope.launch {
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        walletRepository.getWallets()
+            .onSuccess { wallets ->
+                _uiState.update {
+                    it.copy(
+                        wallets = wallets,
+                        isLoading = false
+                    )
                 }
-                .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Gagal memuat wallet"
-                        )
-                    }
+            }
+            .onFailure { throwable ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Terjadi kesalahan tak terduga"
+                    )
                 }
-        }
+            }
     }
 
-    fun selectWallet(wallet: Wallet) {
-        viewModelScope.launch {
-            selectedWalletPrefs.saveSelectedWallet(wallet)
-            AppEventBus.emit(
-                AppEvent.WalletSelected(
-                    wallet = wallet
-                )
+    fun onWalletSelected(wallet: Wallet) = viewModelScope.launch {
+        selectedWalletPrefs.saveSelectedWallet(wallet)
+        AppEventBus.emit(
+            AppEvent.WalletSelected(
+                wallet = wallet
             )
-        }
+        )
     }
 
     init {
@@ -71,7 +72,11 @@ class SelectWalletVM(
 
         viewModelScope.launch {
             selectedWalletPrefs.selectedWallet.collect { wallet ->
-                _uiState.update { it.copy(selectedWallet = wallet) }
+                _uiState.update {
+                    it.copy(
+                        selectedWallet = wallet
+                    )
+                }
             }
         }
 
