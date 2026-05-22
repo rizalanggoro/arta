@@ -34,7 +34,8 @@ import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
+import id.my.rizalanggoro.arta.openapi.models.DtoWallet
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -70,7 +71,7 @@ fun SelectWalletScreen(
 private fun Content(
     uiState: SelectWalletUiState = SelectWalletUiState(),
     onClickRetry: () -> Unit = {},
-    onClickWallet: (Wallet) -> Unit = {},
+    onClickWallet: (DomainWallet) -> Unit = {},
     onClickManageWallet: () -> Unit = {},
 ) {
     Column(
@@ -132,18 +133,18 @@ private fun Content(
                             ),
                             leadingContent = {
                                 RadioButton(
-                                    selected = uiState.selectedWallet?.id == wallet.id,
-                                    onClick = { onClickWallet(wallet) },
+                                    selected = uiState.selectedWallet?.id == wallet.data.id,
+                                    onClick = { onClickWallet(wallet.data) },
                                 )
                             },
                             headlineContent = {
-                                Text(wallet.name.orEmpty())
+                                Text(wallet.data.name.orEmpty())
                             },
                             supportingContent = {
-                                Text(walletTypeLabel(wallet.type.orEmpty()))
+                                Text(walletTypeLabel(wallet.data.type.orEmpty()))
                             },
                             modifier = Modifier.clickable {
-                                onClickWallet(wallet)
+                                onClickWallet(wallet.data)
                             }
                         )
                     }
@@ -169,9 +170,30 @@ private fun SelectWalletPreview() {
         Content(
             uiState = SelectWalletUiState(
                 wallets = listOf(
-                    Wallet(id = 1, userID = 1, name = "Dompet Harian", type = "cash_savings"),
-                    Wallet(id = 1, userID = 1, name = "Dompet Harian", type = "cash_savings"),
-                    Wallet(id = 1, userID = 1, name = "Dompet Harian", type = "cash_savings"),
+                    DtoWallet(
+                        data = DomainWallet(
+                            id = 1,
+                            userID = 1,
+                            name = "Dompet Harian",
+                            type = "cash_savings"
+                        )
+                    ),
+                    DtoWallet(
+                        data = DomainWallet(
+                            id = 2,
+                            userID = 1,
+                            name = "Dompet Harian",
+                            type = "cash_savings"
+                        )
+                    ),
+                    DtoWallet(
+                        data = DomainWallet(
+                            id = 3,
+                            userID = 1,
+                            name = "Dompet Harian",
+                            type = "cash_savings"
+                        )
+                    ),
                 )
             ),
         )

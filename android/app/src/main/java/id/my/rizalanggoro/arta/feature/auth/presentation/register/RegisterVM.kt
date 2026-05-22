@@ -11,7 +11,6 @@ import id.my.rizalanggoro.arta.core.network.RetrofitProvider
 import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.AuthApi
 import id.my.rizalanggoro.arta.openapi.models.RegisterReq
-import id.my.rizalanggoro.arta.openapi.models.RegisterRes
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -113,17 +112,21 @@ class RegisterVM(
                     throw IllegalStateException("Registrasi gagal")
                 }
 
-                val body = response.body() ?: throw IllegalStateException("Respons server kosong")
-                body.toDomain()
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess { body ->
+                authPrefs.setSession(
+                    AuthSession(
+                        userId = requireNotNull(body.userId) { "Register response missing user id" },
+                        email = requireNotNull(body.email) { "Register response missing email" },
+                        name = requireNotNull(body.name) { "Register response missing name" },
+                        token = requireNotNull(body.token) { "Register response missing token" },
+                    )
+                )
+
+                _effect.emit(RegisterEffect.NavigateToCreateFirstWallet)
+            }.onFailure { throwable ->
+                _messageEvent.emit(throwable.message ?: "Registrasi gagal")
             }
-                .onSuccess { session ->
-                    authPrefs.setSession(session)
-                    _messageEvent.emit("Registrasi berhasil untuk ${session.name}")
-                    _effect.emit(RegisterEffect.NavigateToCreateFirstWallet)
-                }
-                .onFailure { throwable ->
-                    _messageEvent.emit(throwable.message ?: "Registrasi gagal")
-                }
             _uiState.update { it.copy(isLoading = false) }
         }
     }
@@ -131,13 +134,4 @@ class RegisterVM(
 
 sealed class RegisterEffect {
     object NavigateToCreateFirstWallet : RegisterEffect()
-}
-
-private fun RegisterRes.toDomain(): AuthSession {
-    return AuthSession(
-        userId = requireNotNull(userId) { "Register response missing user id" },
-        email = requireNotNull(email) { "Register response missing email" },
-        name = requireNotNull(name) { "Register response missing name" },
-        token = requireNotNull(token) { "Register response missing token" },
-    )
 }

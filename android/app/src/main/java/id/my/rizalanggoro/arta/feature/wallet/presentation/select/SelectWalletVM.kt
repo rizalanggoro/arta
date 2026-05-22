@@ -9,9 +9,9 @@ import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.domain.Wallet
 import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,27 +46,25 @@ class SelectWalletVM(
                 throw IllegalStateException(response.walletApiErrorMessage())
             }
 
-            response.body()?.wallets.orEmpty().mapNotNull { it.data }
+            response.body() ?: throw IllegalStateException("Respons server kosong")
+        }.onSuccess { response ->
+            _uiState.update {
+                it.copy(
+                    wallets = response.wallets,
+                    isLoading = false
+                )
+            }
+        }.onFailure { throwable ->
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = throwable.message ?: "Terjadi kesalahan tak terduga"
+                )
+            }
         }
-            .onSuccess { wallets ->
-                _uiState.update {
-                    it.copy(
-                        wallets = wallets,
-                        isLoading = false
-                    )
-                }
-            }
-            .onFailure { throwable ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = throwable.message ?: "Terjadi kesalahan tak terduga"
-                    )
-                }
-            }
     }
 
-    fun onWalletSelected(wallet: Wallet) = viewModelScope.launch {
+    fun onWalletSelected(wallet: DomainWallet) = viewModelScope.launch {
         selectedWalletPrefs.saveSelectedWallet(wallet)
         AppEventBus.emit(
             AppEvent.WalletSelected(

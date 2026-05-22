@@ -16,8 +16,6 @@ import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.DtoError
 import id.my.rizalanggoro.arta.openapi.models.LoginReq
 import id.my.rizalanggoro.arta.openapi.models.LoginRes
-import kotlinx.serialization.json.Json
-import retrofit2.Response
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -26,6 +24,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import retrofit2.Response
 
 class LoginVM(
     private val authApi: AuthApi,
@@ -101,29 +101,33 @@ class LoginVM(
                     throw IllegalStateException(apiErrorMessage(response))
                 }
 
-                val body = response.body() ?: throw IllegalStateException("Respons server kosong")
-                body.toDomain()
-            }
-                .onSuccess { session ->
-                    authPrefs.setSession(session)
-                    runCatching {
-                        val response = walletApi.listWallets()
-                        if (!response.isSuccessful) {
-                            throw IllegalStateException(response.walletApiErrorMessage())
-                        }
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess { response ->
+                authPrefs.setSession(
+                    session = AuthSession(
+                        userId = requireNotNull(response.userId) { "Login response missing user id" },
+                        email = requireNotNull(response.email) { "Login response missing email" },
+                        name = requireNotNull(response.name) { "Login response missing name" },
+                        token = requireNotNull(response.token) { "Login response missing token" },
+                    )
+                )
 
-                        response.body()?.wallets.orEmpty().mapNotNull { it.data }
+                runCatching {
+                    val response = walletApi.listWallets()
+                    if (!response.isSuccessful) {
+                        throw IllegalStateException(response.walletApiErrorMessage())
                     }
-                        .onSuccess { wallets ->
-                            wallets.firstOrNull()?.let { firstWallet ->
-                                selectedWalletPrefs.saveSelectedWallet(firstWallet)
-                            }
-                        }
-                    _messageEvent.emit("Login berhasil untuk ${session.name}")
+
+                    response.body() ?: throw IllegalStateException("Respons server kosong")
+                }.onSuccess { response ->
+                    response.wallets.firstOrNull()?.let { firstWallet ->
+                        selectedWalletPrefs.saveSelectedWallet(firstWallet.data)
+                    }
                 }
-                .onFailure { throwable ->
-                    _messageEvent.emit(throwable.message ?: "Login gagal")
-                }
+                _messageEvent.emit("Login berhasil untuk ${response.name}")
+            }.onFailure { throwable ->
+                _messageEvent.emit(throwable.message ?: "Login gagal")
+            }
             _uiState.update { it.copy(isLoading = false) }
         }
     }
@@ -141,13 +145,4 @@ class LoginVM(
             rawError
         }
     }
-}
-
-private fun LoginRes.toDomain(): AuthSession {
-    return AuthSession(
-        userId = requireNotNull(userId) { "Login response missing user id" },
-        email = requireNotNull(email) { "Login response missing email" },
-        name = requireNotNull(name) { "Login response missing name" },
-        token = requireNotNull(token) { "Login response missing token" },
-    )
 }

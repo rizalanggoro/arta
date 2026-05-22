@@ -10,6 +10,8 @@ import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
+import id.my.rizalanggoro.arta.openapi.models.CreateWalletRes
+import id.my.rizalanggoro.arta.openapi.models.UpdateWalletRes
 import id.my.rizalanggoro.arta.openapi.models.WalletCreateWalletReq
 import id.my.rizalanggoro.arta.openapi.models.WalletUpdateWalletReq
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -68,27 +70,25 @@ class UpsertWalletVM(
                     throw IllegalStateException(response.walletApiErrorMessage())
                 }
 
-                response.body()?.data ?: throw IllegalStateException("Respons server kosong")
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess { response ->
+                _uiState.update {
+                    it.copy(
+                        walletId = requireNotNull(response.data.id) { "Wallet response missing id" },
+                        name = requireNotNull(response.data.name) { "Wallet response missing name" },
+                        type = requireNotNull(response.data.type) { "Wallet response missing type" },
+                        isLoading = false,
+                        errorMessage = null,
+                    )
+                }
+            }.onFailure { throwable ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Gagal memuat wallet",
+                    )
+                }
             }
-                .onSuccess { wallet ->
-                    _uiState.update {
-                        it.copy(
-                            walletId = requireNotNull(wallet.id) { "Wallet response missing id" },
-                            name = requireNotNull(wallet.name) { "Wallet response missing name" },
-                            type = requireNotNull(wallet.type) { "Wallet response missing type" },
-                            isLoading = false,
-                            errorMessage = null,
-                        )
-                    }
-                }
-                .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Gagal memuat wallet",
-                        )
-                    }
-                }
         }
     }
 
@@ -141,7 +141,7 @@ class UpsertWalletVM(
                         throw IllegalStateException(response.walletApiErrorMessage())
                     }
 
-                    response.body()?.data ?: throw IllegalStateException("Respons server kosong")
+                    response.body() ?: throw IllegalStateException("Respons server kosong")
                 }
             } else {
                 runCatching {
@@ -156,19 +156,25 @@ class UpsertWalletVM(
                         throw IllegalStateException(response.walletApiErrorMessage())
                     }
 
-                    response.body()?.data ?: throw IllegalStateException("Respons server kosong")
+                    response.body() ?: throw IllegalStateException("Respons server kosong")
                 }
             }
 
             result
-                .onSuccess { wallet ->
+                .onSuccess { response ->
+                    val walletName = when (response) {
+                        is CreateWalletRes -> response.data.name.orEmpty()
+                        is UpdateWalletRes -> response.data.name.orEmpty()
+                        else -> ""
+                    }
+
                     AppEventBus.emit(AppEvent.WalletChanged)
                     _effect.emit(
                         UpsertWalletEffect.ShowMessage(
                             if (isUpdate) {
-                                "Wallet ${wallet.name.orEmpty()} berhasil diperbarui"
+                                "Wallet $walletName berhasil diperbarui"
                             } else {
-                                "Wallet ${wallet.name.orEmpty()} berhasil dibuat"
+                                "Wallet $walletName berhasil dibuat"
                             }
                         )
                     )
@@ -177,7 +183,8 @@ class UpsertWalletVM(
                 .onFailure { throwable ->
                     _effect.emit(
                         UpsertWalletEffect.ShowMessage(
-                            throwable.message ?: if (isUpdate) "Gagal memperbarui wallet" else "Gagal membuat wallet"
+                            throwable.message
+                                ?: if (isUpdate) "Gagal memperbarui wallet" else "Gagal membuat wallet"
                         )
                     )
                 }
