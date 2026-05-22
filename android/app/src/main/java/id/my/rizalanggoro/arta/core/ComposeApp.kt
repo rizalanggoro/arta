@@ -32,11 +32,10 @@ import id.my.rizalanggoro.arta.core.Routes.TransactionCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionDetailRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionUpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.UpsertGoldTaxRoute
+import id.my.rizalanggoro.arta.core.Routes.UpsertWalletRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletCreateFirstRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletUpdateRoute
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.feature.auth.presentation.forgotpassword.ForgotPasswordScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
@@ -56,11 +55,10 @@ import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransac
 import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.update.UpdateTransactionScreen
-import id.my.rizalanggoro.arta.feature.wallet.presentation.create.CreateWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst.CreateFirstWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletScreen
-import id.my.rizalanggoro.arta.feature.wallet.presentation.update.UpdateWalletScreen
+import id.my.rizalanggoro.arta.feature.wallet.presentation.upsert.UpsertWalletScreen
 import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
@@ -72,17 +70,16 @@ fun ComposeApp() {
     val selectedWallet by app.selectedWalletPrefs.selectedWallet.collectAsState()
     val isDarkTheme by app.themePrefs.isDarkTheme.collectAsState()
 
+    val startRoute = when {
+        session != null && selectedWallet == null -> WalletCreateFirstRoute
+        session != null -> HomeRoute
+        else -> LoginRoute
+    }
+
+    val backStack = rememberNavBackStack(startRoute)
+    val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
+
     ArtaTheme(darkTheme = isDarkTheme) {
-
-        val startRoute = when {
-            session != null && selectedWallet == null -> WalletCreateFirstRoute
-            session != null -> HomeRoute
-            else -> LoginRoute
-        }
-
-        val backStack = rememberNavBackStack(startRoute)
-        val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
-
         CompositionLocalProvider(LocalBackStack provides backStack) {
             Surface {
                 NavDisplay(
@@ -94,51 +91,61 @@ fun ComposeApp() {
                     ),
                     sceneStrategies = listOf(bottomSheetStrategy),
                     entryProvider = entryProvider {
-                        entry<CategoryRoute> { ListCategoryScreen() }
-                        entry<CategorySelectRoute> { SelectCategoryScreen() }
-                        entry<CategoryUpsertRoute>(
-                            metadata = BottomSheetSceneStrategy.bottomSheet()
-                        ) { route ->
-                            UpsertCategoryScreen(categoryId = route.categoryId)
-                        }
-                        entry<GoldCreateRoute> { CreateGoldScreen() }
-                        entry<GoldTaxListRoute> { ListGoldTaxScreen() }
-                        entry<UpsertGoldTaxRoute>(
-                            metadata = BottomSheetSceneStrategy.bottomSheet()
-                        ) { route ->
-                            UpsertGoldTaxScreen(taxPreferenceId = route.id)
-                        }
-                        entry<GoldUpdateRoute> { route -> UpdateGoldScreen(goldId = route.goldId) }
-                        entry<TransactionCreateRoute> { CreateTransactionScreen() }
-                        entry<TransactionUpdateRoute> { route ->
-                            UpdateTransactionScreen(
-                                transactionId = route.transactionId
-                            )
-                        }
-                        entry<TransactionDetailRoute> { route ->
-                            TransactionDetailScreen(
-                                transactionId = route.id
-                            )
-                        }
-                        entry<GoldDetailRoute> { route -> GoldDetailScreen(goldId = route.id) }
-                        entry<HomeGoldRoute> { HomeGoldScreen() }
-                        entry<HomeRoute> {
-                            HomeScreen()
-                        }
-                        entry<HomeTransactionRoute> { HomeTransactionScreen() }
-                        entry<HomeSettingRoute> { HomeSettingScreen() }
+                        // auth
+                        entry<LoginRoute> { LoginScreen() }
+                        entry<RegisterRoute> { RegisterScreen() }
+                        entry<ForgotPasswordRoute> { ForgotPasswordScreen() }
+
+                        // wallet
                         entry<WalletRoute> { ListWalletScreen() }
                         entry<WalletSelectRoute>(
                             metadata = BottomSheetSceneStrategy.bottomSheet()
                         ) {
                             SelectWalletScreen()
                         }
-                        entry<WalletCreateRoute> { CreateWalletScreen() }
+                        entry<UpsertWalletRoute>(
+                            metadata = BottomSheetSceneStrategy.bottomSheet()
+                        ) {
+                            UpsertWalletScreen(walletId = it.walletId)
+                        }
                         entry<WalletCreateFirstRoute> { CreateFirstWalletScreen() }
-                        entry<WalletUpdateRoute> { route -> UpdateWalletScreen(walletId = route.walletId) }
-                        entry<LoginRoute> { LoginScreen() }
-                        entry<RegisterRoute> { RegisterScreen() }
-                        entry<ForgotPasswordRoute> { ForgotPasswordScreen() }
+
+                        // category
+                        entry<CategoryRoute> { ListCategoryScreen() }
+                        entry<CategorySelectRoute> { SelectCategoryScreen() }
+                        entry<CategoryUpsertRoute>(
+                            metadata = BottomSheetSceneStrategy.bottomSheet()
+                        ) {
+                            UpsertCategoryScreen(categoryId = it.categoryId)
+                        }
+
+                        // transaction
+                        entry<TransactionCreateRoute> { CreateTransactionScreen() }
+                        entry<TransactionUpdateRoute> {
+                            UpdateTransactionScreen(
+                                transactionId = it.transactionId
+                            )
+                        }
+                        entry<TransactionDetailRoute> {
+                            TransactionDetailScreen(
+                                transactionId = it.id
+                            )
+                        }
+
+                        // gold
+                        entry<GoldCreateRoute> { CreateGoldScreen() }
+                        entry<GoldTaxListRoute> { ListGoldTaxScreen() }
+                        entry<UpsertGoldTaxRoute>(
+                            metadata = BottomSheetSceneStrategy.bottomSheet()
+                        ) { UpsertGoldTaxScreen(taxPreferenceId = it.id) }
+                        entry<GoldUpdateRoute> { UpdateGoldScreen(goldId = it.goldId) }
+                        entry<GoldDetailRoute> { GoldDetailScreen(goldId = it.id) }
+
+                        // home
+                        entry<HomeGoldRoute> { HomeGoldScreen() }
+                        entry<HomeRoute> { HomeScreen() }
+                        entry<HomeTransactionRoute> { HomeTransactionScreen() }
+                        entry<HomeSettingRoute> { HomeSettingScreen() }
                     },
                 )
             }

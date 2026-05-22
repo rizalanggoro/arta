@@ -44,15 +44,12 @@ object Routes {
     data object WalletSelectRoute : NavKey
 
     @Serializable
-    data object WalletCreateRoute : NavKey
+    data class UpsertWalletRoute(
+        val walletId: Int = 0,
+    ) : NavKey
 
     @Serializable
     data object WalletCreateFirstRoute : NavKey
-
-    @Serializable
-    data class WalletUpdateRoute(
-        val walletId: Int,
-    ) : NavKey
 
     // gold
     @Serializable

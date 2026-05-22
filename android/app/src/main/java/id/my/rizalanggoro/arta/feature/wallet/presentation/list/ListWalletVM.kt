@@ -6,11 +6,14 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.domain.Wallet
 import id.my.rizalanggoro.arta.feature.wallet.data.WalletRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -86,6 +89,12 @@ class ListWalletVM(
 						)
 					}
 				}
+		}
+
+		viewModelScope.launch {
+			AppEventBus.event
+				.filterIsInstance<AppEvent.WalletChanged>()
+				.collect { loadWallets() }
 		}
 	}
 }

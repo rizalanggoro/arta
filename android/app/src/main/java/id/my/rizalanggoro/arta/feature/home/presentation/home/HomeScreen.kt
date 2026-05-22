@@ -109,12 +109,13 @@ private fun Content(
             TopAppBar(
                 title = { Text(text = "Arta") },
                 actions = {
-                    FilledTonalIconButton(onClick = onClickSelectWallet) {
-                        Icon(
-                            Icons.Rounded.Wallet,
-                            contentDescription = null
-                        )
-                    }
+                    if (selectedIndex in 0..1)
+                        FilledTonalIconButton(onClick = onClickSelectWallet) {
+                            Icon(
+                                Icons.Rounded.Wallet,
+                                null
+                            )
+                        }
                 },
             )
         },

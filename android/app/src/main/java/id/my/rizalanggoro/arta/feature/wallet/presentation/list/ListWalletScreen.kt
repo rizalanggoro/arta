@@ -43,7 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes.WalletUpdateRoute
+import id.my.rizalanggoro.arta.core.Routes.UpsertWalletRoute
 import id.my.rizalanggoro.arta.domain.Wallet
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
@@ -62,7 +62,8 @@ fun ListWalletScreen(vm: ListWalletVM = viewModel(factory = ListWalletVM.Factory
         errorMessage = uiState.errorMessage,
         deleteTarget = uiState.deleteTarget,
         selectedWallet = uiState.selectedWallet,
-        onClickEdit = { walletId -> backStack.add(WalletUpdateRoute(walletId = walletId)) },
+        onClickCreate = { backStack.add(UpsertWalletRoute()) },
+        onClickEdit = { walletId -> backStack.add(UpsertWalletRoute(walletId = walletId)) },
         onSelectWallet = vm::onWalletSelected,
         onClickDelete = vm::onDeleteRequested,
         onDismissWalletActions = vm::dismissWalletActions,
@@ -80,6 +81,7 @@ private fun Content(
     errorMessage: String? = null,
     deleteTarget: Wallet? = null,
     selectedWallet: Wallet? = null,
+    onClickCreate: () -> Unit = {},
     onClickEdit: (Int) -> Unit = {},
     onSelectWallet: (Wallet) -> Unit = {},
     onClickDelete: (Wallet) -> Unit = {},
@@ -104,7 +106,7 @@ private fun Content(
         },
         floatingActionButton = {
             if (!isLoading) {
-                FloatingActionButton(onClick = {}) {
+                FloatingActionButton(onClick = onClickCreate) {
                     Icon(
                         Icons.Rounded.Add,
                         contentDescription = null,

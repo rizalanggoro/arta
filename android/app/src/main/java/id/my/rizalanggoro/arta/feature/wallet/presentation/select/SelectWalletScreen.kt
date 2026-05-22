@@ -4,29 +4,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.domain.Wallet
@@ -66,7 +54,6 @@ fun SelectWalletScreen(
         onClickBack = { backStack.removeLastOrNull() },
         onReload = vm::loadWallets,
         onClickWallet = vm::selectWallet,
-        onClickAdd = { backStack.add(Routes.WalletCreateRoute) }
     )
 }
 
@@ -80,96 +67,75 @@ private fun Content(
     onClickBack: () -> Unit = {},
     onReload: () -> Unit = {},
     onClickWallet: (Wallet) -> Unit = {},
-    onClickAdd: () -> Unit = {},
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Pilih Dompet") },
-                navigationIcon = {
-                    IconButton(onClick = onClickBack) {
-                        Icon(
-                            Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = null
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = "Pilih Dompet",
+            style = MaterialTheme.typography.titleLarge,
+        )
+
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    LoadingIndicator()
+                }
+            }
+
+            errorMessage != null -> {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text(errorMessage)
+                        Button(onClick = onReload) { Text("Muat ulang") }
+                    }
+                }
+            }
+
+            wallets.isEmpty() -> {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text("Belum ada wallet.")
+                        Text(
+                            text = "Buat wallet dulu agar bisa dipakai di transaksi.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                },
-            )
-        },
-        floatingActionButton = {
-            if (!isLoading)
-                FloatingActionButton(onClick = onClickAdd) {
-                    Icon(
-                        Icons.Rounded.Add,
-                        contentDescription = null
-                    )
                 }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when {
-                isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        LoadingIndicator()
-                    }
-                }
+            }
 
-                errorMessage != null -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text(errorMessage)
-                            Button(onClick = onReload) { Text("Muat ulang") }
-                        }
-                    }
-                }
-
-                wallets.isEmpty() -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text("Belum ada wallet.")
-                            Text(
-                                text = "Buat wallet dulu agar bisa dipakai di transaksi.",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-
-                else -> {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(wallets) { wallet ->
-                            ListItem(
-                                leadingContent = {
-                                    RadioButton(
-                                        selected = selectedWallet?.id == wallet.id,
-                                        onClick = { onClickWallet(wallet) }
-                                    )
-                                },
-                                headlineContent = {
-                                    Text(wallet.name)
-                                },
-                                supportingContent = {
-                                    Text(walletTypeLabel(wallet.type))
-                                },
-                                modifier = Modifier.clickable {
-                                    onClickWallet(wallet)
-                                }
-                            )
-                        }
-                        item { Spacer(modifier = Modifier.height(88.dp)) }
+            else -> {
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(wallets, key = { it.id }) { wallet ->
+                        ListItem(
+                            leadingContent = {
+                                RadioButton(
+                                    selected = selectedWallet?.id == wallet.id,
+                                    onClick = { onClickWallet(wallet) },
+                                )
+                            },
+                            headlineContent = {
+                                Text(wallet.name)
+                            },
+                            supportingContent = {
+                                Text(walletTypeLabel(wallet.type))
+                            },
+                            modifier = Modifier.clickable {
+                                onClickWallet(wallet)
+                            }
+                        )
                     }
                 }
             }
