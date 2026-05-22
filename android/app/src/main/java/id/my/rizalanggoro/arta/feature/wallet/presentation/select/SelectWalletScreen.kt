@@ -137,10 +137,10 @@ private fun Content(
                                 )
                             },
                             headlineContent = {
-                                Text(wallet.name)
+                                Text(wallet.name.orEmpty())
                             },
                             supportingContent = {
-                                Text(walletTypeLabel(wallet.type))
+                                Text(walletTypeLabel(wallet.type.orEmpty()))
                             },
                             modifier = Modifier.clickable {
                                 onClickWallet(wallet)
@@ -169,9 +169,9 @@ private fun SelectWalletPreview() {
         Content(
             uiState = SelectWalletUiState(
                 wallets = listOf(
-                    Wallet(id = 1, userId = 1, name = "Dompet Harian", type = "cash_savings"),
-                    Wallet(id = 1, userId = 1, name = "Dompet Harian", type = "cash_savings"),
-                    Wallet(id = 1, userId = 1, name = "Dompet Harian", type = "cash_savings"),
+                    Wallet(id = 1, userID = 1, name = "Dompet Harian", type = "cash_savings"),
+                    Wallet(id = 1, userID = 1, name = "Dompet Harian", type = "cash_savings"),
+                    Wallet(id = 1, userID = 1, name = "Dompet Harian", type = "cash_savings"),
                 )
             ),
         )

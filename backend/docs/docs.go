@@ -899,17 +899,305 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/wallet": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "operationId": "ListWallets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wallet.ListWalletsRes"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "operationId": "CreateWallet",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wallet.CreateWalletReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/CreateWalletRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/wallet/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "operationId": "GetWallet",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Wallet ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetWalletRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "operationId": "UpdateWallet",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Wallet ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wallet.UpdateWalletReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UpdateWalletRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "operationId": "DeleteWallet",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Wallet ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/DeleteWalletRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "CashDashboardRes": {
             "type": "object",
+            "required": [
+                "active_wallet_name",
+                "financial_summary",
+                "recent_transactions"
+            ],
             "properties": {
                 "active_wallet_name": {
                     "type": "string"
                 },
                 "financial_summary": {
                     "type": "object",
+                    "required": [
+                        "current_balance",
+                        "today_expense",
+                        "today_income"
+                    ],
                     "properties": {
                         "current_balance": {
                             "type": "number"
@@ -926,6 +1214,10 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "object",
+                        "required": [
+                            "category",
+                            "data"
+                        ],
                         "properties": {
                             "category": {
                                 "$ref": "#/definitions/domain.Category"
@@ -940,6 +1232,9 @@ const docTemplate = `{
         },
         "CreateCategoryRes": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
@@ -948,6 +1243,11 @@ const docTemplate = `{
         },
         "CreateGoldRes": {
             "type": "object",
+            "required": [
+                "data",
+                "profit",
+                "sell_price"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Gold"
@@ -962,14 +1262,31 @@ const docTemplate = `{
         },
         "CreateGoldTaxPreferenceRes": {
             "type": "object",
+            "required": [
+                "preference"
+            ],
             "properties": {
                 "preference": {
                     "$ref": "#/definitions/dto.GoldTaxPreference"
                 }
             }
         },
+        "CreateWalletRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Wallet"
+                }
+            }
+        },
         "DeleteCategoryRes": {
             "type": "object",
+            "required": [
+                "message"
+            ],
             "properties": {
                 "message": {
                     "type": "string"
@@ -978,6 +1295,9 @@ const docTemplate = `{
         },
         "DeleteGoldRes": {
             "type": "object",
+            "required": [
+                "message"
+            ],
             "properties": {
                 "message": {
                     "type": "string"
@@ -986,6 +1306,20 @@ const docTemplate = `{
         },
         "DeleteGoldTaxPreferenceRes": {
             "type": "object",
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeleteWalletRes": {
+            "type": "object",
+            "required": [
+                "message"
+            ],
             "properties": {
                 "message": {
                     "type": "string"
@@ -994,6 +1328,9 @@ const docTemplate = `{
         },
         "GetCategoryRes": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
@@ -1002,6 +1339,11 @@ const docTemplate = `{
         },
         "GetGoldRes": {
             "type": "object",
+            "required": [
+                "data",
+                "profit",
+                "sell_price"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Gold"
@@ -1014,8 +1356,30 @@ const docTemplate = `{
                 }
             }
         },
+        "GetWalletRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Wallet"
+                }
+            }
+        },
         "GoldDashboardRes": {
             "type": "object",
+            "required": [
+                "active_wallet_name",
+                "buy_price",
+                "latest_dollar_price",
+                "latest_gold_price_per_gram_idr",
+                "profit",
+                "recent_golds",
+                "total_asset",
+                "total_gold_items",
+                "total_weight"
+            ],
             "properties": {
                 "active_wallet_name": {
                     "type": "string"
@@ -1051,6 +1415,10 @@ const docTemplate = `{
         },
         "GoldSummaryRes": {
             "type": "object",
+            "required": [
+                "total_grams",
+                "total_value"
+            ],
             "properties": {
                 "total_grams": {
                     "type": "number"
@@ -1062,6 +1430,9 @@ const docTemplate = `{
         },
         "ListGoldTaxPreferencesRes": {
             "type": "object",
+            "required": [
+                "preferences"
+            ],
             "properties": {
                 "preferences": {
                     "type": "array",
@@ -1073,6 +1444,10 @@ const docTemplate = `{
         },
         "LoginReq": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -1084,6 +1459,12 @@ const docTemplate = `{
         },
         "LoginRes": {
             "type": "object",
+            "required": [
+                "email",
+                "name",
+                "token",
+                "user_id"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -1101,6 +1482,9 @@ const docTemplate = `{
         },
         "LogoutRes": {
             "type": "object",
+            "required": [
+                "message"
+            ],
             "properties": {
                 "message": {
                     "type": "string"
@@ -1109,6 +1493,10 @@ const docTemplate = `{
         },
         "MeRes": {
             "type": "object",
+            "required": [
+                "data",
+                "updated_at"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.User"
@@ -1120,6 +1508,11 @@ const docTemplate = `{
         },
         "RegisterReq": {
             "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -1134,6 +1527,12 @@ const docTemplate = `{
         },
         "RegisterRes": {
             "type": "object",
+            "required": [
+                "email",
+                "name",
+                "token",
+                "user_id"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -1151,6 +1550,9 @@ const docTemplate = `{
         },
         "UpdateCategoryRes": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
@@ -1159,6 +1561,11 @@ const docTemplate = `{
         },
         "UpdateGoldRes": {
             "type": "object",
+            "required": [
+                "data",
+                "profit",
+                "sell_price"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Gold"
@@ -1173,14 +1580,32 @@ const docTemplate = `{
         },
         "UpdateGoldTaxPreferenceRes": {
             "type": "object",
+            "required": [
+                "preference"
+            ],
             "properties": {
                 "preference": {
                     "$ref": "#/definitions/dto.GoldTaxPreference"
                 }
             }
         },
+        "UpdateWalletRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Wallet"
+                }
+            }
+        },
         "category.CreateCategoryReq": {
             "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -1192,6 +1617,9 @@ const docTemplate = `{
         },
         "category.ListCategoriesRes": {
             "type": "object",
+            "required": [
+                "categories"
+            ],
             "properties": {
                 "categories": {
                     "type": "array",
@@ -1214,6 +1642,13 @@ const docTemplate = `{
         },
         "domain.Category": {
             "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "name",
+                "type",
+                "updated_at"
+            ],
             "properties": {
                 "created_at": {
                     "type": "string"
@@ -1239,6 +1674,18 @@ const docTemplate = `{
         },
         "domain.Gold": {
             "type": "object",
+            "required": [
+                "carat",
+                "created_at",
+                "date",
+                "grams",
+                "id",
+                "notes",
+                "price",
+                "type",
+                "updated_at",
+                "wallet_id"
+            ],
             "properties": {
                 "carat": {
                     "type": "number"
@@ -1275,6 +1722,16 @@ const docTemplate = `{
         },
         "domain.Transaction": {
             "type": "object",
+            "required": [
+                "amount",
+                "category_id",
+                "created_at",
+                "date",
+                "description",
+                "id",
+                "updated_at",
+                "wallet_id"
+            ],
             "properties": {
                 "amount": {
                     "type": "number"
@@ -1304,6 +1761,13 @@ const docTemplate = `{
         },
         "domain.User": {
             "type": "object",
+            "required": [
+                "created_at",
+                "email",
+                "id",
+                "name",
+                "updated_at"
+            ],
             "properties": {
                 "created_at": {
                     "type": "string"
@@ -1353,6 +1817,9 @@ const docTemplate = `{
         },
         "dto.Category": {
             "type": "object",
+            "required": [
+                "data"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
@@ -1361,6 +1828,10 @@ const docTemplate = `{
         },
         "dto.Error": {
             "type": "object",
+            "required": [
+                "code",
+                "message"
+            ],
             "properties": {
                 "code": {
                     "type": "integer"
@@ -1372,6 +1843,11 @@ const docTemplate = `{
         },
         "dto.Gold": {
             "type": "object",
+            "required": [
+                "data",
+                "profit",
+                "sell_price"
+            ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Gold"
@@ -1386,6 +1862,14 @@ const docTemplate = `{
         },
         "dto.GoldTaxPreference": {
             "type": "object",
+            "required": [
+                "carat",
+                "created_at",
+                "id",
+                "tax_rate",
+                "updated_at",
+                "user_id"
+            ],
             "properties": {
                 "carat": {
                     "type": "number"
@@ -1407,8 +1891,26 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.Wallet": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Wallet"
+                }
+            }
+        },
         "gold.CreateGoldReq": {
             "type": "object",
+            "required": [
+                "date",
+                "grams",
+                "price",
+                "type",
+                "wallet_id"
+            ],
             "properties": {
                 "carat": {
                     "type": "number"
@@ -1436,6 +1938,10 @@ const docTemplate = `{
         },
         "gold.GoldTaxPreferenceReq": {
             "type": "object",
+            "required": [
+                "carat",
+                "tax_rate"
+            ],
             "properties": {
                 "carat": {
                     "type": "number"
@@ -1447,6 +1953,9 @@ const docTemplate = `{
         },
         "gold.ListGoldsRes": {
             "type": "object",
+            "required": [
+                "golds"
+            ],
             "properties": {
                 "golds": {
                     "type": "array",
@@ -1473,6 +1982,50 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "wallet.CreateWalletReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "wallet.ListWalletsRes": {
+            "type": "object",
+            "required": [
+                "wallets"
+            ],
+            "properties": {
+                "wallets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Wallet"
+                    }
+                }
+            }
+        },
+        "wallet.UpdateWalletReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"

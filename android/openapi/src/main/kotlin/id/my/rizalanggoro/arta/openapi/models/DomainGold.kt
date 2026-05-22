@@ -47,35 +47,35 @@ import kotlinx.serialization.Contextual
 data class DomainGold (
 
     @Contextual @SerialName(value = "carat")
-    val carat: java.math.BigDecimal? = null,
+    val carat: java.math.BigDecimal,
 
     @SerialName(value = "created_at")
-    val createdAt: kotlin.String? = null,
+    val createdAt: kotlin.String,
 
     @SerialName(value = "date")
-    val date: kotlin.String? = null,
+    val date: kotlin.String,
 
     @Contextual @SerialName(value = "grams")
-    val grams: java.math.BigDecimal? = null,
+    val grams: java.math.BigDecimal,
 
     @SerialName(value = "id")
-    val id: kotlin.Int? = null,
+    val id: kotlin.Int,
 
     @SerialName(value = "notes")
-    val notes: kotlin.String? = null,
+    val notes: kotlin.String,
 
     @Contextual @SerialName(value = "price")
-    val price: java.math.BigDecimal? = null,
+    val price: java.math.BigDecimal,
 
     /* pure_gold or jewelry */
     @SerialName(value = "type")
-    val type: kotlin.String? = null,
+    val type: kotlin.String,
 
     @SerialName(value = "updated_at")
-    val updatedAt: kotlin.String? = null,
+    val updatedAt: kotlin.String,
 
     @SerialName(value = "wallet_id")
-    val walletId: kotlin.Int? = null
+    val walletId: kotlin.Int
 
 ) {
 

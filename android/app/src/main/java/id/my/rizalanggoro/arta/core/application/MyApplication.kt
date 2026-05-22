@@ -13,8 +13,7 @@ import id.my.rizalanggoro.arta.feature.home.data.DashboardApiService
 import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionApiService
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
-import id.my.rizalanggoro.arta.feature.wallet.data.WalletApiService
-import id.my.rizalanggoro.arta.feature.wallet.data.WalletRepository
+import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 
 class MyApplication : Application() {
     lateinit var authPrefs: AuthPrefs
@@ -29,7 +28,7 @@ class MyApplication : Application() {
     lateinit var categoryRepository: CategoryRepository
         private set
 
-    lateinit var walletRepository: WalletRepository
+    lateinit var walletApi: WalletApi
         private set
 
     lateinit var transactionRepository: TransactionRepository
@@ -50,7 +49,7 @@ class MyApplication : Application() {
 
         val dashboardApi = RetrofitProvider.create(DashboardApiService::class.java)
         val categoryApi = RetrofitProvider.create(CategoryApiService::class.java)
-        val walletApi = RetrofitProvider.create(WalletApiService::class.java)
+        val walletApi = RetrofitProvider.create(WalletApi::class.java)
         val transactionApi = RetrofitProvider.create(TransactionApiService::class.java)
         val goldApi = RetrofitProvider.create(GoldApiService::class.java)
 
@@ -64,10 +63,7 @@ class MyApplication : Application() {
             authSessionProvider = { authPrefs.currentSession.value },
         )
 
-        walletRepository = WalletRepository(
-            apiService = walletApi,
-            authSessionProvider = { authPrefs.currentSession.value },
-        )
+        this.walletApi = walletApi
 
         transactionRepository = TransactionRepository(
             apiService = transactionApi,

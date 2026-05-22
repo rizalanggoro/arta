@@ -40,13 +40,13 @@ import kotlinx.serialization.Contextual
 data class CashDashboardResFinancialSummary (
 
     @Contextual @SerialName(value = "current_balance")
-    val currentBalance: java.math.BigDecimal? = null,
+    val currentBalance: java.math.BigDecimal,
 
     @Contextual @SerialName(value = "today_expense")
-    val todayExpense: java.math.BigDecimal? = null,
+    val todayExpense: java.math.BigDecimal,
 
     @Contextual @SerialName(value = "today_income")
-    val todayIncome: java.math.BigDecimal? = null
+    val todayIncome: java.math.BigDecimal
 
 ) {
 

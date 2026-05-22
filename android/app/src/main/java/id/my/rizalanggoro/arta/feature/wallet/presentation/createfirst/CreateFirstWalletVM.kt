@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.feature.wallet.data.WalletRepository
+import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
+import id.my.rizalanggoro.arta.openapi.apis.WalletApi
+import id.my.rizalanggoro.arta.openapi.models.WalletCreateWalletReq
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,7 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CreateFirstWalletVM(
-	private val walletRepository: WalletRepository,
+	private val walletApi: WalletApi,
 	private val application: MyApplication,
 ) : ViewModel() {
 	companion object {
@@ -25,7 +27,7 @@ class CreateFirstWalletVM(
 			initializer {
 				val app = (this[APPLICATION_KEY] as MyApplication)
 				CreateFirstWalletVM(
-					walletRepository = app.walletRepository,
+					walletApi = app.walletApi,
 					application = app,
 				)
 			}
@@ -70,7 +72,20 @@ class CreateFirstWalletVM(
 
 		viewModelScope.launch {
 			_uiState.update { it.copy(isLoading = true) }
-			walletRepository.createWallet(name = current.name, type = current.type)
+			runCatching {
+				val response = walletApi.createWallet(
+					WalletCreateWalletReq(
+						name = current.name,
+						type = current.type,
+					)
+				)
+
+				if (!response.isSuccessful) {
+					throw IllegalStateException(response.walletApiErrorMessage())
+				}
+
+				response.body()?.data ?: throw IllegalStateException("Respons server kosong")
+			}
 				.onSuccess { wallet ->
 					application.selectedWalletPrefs.saveSelectedWallet(wallet)
 					_messageEvent.emit("Wallet pertama dibuat: ${wallet.name}")

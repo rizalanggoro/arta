@@ -44,19 +44,19 @@ import kotlinx.serialization.Contextual
 data class DomainUser (
 
     @SerialName(value = "created_at")
-    val createdAt: kotlin.String? = null,
+    val createdAt: kotlin.String,
 
     @SerialName(value = "email")
-    val email: kotlin.String? = null,
+    val email: kotlin.String,
 
     @SerialName(value = "id")
-    val id: kotlin.Int? = null,
+    val id: kotlin.Int,
 
     @SerialName(value = "name")
-    val name: kotlin.String? = null,
+    val name: kotlin.String,
 
     @SerialName(value = "updated_at")
-    val updatedAt: kotlin.String? = null,
+    val updatedAt: kotlin.String,
 
     @SerialName(value = "wallets")
     val wallets: kotlin.collections.List<DomainWallet>? = null

@@ -45,28 +45,28 @@ import kotlinx.serialization.Contextual
 data class DomainTransaction (
 
     @Contextual @SerialName(value = "amount")
-    val amount: java.math.BigDecimal? = null,
+    val amount: java.math.BigDecimal,
 
     @SerialName(value = "category_id")
-    val categoryId: kotlin.Int? = null,
+    val categoryId: kotlin.Int,
 
     @SerialName(value = "created_at")
-    val createdAt: kotlin.String? = null,
+    val createdAt: kotlin.String,
 
     @SerialName(value = "date")
-    val date: kotlin.String? = null,
+    val date: kotlin.String,
 
     @SerialName(value = "description")
-    val description: kotlin.String? = null,
+    val description: kotlin.String,
 
     @SerialName(value = "id")
-    val id: kotlin.Int? = null,
+    val id: kotlin.Int,
 
     @SerialName(value = "updated_at")
-    val updatedAt: kotlin.String? = null,
+    val updatedAt: kotlin.String,
 
     @SerialName(value = "wallet_id")
-    val walletId: kotlin.Int? = null
+    val walletId: kotlin.Int
 
 ) {
 

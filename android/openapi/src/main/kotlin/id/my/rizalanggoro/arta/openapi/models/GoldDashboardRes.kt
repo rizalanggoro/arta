@@ -47,31 +47,31 @@ import kotlinx.serialization.Contextual
 data class GoldDashboardRes (
 
     @SerialName(value = "active_wallet_name")
-    val activeWalletName: kotlin.String? = null,
+    val activeWalletName: kotlin.String,
 
     @Contextual @SerialName(value = "buy_price")
-    val buyPrice: java.math.BigDecimal? = null,
+    val buyPrice: java.math.BigDecimal,
 
     @Contextual @SerialName(value = "latest_dollar_price")
-    val latestDollarPrice: java.math.BigDecimal? = null,
+    val latestDollarPrice: java.math.BigDecimal,
 
     @Contextual @SerialName(value = "latest_gold_price_per_gram_idr")
-    val latestGoldPricePerGramIdr: java.math.BigDecimal? = null,
+    val latestGoldPricePerGramIdr: java.math.BigDecimal,
 
     @Contextual @SerialName(value = "profit")
-    val profit: java.math.BigDecimal? = null,
+    val profit: java.math.BigDecimal,
 
     @SerialName(value = "recent_golds")
-    val recentGolds: kotlin.collections.List<DtoGold>? = null,
+    val recentGolds: kotlin.collections.List<DtoGold>,
 
     @Contextual @SerialName(value = "total_asset")
-    val totalAsset: java.math.BigDecimal? = null,
+    val totalAsset: java.math.BigDecimal,
 
     @SerialName(value = "total_gold_items")
-    val totalGoldItems: kotlin.Int? = null,
+    val totalGoldItems: kotlin.Int,
 
     @Contextual @SerialName(value = "total_weight")
-    val totalWeight: java.math.BigDecimal? = null
+    val totalWeight: java.math.BigDecimal
 
 ) {
 

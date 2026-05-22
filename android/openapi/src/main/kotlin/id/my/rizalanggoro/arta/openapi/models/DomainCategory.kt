@@ -43,20 +43,20 @@ import kotlinx.serialization.Contextual
 data class DomainCategory (
 
     @SerialName(value = "created_at")
-    val createdAt: kotlin.String? = null,
+    val createdAt: kotlin.String,
 
     @SerialName(value = "id")
-    val id: kotlin.Int? = null,
+    val id: kotlin.Int,
 
     @SerialName(value = "name")
-    val name: kotlin.String? = null,
+    val name: kotlin.String,
 
     /* income, expense */
     @SerialName(value = "type")
-    val type: kotlin.String? = null,
+    val type: kotlin.String,
 
     @SerialName(value = "updated_at")
-    val updatedAt: kotlin.String? = null,
+    val updatedAt: kotlin.String,
 
     /* nil for default categories */
     @SerialName(value = "user_id")

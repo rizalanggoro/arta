@@ -41,10 +41,10 @@ import kotlinx.serialization.Contextual
 data class CashDashboardResRecentTransactionsInner (
 
     @SerialName(value = "category")
-    val category: DomainCategory? = null,
+    val category: DomainCategory,
 
     @SerialName(value = "data")
-    val `data`: DomainTransaction? = null
+    val `data`: DomainTransaction
 
 ) {
 

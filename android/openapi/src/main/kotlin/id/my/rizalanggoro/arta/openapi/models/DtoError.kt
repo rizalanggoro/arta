@@ -39,10 +39,10 @@ import kotlinx.serialization.Contextual
 data class DtoError (
 
     @SerialName(value = "code")
-    val code: kotlin.Int? = null,
+    val code: kotlin.Int,
 
     @SerialName(value = "message")
-    val message: kotlin.String? = null
+    val message: kotlin.String
 
 ) {
 

@@ -10,8 +10,9 @@ import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.network.RetrofitProvider
 import id.my.rizalanggoro.arta.domain.AuthSession
-import id.my.rizalanggoro.arta.feature.wallet.data.WalletRepository
+import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
 import id.my.rizalanggoro.arta.openapi.apis.AuthApi
+import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.DtoError
 import id.my.rizalanggoro.arta.openapi.models.LoginReq
 import id.my.rizalanggoro.arta.openapi.models.LoginRes
@@ -29,7 +30,7 @@ import kotlinx.coroutines.launch
 class LoginVM(
     private val authApi: AuthApi,
     private val authPrefs: AuthPrefs,
-    private val walletRepository: WalletRepository,
+    private val walletApi: WalletApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
 ) : ViewModel() {
     private val errorJson = Json {
@@ -43,7 +44,7 @@ class LoginVM(
                 LoginVM(
                     authApi = RetrofitProvider.create(AuthApi::class.java),
                     authPrefs = app.authPrefs,
-                    walletRepository = app.walletRepository,
+                    walletApi = app.walletApi,
                     selectedWalletPrefs = app.selectedWalletPrefs,
                 )
             }
@@ -105,7 +106,14 @@ class LoginVM(
             }
                 .onSuccess { session ->
                     authPrefs.setSession(session)
-                    walletRepository.getWallets()
+                    runCatching {
+                        val response = walletApi.listWallets()
+                        if (!response.isSuccessful) {
+                            throw IllegalStateException(response.walletApiErrorMessage())
+                        }
+
+                        response.body()?.wallets.orEmpty().mapNotNull { it.data }
+                    }
                         .onSuccess { wallets ->
                             wallets.firstOrNull()?.let { firstWallet ->
                                 selectedWalletPrefs.saveSelectedWallet(firstWallet)

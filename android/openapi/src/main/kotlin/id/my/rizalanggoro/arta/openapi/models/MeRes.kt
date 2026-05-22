@@ -40,10 +40,10 @@ import kotlinx.serialization.Contextual
 data class MeRes (
 
     @SerialName(value = "data")
-    val `data`: DomainUser? = null,
+    val `data`: DomainUser,
 
     @SerialName(value = "updated_at")
-    val updatedAt: kotlin.String? = null
+    val updatedAt: kotlin.String
 
 ) {
 

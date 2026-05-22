@@ -39,10 +39,10 @@ import kotlinx.serialization.Contextual
 data class GoldSummaryRes (
 
     @Contextual @SerialName(value = "total_grams")
-    val totalGrams: java.math.BigDecimal? = null,
+    val totalGrams: java.math.BigDecimal,
 
     @Contextual @SerialName(value = "total_value")
-    val totalValue: java.math.BigDecimal? = null
+    val totalValue: java.math.BigDecimal
 
 ) {
 

@@ -39,10 +39,10 @@ import kotlinx.serialization.Contextual
 data class LoginReq (
 
     @SerialName(value = "email")
-    val email: kotlin.String? = null,
+    val email: kotlin.String,
 
     @SerialName(value = "password")
-    val password: kotlin.String? = null
+    val password: kotlin.String
 
 ) {
 

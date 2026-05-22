@@ -86,7 +86,7 @@ class CreateTransactionVM(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             transactionRepository.createTransaction(
-                walletId = current.wallet!!.id,
+                walletId = requireNotNull(current.wallet?.id) { "Wallet response missing id" },
                 amount = amount,
                 categoryId = current.category!!.id,
                 description = current.description,

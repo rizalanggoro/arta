@@ -33,6 +33,15 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	protected.Delete("/:id", h.delete)
 }
 
+// @ID ListWallets
+// @Tags wallet
+// @Accept json
+// @Produce json
+// @Success 200 {object} ListWalletsRes
+// @Failure 401 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Security Bearer
+// @Router /api/wallet [get]
 func (h *Handler) list(c *fiber.Ctx) error {
 	userID := middleware.GetUserID(c)
 	if userID == "" {
@@ -57,6 +66,17 @@ func (h *Handler) list(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(res)
 }
 
+// @ID CreateWallet
+// @Tags wallet
+// @Accept json
+// @Produce json
+// @Param body body CreateWalletReq true "body"
+// @Success 201 {object} CreateWalletRes
+// @Failure 400 {object} dto.Error
+// @Failure 401 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Security Bearer
+// @Router /api/wallet [post]
 func (h *Handler) create(c *fiber.Ctx) error {
 	var req CreateWalletReq
 	if err := c.BodyParser(&req); err != nil {
@@ -92,6 +112,18 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(CreateWalletRes{dto.Wallet{Data: *created}})
 }
 
+// @ID GetWallet
+// @Tags wallet
+// @Accept json
+// @Produce json
+// @Param id path int true "Wallet ID"
+// @Success 200 {object} GetWalletRes
+// @Failure 400 {object} dto.Error
+// @Failure 401 {object} dto.Error
+// @Failure 404 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Security Bearer
+// @Router /api/wallet/{id} [get]
 func (h *Handler) get(c *fiber.Ctx) error {
 	id := c.Params("id")
 	parsedID, err := strconv.ParseUint(id, 10, 64)
@@ -111,6 +143,19 @@ func (h *Handler) get(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(GetWalletRes{dto.Wallet{Data: *wallet}})
 }
 
+// @ID UpdateWallet
+// @Tags wallet
+// @Accept json
+// @Produce json
+// @Param id path int true "Wallet ID"
+// @Param body body UpdateWalletReq true "body"
+// @Success 200 {object} UpdateWalletRes
+// @Failure 400 {object} dto.Error
+// @Failure 401 {object} dto.Error
+// @Failure 404 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Security Bearer
+// @Router /api/wallet/{id} [put]
 func (h *Handler) update(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var req UpdateWalletReq
@@ -148,6 +193,18 @@ func (h *Handler) update(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(UpdateWalletRes{dto.Wallet{Data: *updated}})
 }
 
+// @ID DeleteWallet
+// @Tags wallet
+// @Accept json
+// @Produce json
+// @Param id path int true "Wallet ID"
+// @Success 200 {object} DeleteWalletRes
+// @Failure 400 {object} dto.Error
+// @Failure 401 {object} dto.Error
+// @Failure 404 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Security Bearer
+// @Router /api/wallet/{id} [delete]
 func (h *Handler) delete(c *fiber.Ctx) error {
 	id := c.Params("id")
 	parsedID, err := strconv.ParseUint(id, 10, 64)

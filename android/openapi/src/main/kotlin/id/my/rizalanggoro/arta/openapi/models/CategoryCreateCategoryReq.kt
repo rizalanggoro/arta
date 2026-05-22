@@ -39,10 +39,10 @@ import kotlinx.serialization.Contextual
 data class CategoryCreateCategoryReq (
 
     @SerialName(value = "name")
-    val name: kotlin.String? = null,
+    val name: kotlin.String,
 
     @SerialName(value = "type")
-    val type: kotlin.String? = null
+    val type: kotlin.String
 
 ) {
 

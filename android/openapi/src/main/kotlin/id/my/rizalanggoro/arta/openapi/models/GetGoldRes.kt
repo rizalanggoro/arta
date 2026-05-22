@@ -41,13 +41,13 @@ import kotlinx.serialization.Contextual
 data class GetGoldRes (
 
     @SerialName(value = "data")
-    val `data`: DomainGold? = null,
+    val `data`: DomainGold,
 
     @Contextual @SerialName(value = "profit")
-    val profit: java.math.BigDecimal? = null,
+    val profit: java.math.BigDecimal,
 
     @Contextual @SerialName(value = "sell_price")
-    val sellPrice: java.math.BigDecimal? = null
+    val sellPrice: java.math.BigDecimal
 
 ) {
 

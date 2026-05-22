@@ -107,7 +107,7 @@ class CreateGoldVM(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             goldRepository.createGold(
-                walletId = current.selectedWallet!!.id,
+                walletId = requireNotNull(current.selectedWallet?.id) { "Wallet response missing id" },
                 date = current.date,
                 grams = grams!!,
                 price = price!!,

@@ -39,7 +39,7 @@ import kotlinx.serialization.Contextual
 data class CreateCategoryRes (
 
     @SerialName(value = "data")
-    val `data`: DomainCategory? = null
+    val `data`: DomainCategory
 
 ) {
 

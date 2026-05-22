@@ -1,7 +1,7 @@
 package id.my.rizalanggoro.arta.core.data
 
 import android.content.Context
-import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,11 +12,11 @@ class SelectedWalletPrefs(context: Context) {
     private val json = Json { ignoreUnknownKeys = true }
 
     private val _selectedWallet = MutableStateFlow(getSelectedWallet())
-    val selectedWallet: StateFlow<Wallet?> = _selectedWallet.asStateFlow()
+    val selectedWallet: StateFlow<DomainWallet?> = _selectedWallet.asStateFlow()
 
-    fun saveSelectedWallet(wallet: Wallet) {
+    fun saveSelectedWallet(wallet: DomainWallet) {
         prefs.edit()
-            .putString(KEY_SELECTED_WALLET, json.encodeToString(Wallet.serializer(), wallet))
+            .putString(KEY_SELECTED_WALLET, json.encodeToString(DomainWallet.serializer(), wallet))
             .apply()
         _selectedWallet.value = wallet
     }
@@ -26,10 +26,10 @@ class SelectedWalletPrefs(context: Context) {
         _selectedWallet.value = null
     }
 
-    private fun getSelectedWallet(): Wallet? {
+    private fun getSelectedWallet(): DomainWallet? {
         val raw = prefs.getString(KEY_SELECTED_WALLET, null) ?: return null
         return runCatching {
-            json.decodeFromString(Wallet.serializer(), raw)
+            json.decodeFromString(DomainWallet.serializer(), raw)
         }.getOrNull()
     }
 

@@ -32,11 +32,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,17 +41,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.UpsertWalletRoute
-import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.openapi.models.DtoWallet
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
 fun ListWalletScreen(vm: ListWalletVM = viewModel(factory = ListWalletVM.Factory)) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
-
-    LaunchedEffect(Unit) {
-        vm.loadWallets()
-    }
 
     Content(
         wallets = uiState.wallets,
@@ -64,7 +58,7 @@ fun ListWalletScreen(vm: ListWalletVM = viewModel(factory = ListWalletVM.Factory
         selectedWallet = uiState.selectedWallet,
         onClickCreate = { backStack.add(UpsertWalletRoute()) },
         onClickEdit = { walletId -> backStack.add(UpsertWalletRoute(walletId = walletId)) },
-        onSelectWallet = vm::onWalletSelected,
+        onSelectWallet = { vm.onWalletSelected(it.data) },
         onClickDelete = vm::onDeleteRequested,
         onDismissWalletActions = vm::dismissWalletActions,
         onDismissDelete = vm::dismissDeleteDialog,
@@ -76,18 +70,18 @@ fun ListWalletScreen(vm: ListWalletVM = viewModel(factory = ListWalletVM.Factory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    wallets: List<Wallet> = emptyList(),
+    wallets: List<DtoWallet> = emptyList(),
     isLoading: Boolean = false,
     errorMessage: String? = null,
-    deleteTarget: Wallet? = null,
-    selectedWallet: Wallet? = null,
+    deleteTarget: DomainWallet? = null,
+    selectedWallet: DomainWallet? = null,
     onClickCreate: () -> Unit = {},
     onClickEdit: (Int) -> Unit = {},
-    onSelectWallet: (Wallet) -> Unit = {},
-    onClickDelete: (Wallet) -> Unit = {},
+    onSelectWallet: (DtoWallet) -> Unit = {},
+    onClickDelete: (DomainWallet) -> Unit = {},
     onDismissWalletActions: () -> Unit = {},
     onDismissDelete: () -> Unit = {},
-    onConfirmDelete: (Wallet) -> Unit = {},
+    onConfirmDelete: (DomainWallet) -> Unit = {},
     onRetry: () -> Unit = {},
 ) {
     Scaffold(
@@ -167,13 +161,13 @@ private fun Content(
 
                 else -> {
                     LazyColumn {
-                        items(wallets, key = { it.id }) { wallet ->
+                        items(wallets, key = { requireNotNull(it.data.id) }) { wallet ->
                             ListItem(
                                 headlineContent = {
-                                    Text(wallet.name)
+                                    Text(wallet.data.name.orEmpty())
                                 },
                                 supportingContent = {
-                                    Text(walletTypeLabel(wallet.type))
+                                    Text(walletTypeLabel(wallet.data.type.orEmpty()))
                                 },
                                 modifier = Modifier.clickable {
                                     onSelectWallet(wallet)
@@ -191,7 +185,7 @@ private fun Content(
             wallet = wallet,
             onEdit = {
                 onDismissWalletActions()
-                onClickEdit(wallet.id)
+                onClickEdit(requireNotNull(wallet.id))
             },
             onDelete = {
                 onDismissWalletActions()
@@ -213,7 +207,7 @@ private fun Content(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WalletActionBottomSheet(
-    wallet: Wallet,
+    wallet: DomainWallet,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
@@ -227,11 +221,11 @@ private fun WalletActionBottomSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = wallet.name,
+                text = wallet.name.orEmpty(),
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                text = walletTypeLabel(wallet.type),
+                text = walletTypeLabel(wallet.type.orEmpty()),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
@@ -259,16 +253,16 @@ private fun WalletActionBottomSheet(
 
 @Composable
 private fun DeleteWalletDialog(
-    wallet: Wallet,
+    wallet: DomainWallet,
     onDismiss: () -> Unit,
-    onConfirmDelete: (Wallet) -> Unit,
+    onConfirmDelete: (DomainWallet) -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Hapus wallet?") },
         text = {
             Text(
-                text = "Wallet \"${wallet.name}\" akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.",
+                text = "Wallet \"${wallet.name.orEmpty()}\" akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.",
             )
         },
         confirmButton = {
@@ -299,17 +293,21 @@ private fun WalletListPreview() {
     ArtaTheme {
         Content(
             wallets = listOf(
-                Wallet(
-                    id = 1,
-                    userId = 10,
-                    name = "Utama",
-                    type = "cash_savings",
+                DtoWallet(
+                    data = id.my.rizalanggoro.arta.openapi.models.DomainWallet(
+                        id = 1,
+                        userID = 10,
+                        name = "Utama",
+                        type = "cash_savings",
+                    ),
                 ),
-                Wallet(
-                    id = 2,
-                    userId = 10,
-                    name = "Emas",
-                    type = "gold_savings",
+                DtoWallet(
+                    data = id.my.rizalanggoro.arta.openapi.models.DomainWallet(
+                        id = 2,
+                        userID = 10,
+                        name = "Emas",
+                        type = "gold_savings",
+                    ),
                 ),
             ),
         )
@@ -339,9 +337,9 @@ private fun WalletListErrorPreview() {
 private fun WalletActionBottomSheetPreview() {
     ArtaTheme {
         WalletActionBottomSheet(
-            wallet = Wallet(
+            wallet = id.my.rizalanggoro.arta.openapi.models.DomainWallet(
                 id = 1,
-                userId = 10,
+                userID = 10,
                 name = "Utama",
                 type = "cash_savings",
             ),
@@ -357,9 +355,9 @@ private fun WalletActionBottomSheetPreview() {
 private fun DeleteWalletDialogPreview() {
     ArtaTheme {
         DeleteWalletDialog(
-            wallet = Wallet(
+            wallet = id.my.rizalanggoro.arta.openapi.models.DomainWallet(
                 id = 2,
-                userId = 10,
+                userID = 10,
                 name = "Emas",
                 type = "gold_savings",
             ),

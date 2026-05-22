@@ -42,13 +42,13 @@ import kotlinx.serialization.Contextual
 data class CashDashboardRes (
 
     @SerialName(value = "active_wallet_name")
-    val activeWalletName: kotlin.String? = null,
+    val activeWalletName: kotlin.String,
 
     @SerialName(value = "financial_summary")
-    val financialSummary: CashDashboardResFinancialSummary? = null,
+    val financialSummary: CashDashboardResFinancialSummary,
 
     @SerialName(value = "recent_transactions")
-    val recentTransactions: kotlin.collections.List<CashDashboardResRecentTransactionsInner>? = null
+    val recentTransactions: kotlin.collections.List<CashDashboardResRecentTransactionsInner>
 
 ) {
 

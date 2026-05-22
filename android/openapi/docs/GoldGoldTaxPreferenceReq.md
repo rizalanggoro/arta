@@ -4,8 +4,8 @@
 ## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-| **carat** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional] |
-| **taxRate** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional] |
+| **carat** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **taxRate** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
 
 
 

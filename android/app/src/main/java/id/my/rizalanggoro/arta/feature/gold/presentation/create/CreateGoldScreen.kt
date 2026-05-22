@@ -356,7 +356,7 @@ private fun CreateGoldDefaultPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             selectedWallet = Wallet(
                 id = 12,
-                userId = 1,
+                userID = 1,
                 name = "Tabungan Emas",
                 type = "gold_savings",
             ),

@@ -39,7 +39,7 @@ import kotlinx.serialization.Contextual
 data class CategoryListCategoriesRes (
 
     @SerialName(value = "categories")
-    val categories: kotlin.collections.List<DtoCategory>? = null
+    val categories: kotlin.collections.List<DtoCategory>
 
 ) {
 

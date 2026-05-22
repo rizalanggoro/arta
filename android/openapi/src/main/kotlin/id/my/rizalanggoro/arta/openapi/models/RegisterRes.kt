@@ -41,16 +41,16 @@ import kotlinx.serialization.Contextual
 data class RegisterRes (
 
     @SerialName(value = "email")
-    val email: kotlin.String? = null,
+    val email: kotlin.String,
 
     @SerialName(value = "name")
-    val name: kotlin.String? = null,
+    val name: kotlin.String,
 
     @SerialName(value = "token")
-    val token: kotlin.String? = null,
+    val token: kotlin.String,
 
     @SerialName(value = "user_id")
-    val userId: kotlin.String? = null
+    val userId: kotlin.String
 
 ) {
 

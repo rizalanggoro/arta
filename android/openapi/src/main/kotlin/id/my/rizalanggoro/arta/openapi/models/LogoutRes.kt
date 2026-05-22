@@ -38,7 +38,7 @@ import kotlinx.serialization.Contextual
 data class LogoutRes (
 
     @SerialName(value = "message")
-    val message: kotlin.String? = null
+    val message: kotlin.String
 
 ) {
 

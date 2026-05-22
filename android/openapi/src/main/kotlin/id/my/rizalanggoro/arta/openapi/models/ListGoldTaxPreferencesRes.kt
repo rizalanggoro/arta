@@ -39,7 +39,7 @@ import kotlinx.serialization.Contextual
 data class ListGoldTaxPreferencesRes (
 
     @SerialName(value = "preferences")
-    val preferences: kotlin.collections.List<DtoGoldTaxPreference>? = null
+    val preferences: kotlin.collections.List<DtoGoldTaxPreference>
 
 ) {
 

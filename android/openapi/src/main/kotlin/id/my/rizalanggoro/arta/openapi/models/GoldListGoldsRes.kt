@@ -39,7 +39,7 @@ import kotlinx.serialization.Contextual
 data class GoldListGoldsRes (
 
     @SerialName(value = "golds")
-    val golds: kotlin.collections.List<DtoGold>? = null
+    val golds: kotlin.collections.List<DtoGold>
 
 ) {
 

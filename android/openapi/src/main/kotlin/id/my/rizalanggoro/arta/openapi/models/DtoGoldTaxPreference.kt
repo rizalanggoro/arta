@@ -43,22 +43,22 @@ import kotlinx.serialization.Contextual
 data class DtoGoldTaxPreference (
 
     @Contextual @SerialName(value = "carat")
-    val carat: java.math.BigDecimal? = null,
+    val carat: java.math.BigDecimal,
 
     @SerialName(value = "created_at")
-    val createdAt: kotlin.String? = null,
+    val createdAt: kotlin.String,
 
     @SerialName(value = "id")
-    val id: kotlin.Int? = null,
+    val id: kotlin.Int,
 
     @Contextual @SerialName(value = "tax_rate")
-    val taxRate: java.math.BigDecimal? = null,
+    val taxRate: java.math.BigDecimal,
 
     @SerialName(value = "updated_at")
-    val updatedAt: kotlin.String? = null,
+    val updatedAt: kotlin.String,
 
     @SerialName(value = "user_id")
-    val userId: kotlin.Int? = null
+    val userId: kotlin.Int
 
 ) {
 

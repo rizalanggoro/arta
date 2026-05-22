@@ -293,7 +293,7 @@ private fun CreateTransactionErrorPreview() {
         Content(
             wallet = Wallet(
                 id = 12,
-                userId = 10,
+                userID = 10,
                 name = "Tabungan Uang",
                 type = "cash_savings",
             ),

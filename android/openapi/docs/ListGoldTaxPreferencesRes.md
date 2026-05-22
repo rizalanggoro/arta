@@ -4,7 +4,7 @@
 ## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-| **preferences** | [**kotlin.collections.List&lt;DtoGoldTaxPreference&gt;**](DtoGoldTaxPreference.md) |  |  [optional] |
+| **preferences** | [**kotlin.collections.List&lt;DtoGoldTaxPreference&gt;**](DtoGoldTaxPreference.md) |  |  |
 
 
 

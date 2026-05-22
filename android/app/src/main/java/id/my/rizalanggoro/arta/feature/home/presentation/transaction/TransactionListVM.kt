@@ -8,7 +8,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.network.RetrofitProvider
 import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
-import id.my.rizalanggoro.arta.feature.wallet.data.WalletRepository
+import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
+import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 
 class TransactionListVM(
     private val transactionRepository: TransactionRepository,
-    private val walletRepository: WalletRepository,
+    private val walletApi: WalletApi,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
@@ -27,8 +28,8 @@ class TransactionListVM(
                     apiService = RetrofitProvider.create(id.my.rizalanggoro.arta.feature.transaction.data.TransactionApiService::class.java),
                     authSessionProvider = { app.authPrefs.currentSession.value },
                 )
-                val walletRepo = app.walletRepository
-                TransactionListVM(transactionRepository = txRepo, walletRepository = walletRepo)
+                val walletApi = app.walletApi
+                TransactionListVM(transactionRepository = txRepo, walletApi = walletApi)
             }
         }
     }
@@ -43,11 +44,19 @@ class TransactionListVM(
     fun loadTransactions() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            walletRepository.getWallets()
+            runCatching {
+                val response = walletApi.listWallets()
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.walletApiErrorMessage())
+                }
+
+                response.body()?.wallets.orEmpty().mapNotNull { it.data }
+            }
                 .onSuccess { wallets ->
                     val allTxs = mutableListOf<id.my.rizalanggoro.arta.domain.Transaction>()
                     for (w in wallets) {
-                        transactionRepository.listTransactionsByWallet(w.id)
+                        val walletId = w.id ?: continue
+                        transactionRepository.listTransactionsByWallet(walletId)
                             .onSuccess { txs -> allTxs.addAll(txs) }
                             .onFailure { /* ignore per-wallet failure for now */ }
                     }

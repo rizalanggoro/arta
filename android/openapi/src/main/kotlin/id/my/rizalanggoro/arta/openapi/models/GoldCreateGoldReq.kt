@@ -31,39 +31,39 @@ import kotlinx.serialization.Contextual
 /**
  * 
  *
- * @param carat 
  * @param date 
  * @param grams 
- * @param notes 
  * @param price Price is the total purchase price for the recorded grams
  * @param type 
  * @param walletId 
+ * @param carat 
+ * @param notes 
  */
 @Serializable
 
 data class GoldCreateGoldReq (
 
-    @Contextual @SerialName(value = "carat")
-    val carat: java.math.BigDecimal? = null,
-
     @SerialName(value = "date")
-    val date: kotlin.String? = null,
+    val date: kotlin.String,
 
     @Contextual @SerialName(value = "grams")
-    val grams: java.math.BigDecimal? = null,
-
-    @SerialName(value = "notes")
-    val notes: kotlin.String? = null,
+    val grams: java.math.BigDecimal,
 
     /* Price is the total purchase price for the recorded grams */
     @Contextual @SerialName(value = "price")
-    val price: java.math.BigDecimal? = null,
+    val price: java.math.BigDecimal,
 
     @SerialName(value = "type")
-    val type: kotlin.String? = null,
+    val type: kotlin.String,
 
     @SerialName(value = "wallet_id")
-    val walletId: kotlin.Int? = null
+    val walletId: kotlin.Int,
+
+    @Contextual @SerialName(value = "carat")
+    val carat: java.math.BigDecimal? = null,
+
+    @SerialName(value = "notes")
+    val notes: kotlin.String? = null
 
 ) {
 

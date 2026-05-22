@@ -10,7 +10,8 @@ import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.domain.Wallet
-import id.my.rizalanggoro.arta.feature.wallet.data.WalletRepository
+import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
+import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SelectWalletVM(
-    private val walletRepository: WalletRepository,
+    private val walletApi: WalletApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
 ) : ViewModel() {
     companion object {
@@ -27,7 +28,7 @@ class SelectWalletVM(
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 SelectWalletVM(
-                    walletRepository = app.walletRepository,
+                    walletApi = app.walletApi,
                     selectedWalletPrefs = app.selectedWalletPrefs
                 )
             }
@@ -39,7 +40,14 @@ class SelectWalletVM(
 
     fun loadWallets() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-        walletRepository.getWallets()
+        runCatching {
+            val response = walletApi.listWallets()
+            if (!response.isSuccessful) {
+                throw IllegalStateException(response.walletApiErrorMessage())
+            }
+
+            response.body()?.wallets.orEmpty().mapNotNull { it.data }
+        }
             .onSuccess { wallets ->
                 _uiState.update {
                     it.copy(
