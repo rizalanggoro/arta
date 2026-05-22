@@ -12,10 +12,6 @@ definitions:
             type: number
           today_income:
             type: number
-        required:
-        - current_balance
-        - today_expense
-        - today_income
         type: object
       recent_transactions:
         items:
@@ -24,57 +20,56 @@ definitions:
               $ref: '#/definitions/domain.Category'
             data:
               $ref: '#/definitions/domain.Transaction'
-          required:
-          - category
-          - data
           type: object
         type: array
-    required:
-    - active_wallet_name
-    - financial_summary
-    - recent_transactions
     type: object
   CreateCategoryRes:
     properties:
       data:
         $ref: '#/definitions/domain.Category'
-    required:
-    - data
     type: object
   CreateGoldRes:
     properties:
       data:
         $ref: '#/definitions/domain.Gold'
-    required:
-    - data
+      profit:
+        type: number
+      sell_price:
+        type: number
+    type: object
+  CreateGoldTaxPreferenceRes:
+    properties:
+      preference:
+        $ref: '#/definitions/dto.GoldTaxPreference'
     type: object
   DeleteCategoryRes:
     properties:
       message:
         type: string
-    required:
-    - message
     type: object
   DeleteGoldRes:
     properties:
       message:
         type: string
-    required:
-    - message
+    type: object
+  DeleteGoldTaxPreferenceRes:
+    properties:
+      message:
+        type: string
     type: object
   GetCategoryRes:
     properties:
       data:
         $ref: '#/definitions/domain.Category'
-    required:
-    - data
     type: object
   GetGoldRes:
     properties:
       data:
         $ref: '#/definitions/domain.Gold'
-    required:
-    - data
+      profit:
+        type: number
+      sell_price:
+        type: number
     type: object
   GoldDashboardRes:
     properties:
@@ -90,12 +85,7 @@ definitions:
         type: number
       recent_golds:
         items:
-          properties:
-            data:
-              $ref: '#/definitions/domain.Gold'
-          required:
-          - data
-          type: object
+          $ref: '#/definitions/dto.Gold'
         type: array
       total_asset:
         type: number
@@ -103,30 +93,13 @@ definitions:
         type: integer
       total_weight:
         type: number
-    required:
-    - active_wallet_name
-    - buy_price
-    - latest_dollar_price
-    - latest_gold_price_per_gram_idr
-    - profit
-    - recent_golds
-    - total_asset
-    - total_gold_items
-    - total_weight
     type: object
   GoldSummaryRes:
     properties:
-      by_type:
-        additionalProperties: true
-        type: object
       total_grams:
         type: number
       total_value:
         type: number
-    required:
-    - by_type
-    - total_grams
-    - total_value
     type: object
   ListGoldTaxPreferencesRes:
     properties:
@@ -134,8 +107,6 @@ definitions:
         items:
           $ref: '#/definitions/dto.GoldTaxPreference'
         type: array
-    required:
-    - preferences
     type: object
   LoginReq:
     properties:
@@ -143,9 +114,6 @@ definitions:
         type: string
       password:
         type: string
-    required:
-    - email
-    - password
     type: object
   LoginRes:
     properties:
@@ -157,18 +125,11 @@ definitions:
         type: string
       user_id:
         type: string
-    required:
-    - email
-    - name
-    - token
-    - user_id
     type: object
   LogoutRes:
     properties:
       message:
         type: string
-    required:
-    - message
     type: object
   MeRes:
     properties:
@@ -176,9 +137,6 @@ definitions:
         $ref: '#/definitions/domain.User'
       updated_at:
         type: string
-    required:
-    - data
-    - updated_at
     type: object
   RegisterReq:
     properties:
@@ -188,10 +146,6 @@ definitions:
         type: string
       password:
         type: string
-    required:
-    - email
-    - name
-    - password
     type: object
   RegisterRes:
     properties:
@@ -203,34 +157,25 @@ definitions:
         type: string
       user_id:
         type: string
-    required:
-    - email
-    - name
-    - token
-    - user_id
-    type: object
-  SaveGoldTaxPreferencesRes:
-    properties:
-      preferences:
-        items:
-          $ref: '#/definitions/dto.GoldTaxPreference'
-        type: array
-    required:
-    - preferences
     type: object
   UpdateCategoryRes:
     properties:
       data:
         $ref: '#/definitions/domain.Category'
-    required:
-    - data
     type: object
   UpdateGoldRes:
     properties:
       data:
         $ref: '#/definitions/domain.Gold'
-    required:
-    - data
+      profit:
+        type: number
+      sell_price:
+        type: number
+    type: object
+  UpdateGoldTaxPreferenceRes:
+    properties:
+      preference:
+        $ref: '#/definitions/dto.GoldTaxPreference'
     type: object
   category.CreateCategoryReq:
     properties:
@@ -238,9 +183,6 @@ definitions:
         type: string
       type:
         type: string
-    required:
-    - name
-    - type
     type: object
   category.ListCategoriesRes:
     properties:
@@ -248,8 +190,6 @@ definitions:
         items:
           $ref: '#/definitions/dto.Category'
         type: array
-    required:
-    - categories
     type: object
   category.UpdateCategoryReq:
     properties:
@@ -274,40 +214,29 @@ definitions:
       user_id:
         description: nil for default categories
         type: integer
-    required:
-    - created_at
-    - id
-    - name
-    - type
-    - updated_at
     type: object
   domain.Gold:
     properties:
       carat:
-        format: float64
         type: number
-      createdAt:
+      created_at:
         type: string
       date:
         type: string
       grams:
-        format: float64
         type: number
       id:
         type: integer
       notes:
         type: string
       price:
-        description: Price is the total purchase price for this gold entry (for the
-          recorded grams)
-        format: float64
         type: number
       type:
         description: pure_gold or jewelry
         type: string
-      updatedAt:
+      updated_at:
         type: string
-      walletID:
+      wallet_id:
         type: integer
     type: object
   domain.Transaction:
@@ -328,15 +257,6 @@ definitions:
         type: string
       wallet_id:
         type: integer
-    required:
-    - amount
-    - category_id
-    - created_at
-    - date
-    - description
-    - id
-    - updated_at
-    - wallet_id
     type: object
   domain.User:
     properties:
@@ -354,12 +274,6 @@ definitions:
         items:
           $ref: '#/definitions/domain.Wallet'
         type: array
-    required:
-    - created_at
-    - email
-    - id
-    - name
-    - updated_at
     type: object
   domain.Wallet:
     properties:
@@ -380,8 +294,6 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/domain.Category'
-    required:
-    - data
     type: object
   dto.Error:
     properties:
@@ -389,16 +301,15 @@ definitions:
         type: integer
       message:
         type: string
-    required:
-    - code
-    - message
     type: object
   dto.Gold:
     properties:
       data:
         $ref: '#/definitions/domain.Gold'
-    required:
-    - data
+      profit:
+        type: number
+      sell_price:
+        type: number
     type: object
   dto.GoldTaxPreference:
     properties:
@@ -414,13 +325,6 @@ definitions:
         type: string
       user_id:
         type: integer
-    required:
-    - carat
-    - created_at
-    - id
-    - tax_rate
-    - updated_at
-    - user_id
     type: object
   gold.CreateGoldReq:
     properties:
@@ -439,12 +343,13 @@ definitions:
         type: string
       wallet_id:
         type: integer
-    required:
-    - date
-    - grams
-    - price
-    - type
-    - wallet_id
+    type: object
+  gold.GoldTaxPreferenceReq:
+    properties:
+      carat:
+        type: number
+      tax_rate:
+        type: number
     type: object
   gold.ListGoldsRes:
     properties:
@@ -452,27 +357,6 @@ definitions:
         items:
           $ref: '#/definitions/dto.Gold'
         type: array
-    required:
-    - golds
-    type: object
-  gold.SaveGoldTaxPreferenceItemReq:
-    properties:
-      carat:
-        type: number
-      tax_rate:
-        type: number
-    required:
-    - carat
-    - tax_rate
-    type: object
-  gold.SaveGoldTaxPreferencesReq:
-    properties:
-      preferences:
-        items:
-          $ref: '#/definitions/gold.SaveGoldTaxPreferenceItemReq'
-        type: array
-    required:
-    - preferences
     type: object
   gold.UpdateGoldReq:
     properties:
@@ -996,10 +880,10 @@ paths:
             $ref: '#/definitions/ListGoldTaxPreferencesRes'
       tags:
       - gold
-    put:
+    post:
       consumes:
       - application/json
-      operationId: SaveGoldTaxPreferences
+      operationId: CreateGoldTaxPreference
       parameters:
       - description: Bearer token
         in: header
@@ -1011,14 +895,69 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/gold.SaveGoldTaxPreferencesReq'
+          $ref: '#/definitions/gold.GoldTaxPreferenceReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/CreateGoldTaxPreferenceRes'
+      tags:
+      - gold
+  /api/gold/tax/{id}:
+    delete:
+      consumes:
+      - application/json
+      operationId: DeleteGoldTaxPreference
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: tax preference id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/SaveGoldTaxPreferencesRes'
+            $ref: '#/definitions/DeleteGoldTaxPreferenceRes'
+      tags:
+      - gold
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateGoldTaxPreference
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: tax preference id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/gold.GoldTaxPreferenceReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UpdateGoldTaxPreferenceRes'
       tags:
       - gold
 schemes:

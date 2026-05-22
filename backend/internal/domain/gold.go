@@ -4,23 +4,21 @@ import (
 	"time"
 
 	"github.com/artafinance/backend/internal/model"
-	"gorm.io/gorm"
 )
 
 // Gold represents gold holdings in the domain layer
 // @name Gold
 type Gold struct {
-	ID       uint
-	WalletID uint
-	Date     time.Time
-	Grams    float64
-	// Price is the total purchase price for this gold entry (for the recorded grams)
-	Price         float64
-	Type          string  // pure_gold or jewelry
-	Carat         float64
-	Notes         string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID        uint      `json:"id"`
+	WalletID  uint      `json:"wallet_id"`
+	Date      time.Time `json:"date"`
+	Grams     float64   `json:"grams"`
+	Price     float64   `json:"price"`
+	Type      string    `json:"type"` // pure_gold or jewelry
+	Carat     float64   `json:"carat"`
+	Notes     string    `json:"notes"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 const (
@@ -35,16 +33,16 @@ func FromGoldModel(m *model.Gold) *Gold {
 	}
 
 	return &Gold{
-		ID:            m.ID,
-		WalletID:      m.WalletID,
-		Date:          m.Date,
-		Grams:         m.Grams,
-		Price:         m.Price,
-		Type:          m.Type,
-		Carat:         m.Carat,
-		Notes:         m.Notes,
-		CreatedAt:     m.CreatedAt,
-		UpdatedAt:     m.UpdatedAt,
+		ID:        m.ID,
+		WalletID:  m.WalletID,
+		Date:      m.Date,
+		Grams:     m.Grams,
+		Price:     m.Price,
+		Type:      m.Type,
+		Carat:     m.Carat,
+		Notes:     m.Notes,
+		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
 	}
 }
 
@@ -55,13 +53,12 @@ func (g *Gold) ToModel() *model.Gold {
 	}
 
 	return &model.Gold{
-		Model:         gorm.Model{ID: g.ID},
-		WalletID:      g.WalletID,
-		Date:          g.Date,
-		Grams:         g.Grams,
-		Price:         g.Price,
-		Type:          g.Type,
-		Carat:         g.Carat,
-		Notes:         g.Notes,
+		WalletID: g.WalletID,
+		Date:     g.Date,
+		Grams:    g.Grams,
+		Price:    g.Price,
+		Type:     g.Type,
+		Carat:    g.Carat,
+		Notes:    g.Notes,
 	}
 }

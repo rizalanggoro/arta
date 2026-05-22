@@ -5,8 +5,6 @@ import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.data.ThemePrefs
 import id.my.rizalanggoro.arta.core.network.RetrofitProvider
-import id.my.rizalanggoro.arta.feature.auth.data.AuthApiService
-import id.my.rizalanggoro.arta.feature.auth.data.AuthRepository
 import id.my.rizalanggoro.arta.feature.category.data.CategoryApiService
 import id.my.rizalanggoro.arta.feature.category.data.CategoryRepository
 import id.my.rizalanggoro.arta.feature.gold.data.GoldApiService
@@ -23,9 +21,6 @@ class MyApplication : Application() {
         private set
 
     lateinit var themePrefs: ThemePrefs
-        private set
-
-    lateinit var authRepository: AuthRepository
         private set
 
     lateinit var dashboardRepository: DashboardRepository
@@ -53,17 +48,11 @@ class MyApplication : Application() {
         themePrefs = ThemePrefs(applicationContext)
         selectedWalletPrefs = SelectedWalletPrefs(applicationContext)
 
-        val authApi = RetrofitProvider.create(AuthApiService::class.java)
         val dashboardApi = RetrofitProvider.create(DashboardApiService::class.java)
         val categoryApi = RetrofitProvider.create(CategoryApiService::class.java)
         val walletApi = RetrofitProvider.create(WalletApiService::class.java)
         val transactionApi = RetrofitProvider.create(TransactionApiService::class.java)
         val goldApi = RetrofitProvider.create(GoldApiService::class.java)
-
-        authRepository = AuthRepository(
-            apiService = authApi,
-            authSessionProvider = { authPrefs.currentSession.value },
-        )
 
         dashboardRepository = DashboardRepository(
             apiService = dashboardApi,

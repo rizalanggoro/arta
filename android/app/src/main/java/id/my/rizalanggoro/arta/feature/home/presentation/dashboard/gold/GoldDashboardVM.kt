@@ -6,9 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.core.network.RetrofitProvider
 import id.my.rizalanggoro.arta.domain.GoldDashboard
-import id.my.rizalanggoro.arta.feature.home.data.DashboardApiService
 import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,26 +14,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import java.util.Locale
 
 class GoldDashboardVM(
     private val dashboardRepository: DashboardRepository,
-    private val sessionName: String?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as MyApplication
-                val repository = DashboardRepository(
-                    apiService = RetrofitProvider.create(DashboardApiService::class.java),
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
                 GoldDashboardVM(
-                    dashboardRepository = repository,
-                    sessionName = app.authPrefs.currentSession.value?.name,
+                    dashboardRepository = app.dashboardRepository,
                 )
             }
         }
@@ -48,10 +37,6 @@ class GoldDashboardVM(
         ),
     )
     val uiState: StateFlow<GoldDashboardUiState> = _uiState.asStateFlow()
-
-    init {
-        loadDashboard()
-    }
 
     fun retry() {
         loadDashboard()
@@ -85,16 +70,7 @@ class GoldDashboardVM(
             totalGoldItems = "$totalGoldItems item",
             latestDollarPrice = formatMoney(latestDollarPrice),
             latestGoldPricePerGramIdr = formatMoney(latestGoldPricePerGramIdr),
-            recentGolds = recentGolds.map { gold ->
-                GoldDashboardGoldUiState(
-                    title = gold.notes.ifBlank { "Emas #${gold.id}" },
-                    subtitle = listOfNotNull(
-                        gold.type.replace('_', ' '),
-                        formatDate(gold.date),
-                    ).joinToString(" · "),
-                    amountDisplay = "${formatWeight(gold.grams)} · ${formatMoney(gold.price)}",
-                )
-            },
+            recentGolds = recentGolds,
             isLoading = false,
             errorMessage = null,
         )
@@ -120,13 +96,7 @@ class GoldDashboardVM(
         return "${formatter.format(value)} g"
     }
 
-    private fun formatDate(value: String): String {
-        if (value.isBlank()) return "-"
-
-        val formatted = runCatching { OffsetDateTime.parse(value) }.getOrNull()?.toLocalDate()
-            ?: runCatching { LocalDateTime.parse(value).toLocalDate() }.getOrNull()
-            ?: runCatching { LocalDate.parse(value) }.getOrNull()
-
-        return formatted?.toString() ?: value
+    init {
+        loadDashboard()
     }
 }

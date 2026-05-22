@@ -12,6 +12,8 @@ data class Gold(
     val type: String,
     val carat: Double = 0.0,
     val notes: String = "",
+    val sellPrice: Double = 0.0,
+    val profit: Double = 0.0,
     val createdAt: String = "",
     val updatedAt: String = "",
 )

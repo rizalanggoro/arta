@@ -10,6 +10,10 @@ android {
         version = release(37)
     }
 
+    sourceSets {
+        getByName("main").kotlin.directories.add("../openapi/src/main/kotlin")
+    }
+
     defaultConfig {
         applicationId = "id.my.rizalanggoro.arta"
         minSdk = 29
@@ -64,4 +68,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.converter.kotlinx.serialization)
+    implementation("com.squareup.okhttp3:logging-interceptor:5.1.0")
+    implementation("com.squareup.retrofit2:converter-scalars:3.0.0")
 }

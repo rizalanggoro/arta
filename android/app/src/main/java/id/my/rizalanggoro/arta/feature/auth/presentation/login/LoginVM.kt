@@ -6,7 +6,17 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.feature.auth.data.AuthRepository
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
+import id.my.rizalanggoro.arta.core.network.RetrofitProvider
+import id.my.rizalanggoro.arta.domain.AuthSession
+import id.my.rizalanggoro.arta.feature.wallet.data.WalletRepository
+import id.my.rizalanggoro.arta.openapi.apis.AuthApi
+import id.my.rizalanggoro.arta.openapi.models.DtoError
+import id.my.rizalanggoro.arta.openapi.models.LoginReq
+import id.my.rizalanggoro.arta.openapi.models.LoginRes
+import kotlinx.serialization.json.Json
+import retrofit2.Response
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,16 +27,24 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginVM(
-    private val authRepository: AuthRepository,
-    private val application: MyApplication,
+    private val authApi: AuthApi,
+    private val authPrefs: AuthPrefs,
+    private val walletRepository: WalletRepository,
+    private val selectedWalletPrefs: SelectedWalletPrefs,
 ) : ViewModel() {
+    private val errorJson = Json {
+        ignoreUnknownKeys = true
+    }
+
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 LoginVM(
-                    authRepository = app.authRepository,
-                    application = app,
+                    authApi = RetrofitProvider.create(AuthApi::class.java),
+                    authPrefs = app.authPrefs,
+                    walletRepository = app.walletRepository,
+                    selectedWalletPrefs = app.selectedWalletPrefs,
                 )
             }
         }
@@ -69,17 +87,31 @@ class LoginVM(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            authRepository.login(current.email, current.password)
+
+            runCatching {
+                val response = authApi.apiAuthLoginPost(
+                    LoginReq(
+                        email = current.email,
+                        password = current.password,
+                    ),
+                )
+
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(apiErrorMessage(response))
+                }
+
+                val body = response.body() ?: throw IllegalStateException("Respons server kosong")
+                body.toDomain()
+            }
                 .onSuccess { session ->
-                    application.authPrefs.setSession(session)
-                    _messageEvent.emit("Login berhasil untuk ${session.name}")
-                    // Save first wallet as selected wallet if available
-                    val walletsResult = application.walletRepository.getWallets()
-                    walletsResult.onSuccess { wallets ->
-                        if (wallets.isNotEmpty()) {
-                            application.selectedWalletPrefs.saveSelectedWallet(wallets.first())
+                    authPrefs.setSession(session)
+                    walletRepository.getWallets()
+                        .onSuccess { wallets ->
+                            wallets.firstOrNull()?.let { firstWallet ->
+                                selectedWalletPrefs.saveSelectedWallet(firstWallet)
+                            }
                         }
-                    }
+                    _messageEvent.emit("Login berhasil untuk ${session.name}")
                 }
                 .onFailure { throwable ->
                     _messageEvent.emit(throwable.message ?: "Login gagal")
@@ -87,4 +119,27 @@ class LoginVM(
             _uiState.update { it.copy(isLoading = false) }
         }
     }
+
+    private fun apiErrorMessage(response: Response<LoginRes>): String {
+        val rawError = response.errorBody()?.string().orEmpty()
+        if (rawError.isBlank()) {
+            return "Login gagal"
+        }
+
+        return runCatching {
+            val error = errorJson.decodeFromString(DtoError.serializer(), rawError)
+            error.message?.takeIf { it.isNotBlank() } ?: rawError
+        }.getOrElse {
+            rawError
+        }
+    }
+}
+
+private fun LoginRes.toDomain(): AuthSession {
+    return AuthSession(
+        userId = requireNotNull(userId) { "Login response missing user id" },
+        email = requireNotNull(email) { "Login response missing email" },
+        name = requireNotNull(name) { "Login response missing name" },
+        token = requireNotNull(token) { "Login response missing token" },
+    )
 }

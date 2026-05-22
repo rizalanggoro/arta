@@ -9,7 +9,8 @@ import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.data.ThemePrefs
-import id.my.rizalanggoro.arta.feature.auth.data.AuthRepository
+import id.my.rizalanggoro.arta.core.network.RetrofitProvider
+import id.my.rizalanggoro.arta.openapi.apis.AuthApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,7 @@ class HomeSettingVM(
     private val authPrefs: AuthPrefs,
     private val themePrefs: ThemePrefs,
     private val selectedWalletPrefs: SelectedWalletPrefs,
-    private val authRepository: AuthRepository
+    private val authApi: AuthApi,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
@@ -33,7 +34,7 @@ class HomeSettingVM(
                     authPrefs = app.authPrefs,
                     themePrefs = app.themePrefs,
                     selectedWalletPrefs = app.selectedWalletPrefs,
-                    authRepository = app.authRepository
+                    authApi = RetrofitProvider.create(AuthApi::class.java),
                 )
             }
         }
@@ -56,11 +57,19 @@ class HomeSettingVM(
     fun logout() {
         viewModelScope.launch {
             runCatching {
-                authRepository.logout()
+                val session = authPrefs.currentSession.value
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+                val response = authApi.apiAuthLogoutPost("Bearer ${session.token}")
+                if (!response.isSuccessful) {
+                    throw IllegalStateException("Logout gagal")
+                }
             }.onSuccess {
                 selectedWalletPrefs.clear()
                 authPrefs.clear()
                 _event.emit(HomeSettingEvent.LoggedOut)
+            }.onFailure { throwable ->
+                _event.emit(HomeSettingEvent.LogoutFailed(throwable.message ?: "Logout gagal"))
             }
         }
     }
@@ -89,4 +98,5 @@ class HomeSettingVM(
 
 sealed class HomeSettingEvent {
     data object LoggedOut : HomeSettingEvent()
+    data class LogoutFailed(val message: String) : HomeSettingEvent()
 }

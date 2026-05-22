@@ -19,6 +19,8 @@ data class GoldDashboardResponseDto(
 @Serializable
 data class GoldDashboardGoldDto(
     @SerialName("data") val data: GoldDashboardGoldDataDto,
+    @SerialName("sell_price") val sellPrice: Double = 0.0,
+    @SerialName("profit") val profit: Double = 0.0,
 )
 
 @Serializable

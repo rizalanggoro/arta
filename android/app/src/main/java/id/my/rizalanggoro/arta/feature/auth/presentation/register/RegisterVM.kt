@@ -6,7 +6,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.feature.auth.data.AuthRepository
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.network.RetrofitProvider
+import id.my.rizalanggoro.arta.domain.AuthSession
+import id.my.rizalanggoro.arta.openapi.apis.AuthApi
+import id.my.rizalanggoro.arta.openapi.models.RegisterReq
+import id.my.rizalanggoro.arta.openapi.models.RegisterRes
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,16 +22,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RegisterVM(
-    private val authRepository: AuthRepository,
-    private val application: MyApplication,
+    private val authApi: AuthApi,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 RegisterVM(
-                    authRepository = app.authRepository,
-                    application = app,
+                    authApi = RetrofitProvider.create(AuthApi::class.java),
+                    authPrefs = app.authPrefs,
                 )
             }
         }
@@ -95,13 +100,24 @@ class RegisterVM(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            authRepository.register(
-                name = current.name,
-                email = current.email,
-                password = current.password,
-            )
+            runCatching {
+                val response = authApi.apiAuthRegisterPost(
+                    RegisterReq(
+                        name = current.name,
+                        email = current.email,
+                        password = current.password,
+                    ),
+                )
+
+                if (!response.isSuccessful) {
+                    throw IllegalStateException("Registrasi gagal")
+                }
+
+                val body = response.body() ?: throw IllegalStateException("Respons server kosong")
+                body.toDomain()
+            }
                 .onSuccess { session ->
-                    application.authPrefs.setSession(session)
+                    authPrefs.setSession(session)
                     _messageEvent.emit("Registrasi berhasil untuk ${session.name}")
                     _effect.emit(RegisterEffect.NavigateToCreateFirstWallet)
                 }
@@ -115,4 +131,13 @@ class RegisterVM(
 
 sealed class RegisterEffect {
     object NavigateToCreateFirstWallet : RegisterEffect()
+}
+
+private fun RegisterRes.toDomain(): AuthSession {
+    return AuthSession(
+        userId = requireNotNull(userId) { "Register response missing user id" },
+        email = requireNotNull(email) { "Register response missing email" },
+        name = requireNotNull(name) { "Register response missing name" },
+        token = requireNotNull(token) { "Register response missing token" },
+    )
 }

@@ -21,7 +21,10 @@ fun GoldDashboardResponseDto.toDomain(): GoldDashboard {
 }
 
 fun GoldDashboardGoldDto.toDomain(): Gold {
-    return data.toDomain()
+    return data.toDomain().copy(
+        sellPrice = sellPrice,
+        profit = profit,
+    )
 }
 
 fun GoldDashboardGoldDataDto.toDomain(): Gold {

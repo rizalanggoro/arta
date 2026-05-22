@@ -28,7 +28,5 @@ type GoldDashboard struct {
 	TotalGoldItems            int     `json:"total_gold_items"`
 	LatestDollarPrice         float64 `json:"latest_dollar_price"`
 	LatestGoldPricePerGramIDR float64 `json:"latest_gold_price_per_gram_idr"`
-	RecentGolds               []struct {
-		Data domain.Gold `json:"data"`
-	} `json:"recent_golds"`
+	RecentGolds               []Gold  `json:"recent_golds"`
 }

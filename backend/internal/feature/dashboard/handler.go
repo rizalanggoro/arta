@@ -129,6 +129,9 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
+	latestDollarPrice := float64(latestFxRate.Rate)
+	latestGoldPricePerGramIDR := (latestGoldPrice.PricePerOunceUSD * latestDollarPrice) / gramsPerTroyOunce
+
 	totalWeight := 0.0
 	buyPrice := 0.0
 	recentGoldsLimit := 5
@@ -136,22 +139,22 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 		recentGoldsLimit = len(golds)
 	}
 
-	recentGolds := make([]struct {
-		Data domain.Gold `json:"data"`
-	}, 0, recentGoldsLimit)
+	recentGolds := make([]dto.Gold, 0, recentGoldsLimit)
 	for i := range golds {
 		goldItem := golds[i]
 		totalWeight += goldItem.Grams
 		buyPrice += goldItem.Price
 		if len(recentGolds) < 5 {
-			recentGolds = append(recentGolds, struct {
-				Data domain.Gold `json:"data"`
-			}{Data: goldItem})
+			taxRate := taxByCarat[goldItem.Carat]
+			sellPrice := goldItem.Grams * latestGoldPricePerGramIDR * (1 - (taxRate / 100))
+			profit := sellPrice - goldItem.Price
+			recentGolds = append(recentGolds, dto.Gold{
+				Data:      goldItem,
+				SellPrice: math.Round(sellPrice*100) / 100,
+				Profit:    math.Round(profit*100) / 100,
+			})
 		}
 	}
-
-	latestDollarPrice := float64(latestFxRate.Rate)
-	latestGoldPricePerGramIDR := (latestGoldPrice.PricePerOunceUSD * latestDollarPrice) / gramsPerTroyOunce
 	totalAsset := 0.0
 	for i := range golds {
 		taxRate := taxByCarat[golds[i].Carat]
