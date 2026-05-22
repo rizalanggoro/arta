@@ -112,7 +112,11 @@ fun ComposeApp() {
 
                         // category
                         entry<CategoryRoute> { ListCategoryScreen() }
-                        entry<CategorySelectRoute> { SelectCategoryScreen() }
+                        entry<CategorySelectRoute>(
+                            metadata = BottomSheetSceneStrategy.bottomSheet()
+                        ) {
+                            SelectCategoryScreen()
+                        }
                         entry<CategoryUpsertRoute>(
                             metadata = BottomSheetSceneStrategy.bottomSheet()
                         ) {

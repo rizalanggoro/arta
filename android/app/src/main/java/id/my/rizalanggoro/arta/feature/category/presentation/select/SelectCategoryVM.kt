@@ -49,6 +49,10 @@ class SelectCategoryVM(
         }
     }
 
+    fun onCategoryTypeSelected(type: String) {
+        _uiState.update { it.copy(selectedType = type) }
+    }
+
     fun selectCategory(category: Category) {
         viewModelScope.launch {
             AppEventBus.emit(AppEvent.CategorySelected(category = category))
