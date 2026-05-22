@@ -4,14 +4,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -22,13 +26,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
+import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
 
@@ -51,9 +59,12 @@ fun SelectWalletScreen(
         wallets = uiState.wallets,
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,
-        onClickBack = { backStack.removeLastOrNull() },
         onReload = vm::loadWallets,
         onClickWallet = vm::selectWallet,
+        onClickManageWallet = {
+            backStack.removeLastOrNull()
+            backStack.add(Routes.WalletRoute)
+        }
     )
 }
 
@@ -64,62 +75,67 @@ private fun Content(
     wallets: List<Wallet> = emptyList(),
     isLoading: Boolean = false,
     errorMessage: String? = null,
-    onClickBack: () -> Unit = {},
     onReload: () -> Unit = {},
     onClickWallet: (Wallet) -> Unit = {},
+    onClickManageWallet: () -> Unit = {},
 ) {
     Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(
-            text = "Pilih Dompet",
-            style = MaterialTheme.typography.titleLarge,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Text(
+                text = "Pilih Dompet",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            FilledTonalIconButton(onClick = onClickManageWallet) {
+                Icon(
+                    Icons.Rounded.Settings,
+                    null
+                )
+            }
+        }
 
         when {
             isLoading -> {
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     LoadingIndicator()
                 }
             }
 
-            errorMessage != null -> {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Text(errorMessage)
-                        Button(onClick = onReload) { Text("Muat ulang") }
-                    }
-                }
-            }
+            errorMessage != null -> ErrorPlaceholder(
+                modifier = Modifier.padding(16.dp),
+                message = errorMessage,
+                onClickRetry = onReload
+            )
 
-            wallets.isEmpty() -> {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Text("Belum ada wallet.")
-                        Text(
-                            text = "Buat wallet dulu agar bisa dipakai di transaksi.",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
+            wallets.isEmpty() -> EmptyPlaceholder(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
 
             else -> {
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(wallets, key = { it.id }) { wallet ->
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    items(wallets) { wallet ->
                         ListItem(
+                            colors = ListItemDefaults.colors(
+                                containerColor = Color.Transparent
+                            ),
                             leadingContent = {
                                 RadioButton(
                                     selected = selectedWallet?.id == wallet.id,
