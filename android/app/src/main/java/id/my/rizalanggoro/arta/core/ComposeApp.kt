@@ -127,7 +127,11 @@ fun ComposeApp() {
                         entry<HomeTransactionRoute> { HomeTransactionScreen() }
                         entry<HomeSettingRoute> { HomeSettingScreen() }
                         entry<WalletRoute> { ListWalletScreen() }
-                        entry<WalletSelectRoute> { SelectWalletScreen() }
+                        entry<WalletSelectRoute>(
+                            metadata = BottomSheetSceneStrategy.bottomSheet()
+                        ) {
+                            SelectWalletScreen()
+                        }
                         entry<WalletCreateRoute> { CreateWalletScreen() }
                         entry<WalletCreateFirstRoute> { CreateFirstWalletScreen() }
                         entry<WalletUpdateRoute> { route -> UpdateWalletScreen(walletId = route.walletId) }
