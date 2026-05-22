@@ -81,11 +81,8 @@ object Routes {
     data object CategorySelectRoute : NavKey
 
     @Serializable
-    data object CategoryCreateRoute : NavKey
-
-    @Serializable
-    data class CategoryUpdateRoute(
-        val categoryId: Int,
+    data class CategoryUpsertRoute(
+        val categoryId: Int = 0,
     ) : NavKey
 
     // transaction

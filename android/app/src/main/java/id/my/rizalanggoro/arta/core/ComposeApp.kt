@@ -14,10 +14,9 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import id.my.rizalanggoro.arta.core.Routes.CategoryCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
 import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
-import id.my.rizalanggoro.arta.core.Routes.CategoryUpdateRoute
+import id.my.rizalanggoro.arta.core.Routes.CategoryUpsertRoute
 import id.my.rizalanggoro.arta.core.Routes.ForgotPasswordRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldDetailRoute
@@ -42,10 +41,9 @@ import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.feature.auth.presentation.forgotpassword.ForgotPasswordScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterScreen
-import id.my.rizalanggoro.arta.feature.category.presentation.create.CreateCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
-import id.my.rizalanggoro.arta.feature.category.presentation.update.UpdateCategoryScreen
+import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.create.CreateGoldScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.tax.ListGoldTaxScreen
@@ -98,8 +96,11 @@ fun ComposeApp() {
                     entryProvider = entryProvider {
                         entry<CategoryRoute> { ListCategoryScreen() }
                         entry<CategorySelectRoute> { SelectCategoryScreen() }
-                        entry<CategoryCreateRoute> { CreateCategoryScreen() }
-                        entry<CategoryUpdateRoute> { route -> UpdateCategoryScreen(categoryId = route.categoryId) }
+                        entry<CategoryUpsertRoute>(
+                            metadata = BottomSheetSceneStrategy.bottomSheet()
+                        ) { route ->
+                            UpsertCategoryScreen(categoryId = route.categoryId)
+                        }
                         entry<GoldCreateRoute> { CreateGoldScreen() }
                         entry<GoldTaxListRoute> { ListGoldTaxScreen() }
                         entry<UpsertGoldTaxRoute>(

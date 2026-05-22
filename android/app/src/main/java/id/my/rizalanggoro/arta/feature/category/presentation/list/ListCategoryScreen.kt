@@ -55,8 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes.CategoryCreateRoute
-import id.my.rizalanggoro.arta.core.Routes.CategoryUpdateRoute
+import id.my.rizalanggoro.arta.core.Routes.CategoryUpsertRoute
 import id.my.rizalanggoro.arta.domain.Category
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
@@ -76,10 +75,10 @@ fun ListCategoryScreen(vm: ListCategoryVM = viewModel(factory = ListCategoryVM.F
         selectedType = uiState.selectedType,
         actionTarget = uiState.actionTarget,
         deleteTarget = uiState.deleteTarget,
-        onClickCreate = { backStack.add(CategoryCreateRoute) },
+        onClickCreate = { backStack.add(CategoryUpsertRoute()) },
         onClickType = vm::onCategoryTypeSelected,
         onClickCategory = vm::onCategoryClicked,
-        onClickEdit = { categoryId -> backStack.add(CategoryUpdateRoute(categoryId = categoryId)) },
+        onClickEdit = { categoryId -> backStack.add(CategoryUpsertRoute(categoryId = categoryId)) },
         onClickBack = { backStack.removeLastOrNull() },
         onDismissActionSheet = vm::dismissActionSheet,
         onClickDelete = vm::onDeleteRequested,
