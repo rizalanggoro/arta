@@ -59,14 +59,6 @@ object Routes {
     data object GoldCreateRoute : NavKey
 
     @Serializable
-    data object GoldTaxCreateRoute : NavKey
-
-    @Serializable
-    data class GoldTaxUpdateRoute(
-        val taxPreferenceId: Int,
-    ) : NavKey
-
-    @Serializable
     data class GoldUpdateRoute(
         val goldId: Int,
     ) : NavKey
@@ -74,6 +66,11 @@ object Routes {
     @Serializable
     data class GoldDetailRoute(
         val id: Int,
+    ) : NavKey
+
+    @Serializable
+    data class UpsertGoldTaxRoute(
+        val id: Int = 0
     ) : NavKey
 
     // category

@@ -15,69 +15,73 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ListGoldTaxVM(
-	private val goldRepository: GoldRepository,
+    private val goldRepository: GoldRepository,
 ) : ViewModel() {
-	companion object {
-		val Factory = viewModelFactory {
-			initializer {
-				val app = this[APPLICATION_KEY] as MyApplication
-				ListGoldTaxVM(goldRepository = app.goldRepository)
-			}
-		}
-	}
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                val app = this[APPLICATION_KEY] as MyApplication
+                ListGoldTaxVM(goldRepository = app.goldRepository)
+            }
+        }
+    }
 
-	private val _uiState = MutableStateFlow(ListGoldTaxUiState())
-	val uiState: StateFlow<ListGoldTaxUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(ListGoldTaxUiState())
+    val uiState: StateFlow<ListGoldTaxUiState> = _uiState.asStateFlow()
 
-	fun loadTaxPreferences() {
-		viewModelScope.launch {
-			_uiState.update { it.copy(isLoading = true, errorMessage = null) }
-			goldRepository.getTaxPreferences()
-				.onSuccess { preferences ->
-					_uiState.update {
-						it.copy(
-							preferences = preferences,
-							deleteTarget = null,
-							isLoading = false,
-							errorMessage = null,
-						)
-					}
-				}
-				.onFailure { throwable ->
-					_uiState.update {
-						it.copy(
-							isLoading = false,
-							errorMessage = throwable.message ?: "Gagal memuat preferensi pajak",
-						)
-					}
-				}
-		}
-	}
+    fun loadTaxPreferences() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            goldRepository.getTaxPreferences()
+                .onSuccess { preferences ->
+                    _uiState.update {
+                        it.copy(
+                            preferences = preferences,
+                            deleteTarget = null,
+                            isLoading = false,
+                            errorMessage = null,
+                        )
+                    }
+                }
+                .onFailure { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = throwable.message ?: "Gagal memuat preferensi pajak",
+                        )
+                    }
+                }
+        }
+    }
 
-	fun onDeleteRequested(preference: GoldTaxPreference) {
-		_uiState.update { it.copy(deleteTarget = preference) }
-	}
+    fun onDeleteRequested(preference: GoldTaxPreference) {
+        _uiState.update { it.copy(deleteTarget = preference) }
+    }
 
-	fun dismissDeleteDialog() {
-		_uiState.update { it.copy(deleteTarget = null) }
-	}
+    fun dismissDeleteDialog() {
+        _uiState.update { it.copy(deleteTarget = null) }
+    }
 
-	fun confirmDeleteTaxPreference(preference: GoldTaxPreference) {
-		viewModelScope.launch {
-			_uiState.update { it.copy(isLoading = true, errorMessage = null) }
-			goldRepository.deleteTaxPreference(preference.id)
-				.onSuccess {
-					_uiState.update { it.copy(isLoading = false, deleteTarget = null) }
-					loadTaxPreferences()
-				}
-				.onFailure { throwable ->
-					_uiState.update {
-						it.copy(
-							isLoading = false,
-							errorMessage = throwable.message ?: "Gagal menghapus preferensi pajak",
-						)
-					}
-				}
-		}
-	}
+    fun confirmDeleteTaxPreference(preference: GoldTaxPreference) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            goldRepository.deleteTaxPreference(preference.id)
+                .onSuccess {
+                    _uiState.update { it.copy(isLoading = false, deleteTarget = null) }
+                    loadTaxPreferences()
+                }
+                .onFailure { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = throwable.message ?: "Gagal menghapus preferensi pajak",
+                        )
+                    }
+                }
+        }
+    }
+
+    init {
+        loadTaxPreferences()
+    }
 }

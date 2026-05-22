@@ -14,9 +14,9 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Inbox
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
@@ -26,7 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,199 +36,175 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes.GoldTaxCreateRoute
-import id.my.rizalanggoro.arta.core.Routes.GoldTaxUpdateRoute
+import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.domain.GoldTaxPreference
+import id.my.rizalanggoro.arta.feature.gold.presentation.tax.component.DeleteGoldTaxConfirmationDialog
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ListGoldTaxScreen(
-	vm: ListGoldTaxVM = viewModel(factory = ListGoldTaxVM.Factory),
+    vm: ListGoldTaxVM = viewModel(factory = ListGoldTaxVM.Factory),
 ) {
-	val uiState by vm.uiState.collectAsState()
-	val backStack = LocalBackStack.current
-	val snackbarHostState = remember { SnackbarHostState() }
+    val uiState by vm.uiState.collectAsState()
+    val backStack = LocalBackStack.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
-	LaunchedEffect(Unit) {
-		vm.loadTaxPreferences()
-	}
+    LaunchedEffect(Unit) {
+        AppEventBus.event
+            .filterIsInstance<AppEvent.GoldTaxChanged>()
+            .collect { vm.loadTaxPreferences() }
+    }
 
-	Content(
-		snackbarHostState = snackbarHostState,
-		preferences = uiState.preferences,
-		deleteTarget = uiState.deleteTarget,
-		isLoading = uiState.isLoading,
-		errorMessage = uiState.errorMessage,
-		onClickCreate = { backStack.add(GoldTaxCreateRoute) },
-		onClickEdit = { taxPreferenceId -> backStack.add(GoldTaxUpdateRoute(taxPreferenceId = taxPreferenceId)) },
-		onClickDelete = vm::onDeleteRequested,
-		onClickBack = { backStack.removeLastOrNull() },
-		onDismissDelete = vm::dismissDeleteDialog,
-		onConfirmDelete = vm::confirmDeleteTaxPreference,
-		onRetry = vm::loadTaxPreferences,
-	)
+    Content(
+        snackbarHostState = snackbarHostState,
+        uiState = uiState,
+        onClickDelete = vm::onDeleteRequested,
+        onClickBack = { backStack.removeLastOrNull() },
+        onClickCreate = {
+            backStack.add(
+                Routes.UpsertGoldTaxRoute()
+            )
+        },
+        onClickEdit = { preference ->
+            backStack.add(
+                Routes.UpsertGoldTaxRoute(
+                    id = preference.id
+                )
+            )
+        },
+    )
+
+    uiState.deleteTarget?.let { preference ->
+        DeleteGoldTaxConfirmationDialog(
+            preference = preference,
+            onDismiss = vm::dismissDeleteDialog,
+            onConfirm = { vm.confirmDeleteTaxPreference(preference) },
+        )
+    }
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
-	snackbarHostState: SnackbarHostState,
-	preferences: List<GoldTaxPreference> = emptyList(),
-	deleteTarget: GoldTaxPreference? = null,
-	isLoading: Boolean = false,
-	errorMessage: String? = null,
-	onClickCreate: () -> Unit = {},
-	onClickEdit: (Int) -> Unit = {},
-	onClickDelete: (GoldTaxPreference) -> Unit = {},
-	onClickBack: () -> Unit = {},
-	onDismissDelete: () -> Unit = {},
-	onConfirmDelete: (GoldTaxPreference) -> Unit = {},
-	onRetry: () -> Unit = {},
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    uiState: ListGoldTaxUiState = ListGoldTaxUiState(),
+    onClickCreate: () -> Unit = {},
+    onClickEdit: (GoldTaxPreference) -> Unit = {},
+    onClickDelete: (GoldTaxPreference) -> Unit = {},
+    onClickBack: () -> Unit = {},
 ) {
-	Scaffold(
-		snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-		topBar = {
-			TopAppBar(
-				title = { Text("Pajak emas") },
-				navigationIcon = {
-					IconButton(onClick = onClickBack) {
-						Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
-					}
-				},
-			)
-		},
-	) { paddingValues ->
-		when {
-			isLoading -> Box(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(paddingValues),
-				contentAlignment = Alignment.Center,
-			) {
-				LoadingIndicator()
-			}
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Pajak emas") },
+                navigationIcon = {
+                    IconButton(onClick = onClickBack) {
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
+                    }
+                },
+            )
+        },
+        floatingActionButton = {
+            if (uiState.isLoading.not())
+                FloatingActionButton(onClick = dropUnlessResumed { onClickCreate() }) {
+                    Icon(
+                        Icons.Rounded.Add,
+                        null
+                    )
+                }
+        }
+    ) { paddingValues ->
+        when {
+            uiState.isLoading -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                LoadingIndicator()
+            }
 
-			errorMessage != null -> Column(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(paddingValues)
-					.padding(16.dp),
-				verticalArrangement = Arrangement.spacedBy(16.dp),
-			) {
-				Text(text = errorMessage, style = MaterialTheme.typography.bodyMedium)
-				OutlinedButton(onClick = onRetry) {
-					Text("Coba lagi")
-				}
-			}
+            uiState.preferences.isEmpty() ->
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(
+                        Icons.Rounded.Inbox,
+                        null,
+                        tint = MaterialTheme.colorScheme.outlineVariant,
+                    )
+                    Text(
+                        text = "Belum ada preferensi pajak",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
 
-			else -> LazyColumn(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(paddingValues)
-					.padding(16.dp),
-				verticalArrangement = Arrangement.spacedBy(12.dp),
-			) {
-				item {
-					OutlinedButton(
-						onClick = onClickCreate,
-						modifier = Modifier.fillMaxWidth(),
-					) {
-						Icon(Icons.Rounded.Add, contentDescription = null)
-						Text("Tambah pajak baru")
-					}
-				}
+                }
 
-				if (preferences.isEmpty()) {
-					item {
-						Column(
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(top = 32.dp),
-							horizontalAlignment = Alignment.CenterHorizontally,
-							verticalArrangement = Arrangement.spacedBy(8.dp),
-						) {
-							Icon(
-								Icons.Rounded.Inbox,
-								contentDescription = null,
-								tint = MaterialTheme.colorScheme.outlineVariant,
-							)
-							Text(
-								text = "Belum ada preferensi pajak",
-								style = MaterialTheme.typography.bodyMedium,
-								color = MaterialTheme.colorScheme.outline,
-							)
-						}
-					}
-				} else {
-					items(preferences) { preference ->
-						Card(modifier = Modifier.fillMaxWidth()) {
-							Column(
-								modifier = Modifier.padding(16.dp),
-								verticalArrangement = Arrangement.spacedBy(12.dp),
-							) {
-								Text(
-									text = "Karat ${preference.carat}",
-									style = MaterialTheme.typography.titleMedium,
-								)
-								Text(
-									text = "Rasio pajak ${preference.taxRate}%",
-									style = MaterialTheme.typography.bodyMedium,
-									color = MaterialTheme.colorScheme.outline,
-								)
-								OutlinedButton(
-									onClick = { onClickEdit(preference.id) },
-									modifier = Modifier.fillMaxWidth(),
-								) {
-									Icon(Icons.Rounded.Edit, contentDescription = null)
-									Text("Ubah")
-								}
-								OutlinedButton(
-									onClick = { onClickDelete(preference) },
-									modifier = Modifier.fillMaxWidth(),
-								) {
-									Icon(Icons.Rounded.Delete, contentDescription = null)
-									Text("Hapus")
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	deleteTarget?.let { preference ->
-		AlertDialog(
-			onDismissRequest = onDismissDelete,
-			title = { Text("Hapus preferensi karat?") },
-			text = { Text("Karat ${preference.carat} dengan rasio pajak ${preference.taxRate}% akan dihapus.") },
-			confirmButton = {
-				TextButton(onClick = { onConfirmDelete(preference) }) {
-					Text("Hapus")
-				}
-			},
-			dismissButton = {
-				TextButton(onClick = onDismissDelete) {
-					Text("Batal")
-				}
-			},
-		)
-	}
+            else -> LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                items(uiState.preferences) { preference ->
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Text(
+                                text = "Karat ${preference.carat}",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                text = "Rasio pajak ${preference.taxRate}%",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                            OutlinedButton(
+                                onClick = { onClickEdit(preference) },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Icon(Icons.Rounded.Edit, contentDescription = null)
+                                Text("Ubah")
+                            }
+                            OutlinedButton(
+                                onClick = { onClickDelete(preference) },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Icon(Icons.Rounded.Delete, contentDescription = null)
+                                Text("Hapus")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewListGoldTaxScreen() {
-	ArtaTheme {
-		Content(
-			snackbarHostState = remember { SnackbarHostState() },
-			preferences = listOf(
-				GoldTaxPreference(id = 1, carat = 24.0, taxRate = 5.0),
-				GoldTaxPreference(id = 2, carat = 18.0, taxRate = 3.5),
-			),
-		)
-	}
+    ArtaTheme {
+        Content(
+            uiState = ListGoldTaxUiState(
+                isLoading = false,
+                preferences = listOf(
+                    GoldTaxPreference(id = 1, carat = 24.0, taxRate = 5.0),
+                    GoldTaxPreference(id = 2, carat = 18.0, taxRate = 3.5),
+                )
+            ),
+        )
+    }
 }
