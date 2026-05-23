@@ -44,7 +44,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -56,17 +55,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategoryUpsertRoute
-import id.my.rizalanggoro.arta.domain.Category
+import id.my.rizalanggoro.arta.openapi.models.DtoCategory
+import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
 fun ListCategoryScreen(vm: ListCategoryVM = viewModel(factory = ListCategoryVM.Factory)) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
-
-    LaunchedEffect(Unit) {
-        vm.loadCategories()
-    }
 
     Content(
         categories = uiState.categories,
@@ -91,21 +87,21 @@ fun ListCategoryScreen(vm: ListCategoryVM = viewModel(factory = ListCategoryVM.F
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    categories: List<Category> = emptyList(),
+    categories: List<DtoCategory> = emptyList(),
     isLoading: Boolean = false,
     errorMessage: String? = null,
     selectedType: String = "expense",
-    actionTarget: Category? = null,
-    deleteTarget: Category? = null,
+    actionTarget: DomainCategory? = null,
+    deleteTarget: DomainCategory? = null,
     onClickCreate: () -> Unit = {},
     onClickType: (String) -> Unit = {},
-    onClickCategory: (Category) -> Unit = {},
+    onClickCategory: (DomainCategory) -> Unit = {},
     onClickEdit: (Int) -> Unit = {},
     onClickBack: () -> Unit = {},
-    onClickDelete: (Category) -> Unit = {},
+    onClickDelete: (DomainCategory) -> Unit = {},
     onDismissActionSheet: () -> Unit = {},
     onDismissDelete: () -> Unit = {},
-    onConfirmDelete: (Category) -> Unit = {},
+    onConfirmDelete: (DomainCategory) -> Unit = {},
     onRetry: () -> Unit = {},
 ) {
     val actionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -215,7 +211,7 @@ private fun Content(
                             .weight(1f),
                     ) {
                         item { Box(modifier = Modifier.height(8.dp)) }
-                        items(categories, key = { it.id }) { category ->
+                        items(categories, key = { it.data.id }) { category ->
                             ListItem(
                                 leadingContent = {
                                     Box(
@@ -223,20 +219,20 @@ private fun Content(
                                             .size(40.dp)
                                             .clip(CircleShape)
                                             .background(
-                                                when (category.type) {
+                                                when (category.data.type) {
                                                     "income" -> MaterialTheme.colorScheme.primaryContainer
                                                     else -> MaterialTheme.colorScheme.errorContainer
                                                 }
                                             )
                                     ) {
                                         Icon(
-                                            when (category.type) {
+                                            when (category.data.type) {
                                                 "income" -> Icons.AutoMirrored.Rounded.CallReceived
                                                 else -> Icons.AutoMirrored.Rounded.CallMade
                                             },
                                             contentDescription = null,
                                             modifier = Modifier.align(Alignment.Center),
-                                            tint = when (category.type) {
+                                            tint = when (category.data.type) {
                                                 "income" -> MaterialTheme.colorScheme.primary
                                                 else -> MaterialTheme.colorScheme.error
                                             }
@@ -244,16 +240,16 @@ private fun Content(
                                     }
                                 },
                                 headlineContent = {
-                                    Text(category.name)
+                                    Text(category.data.name)
                                 },
                                 supportingContent = when {
-                                    category.userId != null -> null
+                                    category.data.userId != null -> null
                                     else -> {
                                         { Text("Bawaan") }
                                     }
                                 },
-                                modifier = Modifier.clickable(enabled = category.userId != null) {
-                                    onClickCategory(category)
+                                modifier = Modifier.clickable(enabled = category.data.userId != null) {
+                                    onClickCategory(category.data)
                                 }
                             )
                         }
@@ -351,21 +347,25 @@ private fun ListCategoryDefaultPreview() {
     ArtaTheme {
         Content(
             categories = listOf(
-                Category(
-                    id = 1,
-                    userId = null,
-                    name = "Makanan",
-                    type = "expense",
-                    icon = "🍜",
-                    color = "#F97316",
+                DtoCategory(
+                    data = DomainCategory(
+                        createdAt = "2026-05-23T10:00:00Z",
+                        id = 1,
+                        name = "Makanan",
+                        type = "expense",
+                        updatedAt = "2026-05-23T10:00:00Z",
+                        userId = null,
+                    ),
                 ),
-                Category(
-                    id = 2,
-                    userId = 123,
-                    name = "Transport",
-                    type = "expense",
-                    icon = "🚌",
-                    color = "#0EA5E9",
+                DtoCategory(
+                    data = DomainCategory(
+                        createdAt = "2026-05-23T10:00:00Z",
+                        id = 2,
+                        name = "Transport",
+                        type = "expense",
+                        updatedAt = "2026-05-23T10:00:00Z",
+                        userId = 123,
+                    ),
                 ),
             ),
             selectedType = "expense",

@@ -5,14 +5,10 @@ import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.data.ThemePrefs
 import id.my.rizalanggoro.arta.core.network.RetrofitProvider
-import id.my.rizalanggoro.arta.feature.category.data.CategoryApiService
-import id.my.rizalanggoro.arta.feature.category.data.CategoryRepository
-import id.my.rizalanggoro.arta.feature.gold.data.GoldApiService
-import id.my.rizalanggoro.arta.feature.gold.data.GoldRepository
-import id.my.rizalanggoro.arta.feature.home.data.DashboardApiService
-import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
-import id.my.rizalanggoro.arta.feature.transaction.data.TransactionApiService
-import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
+import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
+import id.my.rizalanggoro.arta.openapi.apis.GoldApi
+import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
+import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 
 class MyApplication : Application() {
@@ -22,19 +18,21 @@ class MyApplication : Application() {
     lateinit var themePrefs: ThemePrefs
         private set
 
-    lateinit var dashboardRepository: DashboardRepository
-        private set
+    
 
-    lateinit var categoryRepository: CategoryRepository
+    lateinit var categoryApi: CategoryApi
         private set
 
     lateinit var walletApi: WalletApi
         private set
 
-    lateinit var transactionRepository: TransactionRepository
+    lateinit var transactionApi: TransactionApi
         private set
 
-    lateinit var goldRepository: GoldRepository
+    lateinit var dashboardApi: DashboardApi
+        private set
+
+    lateinit var goldApi: GoldApi
         private set
 
     lateinit var selectedWalletPrefs: SelectedWalletPrefs
@@ -47,32 +45,19 @@ class MyApplication : Application() {
         themePrefs = ThemePrefs(applicationContext)
         selectedWalletPrefs = SelectedWalletPrefs(applicationContext)
 
-        val dashboardApi = RetrofitProvider.create(DashboardApiService::class.java)
-        val categoryApi = RetrofitProvider.create(CategoryApiService::class.java)
+        val dashboardApi = RetrofitProvider.create(DashboardApi::class.java)
+        val categoryApi = RetrofitProvider.create(CategoryApi::class.java)
         val walletApi = RetrofitProvider.create(WalletApi::class.java)
-        val transactionApi = RetrofitProvider.create(TransactionApiService::class.java)
-        val goldApi = RetrofitProvider.create(GoldApiService::class.java)
+        val transactionApi = RetrofitProvider.create(TransactionApi::class.java)
+        val goldApi = RetrofitProvider.create(GoldApi::class.java)
 
-        dashboardRepository = DashboardRepository(
-            apiService = dashboardApi,
-            authSessionProvider = { authPrefs.currentSession.value },
-        )
-
-        categoryRepository = CategoryRepository(
-            apiService = categoryApi,
-            authSessionProvider = { authPrefs.currentSession.value },
-        )
+        this.categoryApi = categoryApi
 
         this.walletApi = walletApi
 
-        transactionRepository = TransactionRepository(
-            apiService = transactionApi,
-            authSessionProvider = { authPrefs.currentSession.value },
-        )
+        this.transactionApi = transactionApi
 
-        goldRepository = GoldRepository(
-            apiService = goldApi,
-            authSessionProvider = { authPrefs.currentSession.value },
-        )
+        this.dashboardApi = dashboardApi
+        this.goldApi = goldApi
     }
 }

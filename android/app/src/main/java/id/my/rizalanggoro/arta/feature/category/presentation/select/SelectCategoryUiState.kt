@@ -1,9 +1,9 @@
 package id.my.rizalanggoro.arta.feature.category.presentation.select
 
-import id.my.rizalanggoro.arta.domain.Category
+import id.my.rizalanggoro.arta.openapi.models.DtoCategory
 
 data class SelectCategoryUiState(
-    val categories: List<Category> = emptyList(),
+    val categories: List<DtoCategory> = emptyList(),
     val selectedType: String = "expense",
     val isLoading: Boolean = false,
     val errorMessage: String? = null,

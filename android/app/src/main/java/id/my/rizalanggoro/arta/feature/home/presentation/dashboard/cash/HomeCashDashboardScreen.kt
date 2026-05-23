@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import id.my.rizalanggoro.arta.domain.Category
-import id.my.rizalanggoro.arta.domain.Transaction
+import id.my.rizalanggoro.arta.openapi.models.CashDashboardResRecentTransactionsInner
+import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -53,7 +53,7 @@ private fun Content(
     greeting: String,
     todayIncomeDisplay: String,
     todayExpenseDisplay: String,
-    recentTransactions: List<Transaction>,
+    recentTransactions: List<CashDashboardResRecentTransactionsInner>,
     isLoading: Boolean,
     errorMessage: String?,
     onRetry: () -> Unit = {},
@@ -178,16 +178,17 @@ private fun SummaryCard(
 
 @Composable
 private fun TransactionRow(
-    transaction: Transaction,
+    transaction: CashDashboardResRecentTransactionsInner,
     modifier: Modifier = Modifier,
 ) {
     val category = transaction.category
-    val title = transaction.description.ifBlank {
+    val data = transaction.data
+    val title = data.description.ifBlank {
         category?.name?.ifBlank { "Transaksi" } ?: "Transaksi"
     }
     val subtitle = listOfNotNull(
         category?.name?.takeIf { it.isNotBlank() },
-        formatTransactionDate(transaction.date),
+        formatTransactionDate(data.date),
     ).joinToString(" · ")
     val isIncome = category?.type == "income"
 
@@ -197,7 +198,7 @@ private fun TransactionRow(
             Text(text = subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Text(
-            text = buildAmountDisplay(transaction.amount, category?.type.orEmpty()),
+            text = buildAmountDisplay(data.amount.toDouble(), category?.type.orEmpty()),
             style = MaterialTheme.typography.titleSmall,
             color = if (isIncome) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
         )
@@ -227,52 +228,33 @@ private fun formatTransactionDate(dateValue: String): String {
     return formatter.format(parsed)
 }
 
-private fun sampleTransactions(): List<Transaction> {
+private fun sampleTransactions(): List<CashDashboardResRecentTransactionsInner> {
     return listOf(
-        Transaction(
-            id = 1,
-            walletId = 1,
-            amount = 1_500_000.0,
-            categoryId = 1,
-            category = Category(id = 1, name = "Transfer masuk", type = "income"),
-            description = "Gaji bulanan",
-            date = "2026-05-19T09:15:00+07:00",
+        CashDashboardResRecentTransactionsInner(
+            category = DomainCategory(createdAt = "", id = 1, name = "Transfer masuk", type = "income", updatedAt = ""),
+            data = id.my.rizalanggoro.arta.openapi.models.DomainTransaction(
+                amount = java.math.BigDecimal(1_500_000),
+                categoryId = 1,
+                createdAt = "2026-05-19T09:15:00+07:00",
+                date = "2026-05-19T09:15:00+07:00",
+                description = "Gaji bulanan",
+                id = 1,
+                updatedAt = "2026-05-19T09:15:00+07:00",
+                walletId = 1,
+            ),
         ),
-        Transaction(
-            id = 2,
-            walletId = 1,
-            amount = 175_000.0,
-            categoryId = 2,
-            category = Category(id = 2, name = "Supermarket", type = "expense"),
-            description = "Belanja kebutuhan pokok",
-            date = "2026-05-19T11:20:00+07:00",
-        ),
-        Transaction(
-            id = 3,
-            walletId = 1,
-            amount = 100_000.0,
-            categoryId = 3,
-            category = Category(id = 3, name = "Dompet digital", type = "expense"),
-            description = "Top up e-wallet",
-            date = "2026-05-19T12:10:00+07:00",
-        ),
-        Transaction(
-            id = 4,
-            walletId = 1,
-            amount = 750_000.0,
-            categoryId = 1,
-            category = Category(id = 1, name = "Transfer masuk", type = "income"),
-            description = "Pemasukan freelance",
-            date = "2026-05-19T14:05:00+07:00",
-        ),
-        Transaction(
-            id = 5,
-            walletId = 1,
-            amount = 55_000.0,
-            categoryId = 4,
-            category = Category(id = 4, name = "Ojek online", type = "expense"),
-            description = "Transport",
-            date = "2026-05-19T16:40:00+07:00",
+        CashDashboardResRecentTransactionsInner(
+            category = DomainCategory(createdAt = "", id = 2, name = "Supermarket", type = "expense", updatedAt = ""),
+            data = id.my.rizalanggoro.arta.openapi.models.DomainTransaction(
+                amount = java.math.BigDecimal(175_000),
+                categoryId = 2,
+                createdAt = "2026-05-19T11:20:00+07:00",
+                date = "2026-05-19T11:20:00+07:00",
+                description = "Belanja kebutuhan pokok",
+                id = 2,
+                updatedAt = "2026-05-19T11:20:00+07:00",
+                walletId = 1,
+            ),
         ),
     )
 }

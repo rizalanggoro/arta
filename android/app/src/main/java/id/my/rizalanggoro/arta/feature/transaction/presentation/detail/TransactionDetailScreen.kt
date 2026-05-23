@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.Routes.TransactionUpdateRoute
 import androidx.compose.ui.tooling.preview.Preview
-import id.my.rizalanggoro.arta.domain.Transaction
+import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import androidx.compose.material3.ExperimentalMaterial3Api
 
 @Composable
@@ -41,7 +41,7 @@ fun TransactionDetailScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Content(tx: Transaction?, onEdit: (Transaction) -> Unit = {}) {
+private fun Content(tx: DomainTransaction?, onEdit: (DomainTransaction) -> Unit = {}) {
     androidx.compose.material3.Scaffold(
         topBar = { androidx.compose.material3.TopAppBar(title = { Text("Detail Transaksi") }) }
     ) { paddingValues ->
@@ -69,7 +69,7 @@ private fun Content(tx: Transaction?, onEdit: (Transaction) -> Unit = {}) {
 @Preview(showBackground = true)
 @Composable
 private fun TransactionDetailScreenPreview() {
-    Content(tx = Transaction(id = 1, walletId = 1, amount = 100000.0, categoryId = 1, description = "Contoh transaksi", date = "2026-05-16"))
+    Content(tx = DomainTransaction(amount = java.math.BigDecimal(100000), categoryId = 1, createdAt = "", date = "2026-05-16", description = "Contoh transaksi", id = 1, updatedAt = "", walletId = 1))
 }
 
 @Preview(showBackground = true, name = "Transaction Detail - Loading")

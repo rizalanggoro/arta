@@ -9,9 +9,10 @@ import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.domain.CashDashboard
-import id.my.rizalanggoro.arta.domain.Wallet
-import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
+import id.my.rizalanggoro.arta.domain.AuthSession
+import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
+import id.my.rizalanggoro.arta.openapi.models.CashDashboardRes
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,8 +25,9 @@ import java.util.Locale
 import kotlin.math.roundToLong
 
 class HomeCashDashboardVM(
-    private val dashboardRepository: DashboardRepository,
+    private val dashboardApi: DashboardApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
+    private val authSessionProvider: () -> AuthSession?,
     private val sessionName: String?,
 ) : ViewModel() {
     companion object {
@@ -33,8 +35,9 @@ class HomeCashDashboardVM(
             initializer {
                 val app = this[APPLICATION_KEY] as MyApplication
                 HomeCashDashboardVM(
-                    dashboardRepository = app.dashboardRepository,
+                    dashboardApi = app.dashboardApi,
                     selectedWalletPrefs = app.selectedWalletPrefs,
+                    authSessionProvider = { app.authPrefs.currentSession.value },
                     sessionName = app.authPrefs.currentSession.value?.name,
                 )
             }
@@ -58,36 +61,39 @@ class HomeCashDashboardVM(
         val walletId = _uiState.value.selectedWallet?.id
 
         viewModelScope.launch {
-            dashboardRepository.getCashDashboard(walletId)
-                .onSuccess { dashboard ->
-                    _uiState.value = dashboard.toUiState(
-                        sessionName = sessionName,
-                        selectedWallet = _uiState.value.selectedWallet,
+            runCatching {
+                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val response = dashboardApi.getCashDashboard("Bearer $token", walletId)
+                if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess { res ->
+                _uiState.value = res.toUiState(
+                    sessionName = sessionName,
+                    selectedWallet = _uiState.value.selectedWallet,
+                )
+            }.onFailure { throwable ->
+                _uiState.update {
+                    it.copy(
+                        activeWalletName = it.selectedWallet?.name ?: "Tabungan Uang",
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Gagal memuat dashboard",
                     )
                 }
-                .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            activeWalletName = it.selectedWallet?.name ?: "Tabungan Uang",
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Gagal memuat dashboard",
-                        )
-                    }
-                }
+            }
         }
     }
 
-    private fun CashDashboard.toUiState(
+    private fun CashDashboardRes.toUiState(
         sessionName: String?,
-        selectedWallet: Wallet?,
+        selectedWallet: DomainWallet?,
     ): CashDashboardUiState {
         return CashDashboardUiState(
             selectedWallet = selectedWallet,
             activeWalletName = activeWalletName,
             greeting = greetingForName(sessionName),
-            balanceDisplay = formatMoney(currentBalance),
-            todayIncomeDisplay = formatMoney(todayIncome),
-            todayExpenseDisplay = formatMoney(todayExpense),
+            balanceDisplay = formatMoney(financialSummary.currentBalance.toDouble()),
+            todayIncomeDisplay = formatMoney(financialSummary.todayIncome.toDouble()),
+            todayExpenseDisplay = formatMoney(financialSummary.todayExpense.toDouble()),
             recentTransactions = recentTransactions,
             isLoading = false,
             errorMessage = null,

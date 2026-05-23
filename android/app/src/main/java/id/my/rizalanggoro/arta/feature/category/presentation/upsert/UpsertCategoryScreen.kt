@@ -34,10 +34,6 @@ fun UpsertCategoryScreen(
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
 
-    LaunchedEffect(categoryId) {
-        vm.loadCategory()
-    }
-
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
             when (effect) {

@@ -33,8 +33,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import id.my.rizalanggoro.arta.domain.Gold
+import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import java.math.BigDecimal
 
 @Composable
 fun HomeGoldScreen(
@@ -53,7 +54,7 @@ fun HomeGoldScreen(
 
 @Composable
 private fun Content(
-    golds: List<Gold> = emptyList(),
+    golds: List<DomainGold> = emptyList(),
     isLoading: Boolean = false,
     errorMessage: String? = null,
     onClickManageTax: () -> Unit = {},
@@ -125,7 +126,7 @@ private fun TaxActions(
 }
 
 @Composable
-private fun GoldItem(gold: Gold) {
+private fun GoldItem(gold: DomainGold) {
     OutlinedCard {
         Column {
             Row(
@@ -150,16 +151,16 @@ private fun GoldItem(gold: Gold) {
                 }
                 Column {
                     Text(
-                        text = "Senin, 12 Juni 2023",
+                        text = gold.date,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
                     Text(
-                        text = "Rp 5.000.000",
+                        text = "Rp ${gold.price}",
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = "3.3 gram",
+                        text = "${gold.grams} gram",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -167,16 +168,8 @@ private fun GoldItem(gold: Gold) {
             }
             HorizontalDivider()
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    "Harga beli Rp 0",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
-                Text(
-                    "Keuntungan Rp 0",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
+                Text("Karat ${gold.carat}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                Text("Catatan ${gold.notes.ifBlank { "-" }}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
             }
         }
     }
@@ -188,14 +181,17 @@ private fun HomeGoldListPreview() {
     ArtaTheme {
         Content(
             golds = List(5) {
-                Gold(
+                DomainGold(
                     id = it,
                     walletId = 1,
                     date = "2026-05-20",
-                    grams = 1.0,
-                    price = 7800000.0,
+                    grams = BigDecimal.valueOf(1.0),
+                    price = BigDecimal.valueOf(7800000.0),
                     type = "pure_gold",
-                    carat = 24.0,
+                    carat = BigDecimal.valueOf(24.0),
+                    notes = "",
+                    createdAt = "",
+                    updatedAt = "",
                 )
             },
             isLoading = false,

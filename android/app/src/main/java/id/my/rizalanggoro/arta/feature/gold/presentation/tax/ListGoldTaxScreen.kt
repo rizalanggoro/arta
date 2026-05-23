@@ -42,7 +42,7 @@ import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.domain.GoldTaxPreference
+import id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference
 import id.my.rizalanggoro.arta.feature.gold.presentation.tax.component.DeleteGoldTaxConfirmationDialog
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
@@ -96,8 +96,8 @@ private fun Content(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     uiState: ListGoldTaxUiState = ListGoldTaxUiState(),
     onClickCreate: () -> Unit = {},
-    onClickEdit: (GoldTaxPreference) -> Unit = {},
-    onClickDelete: (GoldTaxPreference) -> Unit = {},
+    onClickEdit: (DtoGoldTaxPreference) -> Unit = {},
+    onClickDelete: (DtoGoldTaxPreference) -> Unit = {},
     onClickBack: () -> Unit = {},
 ) {
     Scaffold(
@@ -201,8 +201,8 @@ private fun PreviewListGoldTaxScreen() {
             uiState = ListGoldTaxUiState(
                 isLoading = false,
                 preferences = listOf(
-                    GoldTaxPreference(id = 1, carat = 24.0, taxRate = 5.0),
-                    GoldTaxPreference(id = 2, carat = 18.0, taxRate = 3.5),
+                    DtoGoldTaxPreference(id = 1, userId = 1, carat = java.math.BigDecimal.valueOf(24.0), taxRate = java.math.BigDecimal.valueOf(5.0), createdAt = "", updatedAt = ""),
+                    DtoGoldTaxPreference(id = 2, userId = 1, carat = java.math.BigDecimal.valueOf(18.0), taxRate = java.math.BigDecimal.valueOf(3.5), createdAt = "", updatedAt = ""),
                 )
             ),
         )

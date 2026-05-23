@@ -18,8 +18,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import id.my.rizalanggoro.arta.domain.Transaction
 
 @Composable
 fun HomeTransactionScreen(vm: TransactionListVM = viewModel(factory = TransactionListVM.Factory)) {
@@ -39,7 +39,7 @@ fun HomeTransactionScreen(vm: TransactionListVM = viewModel(factory = Transactio
 private fun Content(
     title: String,
     description: String,
-    transactions: List<Transaction>,
+    transactions: List<DomainTransaction>,
     isLoading: Boolean,
     errorMessage: String?,
     onRetry: () -> Unit = {},
@@ -79,7 +79,7 @@ private fun Content(
 
 @Composable
 private fun TransactionRow(
-    transaction: Transaction,
+    transaction: DomainTransaction,
     modifier: Modifier = Modifier,
 ) {
     androidx.compose.foundation.layout.Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

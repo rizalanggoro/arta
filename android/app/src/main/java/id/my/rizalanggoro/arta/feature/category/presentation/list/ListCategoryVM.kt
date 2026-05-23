@@ -6,8 +6,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.feature.category.data.CategoryRepository
-import id.my.rizalanggoro.arta.domain.Category
+import kotlinx.serialization.json.Json
+import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
+import id.my.rizalanggoro.arta.openapi.models.DomainCategory
+import id.my.rizalanggoro.arta.openapi.models.DtoCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,13 +18,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ListCategoryVM(
-	private val categoryRepository: CategoryRepository,
+	private val categoryApi: CategoryApi,
+	private val authSessionProvider: () -> String?,
 ) : ViewModel() {
 	companion object {
 		val Factory = viewModelFactory {
 			initializer {
-				val categoryRepository = (this[APPLICATION_KEY] as MyApplication).categoryRepository
-				ListCategoryVM(categoryRepository = categoryRepository)
+				val app = (this[APPLICATION_KEY] as MyApplication)
+				ListCategoryVM(
+					categoryApi = app.categoryApi,
+					authSessionProvider = { app.authPrefs.currentSession.value?.token },
+				)
 			}
 		}
 	}
@@ -33,26 +40,35 @@ class ListCategoryVM(
 		viewModelScope.launch {
 			val selectedType = type.ifBlank { "expense" }
 			_uiState.update { it.copy(isLoading = true, errorMessage = null, selectedType = selectedType) }
-			categoryRepository.getCategories(type = selectedType)
-				.onSuccess { categories ->
-					_uiState.update {
-						it.copy(
-							categories = categories,
-							isLoading = false,
-							errorMessage = null,
-							actionTarget = null,
-							deleteTarget = null,
-						)
-					}
+			runCatching {
+				val authorization = authorizationHeader()
+					?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+				val response = categoryApi.listCategories(authorization)
+				if (!response.isSuccessful) {
+					val j = Json { ignoreUnknownKeys = true }
+					throw IllegalStateException(response.errorMessage(j))
 				}
-				.onFailure { throwable ->
-					_uiState.update {
-						it.copy(
-							isLoading = false,
-							errorMessage = throwable.message ?: "Gagal memuat kategori",
-						)
-					}
+
+				response.body() ?: throw IllegalStateException("Respons server kosong")
+			}.onSuccess { response ->
+				_uiState.update {
+					it.copy(
+						categories = response.categories,
+						isLoading = false,
+						errorMessage = null,
+						actionTarget = null,
+						deleteTarget = null,
+					)
 				}
+			}.onFailure { throwable ->
+				_uiState.update {
+					it.copy(
+						isLoading = false,
+						errorMessage = throwable.message ?: "Gagal memuat kategori",
+					)
+				}
+			}
 		}
 	}
 
@@ -63,7 +79,7 @@ class ListCategoryVM(
 		loadCategories(type)
 	}
 
-	fun onCategoryClicked(category: Category) {
+	fun onCategoryClicked(category: DomainCategory) {
 		if (category.userId == null) {
 			return
 		}
@@ -74,7 +90,7 @@ class ListCategoryVM(
 		_uiState.update { it.copy(actionTarget = null) }
 	}
 
-	fun onDeleteRequested(category: Category) {
+	fun onDeleteRequested(category: DomainCategory) {
 		_uiState.update { it.copy(deleteTarget = category, actionTarget = null) }
 	}
 
@@ -82,22 +98,39 @@ class ListCategoryVM(
 		_uiState.update { it.copy(deleteTarget = null) }
 	}
 
-	fun confirmDeleteCategory(category: Category) {
+	fun confirmDeleteCategory(category: DomainCategory) {
 		viewModelScope.launch {
 			_uiState.update { it.copy(isLoading = true, errorMessage = null) }
-			categoryRepository.deleteCategory(category.id)
-				.onSuccess {
-					_uiState.update { it.copy(isLoading = false, deleteTarget = null) }
-					loadCategories()
+			runCatching {
+				val authorization = authorizationHeader()
+					?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+				val response = categoryApi.deleteCategory(authorization, category.id)
+				if (!response.isSuccessful) {
+					val j = Json { ignoreUnknownKeys = true }
+					throw IllegalStateException(response.errorMessage(j))
 				}
-				.onFailure { throwable ->
-					_uiState.update {
-						it.copy(
-							isLoading = false,
-							errorMessage = throwable.message ?: "Gagal menghapus kategori",
-						)
-					}
+
+				response.body() ?: throw IllegalStateException("Respons server kosong")
+			}.onSuccess {
+				_uiState.update { it.copy(isLoading = false, deleteTarget = null) }
+				loadCategories()
+			}.onFailure { throwable ->
+				_uiState.update {
+					it.copy(
+						isLoading = false,
+						errorMessage = throwable.message ?: "Gagal menghapus kategori",
+					)
 				}
+			}
 		}
+	}
+
+	private fun authorizationHeader(): String? {
+		return authSessionProvider()?.let { "Bearer $it" }
+	}
+
+	init {
+		loadCategories()
 	}
 }

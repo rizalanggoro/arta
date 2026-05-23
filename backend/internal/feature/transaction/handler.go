@@ -36,6 +36,17 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	protected.Delete("/:id", h.delete)
 }
 
+// @id                   ListTransactions
+// @tags                 transaction
+// @accept               json
+// @produce              json
+// @param                Authorization header string true "Bearer token"
+// @param                wallet_id query int true "wallet id"
+// @success              200 {object} ListTransactionsRes
+// @failure              400 {object} dto.Error
+// @failure              401 {object} dto.Error
+// @failure              500 {object} dto.Error
+// @router               /api/transaction [get]
 // list requires query param `wallet_id` to list transactions for a wallet.
 func (h *Handler) list(c *fiber.Ctx) error {
 	walletID := c.Query("wallet_id")
@@ -75,6 +86,17 @@ func (h *Handler) list(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(res)
 }
 
+// @id                   CreateTransaction
+// @tags                 transaction
+// @accept               json
+// @produce              json
+// @param                Authorization header string true "Bearer token"
+// @param                body body CreateTransactionReq true "body"
+// @success              201 {object} CreateTransactionRes
+// @failure              400 {object} dto.Error
+// @failure              401 {object} dto.Error
+// @failure              500 {object} dto.Error
+// @router               /api/transaction [post]
 func (h *Handler) create(c *fiber.Ctx) error {
 	var req CreateTransactionReq
 	if err := c.BodyParser(&req); err != nil {
@@ -125,6 +147,18 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(CreateTransactionRes{dto.Transaction{Data: *created}})
 }
 
+// @id                   GetTransaction
+// @tags                 transaction
+// @accept               json
+// @produce              json
+// @param                Authorization header string true "Bearer token"
+// @param                id path int true "transaction id"
+// @success              200 {object} GetTransactionRes
+// @failure              400 {object} dto.Error
+// @failure              401 {object} dto.Error
+// @failure              404 {object} dto.Error
+// @failure              500 {object} dto.Error
+// @router               /api/transaction/{id} [get]
 func (h *Handler) get(c *fiber.Ctx) error {
 	id := c.Params("id")
 	parsedID, err := strconv.ParseUint(id, 10, 64)
@@ -148,6 +182,19 @@ func (h *Handler) get(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(GetTransactionRes{dto.Transaction{Data: *tx}})
 }
 
+// @id                   UpdateTransaction
+// @tags                 transaction
+// @accept               json
+// @produce              json
+// @param                Authorization header string true "Bearer token"
+// @param                id path int true "transaction id"
+// @param                body body UpdateTransactionReq true "body"
+// @success              200 {object} UpdateTransactionRes
+// @failure              400 {object} dto.Error
+// @failure              401 {object} dto.Error
+// @failure              404 {object} dto.Error
+// @failure              500 {object} dto.Error
+// @router               /api/transaction/{id} [put]
 func (h *Handler) update(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var req UpdateTransactionReq
@@ -209,6 +256,18 @@ func (h *Handler) update(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(UpdateTransactionRes{dto.Transaction{Data: *updated}})
 }
 
+// @id                   DeleteTransaction
+// @tags                 transaction
+// @accept               json
+// @produce              json
+// @param                Authorization header string true "Bearer token"
+// @param                id path int true "transaction id"
+// @success              200 {object} DeleteTransactionRes
+// @failure              400 {object} dto.Error
+// @failure              401 {object} dto.Error
+// @failure              404 {object} dto.Error
+// @failure              500 {object} dto.Error
+// @router               /api/transaction/{id} [delete]
 func (h *Handler) delete(c *fiber.Ctx) error {
 	id := c.Params("id")
 	parsedID, err := strconv.ParseUint(id, 10, 64)

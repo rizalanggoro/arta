@@ -6,23 +6,19 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.core.network.RetrofitProvider
-import id.my.rizalanggoro.arta.feature.gold.data.GoldRepository
+import id.my.rizalanggoro.arta.openapi.apis.GoldApi
+import id.my.rizalanggoro.arta.domain.AuthSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HomeGoldVM(private val goldRepository: GoldRepository) : ViewModel() {
+class HomeGoldVM(private val goldApi: GoldApi, private val authSessionProvider: () -> AuthSession?) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as MyApplication
-                val goldRepo = GoldRepository(
-                    apiService = RetrofitProvider.create(id.my.rizalanggoro.arta.feature.gold.data.GoldApiService::class.java),
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
-                HomeGoldVM(goldRepo)
+                HomeGoldVM(app.goldApi, { app.authPrefs.currentSession.value })
             }
         }
     }
@@ -33,15 +29,16 @@ class HomeGoldVM(private val goldRepository: GoldRepository) : ViewModel() {
     private fun fetchGolds() {
         _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
-            val res = goldRepository.listGolds()
-            if (res.isSuccess) {
-                _uiState.value =
-                    _uiState.value.copy(isLoading = false, golds = res.getOrNull() ?: emptyList())
-            } else {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = res.exceptionOrNull()?.message
-                )
+            runCatching {
+                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val response = goldApi.listGolds("Bearer $token")
+                if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess { res ->
+                val list = res.golds.map { it.`data` }
+                _uiState.value = _uiState.value.copy(isLoading = false, golds = list)
+            }.onFailure { thr ->
+                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = thr.message)
             }
         }
     }

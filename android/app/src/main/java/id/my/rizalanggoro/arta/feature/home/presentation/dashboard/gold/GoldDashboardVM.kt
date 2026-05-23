@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.domain.GoldDashboard
-import id.my.rizalanggoro.arta.feature.home.data.DashboardRepository
+import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
+import id.my.rizalanggoro.arta.openapi.models.GoldDashboardRes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,14 +17,16 @@ import java.text.NumberFormat
 import java.util.Locale
 
 class GoldDashboardVM(
-    private val dashboardRepository: DashboardRepository,
+    private val dashboardApi: DashboardApi,
+    private val authSessionProvider: () -> id.my.rizalanggoro.arta.domain.AuthSession?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as MyApplication
                 GoldDashboardVM(
-                    dashboardRepository = app.dashboardRepository,
+                    dashboardApi = app.dashboardApi,
+                    authSessionProvider = { app.authPrefs.currentSession.value },
                 )
             }
         }
@@ -44,32 +46,34 @@ class GoldDashboardVM(
 
     private fun loadDashboard() {
         viewModelScope.launch {
-            dashboardRepository.getGoldDashboard()
-                .onSuccess { dashboard ->
-                    _uiState.value = dashboard.toUiState()
+            runCatching {
+                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val response = dashboardApi.getGoldDashboard("Bearer $token")
+                if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
+                response.body() ?: throw IllegalStateException("Response body is null")
+            }.onSuccess { res ->
+                _uiState.value = res.toUiState()
+            }.onFailure { throwable ->
+                _uiState.update {
+                    it.copy(
+                        activeWalletName = "Tabungan Emas",
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Gagal memuat dashboard emas",
+                    )
                 }
-                .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            activeWalletName = "Tabungan Emas",
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Gagal memuat dashboard emas",
-                        )
-                    }
-                }
+            }
         }
     }
-
-    private fun GoldDashboard.toUiState(): GoldDashboardUiState {
+    private fun GoldDashboardRes.toUiState(): GoldDashboardUiState {
         return GoldDashboardUiState(
             activeWalletName = activeWalletName,
-            totalAsset = formatMoney(totalAsset),
-            buyPrice = formatMoney(buyPrice),
-            profit = formatSignedMoney(profit),
-            totalWeight = formatWeight(totalWeight),
+            totalAsset = formatMoney(totalAsset.toDouble()),
+            buyPrice = formatMoney(buyPrice.toDouble()),
+            profit = formatSignedMoney(profit.toDouble()),
+            totalWeight = formatWeight(totalWeight.toDouble()),
             totalGoldItems = "$totalGoldItems item",
-            latestDollarPrice = formatMoney(latestDollarPrice),
-            latestGoldPricePerGramIdr = formatMoney(latestGoldPricePerGramIdr),
+            latestDollarPrice = formatMoney(latestDollarPrice.toDouble()),
+            latestGoldPricePerGramIdr = formatMoney(latestGoldPricePerGramIdr.toDouble()),
             recentGolds = recentGolds,
             isLoading = false,
             errorMessage = null,

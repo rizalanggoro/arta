@@ -1,11 +1,11 @@
 package id.my.rizalanggoro.arta.feature.transaction.presentation.create
 
-import id.my.rizalanggoro.arta.domain.Category
-import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.openapi.models.DomainCategory
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 
 data class CreateTransactionUiState(
-    val wallet: Wallet? = null,
-    val category: Category? = null,
+    val wallet: DomainWallet? = null,
+    val category: DomainCategory? = null,
     val amount: String = "",
     val description: String = "",
     val date: Long = System.currentTimeMillis(),

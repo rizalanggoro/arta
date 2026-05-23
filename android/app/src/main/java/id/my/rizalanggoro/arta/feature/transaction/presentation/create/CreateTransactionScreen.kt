@@ -38,8 +38,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
-import id.my.rizalanggoro.arta.domain.Category
-import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.openapi.models.DomainCategory
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
@@ -99,8 +99,8 @@ fun CreateTransactionScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    wallet: Wallet? = null,
-    category: Category? = null,
+    wallet: DomainWallet? = null,
+    category: DomainCategory? = null,
     amount: String = "",
     description: String = "",
     amountError: String? = null,
@@ -291,7 +291,7 @@ private fun CreateTransactionLoadingPreview() {
 private fun CreateTransactionErrorPreview() {
     ArtaTheme {
         Content(
-            wallet = Wallet(
+            wallet = DomainWallet(
                 id = 12,
                 userID = 10,
                 name = "Tabungan Uang",

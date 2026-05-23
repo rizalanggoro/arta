@@ -1,6 +1,6 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold
 
-import id.my.rizalanggoro.arta.domain.Gold
+import id.my.rizalanggoro.arta.openapi.models.DtoGold
 
 data class GoldDashboardUiState(
     val activeWalletName: String = "Tabungan Emas",
@@ -11,7 +11,7 @@ data class GoldDashboardUiState(
     val totalGoldItems: String = "0 item",
     val latestDollarPrice: String = "Rp 0",
     val latestGoldPricePerGramIdr: String = "Rp 0",
-    val recentGolds: List<Gold> = emptyList(),
+    val recentGolds: List<DtoGold> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )

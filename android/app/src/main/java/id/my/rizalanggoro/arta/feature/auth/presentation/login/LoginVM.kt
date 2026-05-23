@@ -10,7 +10,8 @@ import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.network.RetrofitProvider
 import id.my.rizalanggoro.arta.domain.AuthSession
-import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
+import kotlinx.serialization.json.Json
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.AuthApi
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.DtoError
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import retrofit2.Response
 
 class LoginVM(
@@ -115,7 +115,8 @@ class LoginVM(
                 runCatching {
                     val response = walletApi.listWallets()
                     if (!response.isSuccessful) {
-                        throw IllegalStateException(response.walletApiErrorMessage())
+                        val j = Json { ignoreUnknownKeys = true }
+                        throw IllegalStateException(response.errorMessage(j))
                     }
 
                     response.body() ?: throw IllegalStateException("Respons server kosong")

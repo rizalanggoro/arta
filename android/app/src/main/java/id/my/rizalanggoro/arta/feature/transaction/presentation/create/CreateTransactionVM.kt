@@ -10,7 +10,10 @@ import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.toApiFormat
-import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
+import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
+import id.my.rizalanggoro.arta.openapi.models.CreateTransactionReq
+import kotlinx.serialization.json.Json
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -20,18 +23,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 class CreateTransactionVM(
-    private val transactionRepository: TransactionRepository,
+    private val transactionApi: TransactionApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
+    private val authSessionProvider: () -> String?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 CreateTransactionVM(
-                    transactionRepository = app.transactionRepository,
-                    selectedWalletPrefs = app.selectedWalletPrefs
+                    transactionApi = app.transactionApi,
+                    selectedWalletPrefs = app.selectedWalletPrefs,
+                    authSessionProvider = { app.authPrefs.currentSession.value?.token },
                 )
             }
         }
@@ -85,13 +91,28 @@ class CreateTransactionVM(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            transactionRepository.createTransaction(
-                walletId = requireNotNull(current.wallet?.id) { "Wallet response missing id" },
-                amount = amount,
-                categoryId = current.category!!.id,
-                description = current.description,
-                date = current.date.toApiFormat(),
-            ).onSuccess { tx ->
+            runCatching {
+                val authorization = authorizationHeader()
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+                val response = transactionApi.createTransaction(
+                    authorization = authorization,
+                    body = CreateTransactionReq(
+                        amount = BigDecimal(amount),
+                        categoryId = current.category!!.id,
+                        date = current.date.toApiFormat(),
+                        walletId = requireNotNull(current.wallet?.id) { "Wallet response missing id" },
+                        description = current.description.ifBlank { null },
+                    ),
+                )
+
+                if (!response.isSuccessful) {
+                    val j = Json { ignoreUnknownKeys = true }
+                    throw IllegalStateException(response.errorMessage(j))
+                }
+
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess {
                 _effect.emit(CreateTransactionEvent.Success)
                 AppEventBus.emit(AppEvent.TransactionChanged)
             }.onFailure { throwable ->
@@ -103,6 +124,10 @@ class CreateTransactionVM(
             }
             _uiState.update { it.copy(isLoading = false) }
         }
+    }
+
+    private fun authorizationHeader(): String? {
+        return authSessionProvider()?.let { "Bearer $it" }
     }
 
     init {

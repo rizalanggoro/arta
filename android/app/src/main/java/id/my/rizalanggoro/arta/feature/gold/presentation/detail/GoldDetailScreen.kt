@@ -33,8 +33,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.Routes.GoldUpdateRoute
-import id.my.rizalanggoro.arta.domain.Gold
+import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +76,7 @@ fun GoldDetailScreen(goldId: Int) {
 @Composable
 private fun Content(
     snackbarHostState: SnackbarHostState,
-    gold: Gold? = null,
+    gold: DomainGold? = null,
     isLoading: Boolean = false,
     showDeleteDialog: Boolean = false,
     onClickBack: () -> Unit = {},
@@ -160,16 +161,18 @@ private fun GoldDetailScreenPreview() {
     ArtaTheme {
         Content(
             snackbarHostState = remember { SnackbarHostState() },
-            gold = Gold(
-                id = 1,
-                walletId = 2,
-                date = "2026-05-16",
-                grams = 10.0,
-                price = 9000000.0,
-                type = "pure_gold",
-                carat = 24.0,
-                notes = "Contoh catatan",
-            ),
+            gold = DomainGold(
+                    id = 1,
+                    walletId = 2,
+                    date = "2026-05-16",
+                    grams = BigDecimal.valueOf(10.0),
+                    price = BigDecimal.valueOf(9000000.0),
+                    type = "pure_gold",
+                    carat = BigDecimal.valueOf(24.0),
+                    notes = "Contoh catatan",
+                    createdAt = "",
+                    updatedAt = "",
+                ),
         )
     }
 }

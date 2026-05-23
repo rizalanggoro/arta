@@ -8,8 +8,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.domain.Category
-import id.my.rizalanggoro.arta.feature.category.data.CategoryRepository
+import kotlinx.serialization.json.Json
+import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
+import id.my.rizalanggoro.arta.openapi.models.DtoCategory
+import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,13 +20,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SelectCategoryVM(
-    private val categoryRepository: CategoryRepository,
+    private val categoryApi: CategoryApi,
+    private val authSessionProvider: () -> String?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
-                SelectCategoryVM(categoryRepository = app.categoryRepository)
+                SelectCategoryVM(
+                    categoryApi = app.categoryApi,
+                    authSessionProvider = { app.authPrefs.currentSession.value?.token },
+                )
             }
         }
     }
@@ -34,18 +41,27 @@ class SelectCategoryVM(
     fun loadCategories() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            categoryRepository.getCategories()
-                .onSuccess { categories ->
-                    _uiState.update { it.copy(categories = categories, isLoading = false) }
+            runCatching {
+                val authorization = authorizationHeader()
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+                val response = categoryApi.listCategories(authorization)
+                if (!response.isSuccessful) {
+                    val j = Json { ignoreUnknownKeys = true }
+                    throw IllegalStateException(response.errorMessage(j))
                 }
-                .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Gagal memuat kategori"
-                        )
-                    }
+
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess { response ->
+                _uiState.update { it.copy(categories = response.categories, isLoading = false) }
+            }.onFailure { throwable ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Gagal memuat kategori"
+                    )
                 }
+            }
         }
     }
 
@@ -53,10 +69,14 @@ class SelectCategoryVM(
         _uiState.update { it.copy(selectedType = type) }
     }
 
-    fun selectCategory(category: Category) {
+    fun selectCategory(category: DomainCategory) {
         viewModelScope.launch {
             AppEventBus.emit(AppEvent.CategorySelected(category = category))
         }
+    }
+
+    private fun authorizationHeader(): String? {
+        return authSessionProvider()?.let { "Bearer $it" }
     }
 
     init {

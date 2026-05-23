@@ -6,7 +6,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.feature.gold.data.GoldRepository
+import id.my.rizalanggoro.arta.openapi.apis.GoldApi
+import id.my.rizalanggoro.arta.openapi.models.GoldUpdateGoldReq
+import id.my.rizalanggoro.arta.domain.AuthSession
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,13 +19,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UpdateGoldVM(
-    private val goldRepository: GoldRepository,
+    private val goldApi: GoldApi,
+    private val authSessionProvider: () -> AuthSession?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
-                val goldRepository = (this[APPLICATION_KEY] as MyApplication).goldRepository
-                UpdateGoldVM(goldRepository = goldRepository)
+                val app = this[APPLICATION_KEY] as MyApplication
+                UpdateGoldVM(goldApi = app.goldApi, authSessionProvider = { app.authPrefs.currentSession.value })
             }
         }
     }
@@ -37,23 +40,27 @@ class UpdateGoldVM(
     fun load(goldId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            goldRepository.getGoldById(goldId)
-                .onSuccess { gold ->
-                    _uiState.update {
-                        it.copy(
-                            id = gold.id,
-                            date = gold.date,
-                            grams = gold.grams.toString(),
-                            price = gold.price.toString(),
-                            type = gold.type,
-                            carat = gold.carat.toString(),
-                            notes = gold.notes,
-                        )
-                    }
+            runCatching {
+                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val response = goldApi.getGold("Bearer $token", goldId)
+                if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
+                response.body() ?: throw IllegalStateException("Response body is null")
+            }.onSuccess { res ->
+                val gold = res.`data`
+                _uiState.update {
+                    it.copy(
+                        id = gold.id,
+                        date = gold.date,
+                        grams = gold.grams.toString(),
+                        price = gold.price.toString(),
+                        type = gold.type,
+                        carat = gold.carat.toString(),
+                        notes = gold.notes,
+                    )
                 }
-                .onFailure { throwable ->
-                    _effect.emit(UpdateGoldEffect.ShowMessage(throwable.message ?: "Gagal memuat data emas"))
-                }
+            }.onFailure { throwable ->
+                _effect.emit(UpdateGoldEffect.ShowMessage(throwable.message ?: "Gagal memuat data emas"))
+            }
             _uiState.update { it.copy(isLoading = false) }
         }
     }
@@ -95,15 +102,18 @@ class UpdateGoldVM(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            goldRepository.updateGold(
-                id = id,
-                date = current.date.ifBlank { null },
-                grams = grams,
-                price = current.price.toDoubleOrNull(),
-                type = current.type.ifBlank { null },
-                carat = carat,
-                notes = current.notes.ifBlank { null },
-            ).onSuccess {
+            runCatching {
+                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val resp = goldApi.updateGold("Bearer $token", id, GoldUpdateGoldReq(
+                    date = current.date.ifBlank { null },
+                    grams = current.grams.toDoubleOrNull()?.let(java.math.BigDecimal::valueOf),
+                    price = current.price.toDoubleOrNull()?.let(java.math.BigDecimal::valueOf),
+                    type = current.type.ifBlank { null },
+                    carat = current.carat.toDoubleOrNull()?.let(java.math.BigDecimal::valueOf),
+                    notes = current.notes.ifBlank { null },
+                ))
+                if (!resp.isSuccessful) throw IllegalStateException(resp.errorBody()?.string() ?: "Request failed")
+            }.onSuccess {
                 _effect.emit(UpdateGoldEffect.NavigateBack)
             }.onFailure { throwable ->
                 _effect.emit(UpdateGoldEffect.ShowMessage(throwable.message ?: "Gagal memperbarui data emas"))

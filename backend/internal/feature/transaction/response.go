@@ -25,4 +25,4 @@ type DeleteTransactionRes struct {
 // ListTransactionsRes response for list
 type ListTransactionsRes struct {
 	Transactions []dto.Transaction `json:"transactions"`
-}
+} // @name ListTransactionsRes

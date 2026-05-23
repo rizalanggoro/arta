@@ -45,8 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.constant.goldTypes
-import id.my.rizalanggoro.arta.domain.Wallet
 import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import java.time.LocalDate
 import java.time.ZoneId
@@ -107,7 +107,7 @@ fun CreateGoldScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    selectedWallet: Wallet? = null,
+    selectedWallet: DomainWallet? = null,
     date: String = "",
     grams: String = "",
     price: String = "",
@@ -354,7 +354,7 @@ private fun CreateGoldDefaultPreview() {
     ArtaTheme {
         Content(
             snackbarHostState = remember { SnackbarHostState() },
-            selectedWallet = Wallet(
+            selectedWallet = DomainWallet(
                 id = 12,
                 userID = 1,
                 name = "Tabungan Emas",

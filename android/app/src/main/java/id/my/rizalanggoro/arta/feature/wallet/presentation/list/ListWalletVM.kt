@@ -8,7 +8,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
+import kotlinx.serialization.json.Json
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.DtoWallet
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
@@ -45,7 +46,8 @@ class ListWalletVM(
             runCatching {
                 val response = walletApi.listWallets()
                 if (!response.isSuccessful) {
-                    throw IllegalStateException(response.walletApiErrorMessage())
+                    val j = Json { ignoreUnknownKeys = true }
+                    throw IllegalStateException(response.errorMessage(j))
                 }
 
                 response.body() ?: throw IllegalStateException("Response body is null")
@@ -93,7 +95,8 @@ class ListWalletVM(
                     "Wallet response missing id"
                 })
                 if (!response.isSuccessful) {
-                    throw IllegalStateException(response.walletApiErrorMessage())
+                    val j = Json { ignoreUnknownKeys = true }
+                    throw IllegalStateException(response.errorMessage(j))
                 }
             }.onSuccess {
                 _uiState.update {

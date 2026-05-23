@@ -8,7 +8,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
+import kotlinx.serialization.json.Json
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.CreateWalletRes
 import id.my.rizalanggoro.arta.openapi.models.UpdateWalletRes
@@ -67,7 +68,8 @@ class UpsertWalletVM(
             runCatching {
                 val response = walletApi.getWallet(walletId)
                 if (!response.isSuccessful) {
-                    throw IllegalStateException(response.walletApiErrorMessage())
+                    val j = Json { ignoreUnknownKeys = true }
+                    throw IllegalStateException(response.errorMessage(j))
                 }
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")
@@ -138,7 +140,8 @@ class UpsertWalletVM(
                     )
 
                     if (!response.isSuccessful) {
-                        throw IllegalStateException(response.walletApiErrorMessage())
+                        val j = Json { ignoreUnknownKeys = true }
+                        throw IllegalStateException(response.errorMessage(j))
                     }
 
                     response.body() ?: throw IllegalStateException("Respons server kosong")
@@ -153,7 +156,8 @@ class UpsertWalletVM(
                     )
 
                     if (!response.isSuccessful) {
-                        throw IllegalStateException(response.walletApiErrorMessage())
+                        val j = Json { ignoreUnknownKeys = true }
+                        throw IllegalStateException(response.errorMessage(j))
                     }
 
                     response.body() ?: throw IllegalStateException("Respons server kosong")

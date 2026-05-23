@@ -66,6 +66,11 @@ All URIs are relative to *http://localhost:3000/api*
 | *GoldApi* | [**listGolds**](docs/GoldApi.md#listgolds) | **GET** api/gold |  |
 | *GoldApi* | [**updateGold**](docs/GoldApi.md#updategold) | **PUT** api/gold/{id} |  |
 | *GoldApi* | [**updateGoldTaxPreference**](docs/GoldApi.md#updategoldtaxpreference) | **PUT** api/gold/tax/{id} |  |
+| *TransactionApi* | [**createTransaction**](docs/TransactionApi.md#createtransaction) | **POST** api/transaction |  |
+| *TransactionApi* | [**deleteTransaction**](docs/TransactionApi.md#deletetransaction) | **DELETE** api/transaction/{id} |  |
+| *TransactionApi* | [**getTransaction**](docs/TransactionApi.md#gettransaction) | **GET** api/transaction/{id} |  |
+| *TransactionApi* | [**listTransactions**](docs/TransactionApi.md#listtransactions) | **GET** api/transaction |  |
+| *TransactionApi* | [**updateTransaction**](docs/TransactionApi.md#updatetransaction) | **PUT** api/transaction/{id} |  |
 | *WalletApi* | [**createWallet**](docs/WalletApi.md#createwallet) | **POST** api/wallet |  |
 | *WalletApi* | [**deleteWallet**](docs/WalletApi.md#deletewallet) | **DELETE** api/wallet/{id} |  |
 | *WalletApi* | [**getWallet**](docs/WalletApi.md#getwallet) | **GET** api/wallet/{id} |  |
@@ -85,10 +90,13 @@ All URIs are relative to *http://localhost:3000/api*
  - [id.my.rizalanggoro.arta.openapi.models.CreateCategoryRes](docs/CreateCategoryRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.CreateGoldRes](docs/CreateGoldRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.CreateGoldTaxPreferenceRes](docs/CreateGoldTaxPreferenceRes.md)
+ - [id.my.rizalanggoro.arta.openapi.models.CreateTransactionReq](docs/CreateTransactionReq.md)
+ - [id.my.rizalanggoro.arta.openapi.models.CreateTransactionRes](docs/CreateTransactionRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.CreateWalletRes](docs/CreateWalletRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.DeleteCategoryRes](docs/DeleteCategoryRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.DeleteGoldRes](docs/DeleteGoldRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.DeleteGoldTaxPreferenceRes](docs/DeleteGoldTaxPreferenceRes.md)
+ - [id.my.rizalanggoro.arta.openapi.models.DeleteTransactionRes](docs/DeleteTransactionRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.DeleteWalletRes](docs/DeleteWalletRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainCategory](docs/DomainCategory.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainGold](docs/DomainGold.md)
@@ -99,9 +107,11 @@ All URIs are relative to *http://localhost:3000/api*
  - [id.my.rizalanggoro.arta.openapi.models.DtoError](docs/DtoError.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGold](docs/DtoGold.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference](docs/DtoGoldTaxPreference.md)
+ - [id.my.rizalanggoro.arta.openapi.models.DtoTransaction](docs/DtoTransaction.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoWallet](docs/DtoWallet.md)
  - [id.my.rizalanggoro.arta.openapi.models.GetCategoryRes](docs/GetCategoryRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.GetGoldRes](docs/GetGoldRes.md)
+ - [id.my.rizalanggoro.arta.openapi.models.GetTransactionRes](docs/GetTransactionRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.GetWalletRes](docs/GetWalletRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.GoldCreateGoldReq](docs/GoldCreateGoldReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.GoldDashboardRes](docs/GoldDashboardRes.md)
@@ -110,6 +120,7 @@ All URIs are relative to *http://localhost:3000/api*
  - [id.my.rizalanggoro.arta.openapi.models.GoldSummaryRes](docs/GoldSummaryRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.GoldUpdateGoldReq](docs/GoldUpdateGoldReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.ListGoldTaxPreferencesRes](docs/ListGoldTaxPreferencesRes.md)
+ - [id.my.rizalanggoro.arta.openapi.models.ListTransactionsRes](docs/ListTransactionsRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.LoginReq](docs/LoginReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.LoginRes](docs/LoginRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.LogoutRes](docs/LogoutRes.md)
@@ -119,6 +130,8 @@ All URIs are relative to *http://localhost:3000/api*
  - [id.my.rizalanggoro.arta.openapi.models.UpdateCategoryRes](docs/UpdateCategoryRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.UpdateGoldRes](docs/UpdateGoldRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.UpdateGoldTaxPreferenceRes](docs/UpdateGoldTaxPreferenceRes.md)
+ - [id.my.rizalanggoro.arta.openapi.models.UpdateTransactionReq](docs/UpdateTransactionReq.md)
+ - [id.my.rizalanggoro.arta.openapi.models.UpdateTransactionRes](docs/UpdateTransactionRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.UpdateWalletRes](docs/UpdateWalletRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.WalletCreateWalletReq](docs/WalletCreateWalletReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.WalletListWalletsRes](docs/WalletListWalletsRes.md)

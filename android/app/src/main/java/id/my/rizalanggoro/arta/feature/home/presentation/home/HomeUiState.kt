@@ -1,8 +1,8 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.home
 
-import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 
 data class HomeUiState(
     val selectedIndex: Int = 0,
-    val selectedWallet: Wallet? = null
+    val selectedWallet: DomainWallet? = null
 )

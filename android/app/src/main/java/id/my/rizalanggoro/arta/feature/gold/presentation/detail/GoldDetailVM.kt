@@ -6,7 +6,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.feature.gold.data.GoldRepository
+import id.my.rizalanggoro.arta.openapi.apis.GoldApi
+import id.my.rizalanggoro.arta.domain.AuthSession
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,13 +18,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class GoldDetailVM(
-    private val goldRepository: GoldRepository,
+    private val goldApi: GoldApi,
+    private val authSessionProvider: () -> AuthSession?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
-                val goldRepository = (this[APPLICATION_KEY] as MyApplication).goldRepository
-                GoldDetailVM(goldRepository = goldRepository)
+                val app = (this[APPLICATION_KEY] as MyApplication)
+                GoldDetailVM(goldApi = app.goldApi, authSessionProvider = { app.authPrefs.currentSession.value })
             }
         }
     }
@@ -37,13 +39,17 @@ class GoldDetailVM(
     fun load(goldId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            goldRepository.getGoldById(goldId)
-                .onSuccess { gold ->
-                    _uiState.update { it.copy(gold = gold) }
-                }
-                .onFailure { throwable ->
-                    _effect.emit(GoldDetailEffect.ShowMessage(throwable.message ?: "Gagal memuat data emas"))
-                }
+            runCatching {
+                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val response = goldApi.getGold("Bearer $token", goldId)
+                if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
+                response.body() ?: throw IllegalStateException("Response body is null")
+            }.onSuccess { res ->
+                val gold = res.`data`
+                _uiState.update { it.copy(gold = gold) }
+            }.onFailure { throwable ->
+                _effect.emit(GoldDetailEffect.ShowMessage(throwable.message ?: "Gagal memuat data emas"))
+            }
             _uiState.update { it.copy(isLoading = false) }
         }
     }
@@ -60,13 +66,15 @@ class GoldDetailVM(
         val id = _uiState.value.gold?.id ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            goldRepository.deleteGold(id)
-                .onSuccess {
-                    _effect.emit(GoldDetailEffect.NavigateBack)
-                }
-                .onFailure { throwable ->
-                    _effect.emit(GoldDetailEffect.ShowMessage(throwable.message ?: "Gagal menghapus data emas"))
-                }
+            runCatching {
+                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val resp = goldApi.deleteGold("Bearer $token", id)
+                if (!resp.isSuccessful) throw IllegalStateException(resp.errorBody()?.string() ?: "Request failed")
+            }.onSuccess {
+                _effect.emit(GoldDetailEffect.NavigateBack)
+            }.onFailure { throwable ->
+                _effect.emit(GoldDetailEffect.ShowMessage(throwable.message ?: "Gagal menghapus data emas"))
+            }
             _uiState.update { it.copy(isLoading = false, showDeleteDialog = false) }
         }
     }

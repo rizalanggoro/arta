@@ -1,9 +1,9 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.create
 
-import id.my.rizalanggoro.arta.domain.Wallet
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 
 data class CreateGoldUiState(
-    val selectedWallet: Wallet? = null,
+    val selectedWallet: DomainWallet? = null,
     val date: String = java.time.OffsetDateTime.now().toString(),
     val grams: String = "",
     val price: String = "",

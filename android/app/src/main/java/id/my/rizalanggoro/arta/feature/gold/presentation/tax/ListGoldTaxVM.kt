@@ -6,8 +6,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.domain.GoldTaxPreference
-import id.my.rizalanggoro.arta.feature.gold.data.GoldRepository
+import id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference
+import id.my.rizalanggoro.arta.openapi.apis.GoldApi
+import id.my.rizalanggoro.arta.domain.AuthSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,13 +16,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ListGoldTaxVM(
-    private val goldRepository: GoldRepository,
+    private val goldApi: GoldApi,
+    private val authSessionProvider: () -> AuthSession?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as MyApplication
-                ListGoldTaxVM(goldRepository = app.goldRepository)
+                ListGoldTaxVM(goldApi = app.goldApi, authSessionProvider = { app.authPrefs.currentSession.value })
             }
         }
     }
@@ -32,8 +34,14 @@ class ListGoldTaxVM(
     fun loadTaxPreferences() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            goldRepository.getTaxPreferences()
-                .onSuccess { preferences ->
+            viewModelScope.launch {
+                runCatching {
+                    val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                    val response = goldApi.listGoldTaxPreferences("Bearer $token")
+                    if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
+                    response.body() ?: throw IllegalStateException("Respons server kosong")
+                }.onSuccess { res ->
+                    val preferences = res.preferences
                     _uiState.update {
                         it.copy(
                             preferences = preferences,
@@ -42,8 +50,7 @@ class ListGoldTaxVM(
                             errorMessage = null,
                         )
                     }
-                }
-                .onFailure { throwable ->
+                }.onFailure { throwable ->
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -51,10 +58,11 @@ class ListGoldTaxVM(
                         )
                     }
                 }
+            }
         }
     }
 
-    fun onDeleteRequested(preference: GoldTaxPreference) {
+    fun onDeleteRequested(preference: DtoGoldTaxPreference) {
         _uiState.update { it.copy(deleteTarget = preference) }
     }
 
@@ -62,15 +70,18 @@ class ListGoldTaxVM(
         _uiState.update { it.copy(deleteTarget = null) }
     }
 
-    fun confirmDeleteTaxPreference(preference: GoldTaxPreference) {
+    fun confirmDeleteTaxPreference(preference: DtoGoldTaxPreference) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            goldRepository.deleteTaxPreference(preference.id)
-                .onSuccess {
+            viewModelScope.launch {
+                runCatching {
+                    val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                    val response = goldApi.deleteGoldTaxPreference("Bearer $token", preference.id)
+                    if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
+                }.onSuccess {
                     _uiState.update { it.copy(isLoading = false, deleteTarget = null) }
                     loadTaxPreferences()
-                }
-                .onFailure { throwable ->
+                }.onFailure { throwable ->
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -78,6 +89,7 @@ class ListGoldTaxVM(
                         )
                     }
                 }
+            }
         }
     }
 

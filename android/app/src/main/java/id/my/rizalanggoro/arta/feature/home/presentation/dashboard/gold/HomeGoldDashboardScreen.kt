@@ -21,8 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import id.my.rizalanggoro.arta.domain.Gold
+import id.my.rizalanggoro.arta.openapi.models.DomainGold
+import id.my.rizalanggoro.arta.openapi.models.DtoGold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import java.math.BigDecimal
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -62,7 +64,7 @@ private fun Content(
     totalGoldItems: String,
     latestDollarPrice: String,
     latestGoldPricePerGramIdr: String,
-    recentGolds: List<Gold>,
+    recentGolds: List<DtoGold>,
     isLoading: Boolean,
     errorMessage: String?,
     onRetry: () -> Unit = {},
@@ -202,16 +204,18 @@ private fun SummaryCard(
 
 @Composable
 private fun GoldRow(
-    gold: Gold,
+    gold: DtoGold,
     modifier: Modifier = Modifier,
 ) {
+    val data = gold.data
+
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(text = gold.notes.ifBlank { "Emas #${gold.id}" }, style = MaterialTheme.typography.titleSmall)
+            Text(text = data.notes.ifBlank { "Emas #${data.id}" }, style = MaterialTheme.typography.titleSmall)
             Text(
                 text = listOfNotNull(
-                    gold.type.replace('_', ' '),
-                    formatDate(gold.date),
+                    data.type.replace('_', ' '),
+                    formatDate(data.date),
                 ).joinToString(" · "),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -223,14 +227,14 @@ private fun GoldRow(
         }
         Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
             Text(
-                text = "${formatWeight(gold.grams)} · ${formatMoney(gold.price)}",
+                text = "${formatWeight(data.grams)} · ${formatMoney(data.price)}",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "Profit: ${formatSignedMoney(gold.profit)}",
+                text = "Profit: ${formatSignedMoney(gold.profit.toDouble())}",
                 style = MaterialTheme.typography.bodySmall,
-                color = if (gold.profit >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                color = if (gold.profit.toDouble() >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
             )
         }
     }
@@ -250,11 +254,11 @@ private fun HomeGoldDashboardPreviewDefault() {
             latestDollarPrice = "Rp 16.200",
             latestGoldPricePerGramIdr = "Rp 2.350.000",
             recentGolds = listOf(
-                Gold(id = 1, walletId = 1, date = "2026-05-16T00:00:00Z", grams = 3.0, price = 4800000.0, type = "pure_gold", carat = 24.0, notes = "Emas 24K", createdAt = "", updatedAt = ""),
-                Gold(id = 2, walletId = 1, date = "2026-05-15T00:00:00Z", grams = 2.5, price = 4000000.0, type = "pure_gold", carat = 24.0, notes = "Emas 24K", createdAt = "", updatedAt = ""),
-                Gold(id = 3, walletId = 1, date = "2026-05-13T00:00:00Z", grams = 1.75, price = 3200000.0, type = "jewelry", carat = 18.0, notes = "Cincin emas", createdAt = "", updatedAt = ""),
-                Gold(id = 4, walletId = 1, date = "2026-05-10T00:00:00Z", grams = 5.0, price = 7500000.0, type = "pure_gold", carat = 24.0, notes = "Emas 24K", createdAt = "", updatedAt = ""),
-                Gold(id = 5, walletId = 1, date = "2026-05-08T00:00:00Z", grams = 2.75, price = 4500000.0, type = "jewelry", carat = 18.0, notes = "Kalung emas", createdAt = "", updatedAt = ""),
+                DtoGold(data = DomainGold(id = 1, walletId = 1, date = "2026-05-16T00:00:00Z", grams = BigDecimal.valueOf(3.0), price = BigDecimal.valueOf(4800000.0), type = "pure_gold", carat = BigDecimal.valueOf(24.0), notes = "Emas 24K", createdAt = "", updatedAt = ""), profit = BigDecimal.valueOf(250000.0), sellPrice = BigDecimal.valueOf(5050000.0)),
+                DtoGold(data = DomainGold(id = 2, walletId = 1, date = "2026-05-15T00:00:00Z", grams = BigDecimal.valueOf(2.5), price = BigDecimal.valueOf(4000000.0), type = "pure_gold", carat = BigDecimal.valueOf(24.0), notes = "Emas 24K", createdAt = "", updatedAt = ""), profit = BigDecimal.valueOf(150000.0), sellPrice = BigDecimal.valueOf(4150000.0)),
+                DtoGold(data = DomainGold(id = 3, walletId = 1, date = "2026-05-13T00:00:00Z", grams = BigDecimal.valueOf(1.75), price = BigDecimal.valueOf(3200000.0), type = "jewelry", carat = BigDecimal.valueOf(18.0), notes = "Cincin emas", createdAt = "", updatedAt = ""), profit = BigDecimal.valueOf(-120000.0), sellPrice = BigDecimal.valueOf(3080000.0)),
+                DtoGold(data = DomainGold(id = 4, walletId = 1, date = "2026-05-10T00:00:00Z", grams = BigDecimal.valueOf(5.0), price = BigDecimal.valueOf(7500000.0), type = "pure_gold", carat = BigDecimal.valueOf(24.0), notes = "Emas 24K", createdAt = "", updatedAt = ""), profit = BigDecimal.valueOf(300000.0), sellPrice = BigDecimal.valueOf(7800000.0)),
+                DtoGold(data = DomainGold(id = 5, walletId = 1, date = "2026-05-08T00:00:00Z", grams = BigDecimal.valueOf(2.75), price = BigDecimal.valueOf(4500000.0), type = "jewelry", carat = BigDecimal.valueOf(18.0), notes = "Kalung emas", createdAt = "", updatedAt = ""), profit = BigDecimal.valueOf(-90000.0), sellPrice = BigDecimal.valueOf(4410000.0)),
             ),
             isLoading = false,
             errorMessage = null,
@@ -316,6 +320,10 @@ private fun formatWeight(value: Double): String {
     }
     return "${formatter.format(value)} g"
 }
+
+private fun formatWeight(value: BigDecimal): String = formatWeight(value.toDouble())
+
+private fun formatMoney(value: BigDecimal): String = formatMoney(value.toDouble())
 
 private fun formatSignedMoney(value: Double): String {
     val sign = if (value >= 0) "+" else "-"

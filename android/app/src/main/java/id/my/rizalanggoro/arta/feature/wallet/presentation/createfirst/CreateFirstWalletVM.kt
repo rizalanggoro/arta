@@ -6,7 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
+import kotlinx.serialization.json.Json
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.WalletCreateWalletReq
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -81,7 +82,8 @@ class CreateFirstWalletVM(
                 )
 
                 if (!response.isSuccessful) {
-                    throw IllegalStateException(response.walletApiErrorMessage())
+                    val j = Json { ignoreUnknownKeys = true }
+                    throw IllegalStateException(response.errorMessage(j))
                 }
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")

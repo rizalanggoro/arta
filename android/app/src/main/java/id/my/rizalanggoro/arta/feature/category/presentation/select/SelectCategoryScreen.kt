@@ -38,7 +38,8 @@ import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.constant.categoryTypes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.domain.Category
+import id.my.rizalanggoro.arta.openapi.models.DtoCategory
+import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
 
@@ -69,7 +70,7 @@ fun SelectCategoryScreen(
 
 @Composable
 private fun SelectCategoryCard(
-    category: Category,
+    category: DtoCategory,
     onClick: () -> Unit,
 ) {
     Card(
@@ -87,20 +88,20 @@ private fun SelectCategoryCard(
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(
-                        when (category.type) {
+                        when (category.data.type) {
                             "income" -> MaterialTheme.colorScheme.primaryContainer
                             else -> MaterialTheme.colorScheme.errorContainer
                         }
                     )
             ) {
                 Icon(
-                    when (category.type) {
+                    when (category.data.type) {
                         "income" -> Icons.AutoMirrored.Rounded.CallReceived
                         else -> Icons.AutoMirrored.Rounded.CallMade
                     },
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.Center),
-                    tint = when (category.type) {
+                    tint = when (category.data.type) {
                         "income" -> MaterialTheme.colorScheme.primary
                         else -> MaterialTheme.colorScheme.error
                     }
@@ -108,9 +109,9 @@ private fun SelectCategoryCard(
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(category.name, style = MaterialTheme.typography.titleMedium)
+                Text(category.data.name, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = category.type.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                    text = category.data.type.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -120,16 +121,16 @@ private fun SelectCategoryCard(
 
 @Composable
 private fun Content(
-    categories: List<Category> = emptyList(),
+    categories: List<DtoCategory> = emptyList(),
     selectedType: String = "expense",
     isLoading: Boolean = false,
     errorMessage: String? = null,
     onReload: () -> Unit = {},
     onClickType: (String) -> Unit = {},
-    onSelect: (Category) -> Unit = {},
+    onSelect: (DomainCategory) -> Unit = {},
     onBack: () -> Unit = {},
 ) {
-    val visibleCategories = categories.filter { it.type == selectedType }
+    val visibleCategories = categories.filter { it.data.type == selectedType }
 
     Column(
         modifier = Modifier
@@ -206,10 +207,10 @@ private fun Content(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    items(visibleCategories, key = { it.id }) { category ->
+                    items(visibleCategories, key = { it.data.id }) { category ->
                         SelectCategoryCard(
                             category = category,
-                            onClick = { onSelect(category) },
+                            onClick = { onSelect(category.data) },
                         )
                     }
                 }
@@ -234,21 +235,25 @@ private fun SelectCategoryItemsPreview() {
     ArtaTheme {
         Content(
             categories = listOf(
-                id.my.rizalanggoro.arta.domain.Category(
-                    id = 1,
-                    userId = null,
-                    name = "Makanan",
-                    type = "expense",
-                    icon = "🍜",
-                    color = "#F97316"
+                DtoCategory(
+                    data = DomainCategory(
+                        createdAt = "2026-05-23T10:00:00Z",
+                        id = 1,
+                        name = "Makanan",
+                        type = "expense",
+                        updatedAt = "2026-05-23T10:00:00Z",
+                        userId = null,
+                    )
                 ),
-                id.my.rizalanggoro.arta.domain.Category(
-                    id = 2,
-                    userId = 10,
-                    name = "Gaji",
-                    type = "income",
-                    icon = "💰",
-                    color = "#10B981"
+                DtoCategory(
+                    data = DomainCategory(
+                        createdAt = "2026-05-23T10:00:00Z",
+                        id = 2,
+                        name = "Gaji",
+                        type = "income",
+                        updatedAt = "2026-05-23T10:00:00Z",
+                        userId = 10,
+                    )
                 ),
             ),
             selectedType = "expense",

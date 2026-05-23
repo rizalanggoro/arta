@@ -61,6 +61,33 @@ definitions:
     required:
     - preference
     type: object
+  CreateTransactionReq:
+    properties:
+      amount:
+        type: number
+      category_id:
+        type: integer
+      date:
+        type: string
+      description:
+        type: string
+      wallet_id:
+        type: integer
+    required:
+    - amount
+    - category_id
+    - date
+    - wallet_id
+    type: object
+  CreateTransactionRes:
+    properties:
+      category:
+        $ref: '#/definitions/domain.Category'
+      data:
+        $ref: '#/definitions/domain.Transaction'
+    required:
+    - data
+    type: object
   CreateWalletRes:
     properties:
       data:
@@ -83,6 +110,13 @@ definitions:
     - message
     type: object
   DeleteGoldTaxPreferenceRes:
+    properties:
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  DeleteTransactionRes:
     properties:
       message:
         type: string
@@ -115,6 +149,15 @@ definitions:
     - data
     - profit
     - sell_price
+    type: object
+  GetTransactionRes:
+    properties:
+      category:
+        $ref: '#/definitions/domain.Category'
+      data:
+        $ref: '#/definitions/domain.Transaction'
+    required:
+    - data
     type: object
   GetWalletRes:
     properties:
@@ -174,6 +217,15 @@ definitions:
         type: array
     required:
     - preferences
+    type: object
+  ListTransactionsRes:
+    properties:
+      transactions:
+        items:
+          $ref: '#/definitions/dto.Transaction'
+        type: array
+    required:
+    - transactions
     type: object
   LoginReq:
     properties:
@@ -273,6 +325,28 @@ definitions:
         $ref: '#/definitions/dto.GoldTaxPreference'
     required:
     - preference
+    type: object
+  UpdateTransactionReq:
+    properties:
+      amount:
+        type: number
+      category_id:
+        type: integer
+      date:
+        type: string
+      description:
+        type: string
+      wallet_id:
+        type: integer
+    type: object
+  UpdateTransactionRes:
+    properties:
+      category:
+        $ref: '#/definitions/domain.Category'
+      data:
+        $ref: '#/definitions/domain.Transaction'
+    required:
+    - data
     type: object
   UpdateWalletRes:
     properties:
@@ -482,6 +556,15 @@ definitions:
     - tax_rate
     - updated_at
     - user_id
+    type: object
+  dto.Transaction:
+    properties:
+      category:
+        $ref: '#/definitions/domain.Category'
+      data:
+        $ref: '#/definitions/domain.Transaction'
+    required:
+    - data
     type: object
   dto.Wallet:
     properties:
@@ -1164,6 +1247,207 @@ paths:
             $ref: '#/definitions/UpdateGoldTaxPreferenceRes'
       tags:
       - gold
+  /api/transaction:
+    get:
+      consumes:
+      - application/json
+      operationId: ListTransactions
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: wallet id
+        in: query
+        name: wallet_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListTransactionsRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      tags:
+      - transaction
+    post:
+      consumes:
+      - application/json
+      operationId: CreateTransaction
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateTransactionReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/CreateTransactionRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      tags:
+      - transaction
+  /api/transaction/{id}:
+    delete:
+      consumes:
+      - application/json
+      operationId: DeleteTransaction
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: transaction id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/DeleteTransactionRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      tags:
+      - transaction
+    get:
+      consumes:
+      - application/json
+      operationId: GetTransaction
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: transaction id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GetTransactionRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      tags:
+      - transaction
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateTransaction
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: transaction id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateTransactionReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UpdateTransactionRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      tags:
+      - transaction
   /api/wallet:
     get:
       consumes:

@@ -6,10 +6,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import id.my.rizalanggoro.arta.core.network.RetrofitProvider
-import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
-import id.my.rizalanggoro.arta.feature.wallet.walletApiErrorMessage
+// replaced walletApiErrorMessage usages with core.errorMessage(Json)
+import id.my.rizalanggoro.arta.core.extension.errorMessage
+import kotlinx.serialization.json.Json
+// use OpenAPI models directly (`DtoTransaction.data`) instead of mapper extension
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
+import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
+import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,19 +20,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TransactionListVM(
-    private val transactionRepository: TransactionRepository,
+    private val transactionApi: TransactionApi,
     private val walletApi: WalletApi,
+    private val authSessionProvider: () -> String?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as MyApplication
-                val txRepo = TransactionRepository(
-                    apiService = RetrofitProvider.create(id.my.rizalanggoro.arta.feature.transaction.data.TransactionApiService::class.java),
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
                 val walletApi = app.walletApi
-                TransactionListVM(transactionRepository = txRepo, walletApi = walletApi)
+                TransactionListVM(
+                    transactionApi = app.transactionApi,
+                    walletApi = walletApi,
+                    authSessionProvider = { app.authPrefs.currentSession.value?.token },
+                )
             }
         }
     }
@@ -45,20 +49,35 @@ class TransactionListVM(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             runCatching {
+                val authorization = authorizationHeader()
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
                 val response = walletApi.listWallets()
                 if (!response.isSuccessful) {
-                    throw IllegalStateException(response.walletApiErrorMessage())
+                    val j = Json { ignoreUnknownKeys = true }
+                    throw IllegalStateException(response.errorMessage(j))
                 }
 
                 response.body()?.wallets.orEmpty().mapNotNull { it.data }
             }
                 .onSuccess { wallets ->
-                    val allTxs = mutableListOf<id.my.rizalanggoro.arta.domain.Transaction>()
+                    val allTxs = mutableListOf<DomainTransaction>()
                     for (w in wallets) {
                         val walletId = w.id ?: continue
-                        transactionRepository.listTransactionsByWallet(walletId)
-                            .onSuccess { txs -> allTxs.addAll(txs) }
-                            .onFailure { /* ignore per-wallet failure for now */ }
+                        runCatching {
+                            val authorization = authorizationHeader()
+                                ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+                            val txResponse = transactionApi.listTransactions(authorization, walletId)
+                            if (!txResponse.isSuccessful) {
+                                val j = Json { ignoreUnknownKeys = true }
+                                throw IllegalStateException(txResponse.errorMessage(j))
+                            }
+
+                            txResponse.body() ?: throw IllegalStateException("Respons server kosong")
+                        }.onSuccess { txResponse ->
+                                allTxs.addAll(txResponse.transactions.map { it.data })
+                        }.onFailure { /* ignore per-wallet failure for now */ }
                     }
                     _uiState.update { it.copy(transactions = allTxs.sortedByDescending { it.date }, isLoading = false) }
                 }
@@ -67,4 +86,8 @@ class TransactionListVM(
                 }
         }
     }
+
+        private fun authorizationHeader(): String? {
+            return authSessionProvider()?.let { "Bearer $it" }
+        }
 }

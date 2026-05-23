@@ -7,7 +7,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
-import id.my.rizalanggoro.arta.feature.gold.data.GoldRepository
+import id.my.rizalanggoro.arta.openapi.apis.GoldApi
+import id.my.rizalanggoro.arta.domain.AuthSession
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,17 +19,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CreateGoldVM(
-    private val goldRepository: GoldRepository,
+    private val goldApi: GoldApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
+    private val authSessionProvider: () -> AuthSession?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
-                val goldRepository = app.goldRepository
                 CreateGoldVM(
-                    goldRepository = goldRepository,
-                    selectedWalletPrefs = app.selectedWalletPrefs
+                    goldApi = app.goldApi,
+                    selectedWalletPrefs = app.selectedWalletPrefs,
+                    authSessionProvider = { app.authPrefs.currentSession.value },
                 )
             }
         }
@@ -106,26 +108,25 @@ class CreateGoldVM(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            goldRepository.createGold(
-                walletId = requireNotNull(current.selectedWallet?.id) { "Wallet response missing id" },
-                date = current.date,
-                grams = grams!!,
-                price = price!!,
-                type = current.type,
-                carat = carat!!,
-                notes = current.notes,
-            )
-                .onSuccess { gold ->
-                    _effect.emit(CreateGoldEffect.ShowMessage("Data emas ${gold.type} berhasil dibuat"))
-                    _effect.emit(CreateGoldEffect.NavigateBack)
-                }
-                .onFailure { throwable ->
-                    _effect.emit(
-                        CreateGoldEffect.ShowMessage(
-                            throwable.message ?: "Gagal membuat data emas"
-                        )
-                    )
-                }
+            runCatching {
+                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val resp = goldApi.createGold("Bearer $token", id.my.rizalanggoro.arta.openapi.models.GoldCreateGoldReq(
+                    walletId = requireNotNull(current.selectedWallet?.id) { "Wallet response missing id" },
+                    date = current.date,
+                    grams = java.math.BigDecimal.valueOf(grams!!),
+                    price = java.math.BigDecimal.valueOf(price!!),
+                    type = current.type,
+                    carat = java.math.BigDecimal.valueOf(carat!!),
+                    notes = current.notes,
+                ))
+                if (!resp.isSuccessful) throw IllegalStateException(resp.errorBody()?.string() ?: "Request failed")
+                resp.body()
+            }.onSuccess { _ ->
+                _effect.emit(CreateGoldEffect.ShowMessage("Data emas berhasil dibuat"))
+                _effect.emit(CreateGoldEffect.NavigateBack)
+            }.onFailure { throwable ->
+                _effect.emit(CreateGoldEffect.ShowMessage(throwable.message ?: "Gagal membuat data emas"))
+            }
             _uiState.update { it.copy(isLoading = false) }
         }
     }

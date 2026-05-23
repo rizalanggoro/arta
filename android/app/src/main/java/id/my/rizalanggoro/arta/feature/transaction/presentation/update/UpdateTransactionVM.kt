@@ -8,7 +8,10 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.feature.transaction.data.TransactionRepository
+import kotlinx.serialization.json.Json
+import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
+import id.my.rizalanggoro.arta.openapi.models.UpdateTransactionReq
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,16 +21,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 class UpdateTransactionVM(
-    private val transactionRepository: TransactionRepository,
+    private val transactionApi: TransactionApi,
+    private val authSessionProvider: () -> String?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 UpdateTransactionVM(
-                    transactionRepository = app.transactionRepository
+                    transactionApi = app.transactionApi,
+                    authSessionProvider = { app.authPrefs.currentSession.value?.token }
                 )
             }
         }
@@ -41,20 +47,34 @@ class UpdateTransactionVM(
 
     fun load(transactionId: Int) {
         viewModelScope.launch {
-            transactionRepository.getTransactionById(transactionId)
-                .onSuccess { tx ->
+            _uiState.update { it.copy(isLoading = true) }
+            runCatching {
+                val authorization = authorizationHeader()
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+                val response = transactionApi.getTransaction(authorization, transactionId)
+                if (!response.isSuccessful) {
+                    val j = Json { ignoreUnknownKeys = true }
+                    throw IllegalStateException(response.errorMessage(j))
+                }
+
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess { response ->
                     _uiState.update {
                         it.copy(
-                            walletId = tx.walletId.toString(),
-                            amount = tx.amount.toString(),
-                            categoryId = tx.categoryId.toString(),
-                            selectedCategoryName = if (tx.categoryId > 0) "Kategori #${tx.categoryId}" else "",
-                            description = tx.description,
-                            date = tx.date,
+                            walletId = response.data.walletId.toString(),
+                            selectedWalletName = "Wallet ID: ${response.data.walletId}",
+                            amount = response.data.amount.toPlainString(),
+                            categoryId = response.data.categoryId.toString(),
+                            selectedCategoryName = response.category?.name ?: if (response.data.categoryId > 0) "Kategori #${response.data.categoryId}" else "",
+                            description = response.data.description,
+                            date = response.data.date,
+                            isLoading = false,
                         )
                     }
-                }
-                .onFailure { /* ignore */ }
+            }.onFailure {
+                _uiState.update { it.copy(isLoading = false) }
+            }
         }
     }
 
@@ -78,14 +98,29 @@ class UpdateTransactionVM(
         val current = _uiState.value
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            transactionRepository.updateTransaction(
-                id = id,
-                walletId = current.walletId.toIntOrNull(),
-                amount = current.amount.toDoubleOrNull(),
-                categoryId = current.categoryId.toIntOrNull(),
-                description = current.description.ifBlank { null },
-                date = current.date.ifBlank { null },
-            ).onSuccess {
+            runCatching {
+                val authorization = authorizationHeader()
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+                val response = transactionApi.updateTransaction(
+                    authorization = authorization,
+                    id = id,
+                    body = UpdateTransactionReq(
+                        walletId = current.walletId.toIntOrNull(),
+                        amount = current.amount.toBigDecimalOrNull(),
+                        categoryId = current.categoryId.toIntOrNull(),
+                        description = current.description.ifBlank { null },
+                        date = current.date.ifBlank { null },
+                    ),
+                )
+
+                if (!response.isSuccessful) {
+                    val j = Json { ignoreUnknownKeys = true }
+                    throw IllegalStateException(response.errorMessage(j))
+                }
+
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess {
                 _effect.emit(UpdateTransactionEffect.ShowMessage("Transaksi berhasil diperbarui"))
                 _effect.emit(UpdateTransactionEffect.NavigateBack)
             }.onFailure { throwable ->
@@ -102,6 +137,19 @@ class UpdateTransactionVM(
     init {
         viewModelScope.launch {
             AppEventBus.event
+                .filterIsInstance<AppEvent.WalletSelected>()
+                .collect { event ->
+                    _uiState.update {
+                        it.copy(
+                            walletId = event.wallet.id?.toString().orEmpty(),
+                            selectedWalletName = event.wallet.name.orEmpty(),
+                        )
+                    }
+                }
+        }
+
+        viewModelScope.launch {
+            AppEventBus.event
                 .filterIsInstance<AppEvent.CategorySelected>()
                 .collect { event ->
                     _uiState.update {
@@ -112,6 +160,10 @@ class UpdateTransactionVM(
                     }
                 }
         }
+    }
+
+    private fun authorizationHeader(): String? {
+        return authSessionProvider()?.let { "Bearer $it" }
     }
 }
 
