@@ -9,3 +9,5 @@ val categoryTypes = listOf(
     CategoryType(name = "Pemasukan", value = "income"),
     CategoryType(name = "Pengeluaran", value = "expense"),
 )
+
+fun String.toCategoryType() = categoryTypes.firstOrNull { it.value == this }?.name ?: this

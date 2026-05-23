@@ -1,13 +1,9 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-
 package id.my.rizalanggoro.arta.feature.category.presentation.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,28 +17,19 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.CallMade
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,8 +42,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategoryUpsertRoute
-import id.my.rizalanggoro.arta.openapi.models.DtoCategory
+import id.my.rizalanggoro.arta.core.constant.categoryTypes
+import id.my.rizalanggoro.arta.feature.category.presentation.list.component.CategoryActionSheet
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
+import id.my.rizalanggoro.arta.openapi.models.DtoCategory
+import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
+import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
+import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
@@ -65,51 +57,50 @@ fun ListCategoryScreen(vm: ListCategoryVM = hiltViewModel()) {
     val backStack = LocalBackStack.current
 
     Content(
-        categories = uiState.categories,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
-        selectedType = uiState.selectedType,
-        actionTarget = uiState.actionTarget,
-        deleteTarget = uiState.deleteTarget,
+        uiState = uiState,
         onClickCreate = { backStack.add(CategoryUpsertRoute()) },
         onClickType = vm::onCategoryTypeSelected,
         onClickCategory = vm::onCategoryClicked,
-        onClickEdit = { categoryId -> backStack.add(CategoryUpsertRoute(categoryId = categoryId)) },
         onClickBack = { backStack.removeLastOrNull() },
-        onDismissActionSheet = vm::dismissActionSheet,
-        onClickDelete = vm::onDeleteRequested,
-        onDismissDelete = vm::dismissDeleteDialog,
-        onConfirmDelete = vm::confirmDeleteCategory,
-        onRetry = vm::loadCategories,
+        onClickRetry = vm::loadCategories,
     )
+
+    if (uiState.actionTarget != null)
+        CategoryActionSheet(
+            category = uiState.actionTarget!!,
+            onClickEdit = {
+                backStack.add(
+                    CategoryUpsertRoute(
+                        categoryId = uiState.actionTarget!!.id
+                    )
+                )
+            },
+            onClickDelete = vm::onDeleteActionClicked,
+            onDismissRequest = vm::onActionDismissed,
+        )
+
+    if (uiState.deleteTarget != null)
+        ConfirmDialog(
+            title = "Hapus",
+            description = "Apakah Anda yakin akan menghapus kategori " +
+                    "\"${uiState.deleteTarget!!.name}\"? Tindakan ini tidak dapat dipulihkan",
+            onDismissRequest = vm::onDeleteDialogDismissed,
+            onConfirmRequest = vm::onDeleteClicked,
+            isLoading = uiState.isDeleting,
+            confirmText = "Hapus"
+        )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    categories: List<DtoCategory> = emptyList(),
-    isLoading: Boolean = false,
-    errorMessage: String? = null,
-    selectedType: String = "expense",
-    actionTarget: DomainCategory? = null,
-    deleteTarget: DomainCategory? = null,
+    uiState: ListCategoryUiState = ListCategoryUiState(),
     onClickCreate: () -> Unit = {},
     onClickType: (String) -> Unit = {},
     onClickCategory: (DomainCategory) -> Unit = {},
-    onClickEdit: (Int) -> Unit = {},
     onClickBack: () -> Unit = {},
-    onClickDelete: (DomainCategory) -> Unit = {},
-    onDismissActionSheet: () -> Unit = {},
-    onDismissDelete: () -> Unit = {},
-    onConfirmDelete: (DomainCategory) -> Unit = {},
-    onRetry: () -> Unit = {},
+    onClickRetry: () -> Unit = {},
 ) {
-    val actionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val filterOptions = listOf(
-        CategoryFilterOption(label = "Pengeluaran", value = "expense"),
-        CategoryFilterOption(label = "Pemasukan", value = "income"),
-    )
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -117,7 +108,7 @@ private fun Content(
                     IconButton(onClick = onClickBack) {
                         Icon(
                             Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = null
+                            null
                         )
                     }
                 },
@@ -125,7 +116,7 @@ private fun Content(
             )
         },
         floatingActionButton = {
-            if (!isLoading)
+            if (!uiState.isLoading)
                 FloatingActionButton(onClick = onClickCreate) {
                     Icon(
                         Icons.Rounded.Add,
@@ -140,50 +131,26 @@ private fun Content(
                 .padding(paddingValues)
         ) {
             when {
-                isLoading -> Box(
+                uiState.isLoading -> Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
                     LoadingIndicator()
                 }
 
-                errorMessage != null -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text(
-                                text = errorMessage,
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            Button(onClick = onRetry) {
-                                Text("Muat ulang")
-                            }
-                        }
-                    }
-                }
+                uiState.errorMessage != null -> ErrorPlaceholder(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    message = uiState.errorMessage,
+                    onClickRetry = onClickRetry
+                )
 
-                categories.isEmpty() -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text(
-                                text = "Belum ada kategori custom.",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                            Text(
-                                text = "Buat kategori baru untuk memudahkan pengelompokan transaksi.",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            FilledTonalButton(onClick = onClickCreate) {
-                                Text("Buat kategori")
-                            }
-                        }
-                    }
-                }
+                uiState.categories.isEmpty() -> EmptyPlaceholder(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                )
 
                 else -> Column(modifier = Modifier.fillMaxSize()) {
                     SingleChoiceSegmentedButtonRow(
@@ -191,16 +158,16 @@ private fun Content(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
-                        filterOptions.forEachIndexed { index, option ->
+                        categoryTypes.forEachIndexed { index, item ->
                             SegmentedButton(
-                                selected = selectedType == option.value,
-                                onClick = { onClickType(option.value) },
+                                selected = uiState.selectedType == item.value,
+                                onClick = { onClickType(item.value) },
                                 shape = SegmentedButtonDefaults.itemShape(
                                     index = index,
-                                    count = filterOptions.size
+                                    count = categoryTypes.size
                                 ),
                             ) {
-                                Text(option.label)
+                                Text(item.name)
                             }
                         }
                     }
@@ -211,7 +178,7 @@ private fun Content(
                             .weight(1f),
                     ) {
                         item { Box(modifier = Modifier.height(8.dp)) }
-                        items(categories, key = { it.data.id }) { category ->
+                        items(uiState.categories) { category ->
                             ListItem(
                                 leadingContent = {
                                     Box(
@@ -269,107 +236,38 @@ private fun Content(
             }
         }
     }
-
-    if (actionTarget != null) {
-        ModalBottomSheet(
-            onDismissRequest = onDismissActionSheet,
-            sheetState = actionSheetState,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = actionTarget.name,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = "Pilih tindakan untuk kategori custom ini.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Button(
-                    onClick = {
-                        onClickEdit(actionTarget.id)
-                        onDismissActionSheet()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Ubah")
-                }
-                OutlinedButton(
-                    onClick = {
-                        onClickDelete(actionTarget)
-                        onDismissActionSheet()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Hapus")
-                }
-                TextButton(
-                    onClick = onDismissActionSheet,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Tutup")
-                }
-            }
-        }
-    }
-
-    if (deleteTarget != null) {
-        AlertDialog(
-            onDismissRequest = onDismissDelete,
-            title = { Text("Hapus kategori?") },
-            text = { Text("Kategori \"${deleteTarget.name}\" akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.") },
-            confirmButton = {
-                Button(onClick = { onConfirmDelete(deleteTarget) }) {
-                    Text("Hapus")
-                }
-            },
-            dismissButton = {
-                OutlinedButton(onClick = onDismissDelete) {
-                    Text("Batal")
-                }
-            },
-        )
-    }
 }
-
-private data class CategoryFilterOption(
-    val label: String,
-    val value: String,
-)
 
 @Preview(showBackground = true, name = "Category List - Default")
 @Composable
 private fun ListCategoryDefaultPreview() {
     ArtaTheme {
         Content(
-            categories = listOf(
-                DtoCategory(
-                    data = DomainCategory(
-                        createdAt = "2026-05-23T10:00:00Z",
-                        id = 1,
-                        name = "Makanan",
-                        type = "expense",
-                        updatedAt = "2026-05-23T10:00:00Z",
-                        userId = null,
+            uiState = ListCategoryUiState(
+                categories = listOf(
+                    DtoCategory(
+                        data = DomainCategory(
+                            createdAt = "2026-05-23T10:00:00Z",
+                            id = 1,
+                            name = "Makanan",
+                            type = "expense",
+                            updatedAt = "2026-05-23T10:00:00Z",
+                            userId = null,
+                        ),
+                    ),
+                    DtoCategory(
+                        data = DomainCategory(
+                            createdAt = "2026-05-23T10:00:00Z",
+                            id = 2,
+                            name = "Transport",
+                            type = "expense",
+                            updatedAt = "2026-05-23T10:00:00Z",
+                            userId = 123,
+                        ),
                     ),
                 ),
-                DtoCategory(
-                    data = DomainCategory(
-                        createdAt = "2026-05-23T10:00:00Z",
-                        id = 2,
-                        name = "Transport",
-                        type = "expense",
-                        updatedAt = "2026-05-23T10:00:00Z",
-                        userId = 123,
-                    ),
-                ),
-            ),
-            selectedType = "expense",
-            deleteTarget = null,
+                selectedType = "expense",
+            )
         )
     }
 }
@@ -378,7 +276,11 @@ private fun ListCategoryDefaultPreview() {
 @Composable
 private fun ListCategoryLoadingPreview() {
     ArtaTheme {
-        Content(isLoading = true)
+        Content(
+            uiState = ListCategoryUiState(
+                isLoading = true
+            )
+        )
     }
 }
 
@@ -387,5 +289,17 @@ private fun ListCategoryLoadingPreview() {
 private fun ListCategoryEmptyPreview() {
     ArtaTheme {
         Content()
+    }
+}
+
+@Preview(showBackground = true, name = "Category List - Empty")
+@Composable
+private fun ListCategoryErrorPreview() {
+    ArtaTheme {
+        Content(
+            uiState = ListCategoryUiState(
+                errorMessage = "Terjadi kesalahan tak terduga"
+            )
+        )
     }
 }

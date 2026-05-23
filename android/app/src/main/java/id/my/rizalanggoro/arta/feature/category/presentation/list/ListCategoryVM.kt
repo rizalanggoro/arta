@@ -71,47 +71,68 @@ class ListCategoryVM @Inject constructor(
     }
 
     fun onCategoryClicked(category: DomainCategory) {
-        if (category.userId == null) {
-            return
+        if (category.userId == null) return
+
+        _uiState.update {
+            it.copy(
+                actionTarget = category,
+                deleteTarget = null
+            )
         }
-        _uiState.update { it.copy(actionTarget = category, deleteTarget = null) }
     }
 
-    fun dismissActionSheet() {
-        _uiState.update { it.copy(actionTarget = null) }
+    fun onActionDismissed() = _uiState.update {
+        it.copy(
+            actionTarget = null
+        )
     }
 
-    fun onDeleteRequested(category: DomainCategory) {
-        _uiState.update { it.copy(deleteTarget = category, actionTarget = null) }
+    fun onDeleteActionClicked() =
+        _uiState.update {
+            it.copy(
+                deleteTarget = it.actionTarget,
+                actionTarget = null
+            )
+        }
+
+    fun onDeleteDialogDismissed() = _uiState.update {
+        it.copy(deleteTarget = null)
     }
 
-    fun dismissDeleteDialog() {
-        _uiState.update { it.copy(deleteTarget = null) }
-    }
+    fun onDeleteClicked() = viewModelScope.launch {
+        val category = _uiState.value.deleteTarget ?: return@launch
 
-    fun confirmDeleteCategory(category: DomainCategory) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            runCatching {
-                val authorization = authorizationHeader()
-                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+        _uiState.update {
+            it.copy(
+                isDeleting = true,
+                errorMessage = null
+            )
+        }
 
-                val response = categoryApi.deleteCategory(authorization, category.id)
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(response.errorMessage())
-                }
+        runCatching {
+            val authorization = authorizationHeader()
+                ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                response.body() ?: throw IllegalStateException("Respons server kosong")
-            }.onSuccess {
-                _uiState.update { it.copy(isLoading = false, deleteTarget = null) }
-                loadCategories()
-            }.onFailure { throwable ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = throwable.message ?: "Gagal menghapus kategori",
-                    )
-                }
+            val response = categoryApi.deleteCategory(authorization, category.id)
+            if (!response.isSuccessful) {
+                throw IllegalStateException(response.errorMessage())
+            }
+
+            response.body() ?: throw IllegalStateException("Respons server kosong")
+        }.onSuccess {
+            _uiState.update {
+                it.copy(
+                    isDeleting = false,
+                    deleteTarget = null
+                )
+            }
+            loadCategories()
+        }.onFailure { throwable ->
+            _uiState.update {
+                it.copy(
+                    isDeleting = false,
+                    errorMessage = throwable.message ?: "Gagal menghapus kategori",
+                )
             }
         }
     }
