@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -31,9 +30,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.Routes.ForgotPasswordRoute
 import id.my.rizalanggoro.arta.core.Routes.RegisterRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
@@ -43,21 +44,28 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        vm.messageEvent.collect { message ->
-            snackbarHostState.showSnackbar(message)
-        }
+        vm.event
+            .filterIsInstance<LoginUiState.Event.ShowMessage>()
+            .collect { event ->
+                snackbarHostState.showSnackbar(event.message)
+            }
+    }
+
+    LaunchedEffect(Unit) {
+        vm.event
+            .filterIsInstance<LoginUiState.Event.LoginSucceeded>()
+            .collect {
+                backStack.add(Routes.HomeRoute)
+                backStack.removeFirstOrNull()
+            }
     }
 
     Content(
         snackbarHostState = snackbarHostState,
-        isLoading = uiState.isLoading,
-        email = uiState.email,
-        password = uiState.password,
-        emailError = uiState.emailError,
-        passwordError = uiState.passwordError,
-        onChangeEmail = vm::onChangeEmail,
-        onChangePassword = vm::onChangePassword,
-        onClickSubmit = vm::login,
+        uiState = uiState,
+        onChangeEmail = vm::onEmailChanged,
+        onChangePassword = vm::onPasswordChanged,
+        onClickSubmit = vm::onLoginClicked,
         onClickRegister = { backStack.add(RegisterRoute) },
         onClickForgotPassword = { backStack.add(ForgotPasswordRoute) },
     )
@@ -66,12 +74,8 @@ fun LoginScreen(vm: LoginVM = viewModel(factory = LoginVM.Factory)) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun Content(
-    snackbarHostState: SnackbarHostState,
-    isLoading: Boolean = false,
-    email: String = "",
-    password: String = "",
-    emailError: String? = null,
-    passwordError: String? = null,
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
+    uiState: LoginUiState = LoginUiState(),
     onChangeEmail: (String) -> Unit = {},
     onChangePassword: (String) -> Unit = {},
     onClickSubmit: () -> Unit = {},
@@ -111,19 +115,19 @@ private fun Content(
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextField(
-                    value = email,
+                    value = uiState.email,
                     onValueChange = onChangeEmail,
                     label = { Text("Alamat email") },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = emailError != null,
+                    isError = uiState.emailError != null,
                     supportingText = when {
-                        emailError != null -> {
-                            { Text(emailError) }
+                        uiState.emailError != null -> {
+                            { Text(uiState.emailError) }
                         }
 
                         else -> null
                     },
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -132,19 +136,19 @@ private fun Content(
                 )
 
                 TextField(
-                    value = password,
+                    value = uiState.password,
                     onValueChange = onChangePassword,
                     label = { Text("Kata sandi") },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = passwordError != null,
+                    isError = uiState.passwordError != null,
                     supportingText = when {
-                        passwordError != null -> {
-                            { Text(passwordError) }
+                        uiState.passwordError != null -> {
+                            { Text(uiState.passwordError) }
                         }
 
                         else -> null
                     },
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -153,7 +157,7 @@ private fun Content(
                 )
             }
 
-            when (isLoading) {
+            when (uiState.isLoading) {
                 true -> LoadingIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
@@ -185,15 +189,11 @@ private fun Content(
     }
 }
 
-// ViewModel is initialized directly on the composable parameter per project convention
-
 @Preview(showBackground = true, group = "Login")
 @Composable
 private fun LoginPreview() {
     ArtaTheme {
-        Content(
-            snackbarHostState = remember { SnackbarHostState() },
-        )
+        Content()
     }
 }
 
@@ -202,8 +202,9 @@ private fun LoginPreview() {
 private fun LoginLoadingPreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
-            isLoading = true,
+            uiState = LoginUiState(
+                isLoading = true
+            )
         )
     }
 }
@@ -213,9 +214,10 @@ private fun LoginLoadingPreview() {
 private fun LoginErrorPreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
-            emailError = "Email wajib diisi",
-            passwordError = "Kata sandi wajib diisi",
+            uiState = LoginUiState(
+                emailError = "Email wajib diisi",
+                passwordError = "Kata sandi wajib diisi",
+            ),
         )
     }
 }

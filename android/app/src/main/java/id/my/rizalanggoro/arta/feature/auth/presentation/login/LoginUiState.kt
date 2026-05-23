@@ -6,4 +6,9 @@ data class LoginUiState(
     val emailError: String? = null,
     val passwordError: String? = null,
     val isLoading: Boolean = false,
-)
+) {
+    sealed class Event {
+        data class ShowMessage(val message: String) : Event()
+        data object LoginSucceeded : Event()
+    }
+}

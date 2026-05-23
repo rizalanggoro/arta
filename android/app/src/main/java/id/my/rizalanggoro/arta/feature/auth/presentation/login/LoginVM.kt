@@ -8,24 +8,18 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
-import id.my.rizalanggoro.arta.core.network.RetrofitProvider
-import id.my.rizalanggoro.arta.domain.AuthSession
-import kotlinx.serialization.json.Json
 import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.AuthApi
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
-import id.my.rizalanggoro.arta.openapi.models.DtoError
 import id.my.rizalanggoro.arta.openapi.models.LoginReq
-import id.my.rizalanggoro.arta.openapi.models.LoginRes
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import retrofit2.Response
 
 class LoginVM(
     private val authApi: AuthApi,
@@ -33,16 +27,12 @@ class LoginVM(
     private val walletApi: WalletApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
 ) : ViewModel() {
-    private val errorJson = Json {
-        ignoreUnknownKeys = true
-    }
-
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 LoginVM(
-                    authApi = RetrofitProvider.create(AuthApi::class.java),
+                    authApi = app.authApi,
                     authPrefs = app.authPrefs,
                     walletApi = app.walletApi,
                     selectedWalletPrefs = app.selectedWalletPrefs,
@@ -54,37 +44,32 @@ class LoginVM(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    private val _messageEvent = MutableSharedFlow<String>()
-    val messageEvent: SharedFlow<String> = _messageEvent.asSharedFlow()
+    private val _event = MutableSharedFlow<LoginUiState.Event>()
+    val event = _event.asSharedFlow()
 
-    fun onChangeEmail(value: String) {
+    fun onEmailChanged(value: String) {
         _uiState.update { it.copy(email = value, emailError = null) }
     }
 
-    fun onChangePassword(value: String) {
+    fun onPasswordChanged(value: String) {
         _uiState.update { it.copy(password = value, passwordError = null) }
     }
 
-    fun login() {
+    fun onLoginClicked() {
         val current = _uiState.value
         var hasError = false
 
         if (current.email.isBlank()) {
-            _uiState.update { it.copy(emailError = "Email wajib diisi") }
+            _uiState.update { it.copy(emailError = "Alamat email tidak boleh kosong!") }
             hasError = true
         }
 
         if (current.password.isBlank()) {
-            _uiState.update { it.copy(passwordError = "Kata sandi wajib diisi") }
+            _uiState.update { it.copy(passwordError = "Kata sandi tidak boleh kosong!") }
             hasError = true
         }
 
-        if (hasError) {
-            viewModelScope.launch {
-                _messageEvent.emit("Periksa kembali isian login")
-            }
-            return
-        }
+        if (hasError) return
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -98,7 +83,7 @@ class LoginVM(
                 )
 
                 if (!response.isSuccessful) {
-                    throw IllegalStateException(apiErrorMessage(response))
+                    throw IllegalStateException(response.errorMessage())
                 }
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")
@@ -115,8 +100,7 @@ class LoginVM(
                 runCatching {
                     val response = walletApi.listWallets()
                     if (!response.isSuccessful) {
-                        val j = Json { ignoreUnknownKeys = true }
-                        throw IllegalStateException(response.errorMessage(j))
+                        throw IllegalStateException(response.errorMessage())
                     }
 
                     response.body() ?: throw IllegalStateException("Respons server kosong")
@@ -125,25 +109,15 @@ class LoginVM(
                         selectedWalletPrefs.saveSelectedWallet(firstWallet.data)
                     }
                 }
-                _messageEvent.emit("Login berhasil untuk ${response.name}")
+                _event.emit(LoginUiState.Event.LoginSucceeded)
             }.onFailure { throwable ->
-                _messageEvent.emit(throwable.message ?: "Login gagal")
+                _event.emit(
+                    LoginUiState.Event.ShowMessage(
+                        message = throwable.message ?: "Terjadi kesalahan tak terduga"
+                    )
+                )
             }
             _uiState.update { it.copy(isLoading = false) }
-        }
-    }
-
-    private fun apiErrorMessage(response: Response<LoginRes>): String {
-        val rawError = response.errorBody()?.string().orEmpty()
-        if (rawError.isBlank()) {
-            return "Login gagal"
-        }
-
-        return runCatching {
-            val error = errorJson.decodeFromString(DtoError.serializer(), rawError)
-            error.message?.takeIf { it.isNotBlank() } ?: rawError
-        }.getOrElse {
-            rawError
         }
     }
 }

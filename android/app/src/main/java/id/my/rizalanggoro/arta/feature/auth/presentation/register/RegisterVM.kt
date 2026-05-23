@@ -7,13 +7,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
-import id.my.rizalanggoro.arta.core.network.RetrofitProvider
 import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.AuthApi
 import id.my.rizalanggoro.arta.openapi.models.RegisterReq
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +27,7 @@ class RegisterVM(
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 RegisterVM(
-                    authApi = RetrofitProvider.create(AuthApi::class.java),
+                    authApi = app.authApi,
                     authPrefs = app.authPrefs,
                 )
             }
@@ -39,29 +37,26 @@ class RegisterVM(
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
-    private val _messageEvent = MutableSharedFlow<String>()
-    val messageEvent: SharedFlow<String> = _messageEvent.asSharedFlow()
+    private val _event = MutableSharedFlow<RegisterUiState.Event>()
+    val event = _event.asSharedFlow()
 
-    private val _effect = MutableSharedFlow<RegisterEffect>()
-    val effect: SharedFlow<RegisterEffect> = _effect.asSharedFlow()
-
-    fun onChangeName(value: String) {
+    fun onNameChanged(value: String) {
         _uiState.update { it.copy(name = value, nameError = null) }
     }
 
-    fun onChangeEmail(value: String) {
+    fun onEmailChanged(value: String) {
         _uiState.update { it.copy(email = value, emailError = null) }
     }
 
-    fun onChangePassword(value: String) {
+    fun onPasswordChanged(value: String) {
         _uiState.update { it.copy(password = value, passwordError = null) }
     }
 
-    fun onChangeConfirmPassword(value: String) {
+    fun onConfirmPasswordChanged(value: String) {
         _uiState.update { it.copy(confirmPassword = value, confirmPasswordError = null) }
     }
 
-    fun register() {
+    fun onRegisterClicked() {
         val current = _uiState.value
         var hasError = false
 
@@ -90,12 +85,7 @@ class RegisterVM(
             hasError = true
         }
 
-        if (hasError) {
-            viewModelScope.launch {
-                _messageEvent.emit("Periksa kembali isian registrasi")
-            }
-            return
-        }
+        if (hasError) return
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -123,15 +113,15 @@ class RegisterVM(
                     )
                 )
 
-                _effect.emit(RegisterEffect.NavigateToCreateFirstWallet)
+                _event.emit(RegisterUiState.Event.RegisterSucceeded)
             }.onFailure { throwable ->
-                _messageEvent.emit(throwable.message ?: "Registrasi gagal")
+                _event.emit(
+                    RegisterUiState.Event.ShowMessage(
+                        message = throwable.message ?: "Terjadi kesalahan tak terduga"
+                    )
+                )
             }
             _uiState.update { it.copy(isLoading = false) }
         }
     }
-}
-
-sealed class RegisterEffect {
-    object NavigateToCreateFirstWallet : RegisterEffect()
 }

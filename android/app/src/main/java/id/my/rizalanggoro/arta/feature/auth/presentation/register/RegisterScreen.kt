@@ -33,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.WalletCreateFirstRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,37 +44,30 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        vm.messageEvent.collect { message ->
-            snackbarHostState.showSnackbar(message)
-        }
+        vm.event
+            .filterIsInstance<RegisterUiState.Event.ShowMessage>()
+            .collect { event ->
+                snackbarHostState.showSnackbar(event.message)
+            }
     }
 
     LaunchedEffect(Unit) {
-        vm.effect.collect { effect ->
-            when (effect) {
-                is id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterEffect.NavigateToCreateFirstWallet -> {
-                    backStack.add(WalletCreateFirstRoute)
-                }
+        vm.event
+            .filterIsInstance<RegisterUiState.Event.RegisterSucceeded>()
+            .collect {
+                backStack.clear()
+                backStack.add(WalletCreateFirstRoute)
             }
-        }
     }
 
     Content(
         snackbarHostState = snackbarHostState,
-        isLoading = uiState.isLoading,
-        name = uiState.name,
-        email = uiState.email,
-        password = uiState.password,
-        confirmPassword = uiState.confirmPassword,
-        nameError = uiState.nameError,
-        emailError = uiState.emailError,
-        passwordError = uiState.passwordError,
-        confirmPasswordError = uiState.confirmPasswordError,
-        onChangeName = vm::onChangeName,
-        onChangeEmail = vm::onChangeEmail,
-        onChangePassword = vm::onChangePassword,
-        onChangeConfirmPassword = vm::onChangeConfirmPassword,
-        onClickSubmit = vm::register,
+        uiState = uiState,
+        onChangeName = vm::onNameChanged,
+        onChangeEmail = vm::onEmailChanged,
+        onChangePassword = vm::onPasswordChanged,
+        onChangeConfirmPassword = vm::onConfirmPasswordChanged,
+        onClickSubmit = vm::onRegisterClicked,
         onClickLogin = { backStack.removeLastOrNull() },
     )
 }
@@ -81,16 +75,8 @@ fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun Content(
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    isLoading: Boolean = false,
-    name: String = "",
-    email: String = "",
-    password: String = "",
-    confirmPassword: String = "",
-    nameError: String? = null,
-    emailError: String? = null,
-    passwordError: String? = null,
-    confirmPasswordError: String? = null,
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
+    uiState: RegisterUiState = RegisterUiState(),
     onChangeName: (String) -> Unit = {},
     onChangeEmail: (String) -> Unit = {},
     onChangePassword: (String) -> Unit = {},
@@ -126,19 +112,19 @@ private fun Content(
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextField(
-                    value = name,
+                    value = uiState.name,
                     onValueChange = onChangeName,
                     label = { Text("Nama lengkap") },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = nameError != null,
+                    isError = uiState.nameError != null,
                     supportingText = when {
-                        nameError != null -> {
-                            { Text(nameError) }
+                        uiState.nameError != null -> {
+                            { Text(uiState.nameError) }
                         }
 
                         else -> null
                     },
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
@@ -147,19 +133,19 @@ private fun Content(
                 )
 
                 TextField(
-                    value = email,
+                    value = uiState.email,
                     onValueChange = onChangeEmail,
                     label = { Text("Alamat email") },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = emailError != null,
+                    isError = uiState.emailError != null,
                     supportingText = when {
-                        emailError != null -> {
-                            { Text(emailError) }
+                        uiState.emailError != null -> {
+                            { Text(uiState.emailError) }
                         }
 
                         else -> null
                     },
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -168,19 +154,19 @@ private fun Content(
                 )
 
                 TextField(
-                    value = password,
+                    value = uiState.password,
                     onValueChange = onChangePassword,
                     label = { Text("Kata sandi") },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = passwordError != null,
+                    isError = uiState.passwordError != null,
                     supportingText = when {
-                        passwordError != null -> {
-                            { Text(passwordError) }
+                        uiState.passwordError != null -> {
+                            { Text(uiState.passwordError) }
                         }
 
                         else -> null
                     },
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -189,19 +175,19 @@ private fun Content(
                 )
 
                 TextField(
-                    value = confirmPassword,
+                    value = uiState.confirmPassword,
                     onValueChange = onChangeConfirmPassword,
                     label = { Text("Konfirmasi kata sandi") },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = confirmPasswordError != null,
+                    isError = uiState.confirmPasswordError != null,
                     supportingText = when {
-                        confirmPasswordError != null -> {
-                            { Text(confirmPasswordError) }
+                        uiState.confirmPasswordError != null -> {
+                            { Text(uiState.confirmPasswordError) }
                         }
 
                         else -> null
                     },
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -210,7 +196,7 @@ private fun Content(
                 )
             }
 
-            when (isLoading) {
+            when (uiState.isLoading) {
                 true -> LoadingIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
@@ -235,8 +221,6 @@ private fun Content(
     }
 }
 
-// ViewModel is initialized directly on the composable parameter per project convention
-
 @Preview(showBackground = true, group = "Register")
 @Composable
 private fun RegisterPreview() {
@@ -249,7 +233,11 @@ private fun RegisterPreview() {
 @Composable
 private fun RegisterLoadingPreview() {
     ArtaTheme {
-        Content(isLoading = true)
+        Content(
+            uiState = RegisterUiState(
+                isLoading = true
+            )
+        )
     }
 }
 
@@ -258,10 +246,12 @@ private fun RegisterLoadingPreview() {
 private fun RegisterErrorPreview() {
     ArtaTheme {
         Content(
-            nameError = "Nama wajib diisi",
-            emailError = "Email wajib diisi",
-            passwordError = "Kata sandi wajib diisi",
-            confirmPasswordError = "Konfirmasi kata sandi wajib diisi",
+            uiState = RegisterUiState(
+                nameError = "Nama wajib diisi",
+                emailError = "Email wajib diisi",
+                passwordError = "Kata sandi wajib diisi",
+                confirmPasswordError = "Konfirmasi kata sandi wajib diisi",
+            ),
         )
     }
 }
