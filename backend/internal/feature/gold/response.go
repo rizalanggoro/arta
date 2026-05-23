@@ -26,8 +26,3 @@ type DeleteGoldRes struct {
 type ListGoldsRes struct {
 	Golds []dto.Gold `json:"golds"`
 }
-
-// GoldSummaryRes response for summary
-type GoldSummaryRes struct {
-	dto.GoldSummary
-} // @name GoldSummaryRes

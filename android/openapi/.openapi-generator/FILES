@@ -41,7 +41,6 @@ docs/GoldCreateGoldReq.md
 docs/GoldDashboardRes.md
 docs/GoldGoldTaxPreferenceReq.md
 docs/GoldListGoldsRes.md
-docs/GoldSummaryRes.md
 docs/GoldUpdateGoldReq.md
 docs/ListGoldTaxPreferencesRes.md
 docs/ListTransactionsRes.md
@@ -127,7 +126,6 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GoldCreateGoldReq.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GoldDashboardRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GoldGoldTaxPreferenceReq.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GoldListGoldsRes.kt
-src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GoldSummaryRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GoldUpdateGoldReq.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/ListGoldTaxPreferencesRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/ListTransactionsRes.kt

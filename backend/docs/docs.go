@@ -598,37 +598,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/gold/summary": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "gold"
-                ],
-                "operationId": "GoldSummary",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/GoldSummaryRes"
-                        }
-                    }
-                }
-            }
-        },
         "/api/gold/tax": {
             "get": {
                 "consumes": [
@@ -1220,6 +1189,15 @@ const docTemplate = `{
                     "wallet"
                 ],
                 "operationId": "ListWallets",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1258,6 +1236,13 @@ const docTemplate = `{
                 ],
                 "operationId": "CreateWallet",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "body",
                         "name": "body",
@@ -1314,6 +1299,13 @@ const docTemplate = `{
                 ],
                 "operationId": "GetWallet",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Wallet ID",
@@ -1372,6 +1364,13 @@ const docTemplate = `{
                 ],
                 "operationId": "UpdateWallet",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Wallet ID",
@@ -1439,6 +1438,13 @@ const docTemplate = `{
                 ],
                 "operationId": "DeleteWallet",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Wallet ID",
@@ -1777,21 +1783,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "total_weight": {
-                    "type": "number"
-                }
-            }
-        },
-        "GoldSummaryRes": {
-            "type": "object",
-            "required": [
-                "total_grams",
-                "total_value"
-            ],
-            "properties": {
-                "total_grams": {
-                    "type": "number"
-                },
-                "total_value": {
                     "type": "number"
                 }
             }

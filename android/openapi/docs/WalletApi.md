@@ -23,14 +23,16 @@ All URIs are relative to *http://localhost:3000/api*
 
 val apiClient = ApiClient()
 val webService = apiClient.createWebservice(WalletApi::class.java)
+val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val body : WalletCreateWalletReq =  // WalletCreateWalletReq | body
 
 launch(Dispatchers.IO) {
-    val result : CreateWalletRes = webService.createWallet(body)
+    val result : CreateWalletRes = webService.createWallet(authorization, body)
 }
 ```
 
 ### Parameters
+| **authorization** | **kotlin.String**| Bearer token | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
 | **body** | [**WalletCreateWalletReq**](WalletCreateWalletReq.md)| body | |
@@ -60,14 +62,16 @@ launch(Dispatchers.IO) {
 
 val apiClient = ApiClient()
 val webService = apiClient.createWebservice(WalletApi::class.java)
+val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val id : kotlin.Int = 56 // kotlin.Int | Wallet ID
 
 launch(Dispatchers.IO) {
-    val result : DeleteWalletRes = webService.deleteWallet(id)
+    val result : DeleteWalletRes = webService.deleteWallet(authorization, id)
 }
 ```
 
 ### Parameters
+| **authorization** | **kotlin.String**| Bearer token | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
 | **id** | **kotlin.Int**| Wallet ID | |
@@ -97,14 +101,16 @@ launch(Dispatchers.IO) {
 
 val apiClient = ApiClient()
 val webService = apiClient.createWebservice(WalletApi::class.java)
+val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val id : kotlin.Int = 56 // kotlin.Int | Wallet ID
 
 launch(Dispatchers.IO) {
-    val result : GetWalletRes = webService.getWallet(id)
+    val result : GetWalletRes = webService.getWallet(authorization, id)
 }
 ```
 
 ### Parameters
+| **authorization** | **kotlin.String**| Bearer token | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
 | **id** | **kotlin.Int**| Wallet ID | |
@@ -134,14 +140,17 @@ launch(Dispatchers.IO) {
 
 val apiClient = ApiClient()
 val webService = apiClient.createWebservice(WalletApi::class.java)
+val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 
 launch(Dispatchers.IO) {
-    val result : WalletListWalletsRes = webService.listWallets()
+    val result : WalletListWalletsRes = webService.listWallets(authorization)
 }
 ```
 
 ### Parameters
-This endpoint does not need any parameter.
+| Name | Type | Description  | Notes |
+| ------------- | ------------- | ------------- | ------------- |
+| **authorization** | **kotlin.String**| Bearer token | |
 
 ### Return type
 
@@ -168,15 +177,17 @@ This endpoint does not need any parameter.
 
 val apiClient = ApiClient()
 val webService = apiClient.createWebservice(WalletApi::class.java)
+val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val id : kotlin.Int = 56 // kotlin.Int | Wallet ID
 val body : WalletUpdateWalletReq =  // WalletUpdateWalletReq | body
 
 launch(Dispatchers.IO) {
-    val result : UpdateWalletRes = webService.updateWallet(id, body)
+    val result : UpdateWalletRes = webService.updateWallet(authorization, id, body)
 }
 ```
 
 ### Parameters
+| **authorization** | **kotlin.String**| Bearer token | |
 | **id** | **kotlin.Int**| Wallet ID | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |

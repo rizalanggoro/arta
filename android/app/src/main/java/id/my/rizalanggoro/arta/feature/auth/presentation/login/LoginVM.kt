@@ -87,25 +87,26 @@ class LoginVM(
                 }
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")
-            }.onSuccess { response ->
+            }.onSuccess { loginResponse ->
                 authPrefs.setSession(
                     session = AuthSession(
-                        userId = requireNotNull(response.userId) { "Login response missing user id" },
-                        email = requireNotNull(response.email) { "Login response missing email" },
-                        name = requireNotNull(response.name) { "Login response missing name" },
-                        token = requireNotNull(response.token) { "Login response missing token" },
+                        userId = requireNotNull(loginResponse.userId) { "Login response missing user id" },
+                        email = requireNotNull(loginResponse.email) { "Login response missing email" },
+                        name = requireNotNull(loginResponse.name) { "Login response missing name" },
+                        token = requireNotNull(loginResponse.token) { "Login response missing token" },
                     )
                 )
 
                 runCatching {
-                    val response = walletApi.listWallets()
-                    if (!response.isSuccessful) {
-                        throw IllegalStateException(response.errorMessage())
+                    val authorization = "Bearer ${loginResponse.token}"
+                    val walletResponse = walletApi.listWallets(authorization)
+                    if (!walletResponse.isSuccessful) {
+                        throw IllegalStateException(walletResponse.errorMessage())
                     }
 
-                    response.body() ?: throw IllegalStateException("Respons server kosong")
-                }.onSuccess { response ->
-                    response.wallets.firstOrNull()?.let { firstWallet ->
+                    walletResponse.body() ?: throw IllegalStateException("Respons server kosong")
+                }.onSuccess { walletListResponse ->
+                    walletListResponse.wallets.firstOrNull()?.let { firstWallet ->
                         selectedWalletPrefs.saveSelectedWallet(firstWallet.data)
                     }
                 }

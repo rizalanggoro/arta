@@ -38,7 +38,6 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	protected.Post("/tax", h.createTaxPreference)
 	protected.Put("/tax/:id", h.updateTaxPreference)
 	protected.Delete("/tax/:id", h.deleteTaxPreference)
-	protected.Get("/summary", h.summary)
 	protected.Get("/:id", h.get)
 	protected.Put("/:id", h.update)
 	protected.Delete("/:id", h.delete)
@@ -455,28 +454,3 @@ func (h *Handler) delete(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(DeleteGoldRes{Message: "gold deleted"})
 }
 
-// @id                   GoldSummary
-// @tags                 gold
-// @accept               json
-// @produce              json
-// @param                Authorization header string true "Bearer token"
-// @success              200 {object} GoldSummaryRes
-// @router               /api/gold/summary [get]
-func (h *Handler) summary(c *fiber.Ctx) error {
-	userID := middleware.GetUserID(c)
-	if userID == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
-	}
-
-	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
-	}
-
-	totalGrams, totalValue, byType, err := h.repo.GetSummary(uint(parsedUserID))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(GoldSummaryRes{dto.GoldSummary{TotalGrams: totalGrams, TotalValue: totalValue, ByType: byType}})
-}

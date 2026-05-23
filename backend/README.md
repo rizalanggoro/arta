@@ -191,7 +191,6 @@ Once the application is running, visit:
 - `GET /api/gold/:id` - Get gold detail
 - `PUT /api/gold/:id` - Update gold data
 - `DELETE /api/gold/:id` - Delete gold data
-- `GET /api/gold/summary` - Get gold summary
 
 ### Categories
 

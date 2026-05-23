@@ -9,6 +9,7 @@ import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,12 +21,16 @@ import kotlinx.coroutines.launch
 
 class ListWalletVM(
     private val walletApi: WalletApi,
+    private val authSessionProvider: () -> AuthSession?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
-                val walletApi = (this[APPLICATION_KEY] as MyApplication).walletApi
-                ListWalletVM(walletApi = walletApi)
+                val app = this[APPLICATION_KEY] as MyApplication
+                ListWalletVM(
+                    walletApi = app.walletApi,
+                    authSessionProvider = { app.authPrefs.currentSession.value },
+                )
             }
         }
     }
@@ -42,7 +47,7 @@ class ListWalletVM(
                 )
             }
             runCatching {
-                val response = walletApi.listWallets()
+                val response = walletApi.listWallets(authorizationHeader() ?: throw IllegalStateException("Sesi login tidak ditemukan"))
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorMessage())
                 }
@@ -101,11 +106,14 @@ class ListWalletVM(
             }
             runCatching {
                 val response =
-                    walletApi.deleteWallet(requireNotNull(_uiState.value.deleteTarget?.id) {
-                        "Wallet response missing id"
-                    })
+                    walletApi.deleteWallet(
+                        authorizationHeader() ?: throw IllegalStateException("Sesi login tidak ditemukan"),
+                        requireNotNull(_uiState.value.deleteTarget?.id) {
+                            "Wallet response missing id"
+                        }
+                    )
                 if (!response.isSuccessful) {
-                    throw IllegalStateException(response.errorMessage())
+                        throw IllegalStateException(response.errorMessage())
                 }
             }.onSuccess {
                 _uiState.update {
@@ -134,5 +142,9 @@ class ListWalletVM(
                 .filterIsInstance<AppEvent.WalletChanged>()
                 .collect { loadWallets() }
         }
+    }
+
+    private fun authorizationHeader(): String? {
+        return authSessionProvider()?.token?.let { "Bearer $it" }
     }
 }

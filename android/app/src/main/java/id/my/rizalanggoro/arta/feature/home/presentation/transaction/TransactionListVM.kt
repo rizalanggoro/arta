@@ -1,6 +1,6 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.transaction
 
-// replaced walletApiErrorMessage usages with core.errorMessage(Json)
+// replaced walletApiErrorMessage usages with core.errorMessage()
 // use OpenAPI models directly (`DtoTransaction.data`) instead of mapper extension
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -51,7 +51,7 @@ class TransactionListVM(
                 val authorization = authorizationHeader()
                     ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                val response = walletApi.listWallets()
+                val response = walletApi.listWallets(authorization)
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorMessage())
                 }

@@ -10,6 +10,7 @@ import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 class SelectWalletVM(
     private val walletApi: WalletApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
+    private val authSessionProvider: () -> AuthSession?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
@@ -29,7 +31,8 @@ class SelectWalletVM(
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 SelectWalletVM(
                     walletApi = app.walletApi,
-                    selectedWalletPrefs = app.selectedWalletPrefs
+                    selectedWalletPrefs = app.selectedWalletPrefs,
+                    authSessionProvider = { app.authPrefs.currentSession.value },
                 )
             }
         }
@@ -41,7 +44,10 @@ class SelectWalletVM(
     fun loadWallets() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         runCatching {
-            val response = walletApi.listWallets()
+            val authorization = authorizationHeader()
+                ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+            val response = walletApi.listWallets(authorization)
             if (!response.isSuccessful) {
                 throw IllegalStateException(response.errorMessage())
             }
@@ -62,6 +68,10 @@ class SelectWalletVM(
                 )
             }
         }
+    }
+
+    private fun authorizationHeader(): String? {
+        return authSessionProvider()?.token?.let { "Bearer $it" }
     }
 
     fun onWalletSelected(wallet: DomainWallet) = viewModelScope.launch {

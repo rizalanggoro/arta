@@ -199,16 +199,6 @@ definitions:
     - total_gold_items
     - total_weight
     type: object
-  GoldSummaryRes:
-    properties:
-      total_grams:
-        type: number
-      total_value:
-        type: number
-    required:
-    - total_grams
-    - total_value
-    type: object
   ListGoldTaxPreferencesRes:
     properties:
       preferences:
@@ -1127,26 +1117,6 @@ paths:
             $ref: '#/definitions/UpdateGoldRes'
       tags:
       - gold
-  /api/gold/summary:
-    get:
-      consumes:
-      - application/json
-      operationId: GoldSummary
-      parameters:
-      - description: Bearer token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/GoldSummaryRes'
-      tags:
-      - gold
   /api/gold/tax:
     get:
       consumes:
@@ -1453,6 +1423,12 @@ paths:
       consumes:
       - application/json
       operationId: ListWallets
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1477,6 +1453,11 @@ paths:
       - application/json
       operationId: CreateWallet
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: body
         in: body
         name: body
@@ -1512,6 +1493,11 @@ paths:
       - application/json
       operationId: DeleteWallet
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Wallet ID
         in: path
         name: id
@@ -1549,6 +1535,11 @@ paths:
       - application/json
       operationId: GetWallet
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Wallet ID
         in: path
         name: id
@@ -1586,6 +1577,11 @@ paths:
       - application/json
       operationId: UpdateWallet
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Wallet ID
         in: path
         name: id

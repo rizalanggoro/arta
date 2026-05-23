@@ -9,6 +9,7 @@ import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.WalletCreateWalletReq
 import id.my.rizalanggoro.arta.openapi.models.WalletUpdateWalletReq
@@ -20,7 +21,8 @@ import kotlinx.coroutines.launch
 
 class UpsertWalletVM(
     private val walletApi: WalletApi,
-    private val walletId: Int
+    private val walletId: Int,
+    private val authSessionProvider: () -> AuthSession?,
 ) : ViewModel() {
     companion object {
         fun Factory(walletId: Int) = viewModelFactory {
@@ -28,7 +30,8 @@ class UpsertWalletVM(
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 UpsertWalletVM(
                     walletApi = app.walletApi,
-                    walletId = walletId
+                    walletId = walletId,
+                    authSessionProvider = { app.authPrefs.currentSession.value },
                 )
             }
         }
@@ -50,7 +53,10 @@ class UpsertWalletVM(
             }
 
             runCatching {
-                val response = walletApi.getWallet(walletId)
+                val authorization = authorizationHeader()
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
+                val response = walletApi.getWallet(authorization, walletId)
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorMessage())
                 }
@@ -106,7 +112,11 @@ class UpsertWalletVM(
 
             val result = if (isUpdate) {
                 runCatching {
+                    val authorization = authorizationHeader()
+                        ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
                     val response = walletApi.updateWallet(
+                        authorization = authorization,
                         id = current.walletId,
                         body = WalletUpdateWalletReq(
                             name = current.name,
@@ -122,7 +132,11 @@ class UpsertWalletVM(
                 }
             } else {
                 runCatching {
+                    val authorization = authorizationHeader()
+                        ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
                     val response = walletApi.createWallet(
+                        authorization = authorization,
                         WalletCreateWalletReq(
                             name = current.name,
                             type = current.type,
@@ -147,5 +161,9 @@ class UpsertWalletVM(
 
     init {
         loadWallet()
+    }
+
+    private fun authorizationHeader(): String? {
+        return authSessionProvider()?.token?.let { "Bearer $it" }
     }
 }

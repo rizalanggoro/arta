@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.WalletCreateWalletReq
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 
 class CreateFirstWalletVM(
     private val walletApi: WalletApi,
-    private val selectedWalletPrefs: SelectedWalletPrefs
+    private val selectedWalletPrefs: SelectedWalletPrefs,
+    private val authSessionProvider: () -> AuthSession?,
 ) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
@@ -27,7 +29,8 @@ class CreateFirstWalletVM(
                 val app = (this[APPLICATION_KEY] as MyApplication)
                 CreateFirstWalletVM(
                     walletApi = app.walletApi,
-                    selectedWalletPrefs = app.selectedWalletPrefs
+                    selectedWalletPrefs = app.selectedWalletPrefs,
+                    authSessionProvider = { app.authPrefs.currentSession.value },
                 )
             }
         }
@@ -66,7 +69,11 @@ class CreateFirstWalletVM(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             runCatching {
+                val authorization = authorizationHeader()
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+
                 val response = walletApi.createWallet(
+                    authorization,
                     WalletCreateWalletReq(
                         name = current.name,
                         type = current.type,
@@ -90,5 +97,9 @@ class CreateFirstWalletVM(
             }
             _uiState.update { it.copy(isLoading = false) }
         }
+    }
+
+    private fun authorizationHeader(): String? {
+        return authSessionProvider()?.token?.let { "Bearer $it" }
     }
 }

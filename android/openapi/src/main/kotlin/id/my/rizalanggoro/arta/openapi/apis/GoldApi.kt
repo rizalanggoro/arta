@@ -15,7 +15,6 @@ import id.my.rizalanggoro.arta.openapi.models.GetGoldRes
 import id.my.rizalanggoro.arta.openapi.models.GoldCreateGoldReq
 import id.my.rizalanggoro.arta.openapi.models.GoldGoldTaxPreferenceReq
 import id.my.rizalanggoro.arta.openapi.models.GoldListGoldsRes
-import id.my.rizalanggoro.arta.openapi.models.GoldSummaryRes
 import id.my.rizalanggoro.arta.openapi.models.GoldUpdateGoldReq
 import id.my.rizalanggoro.arta.openapi.models.ListGoldTaxPreferencesRes
 import id.my.rizalanggoro.arta.openapi.models.UpdateGoldRes
@@ -91,19 +90,6 @@ interface GoldApi {
      */
     @GET("api/gold/{id}")
     suspend fun getGold(@Header("Authorization") authorization: kotlin.String, @Path("id") id: kotlin.Int): Response<GetGoldRes>
-
-    /**
-     * GET api/gold/summary
-     * 
-     * 
-     * Responses:
-     *  - 200: OK
-     *
-     * @param authorization Bearer token
-     * @return [GoldSummaryRes]
-     */
-    @GET("api/gold/summary")
-    suspend fun goldSummary(@Header("Authorization") authorization: kotlin.String): Response<GoldSummaryRes>
 
     /**
      * GET api/gold/tax

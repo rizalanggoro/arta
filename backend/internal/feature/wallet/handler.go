@@ -37,6 +37,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 // @Tags wallet
 // @Accept json
 // @Produce json
+// @Param Authorization header string true "Bearer token"
 // @Success 200 {object} ListWalletsRes
 // @Failure 401 {object} dto.Error
 // @Failure 500 {object} dto.Error
@@ -70,6 +71,7 @@ func (h *Handler) list(c *fiber.Ctx) error {
 // @Tags wallet
 // @Accept json
 // @Produce json
+// @Param Authorization header string true "Bearer token"
 // @Param body body CreateWalletReq true "body"
 // @Success 201 {object} CreateWalletRes
 // @Failure 400 {object} dto.Error
@@ -116,6 +118,7 @@ func (h *Handler) create(c *fiber.Ctx) error {
 // @Tags wallet
 // @Accept json
 // @Produce json
+// @Param Authorization header string true "Bearer token"
 // @Param id path int true "Wallet ID"
 // @Success 200 {object} GetWalletRes
 // @Failure 400 {object} dto.Error
@@ -147,6 +150,7 @@ func (h *Handler) get(c *fiber.Ctx) error {
 // @Tags wallet
 // @Accept json
 // @Produce json
+// @Param Authorization header string true "Bearer token"
 // @Param id path int true "Wallet ID"
 // @Param body body UpdateWalletReq true "body"
 // @Success 200 {object} UpdateWalletRes
@@ -197,6 +201,7 @@ func (h *Handler) update(c *fiber.Ctx) error {
 // @Tags wallet
 // @Accept json
 // @Produce json
+// @Param Authorization header string true "Bearer token"
 // @Param id path int true "Wallet ID"
 // @Success 200 {object} DeleteWalletRes
 // @Failure 400 {object} dto.Error

@@ -27,11 +27,12 @@ interface WalletApi {
      *  - 401: Unauthorized
      *  - 500: Internal Server Error
      *
+     * @param authorization Bearer token
      * @param body body
      * @return [CreateWalletRes]
      */
     @POST("api/wallet")
-    suspend fun createWallet(@Body body: WalletCreateWalletReq): Response<CreateWalletRes>
+    suspend fun createWallet(@Header("Authorization") authorization: kotlin.String, @Body body: WalletCreateWalletReq): Response<CreateWalletRes>
 
     /**
      * DELETE api/wallet/{id}
@@ -44,11 +45,12 @@ interface WalletApi {
      *  - 404: Not Found
      *  - 500: Internal Server Error
      *
+     * @param authorization Bearer token
      * @param id Wallet ID
      * @return [DeleteWalletRes]
      */
     @DELETE("api/wallet/{id}")
-    suspend fun deleteWallet(@Path("id") id: kotlin.Int): Response<DeleteWalletRes>
+    suspend fun deleteWallet(@Header("Authorization") authorization: kotlin.String, @Path("id") id: kotlin.Int): Response<DeleteWalletRes>
 
     /**
      * GET api/wallet/{id}
@@ -61,11 +63,12 @@ interface WalletApi {
      *  - 404: Not Found
      *  - 500: Internal Server Error
      *
+     * @param authorization Bearer token
      * @param id Wallet ID
      * @return [GetWalletRes]
      */
     @GET("api/wallet/{id}")
-    suspend fun getWallet(@Path("id") id: kotlin.Int): Response<GetWalletRes>
+    suspend fun getWallet(@Header("Authorization") authorization: kotlin.String, @Path("id") id: kotlin.Int): Response<GetWalletRes>
 
     /**
      * GET api/wallet
@@ -76,10 +79,11 @@ interface WalletApi {
      *  - 401: Unauthorized
      *  - 500: Internal Server Error
      *
+     * @param authorization Bearer token
      * @return [WalletListWalletsRes]
      */
     @GET("api/wallet")
-    suspend fun listWallets(): Response<WalletListWalletsRes>
+    suspend fun listWallets(@Header("Authorization") authorization: kotlin.String): Response<WalletListWalletsRes>
 
     /**
      * PUT api/wallet/{id}
@@ -92,11 +96,12 @@ interface WalletApi {
      *  - 404: Not Found
      *  - 500: Internal Server Error
      *
+     * @param authorization Bearer token
      * @param id Wallet ID
      * @param body body
      * @return [UpdateWalletRes]
      */
     @PUT("api/wallet/{id}")
-    suspend fun updateWallet(@Path("id") id: kotlin.Int, @Body body: WalletUpdateWalletReq): Response<UpdateWalletRes>
+    suspend fun updateWallet(@Header("Authorization") authorization: kotlin.String, @Path("id") id: kotlin.Int, @Body body: WalletUpdateWalletReq): Response<UpdateWalletRes>
 
 }

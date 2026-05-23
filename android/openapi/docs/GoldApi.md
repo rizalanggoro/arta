@@ -9,7 +9,6 @@ All URIs are relative to *http://localhost:3000/api*
 | [**deleteGold**](GoldApi.md#deleteGold) | **DELETE** api/gold/{id} |  |
 | [**deleteGoldTaxPreference**](GoldApi.md#deleteGoldTaxPreference) | **DELETE** api/gold/tax/{id} |  |
 | [**getGold**](GoldApi.md#getGold) | **GET** api/gold/{id} |  |
-| [**goldSummary**](GoldApi.md#goldSummary) | **GET** api/gold/summary |  |
 | [**listGoldTaxPreferences**](GoldApi.md#listGoldTaxPreferences) | **GET** api/gold/tax |  |
 | [**listGolds**](GoldApi.md#listGolds) | **GET** api/gold |  |
 | [**updateGold**](GoldApi.md#updateGold) | **PUT** api/gold/{id} |  |
@@ -201,43 +200,6 @@ launch(Dispatchers.IO) {
 ### Return type
 
 [**GetGoldRes**](GetGoldRes.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-
-
-### Example
-```kotlin
-// Import classes:
-//import id.my.rizalanggoro.arta.openapi.*
-//import id.my.rizalanggoro.arta.openapi.infrastructure.*
-//import id.my.rizalanggoro.arta.openapi.models.*
-
-val apiClient = ApiClient()
-val webService = apiClient.createWebservice(GoldApi::class.java)
-val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
-
-launch(Dispatchers.IO) {
-    val result : GoldSummaryRes = webService.goldSummary(authorization)
-}
-```
-
-### Parameters
-| Name | Type | Description  | Notes |
-| ------------- | ------------- | ------------- | ------------- |
-| **authorization** | **kotlin.String**| Bearer token | |
-
-### Return type
-
-[**GoldSummaryRes**](GoldSummaryRes.md)
 
 ### Authorization
 

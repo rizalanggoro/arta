@@ -61,7 +61,6 @@ All URIs are relative to *http://localhost:3000/api*
 | *GoldApi* | [**deleteGold**](docs/GoldApi.md#deletegold) | **DELETE** api/gold/{id} |  |
 | *GoldApi* | [**deleteGoldTaxPreference**](docs/GoldApi.md#deletegoldtaxpreference) | **DELETE** api/gold/tax/{id} |  |
 | *GoldApi* | [**getGold**](docs/GoldApi.md#getgold) | **GET** api/gold/{id} |  |
-| *GoldApi* | [**goldSummary**](docs/GoldApi.md#goldsummary) | **GET** api/gold/summary |  |
 | *GoldApi* | [**listGoldTaxPreferences**](docs/GoldApi.md#listgoldtaxpreferences) | **GET** api/gold/tax |  |
 | *GoldApi* | [**listGolds**](docs/GoldApi.md#listgolds) | **GET** api/gold |  |
 | *GoldApi* | [**updateGold**](docs/GoldApi.md#updategold) | **PUT** api/gold/{id} |  |
@@ -117,7 +116,6 @@ All URIs are relative to *http://localhost:3000/api*
  - [id.my.rizalanggoro.arta.openapi.models.GoldDashboardRes](docs/GoldDashboardRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.GoldGoldTaxPreferenceReq](docs/GoldGoldTaxPreferenceReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.GoldListGoldsRes](docs/GoldListGoldsRes.md)
- - [id.my.rizalanggoro.arta.openapi.models.GoldSummaryRes](docs/GoldSummaryRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.GoldUpdateGoldReq](docs/GoldUpdateGoldReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.ListGoldTaxPreferencesRes](docs/ListGoldTaxPreferencesRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.ListTransactionsRes](docs/ListTransactionsRes.md)
