@@ -7,7 +7,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -36,7 +35,9 @@ import id.my.rizalanggoro.arta.core.Routes.UpsertWalletRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletCreateFirstRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
+import id.my.rizalanggoro.arta.core.data.ThemePrefs
 import id.my.rizalanggoro.arta.feature.auth.presentation.forgotpassword.ForgotPasswordScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterScreen
@@ -64,11 +65,14 @@ import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ComposeApp() {
-    val app = LocalContext.current.applicationContext as MyApplication
-    val session by app.authPrefs.currentSession.collectAsState()
-    val selectedWallet by app.selectedWalletPrefs.selectedWallet.collectAsState()
-    val isDarkTheme by app.themePrefs.isDarkTheme.collectAsState()
+fun ComposeApp(
+    authPrefs: AuthPrefs,
+    selectedWalletPrefs: SelectedWalletPrefs,
+    themePrefs: ThemePrefs
+) {
+    val session by authPrefs.currentSession.collectAsState()
+    val selectedWallet by selectedWalletPrefs.selectedWallet.collectAsState()
+    val isDarkTheme by themePrefs.isDarkTheme.collectAsState()
 
     val startRoute = when {
         session != null && selectedWallet == null -> WalletCreateFirstRoute

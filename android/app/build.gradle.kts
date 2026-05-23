@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
+
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -68,6 +71,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.converter.kotlinx.serialization)
-    implementation("com.squareup.okhttp3:logging-interceptor:5.1.0")
-    implementation("com.squareup.retrofit2:converter-scalars:3.0.0")
+    implementation(libs.logging.interceptor)
+    implementation(libs.converter.scalars)
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 }

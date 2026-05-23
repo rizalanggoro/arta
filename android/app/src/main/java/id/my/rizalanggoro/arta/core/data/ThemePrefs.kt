@@ -1,11 +1,15 @@
 package id.my.rizalanggoro.arta.core.data
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
-class ThemePrefs(context: Context) {
+class ThemePrefs @Inject constructor(
+    @ApplicationContext context: Context
+) {
     private val prefs = context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
 
     private val _isDarkTheme = MutableStateFlow(readTheme())

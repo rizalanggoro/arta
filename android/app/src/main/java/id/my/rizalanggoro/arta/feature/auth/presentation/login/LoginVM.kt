@@ -1,11 +1,8 @@
 package id.my.rizalanggoro.arta.feature.auth.presentation.login
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.extension.errorMessage
@@ -20,27 +17,15 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginVM(
+@HiltViewModel
+class LoginVM @Inject constructor(
     private val authApi: AuthApi,
     private val authPrefs: AuthPrefs,
     private val walletApi: WalletApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = (this[APPLICATION_KEY] as MyApplication)
-                LoginVM(
-                    authApi = app.authApi,
-                    authPrefs = app.authPrefs,
-                    walletApi = app.walletApi,
-                    selectedWalletPrefs = app.selectedWalletPrefs,
-                )
-            }
-        }
-    }
-
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 

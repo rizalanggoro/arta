@@ -1,39 +1,7 @@
 package id.my.rizalanggoro.arta.core.application
 
 import android.app.Application
-import id.my.rizalanggoro.arta.core.data.AuthPrefs
-import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
-import id.my.rizalanggoro.arta.core.data.ThemePrefs
-import id.my.rizalanggoro.arta.core.network.RetrofitProvider
-import id.my.rizalanggoro.arta.openapi.apis.AuthApi
-import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
-import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
-import id.my.rizalanggoro.arta.openapi.apis.GoldApi
-import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
-import id.my.rizalanggoro.arta.openapi.apis.WalletApi
+import dagger.hilt.android.HiltAndroidApp
 
-class MyApplication : Application() {
-    lateinit var authPrefs: AuthPrefs
-        private set
-
-    lateinit var themePrefs: ThemePrefs
-        private set
-
-    lateinit var selectedWalletPrefs: SelectedWalletPrefs
-        private set
-
-    val authApi = RetrofitProvider.create(AuthApi::class.java)
-    val walletApi = RetrofitProvider.create(WalletApi::class.java)
-    val categoryApi = RetrofitProvider.create(CategoryApi::class.java)
-    val transactionApi = RetrofitProvider.create(TransactionApi::class.java)
-    val goldApi = RetrofitProvider.create(GoldApi::class.java)
-    val dashboardApi = RetrofitProvider.create(DashboardApi::class.java)
-
-    override fun onCreate() {
-        super.onCreate()
-
-        authPrefs = AuthPrefs(applicationContext)
-        themePrefs = ThemePrefs(applicationContext)
-        selectedWalletPrefs = SelectedWalletPrefs(applicationContext)
-    }
-}
+@HiltAndroidApp
+class MyApplication : Application()

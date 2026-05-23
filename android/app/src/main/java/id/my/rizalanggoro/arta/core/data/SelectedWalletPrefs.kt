@@ -1,13 +1,17 @@
 package id.my.rizalanggoro.arta.core.data
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
-class SelectedWalletPrefs(context: Context) {
+class SelectedWalletPrefs @Inject constructor(
+    @ApplicationContext context: Context
+) {
     private val prefs = context.getSharedPreferences("selected_wallet_prefs", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
 
