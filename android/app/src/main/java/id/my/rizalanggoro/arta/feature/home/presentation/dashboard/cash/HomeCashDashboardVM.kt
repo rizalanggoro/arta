@@ -1,15 +1,12 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
 import id.my.rizalanggoro.arta.openapi.models.CashDashboardRes
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
@@ -23,26 +20,15 @@ import java.text.NumberFormat
 import java.time.LocalTime
 import java.util.Locale
 import kotlin.math.roundToLong
+import javax.inject.Inject
 
-class HomeCashDashboardVM(
+@HiltViewModel
+class HomeCashDashboardVM @Inject constructor(
     private val dashboardApi: DashboardApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
-    private val authSessionProvider: () -> AuthSession?,
-    private val sessionName: String?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                HomeCashDashboardVM(
-                    dashboardApi = app.dashboardApi,
-                    selectedWalletPrefs = app.selectedWalletPrefs,
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                    sessionName = app.authPrefs.currentSession.value?.name,
-                )
-            }
-        }
-    }
+    private val sessionName: String? = authPrefs.currentSession.value?.name
 
     private val _uiState = MutableStateFlow(
         CashDashboardUiState(
@@ -62,7 +48,7 @@ class HomeCashDashboardVM(
 
         viewModelScope.launch {
             runCatching {
-                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
                 val response = dashboardApi.getCashDashboard("Bearer $token", walletId)
                 if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
                 response.body() ?: throw IllegalStateException("Respons server kosong")

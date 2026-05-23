@@ -14,11 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -28,14 +29,14 @@ import kotlinx.coroutines.flow.filterIsInstance
 @Composable
 fun UpsertGoldTaxScreen(
     taxPreferenceId: Int,
-    vm: UpsertGoldTaxVM = viewModel(
-        factory = UpsertGoldTaxVM.Factory(
-            taxPreferenceId = taxPreferenceId
-        )
-    ),
+    vm: UpsertGoldTaxVM = hiltViewModel(),
 ) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
+
+    LaunchedEffect(taxPreferenceId) {
+        vm.setTaxPreferenceId(taxPreferenceId)
+    }
 
     LaunchedEffect(Unit) {
         AppEventBus.event

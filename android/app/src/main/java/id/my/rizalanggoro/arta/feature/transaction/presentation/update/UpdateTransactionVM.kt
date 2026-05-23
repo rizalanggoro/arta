@@ -1,11 +1,9 @@
 package id.my.rizalanggoro.arta.feature.transaction.presentation.update
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.errorMessage
@@ -20,23 +18,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UpdateTransactionVM(
+@HiltViewModel
+class UpdateTransactionVM @Inject constructor(
     private val transactionApi: TransactionApi,
-    private val authSessionProvider: () -> String?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = (this[APPLICATION_KEY] as MyApplication)
-                UpdateTransactionVM(
-                    transactionApi = app.transactionApi,
-                    authSessionProvider = { app.authPrefs.currentSession.value?.token }
-                )
-            }
-        }
-    }
-
     private val _uiState = MutableStateFlow(UpdateTransactionUiState())
     val uiState: StateFlow<UpdateTransactionUiState> = _uiState.asStateFlow()
 
@@ -160,7 +148,7 @@ class UpdateTransactionVM(
     }
 
     private fun authorizationHeader(): String? {
-        return authSessionProvider()?.let { "Bearer $it" }
+        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
     }
 }
 

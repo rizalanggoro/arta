@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.constant.categoryTypes
 import id.my.rizalanggoro.arta.core.event.AppEvent
@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun SelectCategoryScreen(
-    vm: SelectCategoryVM = viewModel(factory = SelectCategoryVM.Factory),
+    vm: SelectCategoryVM = hiltViewModel(),
 ) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current

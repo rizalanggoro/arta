@@ -1,14 +1,11 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.update
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewModelScope
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.openapi.apis.GoldApi
 import id.my.rizalanggoro.arta.openapi.models.GoldUpdateGoldReq
-import id.my.rizalanggoro.arta.domain.AuthSession
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,20 +14,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UpdateGoldVM(
+@HiltViewModel
+class UpdateGoldVM @Inject constructor(
     private val goldApi: GoldApi,
-    private val authSessionProvider: () -> AuthSession?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                UpdateGoldVM(goldApi = app.goldApi, authSessionProvider = { app.authPrefs.currentSession.value })
-            }
-        }
-    }
-
     private val _uiState = MutableStateFlow(UpdateGoldUiState())
     val uiState: StateFlow<UpdateGoldUiState> = _uiState.asStateFlow()
 
@@ -41,7 +31,7 @@ class UpdateGoldVM(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             runCatching {
-                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
                 val response = goldApi.getGold("Bearer $token", goldId)
                 if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
                 response.body() ?: throw IllegalStateException("Response body is null")
@@ -96,23 +86,23 @@ class UpdateGoldVM(
             return
         }
 
-        val grams = current.grams.toDoubleOrNull()
-        val price = current.price.toDoubleOrNull()
-        val carat = current.carat.toDoubleOrNull()
-
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             runCatching {
-                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
-                val resp = goldApi.updateGold("Bearer $token", id, GoldUpdateGoldReq(
-                    date = current.date.ifBlank { null },
-                    grams = current.grams.toDoubleOrNull()?.let(java.math.BigDecimal::valueOf),
-                    price = current.price.toDoubleOrNull()?.let(java.math.BigDecimal::valueOf),
-                    type = current.type.ifBlank { null },
-                    carat = current.carat.toDoubleOrNull()?.let(java.math.BigDecimal::valueOf),
-                    notes = current.notes.ifBlank { null },
-                ))
-                if (!resp.isSuccessful) throw IllegalStateException(resp.errorBody()?.string() ?: "Request failed")
+                val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val response = goldApi.updateGold(
+                    "Bearer $token",
+                    id,
+                    GoldUpdateGoldReq(
+                        date = current.date.ifBlank { null },
+                        grams = current.grams.toDoubleOrNull()?.let(java.math.BigDecimal::valueOf),
+                        price = current.price.toDoubleOrNull()?.let(java.math.BigDecimal::valueOf),
+                        type = current.type.ifBlank { null },
+                        carat = current.carat.toDoubleOrNull()?.let(java.math.BigDecimal::valueOf),
+                        notes = current.notes.ifBlank { null },
+                    ),
+                )
+                if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
             }.onSuccess {
                 _effect.emit(UpdateGoldEffect.NavigateBack)
             }.onFailure { throwable ->
@@ -125,5 +115,5 @@ class UpdateGoldVM(
 
 sealed interface UpdateGoldEffect {
     data class ShowMessage(val message: String) : UpdateGoldEffect
-    object NavigateBack : UpdateGoldEffect
+    data object NavigateBack : UpdateGoldEffect
 }

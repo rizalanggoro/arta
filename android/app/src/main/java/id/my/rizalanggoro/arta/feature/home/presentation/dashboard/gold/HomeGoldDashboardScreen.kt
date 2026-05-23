@@ -20,7 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -33,7 +33,7 @@ import java.util.Locale
 
 @Composable
 fun HomeGoldDashboardScreen(
-    vm: GoldDashboardVM = viewModel(factory = GoldDashboardVM.Factory)
+    vm: GoldDashboardVM = hiltViewModel()
 ) {
     val uiState by vm.uiState.collectAsState()
 

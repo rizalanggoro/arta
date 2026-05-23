@@ -1,43 +1,35 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.upserttax
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.apis.GoldApi
 import id.my.rizalanggoro.arta.openapi.models.GoldGoldTaxPreferenceReq
-import id.my.rizalanggoro.arta.domain.AuthSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UpsertGoldTaxVM(
-    private val taxPreferenceId: Int,
+@HiltViewModel
+class UpsertGoldTaxVM @Inject constructor(
     private val goldApi: GoldApi,
-    private val authSessionProvider: () -> AuthSession?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        fun Factory(taxPreferenceId: Int) = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                UpsertGoldTaxVM(
-                    taxPreferenceId = taxPreferenceId,
-                    goldApi = app.goldApi,
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
-            }
-        }
-    }
+    private var taxPreferenceId: Int = 0
 
-    private val _uiState = MutableStateFlow(
-        UpsertGoldTaxUiState(isUpdate = taxPreferenceId != 0),
-    )
+    private val _uiState = MutableStateFlow(UpsertGoldTaxUiState(isUpdate = false))
     val uiState = _uiState.asStateFlow()
+
+    fun setTaxPreferenceId(value: Int) {
+        if (taxPreferenceId == value) return
+        taxPreferenceId = value
+        _uiState.update { it.copy(isUpdate = value != 0) }
+        load()
+    }
 
     fun load() {
         if (taxPreferenceId == 0) {
@@ -48,43 +40,41 @@ class UpsertGoldTaxVM(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             runCatching {
-                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
                 val response = goldApi.listGoldTaxPreferences("Bearer $token")
                 if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
                 response.body() ?: throw IllegalStateException("Respons server kosong")
             }.onSuccess { res ->
-                    val preferences = res.preferences
-                    val preference = preferences.firstOrNull { it.id == taxPreferenceId }
-                    if (preference == null) {
-                        _uiState.update {
-                            it.copy(
-                                isLoading = false,
-                                errorMessage = "Preferensi pajak tidak ditemukan",
-                            )
-                        }
-                        return@launch
+                val preference = res.preferences.firstOrNull { it.id == taxPreferenceId }
+                if (preference == null) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Preferensi pajak tidak ditemukan",
+                        )
                     }
+                    return@launch
+                }
 
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isUpdate = true,
-                            carat = preference.carat.toString(),
-                            taxRate = preference.taxRate.toString(),
-                            caratError = null,
-                            taxRateError = null,
-                            errorMessage = null,
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isUpdate = true,
+                        carat = preference.carat.toString(),
+                        taxRate = preference.taxRate.toString(),
+                        caratError = null,
+                        taxRateError = null,
+                        errorMessage = null,
+                    )
                 }
-                .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Gagal memuat preferensi pajak",
-                        )
-                    }
+            }.onFailure { throwable ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Gagal memuat preferensi pajak",
+                    )
                 }
+            }
         }
     }
 
@@ -134,20 +124,29 @@ class UpsertGoldTaxVM(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             when {
-                current.isUpdate -> {
-                    runCatching {
-                        val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
-                        val resp = goldApi.updateGoldTaxPreference("Bearer $token", taxPreferenceId, GoldGoldTaxPreferenceReq(carat = java.math.BigDecimal.valueOf(carat!!), taxRate = java.math.BigDecimal.valueOf(taxRate!!)))
-                        if (!resp.isSuccessful) throw IllegalStateException(resp.errorBody()?.string() ?: "Request failed")
-                    }
+                current.isUpdate -> runCatching {
+                    val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                    val response = goldApi.updateGoldTaxPreference(
+                        "Bearer $token",
+                        taxPreferenceId,
+                        GoldGoldTaxPreferenceReq(
+                            carat = java.math.BigDecimal.valueOf(carat!!),
+                            taxRate = java.math.BigDecimal.valueOf(taxRate!!),
+                        ),
+                    )
+                    if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
                 }
 
-                else -> {
-                    runCatching {
-                        val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
-                        val resp = goldApi.createGoldTaxPreference("Bearer $token", GoldGoldTaxPreferenceReq(carat = java.math.BigDecimal.valueOf(carat!!), taxRate = java.math.BigDecimal.valueOf(taxRate!!)))
-                        if (!resp.isSuccessful) throw IllegalStateException(resp.errorBody()?.string() ?: "Request failed")
-                    }
+                else -> runCatching {
+                    val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                    val response = goldApi.createGoldTaxPreference(
+                        "Bearer $token",
+                        GoldGoldTaxPreferenceReq(
+                            carat = java.math.BigDecimal.valueOf(carat!!),
+                            taxRate = java.math.BigDecimal.valueOf(taxRate!!),
+                        ),
+                    )
+                    if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
                 }
             }.onSuccess {
                 AppEventBus.emit(AppEvent.GoldTaxChanged)

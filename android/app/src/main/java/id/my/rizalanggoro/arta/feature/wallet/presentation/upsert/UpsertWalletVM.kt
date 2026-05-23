@@ -1,15 +1,12 @@
 package id.my.rizalanggoro.arta.feature.wallet.presentation.upsert
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.errorMessage
-import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.WalletCreateWalletReq
 import id.my.rizalanggoro.arta.openapi.models.WalletUpdateWalletReq
@@ -18,27 +15,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UpsertWalletVM(
+@HiltViewModel
+class UpsertWalletVM @Inject constructor(
     private val walletApi: WalletApi,
-    private val walletId: Int,
-    private val authSessionProvider: () -> AuthSession?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        fun Factory(walletId: Int) = viewModelFactory {
-            initializer {
-                val app = (this[APPLICATION_KEY] as MyApplication)
-                UpsertWalletVM(
-                    walletApi = app.walletApi,
-                    walletId = walletId,
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
-            }
-        }
-    }
+    private var walletId: Int = 0
 
     private val _uiState = MutableStateFlow(UpsertWalletUiState())
     val uiState: StateFlow<UpsertWalletUiState> = _uiState.asStateFlow()
+
+    fun setWalletId(value: Int) {
+        if (walletId == value) return
+        walletId = value
+        loadWallet()
+    }
 
     fun loadWallet() {
         if (walletId == 0) return
@@ -164,6 +157,6 @@ class UpsertWalletVM(
     }
 
     private fun authorizationHeader(): String? {
-        return authSessionProvider()?.token?.let { "Bearer $it" }
+        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
     }
 }

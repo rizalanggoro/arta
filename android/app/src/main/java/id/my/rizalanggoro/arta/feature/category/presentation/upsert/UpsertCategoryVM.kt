@@ -1,11 +1,9 @@
 package id.my.rizalanggoro.arta.feature.category.presentation.upsert
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
 import id.my.rizalanggoro.arta.openapi.models.CategoryCreateCategoryReq
@@ -18,32 +16,27 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UpsertCategoryVM(
-    private val categoryId: Int,
+@HiltViewModel
+class UpsertCategoryVM @Inject constructor(
     private val categoryApi: CategoryApi,
-    private val authSessionProvider: () -> String?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        fun Factory(categoryId: Int) = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                UpsertCategoryVM(
-                    categoryId = categoryId,
-                    categoryApi = app.categoryApi,
-                    authSessionProvider = { app.authPrefs.currentSession.value?.token },
-                )
-            }
-        }
-    }
+    private var categoryId: Int = 0
 
-    private val _uiState = MutableStateFlow(
-        UpsertCategoryUiState(isUpdate = categoryId != 0)
-    )
+    private val _uiState = MutableStateFlow(UpsertCategoryUiState(isUpdate = false))
     val uiState: StateFlow<UpsertCategoryUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<UpsertCategoryEffect>()
     val effect: SharedFlow<UpsertCategoryEffect> = _effect.asSharedFlow()
+
+    fun setCategoryId(value: Int) {
+        if (categoryId == value) return
+        categoryId = value
+        _uiState.update { it.copy(isUpdate = value != 0) }
+        loadCategory()
+    }
 
     fun loadCategory() {
         if (categoryId == 0) {
@@ -160,7 +153,7 @@ class UpsertCategoryVM(
     }
 
     private fun authorizationHeader(): String? {
-        return authSessionProvider()?.let { "Bearer $it" }
+        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
     }
 
     init {

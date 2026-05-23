@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.WalletCreateFirstRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun RegisterScreen(vm: RegisterVM = viewModel(factory = RegisterVM.Factory)) {
+fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
 

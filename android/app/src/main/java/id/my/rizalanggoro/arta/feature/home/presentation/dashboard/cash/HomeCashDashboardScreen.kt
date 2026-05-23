@@ -20,7 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.openapi.models.CashDashboardResRecentTransactionsInner
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = viewModel(factory = HomeCashDashboardVM.Factory)) {
+fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
 
     Content(

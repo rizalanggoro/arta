@@ -32,14 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import java.math.BigDecimal
 
 @Composable
 fun HomeGoldScreen(
-    vm: HomeGoldVM = viewModel(factory = HomeGoldVM.Factory),
+    vm: HomeGoldVM = hiltViewModel(),
     onClickManageTax: () -> Unit = {},
 ) {
     val uiState by vm.uiState.collectAsState()

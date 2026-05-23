@@ -42,7 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.constant.goldTypes
 import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
@@ -56,7 +56,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun CreateGoldScreen(
-    vm: CreateGoldVM = viewModel(factory = CreateGoldVM.Factory),
+    vm: CreateGoldVM = hiltViewModel(),
 ) {
     val uiState by vm.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }

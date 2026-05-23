@@ -26,7 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.UpsertWalletRoute
 import id.my.rizalanggoro.arta.core.constant.toWalletName
@@ -39,7 +39,7 @@ import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
-fun ListWalletScreen(vm: ListWalletVM = viewModel(factory = ListWalletVM.Factory)) {
+fun ListWalletScreen(vm: ListWalletVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
 

@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,7 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 fun TransactionDetailScreen(
     transactionId: Int,
-    vm: TransactionDetailVM = viewModel(factory = TransactionDetailVM.Factory),
+    vm: TransactionDetailVM = hiltViewModel(),
 ) {
     val tx by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current

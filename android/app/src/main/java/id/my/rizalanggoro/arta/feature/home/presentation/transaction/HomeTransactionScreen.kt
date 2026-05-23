@@ -13,7 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,7 +22,7 @@ import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
-fun HomeTransactionScreen(vm: TransactionListVM = viewModel(factory = TransactionListVM.Factory)) {
+fun HomeTransactionScreen(vm: TransactionListVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
 
     Content(

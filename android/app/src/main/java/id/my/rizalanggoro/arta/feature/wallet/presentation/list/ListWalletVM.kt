@@ -1,15 +1,12 @@
 package id.my.rizalanggoro.arta.feature.wallet.presentation.list
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.errorMessage
-import id.my.rizalanggoro.arta.domain.AuthSession
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,23 +15,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ListWalletVM(
+@HiltViewModel
+class ListWalletVM @Inject constructor(
     private val walletApi: WalletApi,
-    private val authSessionProvider: () -> AuthSession?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                ListWalletVM(
-                    walletApi = app.walletApi,
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
-            }
-        }
-    }
-
     private val _uiState = MutableStateFlow(ListWalletUiState())
     val uiState: StateFlow<ListWalletUiState> = _uiState.asStateFlow()
 
@@ -145,6 +132,6 @@ class ListWalletVM(
     }
 
     private fun authorizationHeader(): String? {
-        return authSessionProvider()?.token?.let { "Bearer $it" }
+        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
     }
 }

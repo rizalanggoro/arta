@@ -1,11 +1,9 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
 import id.my.rizalanggoro.arta.openapi.models.GoldDashboardRes
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,23 +13,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
+import javax.inject.Inject
 
-class GoldDashboardVM(
+@HiltViewModel
+class GoldDashboardVM @Inject constructor(
     private val dashboardApi: DashboardApi,
-    private val authSessionProvider: () -> id.my.rizalanggoro.arta.domain.AuthSession?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                GoldDashboardVM(
-                    dashboardApi = app.dashboardApi,
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
-            }
-        }
-    }
-
     private val _uiState = MutableStateFlow(
         GoldDashboardUiState(
             activeWalletName = "Memuat...",
@@ -47,7 +35,7 @@ class GoldDashboardVM(
     private fun loadDashboard() {
         viewModelScope.launch {
             runCatching {
-                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
                 val response = dashboardApi.getGoldDashboard("Bearer $token")
                 if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
                 response.body() ?: throw IllegalStateException("Response body is null")

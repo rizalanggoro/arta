@@ -27,7 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.HomeRoute
 import id.my.rizalanggoro.arta.core.constant.walletTypes
@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateFirstWalletScreen(vm: CreateFirstWalletVM = viewModel(factory = CreateFirstWalletVM.Factory)) {
+fun CreateFirstWalletScreen(vm: CreateFirstWalletVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
 

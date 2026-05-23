@@ -3,11 +3,9 @@ package id.my.rizalanggoro.arta.feature.home.presentation.transaction
 // replaced walletApiErrorMessage usages with core.errorMessage()
 // use OpenAPI models directly (`DtoTransaction.data`) instead of mapper extension
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
@@ -17,26 +15,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class TransactionListVM(
+@HiltViewModel
+class TransactionListVM @Inject constructor(
     private val transactionApi: TransactionApi,
     private val walletApi: WalletApi,
-    private val authSessionProvider: () -> String?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as MyApplication
-                val walletApi = app.walletApi
-                TransactionListVM(
-                    transactionApi = app.transactionApi,
-                    walletApi = walletApi,
-                    authSessionProvider = { app.authPrefs.currentSession.value?.token },
-                )
-            }
-        }
-    }
-
     private val _uiState = MutableStateFlow(TransactionListUiState())
     val uiState: StateFlow<TransactionListUiState> = _uiState.asStateFlow()
 
@@ -97,6 +83,6 @@ class TransactionListVM(
     }
 
     private fun authorizationHeader(): String? {
-        return authSessionProvider()?.let { "Bearer $it" }
+        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
     }
 }

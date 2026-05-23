@@ -1,11 +1,9 @@
 package id.my.rizalanggoro.arta.feature.transaction.presentation.create
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -23,25 +21,14 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import javax.inject.Inject
 
-class CreateTransactionVM(
+@HiltViewModel
+class CreateTransactionVM @Inject constructor(
     private val transactionApi: TransactionApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
-    private val authSessionProvider: () -> String?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = (this[APPLICATION_KEY] as MyApplication)
-                CreateTransactionVM(
-                    transactionApi = app.transactionApi,
-                    selectedWalletPrefs = app.selectedWalletPrefs,
-                    authSessionProvider = { app.authPrefs.currentSession.value?.token },
-                )
-            }
-        }
-    }
-
     private val _uiState = MutableStateFlow(CreateTransactionUiState())
     val uiState: StateFlow<CreateTransactionUiState> = _uiState.asStateFlow()
 
@@ -125,7 +112,7 @@ class CreateTransactionVM(
     }
 
     private fun authorizationHeader(): String? {
-        return authSessionProvider()?.let { "Bearer $it" }
+        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
     }
 
     init {

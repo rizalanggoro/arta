@@ -52,7 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategoryUpsertRoute
 import id.my.rizalanggoro.arta.openapi.models.DtoCategory
@@ -60,7 +60,7 @@ import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
-fun ListCategoryScreen(vm: ListCategoryVM = viewModel(factory = ListCategoryVM.Factory)) {
+fun ListCategoryScreen(vm: ListCategoryVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
 

@@ -1,14 +1,11 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.create
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import id.my.rizalanggoro.arta.core.application.MyApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.openapi.apis.GoldApi
-import id.my.rizalanggoro.arta.domain.AuthSession
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,25 +14,14 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CreateGoldVM(
+@HiltViewModel
+class CreateGoldVM @Inject constructor(
     private val goldApi: GoldApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
-    private val authSessionProvider: () -> AuthSession?,
+    private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    companion object {
-        val Factory = viewModelFactory {
-            initializer {
-                val app = (this[APPLICATION_KEY] as MyApplication)
-                CreateGoldVM(
-                    goldApi = app.goldApi,
-                    selectedWalletPrefs = app.selectedWalletPrefs,
-                    authSessionProvider = { app.authPrefs.currentSession.value },
-                )
-            }
-        }
-    }
-
     private val _uiState = MutableStateFlow(CreateGoldUiState())
     val uiState: StateFlow<CreateGoldUiState> = _uiState.asStateFlow()
 
@@ -109,7 +95,7 @@ class CreateGoldVM(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             runCatching {
-                val token = authSessionProvider()?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
                 val resp = goldApi.createGold("Bearer $token", id.my.rizalanggoro.arta.openapi.models.GoldCreateGoldReq(
                     walletId = requireNotNull(current.selectedWallet?.id) { "Wallet response missing id" },
                     date = current.date,
