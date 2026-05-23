@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.constant.toWalletName
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
@@ -141,7 +142,7 @@ private fun Content(
                                 Text(wallet.data.name.orEmpty())
                             },
                             supportingContent = {
-                                Text(walletTypeLabel(wallet.data.type.orEmpty()))
+                                Text(wallet.data.type.orEmpty().toWalletName())
                             },
                             modifier = Modifier.clickable {
                                 onClickWallet(wallet.data)
@@ -151,15 +152,6 @@ private fun Content(
                 }
             }
         }
-    }
-}
-
-private fun walletTypeLabel(type: String): String {
-    return when (type) {
-        "cash_savings" -> "Tabungan Uang"
-        "gold_savings" -> "Tabungan Emas"
-        else -> type.replace('_', ' ')
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     }
 }
 
