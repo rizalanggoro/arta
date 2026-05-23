@@ -1,17 +1,16 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.transaction
 
+// replaced walletApiErrorMessage usages with core.errorMessage(Json)
+// use OpenAPI models directly (`DtoTransaction.data`) instead of mapper extension
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
-// replaced walletApiErrorMessage usages with core.errorMessage(Json)
 import id.my.rizalanggoro.arta.core.extension.errorMessage
-import kotlinx.serialization.json.Json
-// use OpenAPI models directly (`DtoTransaction.data`) instead of mapper extension
-import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
+import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,8 +53,7 @@ class TransactionListVM(
 
                 val response = walletApi.listWallets()
                 if (!response.isSuccessful) {
-                    val j = Json { ignoreUnknownKeys = true }
-                    throw IllegalStateException(response.errorMessage(j))
+                    throw IllegalStateException(response.errorMessage())
                 }
 
                 response.body()?.wallets.orEmpty().mapNotNull { it.data }
@@ -68,26 +66,37 @@ class TransactionListVM(
                             val authorization = authorizationHeader()
                                 ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                            val txResponse = transactionApi.listTransactions(authorization, walletId)
+                            val txResponse =
+                                transactionApi.listTransactions(authorization, walletId)
                             if (!txResponse.isSuccessful) {
-                                val j = Json { ignoreUnknownKeys = true }
-                                throw IllegalStateException(txResponse.errorMessage(j))
+                                throw IllegalStateException(txResponse.errorMessage())
                             }
 
-                            txResponse.body() ?: throw IllegalStateException("Respons server kosong")
+                            txResponse.body()
+                                ?: throw IllegalStateException("Respons server kosong")
                         }.onSuccess { txResponse ->
-                                allTxs.addAll(txResponse.transactions.map { it.data })
+                            allTxs.addAll(txResponse.transactions.map { it.data })
                         }.onFailure { /* ignore per-wallet failure for now */ }
                     }
-                    _uiState.update { it.copy(transactions = allTxs.sortedByDescending { it.date }, isLoading = false) }
+                    _uiState.update {
+                        it.copy(
+                            transactions = allTxs.sortedByDescending { it.date },
+                            isLoading = false
+                        )
+                    }
                 }
                 .onFailure { throwable ->
-                    _uiState.update { it.copy(isLoading = false, errorMessage = throwable.message ?: "Gagal memuat transaksi") }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = throwable.message ?: "Gagal memuat transaksi"
+                        )
+                    }
                 }
         }
     }
 
-        private fun authorizationHeader(): String? {
-            return authSessionProvider()?.let { "Bearer $it" }
-        }
+    private fun authorizationHeader(): String? {
+        return authSessionProvider()?.let { "Bearer $it" }
+    }
 }

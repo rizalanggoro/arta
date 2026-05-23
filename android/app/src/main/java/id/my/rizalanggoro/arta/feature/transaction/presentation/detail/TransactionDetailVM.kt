@@ -2,11 +2,10 @@ package id.my.rizalanggoro.arta.feature.transaction.presentation.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.lifecycle.viewModelScope
 import id.my.rizalanggoro.arta.core.application.MyApplication
-import kotlinx.serialization.json.Json
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
@@ -43,8 +42,7 @@ class TransactionDetailVM(
 
                 val response = transactionApi.getTransaction(authorization, transactionId)
                 if (!response.isSuccessful) {
-                    val j = Json { ignoreUnknownKeys = true }
-                    throw IllegalStateException(response.errorMessage(j))
+                    throw IllegalStateException(response.errorMessage())
                 }
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")

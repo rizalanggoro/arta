@@ -9,11 +9,10 @@ import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.core.extension.toApiFormat
 import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
 import id.my.rizalanggoro.arta.openapi.models.CreateTransactionReq
-import kotlinx.serialization.json.Json
-import id.my.rizalanggoro.arta.core.extension.errorMessage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -107,8 +106,7 @@ class CreateTransactionVM(
                 )
 
                 if (!response.isSuccessful) {
-                    val j = Json { ignoreUnknownKeys = true }
-                    throw IllegalStateException(response.errorMessage(j))
+                    throw IllegalStateException(response.errorMessage())
                 }
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")

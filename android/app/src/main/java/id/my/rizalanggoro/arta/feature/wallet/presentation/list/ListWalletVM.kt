@@ -8,10 +8,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import kotlinx.serialization.json.Json
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
-import id.my.rizalanggoro.arta.openapi.models.DtoWallet
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,8 +44,7 @@ class ListWalletVM(
             runCatching {
                 val response = walletApi.listWallets()
                 if (!response.isSuccessful) {
-                    val j = Json { ignoreUnknownKeys = true }
-                    throw IllegalStateException(response.errorMessage(j))
+                    throw IllegalStateException(response.errorMessage())
                 }
 
                 response.body() ?: throw IllegalStateException("Response body is null")
@@ -71,37 +68,49 @@ class ListWalletVM(
         }
     }
 
-    fun onDeleteRequested(wallet: DomainWallet) {
-        _uiState.update { it.copy(deleteTarget = wallet, selectedWallet = null) }
+    fun onWalletSelected(wallet: DomainWallet) = _uiState.update {
+        it.copy(
+            selectedWallet = wallet
+        )
     }
 
-    fun dismissDeleteDialog() {
-        _uiState.update { it.copy(deleteTarget = null) }
+    fun onActionDeleteClicked() = _uiState.update {
+        it.copy(
+            deleteTarget = it.selectedWallet,
+            selectedWallet = null
+        )
     }
 
-    fun onWalletSelected(wallet: DomainWallet) {
-        _uiState.update { it.copy(selectedWallet = wallet) }
+    fun onActionDismissed() = _uiState.update {
+        it.copy(
+            selectedWallet = null,
+            deleteTarget = null
+        )
     }
 
-    fun dismissWalletActions() {
-        _uiState.update { it.copy(selectedWallet = null) }
+    fun onDialogDismissed() = _uiState.update {
+        it.copy(deleteTarget = null)
     }
 
-    fun confirmDeleteWallet(wallet: DomainWallet) {
+    fun confirmDeleteWallet() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            _uiState.update {
+                it.copy(
+                    isDeleting = true
+                )
+            }
             runCatching {
-                val response = walletApi.deleteWallet(requireNotNull(wallet.id) {
-                    "Wallet response missing id"
-                })
+                val response =
+                    walletApi.deleteWallet(requireNotNull(_uiState.value.deleteTarget?.id) {
+                        "Wallet response missing id"
+                    })
                 if (!response.isSuccessful) {
-                    val j = Json { ignoreUnknownKeys = true }
-                    throw IllegalStateException(response.errorMessage(j))
+                    throw IllegalStateException(response.errorMessage())
                 }
             }.onSuccess {
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
+                        isDeleting = false,
                         deleteTarget = null
                     )
                 }
@@ -109,21 +118,21 @@ class ListWalletVM(
             }.onFailure { throwable ->
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        errorMessage = throwable.message ?: "Gagal menghapus wallet",
+                        isDeleting = false,
+                        // errorMessage = throwable.message ?: "Gagal menghapus wallet",
                     )
                 }
             }
         }
+    }
+
+    init {
+        loadWallets()
 
         viewModelScope.launch {
             AppEventBus.event
                 .filterIsInstance<AppEvent.WalletChanged>()
                 .collect { loadWallets() }
         }
-    }
-
-    init {
-        loadWallets()
     }
 }

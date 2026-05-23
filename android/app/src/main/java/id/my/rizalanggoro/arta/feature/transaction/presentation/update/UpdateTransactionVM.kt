@@ -8,7 +8,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.my.rizalanggoro.arta.core.application.MyApplication
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import kotlinx.serialization.json.Json
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
 import id.my.rizalanggoro.arta.openapi.models.UpdateTransactionReq
@@ -21,7 +20,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 
 class UpdateTransactionVM(
     private val transactionApi: TransactionApi,
@@ -54,24 +52,24 @@ class UpdateTransactionVM(
 
                 val response = transactionApi.getTransaction(authorization, transactionId)
                 if (!response.isSuccessful) {
-                    val j = Json { ignoreUnknownKeys = true }
-                    throw IllegalStateException(response.errorMessage(j))
+                    throw IllegalStateException(response.errorMessage())
                 }
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")
             }.onSuccess { response ->
-                    _uiState.update {
-                        it.copy(
-                            walletId = response.data.walletId.toString(),
-                            selectedWalletName = "Wallet ID: ${response.data.walletId}",
-                            amount = response.data.amount.toPlainString(),
-                            categoryId = response.data.categoryId.toString(),
-                            selectedCategoryName = response.category?.name ?: if (response.data.categoryId > 0) "Kategori #${response.data.categoryId}" else "",
-                            description = response.data.description,
-                            date = response.data.date,
-                            isLoading = false,
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        walletId = response.data.walletId.toString(),
+                        selectedWalletName = "Wallet ID: ${response.data.walletId}",
+                        amount = response.data.amount.toPlainString(),
+                        categoryId = response.data.categoryId.toString(),
+                        selectedCategoryName = response.category?.name
+                            ?: if (response.data.categoryId > 0) "Kategori #${response.data.categoryId}" else "",
+                        description = response.data.description,
+                        date = response.data.date,
+                        isLoading = false,
+                    )
+                }
             }.onFailure {
                 _uiState.update { it.copy(isLoading = false) }
             }
@@ -115,8 +113,7 @@ class UpdateTransactionVM(
                 )
 
                 if (!response.isSuccessful) {
-                    val j = Json { ignoreUnknownKeys = true }
-                    throw IllegalStateException(response.errorMessage(j))
+                    throw IllegalStateException(response.errorMessage())
                 }
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")
