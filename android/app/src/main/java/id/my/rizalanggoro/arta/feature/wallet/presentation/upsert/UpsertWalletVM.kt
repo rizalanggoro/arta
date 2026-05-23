@@ -10,27 +10,26 @@ import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
-import id.my.rizalanggoro.arta.openapi.models.CreateWalletRes
-import id.my.rizalanggoro.arta.openapi.models.UpdateWalletRes
 import id.my.rizalanggoro.arta.openapi.models.WalletCreateWalletReq
 import id.my.rizalanggoro.arta.openapi.models.WalletUpdateWalletReq
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UpsertWalletVM(
     private val walletApi: WalletApi,
+    private val walletId: Int
 ) : ViewModel() {
     companion object {
-        val Factory = viewModelFactory {
+        fun Factory(walletId: Int) = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MyApplication)
-                UpsertWalletVM(walletApi = app.walletApi)
+                UpsertWalletVM(
+                    walletApi = app.walletApi,
+                    walletId = walletId
+                )
             }
         }
     }
@@ -38,22 +37,8 @@ class UpsertWalletVM(
     private val _uiState = MutableStateFlow(UpsertWalletUiState())
     val uiState: StateFlow<UpsertWalletUiState> = _uiState.asStateFlow()
 
-    private val _effect = MutableSharedFlow<UpsertWalletEffect>()
-    val effect: SharedFlow<UpsertWalletEffect> = _effect.asSharedFlow()
-
-    fun loadWallet(walletId: Int) {
-        if (walletId == 0) {
-            _uiState.update {
-                it.copy(
-                    walletId = 0,
-                    name = "",
-                    type = "cash_savings",
-                    errorMessage = null,
-                    isLoading = false,
-                )
-            }
-            return
-        }
+    fun loadWallet() {
+        if (walletId == 0) return
 
         viewModelScope.launch {
             _uiState.update {
@@ -92,12 +77,17 @@ class UpsertWalletVM(
         }
     }
 
-    fun onChangeName(value: String) {
-        _uiState.update { it.copy(name = value, nameError = null) }
+    fun onNameChanged(value: String) = _uiState.update {
+        it.copy(
+            name = value,
+            nameError = null
+        )
     }
 
-    fun onChangeType(value: String) {
-        _uiState.update { it.copy(type = value, typeError = null) }
+    fun onTypeChanged(value: String) = _uiState.update {
+        it.copy(
+            type = value,
+        )
     }
 
     fun submit() {
@@ -106,23 +96,10 @@ class UpsertWalletVM(
 
         var hasError = false
         if (current.name.isBlank()) {
-            _uiState.update { it.copy(nameError = "Nama wallet wajib diisi") }
+            _uiState.update { it.copy(nameError = "Nama dompet tidak boleh kosong!") }
             hasError = true
         }
-        if (current.type.isBlank()) {
-            _uiState.update { it.copy(typeError = "Tipe wallet wajib diisi") }
-            hasError = true
-        }
-        if (hasError) {
-            viewModelScope.launch {
-                _effect.emit(
-                    UpsertWalletEffect.ShowMessage(
-                        if (isUpdate) "Periksa kembali wallet yang diubah" else "Periksa kembali wallet yang dibuat"
-                    )
-                )
-            }
-            return
-        }
+        if (hasError) return
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -160,41 +137,15 @@ class UpsertWalletVM(
                 }
             }
 
-            result
-                .onSuccess { response ->
-                    val walletName = when (response) {
-                        is CreateWalletRes -> response.data.name.orEmpty()
-                        is UpdateWalletRes -> response.data.name.orEmpty()
-                        else -> ""
-                    }
-
-                    AppEventBus.emit(AppEvent.WalletChanged)
-                    _effect.emit(
-                        UpsertWalletEffect.ShowMessage(
-                            if (isUpdate) {
-                                "Wallet $walletName berhasil diperbarui"
-                            } else {
-                                "Wallet $walletName berhasil dibuat"
-                            }
-                        )
-                    )
-                    _effect.emit(UpsertWalletEffect.NavigateBack)
-                }
-                .onFailure { throwable ->
-                    _effect.emit(
-                        UpsertWalletEffect.ShowMessage(
-                            throwable.message
-                                ?: if (isUpdate) "Gagal memperbarui wallet" else "Gagal membuat wallet"
-                        )
-                    )
-                }
+            result.onSuccess {
+                AppEventBus.emit(AppEvent.WalletChanged)
+            }
 
             _uiState.update { it.copy(isLoading = false) }
         }
     }
-}
 
-sealed interface UpsertWalletEffect {
-    data class ShowMessage(val message: String) : UpsertWalletEffect
-    data object NavigateBack : UpsertWalletEffect
+    init {
+        loadWallet()
+    }
 }
