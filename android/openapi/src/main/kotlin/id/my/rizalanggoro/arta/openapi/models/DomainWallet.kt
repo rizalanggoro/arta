@@ -36,29 +36,29 @@ import kotlinx.serialization.Contextual
  * @param name 
  * @param type 
  * @param updatedAt 
- * @param userID 
+ * @param userId 
  */
 @Serializable
 
 data class DomainWallet (
 
-    @SerialName(value = "createdAt")
-    val createdAt: kotlin.String? = null,
+    @SerialName(value = "created_at")
+    val createdAt: kotlin.String,
 
     @SerialName(value = "id")
-    val id: kotlin.Int? = null,
+    val id: kotlin.Int,
 
     @SerialName(value = "name")
-    val name: kotlin.String? = null,
+    val name: kotlin.String,
 
     @SerialName(value = "type")
-    val type: kotlin.String? = null,
+    val type: kotlin.String,
 
-    @SerialName(value = "updatedAt")
-    val updatedAt: kotlin.String? = null,
+    @SerialName(value = "updated_at")
+    val updatedAt: kotlin.String,
 
-    @SerialName(value = "userID")
-    val userID: kotlin.Int? = null
+    @SerialName(value = "user_id")
+    val userId: kotlin.Int
 
 ) {
 

@@ -10,11 +10,11 @@ import (
 // FxRate represents a foreign exchange rate snapshot in the domain layer.
 // @name FxRate
 type FxRate struct {
-	ID        uint
-	Base      string
-	Date      time.Time
-	Rate      int
-	CreatedAt time.Time
+	ID        uint      `json:"id"`
+	Base      string    `json:"base"`
+	Date      time.Time `json:"date"`
+	Rate      int       `json:"rate"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // FromFxRateModel maps an FX rate model to the domain layer.

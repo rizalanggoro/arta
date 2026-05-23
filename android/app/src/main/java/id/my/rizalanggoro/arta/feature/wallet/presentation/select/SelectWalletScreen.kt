@@ -165,25 +165,31 @@ private fun SelectWalletPreview() {
                     DtoWallet(
                         data = DomainWallet(
                             id = 1,
-                            userID = 1,
+                            userId = 1,
                             name = "Dompet Harian",
                             type = "cash_savings"
+                            ,createdAt = "2026-05-23T00:00:00Z",
+                            updatedAt = "2026-05-23T00:00:00Z",
                         )
                     ),
                     DtoWallet(
                         data = DomainWallet(
                             id = 2,
-                            userID = 1,
+                            userId = 1,
                             name = "Dompet Harian",
                             type = "cash_savings"
+                            ,createdAt = "2026-05-23T00:00:00Z",
+                            updatedAt = "2026-05-23T00:00:00Z",
                         )
                     ),
                     DtoWallet(
                         data = DomainWallet(
                             id = 3,
-                            userID = 1,
+                            userId = 1,
                             name = "Dompet Harian",
                             type = "cash_savings"
+                            ,createdAt = "2026-05-23T00:00:00Z",
+                            updatedAt = "2026-05-23T00:00:00Z",
                         )
                     ),
                 )

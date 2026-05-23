@@ -482,7 +482,7 @@ definitions:
     type: object
   domain.Wallet:
     properties:
-      createdAt:
+      created_at:
         type: string
       id:
         type: integer
@@ -490,10 +490,17 @@ definitions:
         type: string
       type:
         type: string
-      updatedAt:
+      updated_at:
         type: string
-      userID:
+      user_id:
         type: integer
+    required:
+    - created_at
+    - id
+    - name
+    - type
+    - updated_at
+    - user_id
     type: object
   dto.Category:
     properties:

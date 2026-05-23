@@ -293,9 +293,11 @@ private fun CreateTransactionErrorPreview() {
         Content(
             wallet = DomainWallet(
                 id = 12,
-                userID = 10,
+                userId = 10,
                 name = "Tabungan Uang",
                 type = "cash_savings",
+                createdAt = "2026-05-23T00:00:00Z",
+                updatedAt = "2026-05-23T00:00:00Z",
             ),
             amountError = "Nominal tidak valid",
             categoryError = "Kategori tidak boleh kosong",

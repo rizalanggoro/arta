@@ -2201,8 +2201,16 @@ const docTemplate = `{
         },
         "domain.Wallet": {
             "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "name",
+                "type",
+                "updated_at",
+                "user_id"
+            ],
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "id": {
@@ -2214,10 +2222,10 @@ const docTemplate = `{
                 "type": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
-                "userID": {
+                "user_id": {
                     "type": "integer"
                 }
             }

@@ -73,15 +73,6 @@ class LoginVM @Inject constructor(
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")
             }.onSuccess { loginResponse ->
-                authPrefs.setSession(
-                    session = AuthSession(
-                        userId = requireNotNull(loginResponse.userId) { "Login response missing user id" },
-                        email = requireNotNull(loginResponse.email) { "Login response missing email" },
-                        name = requireNotNull(loginResponse.name) { "Login response missing name" },
-                        token = requireNotNull(loginResponse.token) { "Login response missing token" },
-                    )
-                )
-
                 runCatching {
                     val authorization = "Bearer ${loginResponse.token}"
                     val walletResponse = walletApi.listWallets(authorization)
@@ -94,8 +85,24 @@ class LoginVM @Inject constructor(
                     walletListResponse.wallets.firstOrNull()?.let { firstWallet ->
                         selectedWalletPrefs.saveSelectedWallet(firstWallet.data)
                     }
+
+                    authPrefs.setSession(
+                        session = AuthSession(
+                            userId = requireNotNull(loginResponse.userId) { "Login response missing user id" },
+                            email = requireNotNull(loginResponse.email) { "Login response missing email" },
+                            name = requireNotNull(loginResponse.name) { "Login response missing name" },
+                            token = requireNotNull(loginResponse.token) { "Login response missing token" },
+                        )
+                    )
+                    _event.emit(LoginUiState.Event.LoginSucceeded)
+                }.onFailure { throwable ->
+                    throwable.printStackTrace()
+                    _event.emit(
+                        LoginUiState.Event.ShowMessage(
+                            message = throwable.message ?: "Terjadi kesalahan tak terduga"
+                        )
+                    )
                 }
-                _event.emit(LoginUiState.Event.LoginSucceeded)
             }.onFailure { throwable ->
                 _event.emit(
                     LoginUiState.Event.ShowMessage(

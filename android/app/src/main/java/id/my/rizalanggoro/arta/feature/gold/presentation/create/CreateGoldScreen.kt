@@ -356,9 +356,11 @@ private fun CreateGoldDefaultPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             selectedWallet = DomainWallet(
                 id = 12,
-                userID = 1,
+                userId = 1,
                 name = "Tabungan Emas",
                 type = "gold_savings",
+                createdAt = "2026-05-23T00:00:00Z",
+                updatedAt = "2026-05-23T00:00:00Z",
             ),
             date = "2026-05-16T10:30:00+07:00",
             grams = "1.5",

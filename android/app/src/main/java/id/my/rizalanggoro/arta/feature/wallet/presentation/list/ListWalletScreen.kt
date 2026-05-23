@@ -164,17 +164,21 @@ private fun WalletListPreview() {
                     DtoWallet(
                         data = DomainWallet(
                             id = 1,
-                            userID = 10,
+                            userId = 10,
                             name = "Utama",
                             type = "cash_savings",
+                            createdAt = "2026-05-23T00:00:00Z",
+                            updatedAt = "2026-05-23T00:00:00Z",
                         ),
                     ),
                     DtoWallet(
                         data = DomainWallet(
                             id = 2,
-                            userID = 10,
+                            userId = 10,
                             name = "Emas",
                             type = "gold_savings",
+                            createdAt = "2026-05-23T00:00:00Z",
+                            updatedAt = "2026-05-23T00:00:00Z",
                         ),
                     ),
                 ),

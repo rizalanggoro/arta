@@ -4,12 +4,12 @@
 ## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-| **createdAt** | **kotlin.String** |  |  [optional] |
-| **id** | **kotlin.Int** |  |  [optional] |
-| **name** | **kotlin.String** |  |  [optional] |
-| **type** | **kotlin.String** |  |  [optional] |
-| **updatedAt** | **kotlin.String** |  |  [optional] |
-| **userID** | **kotlin.Int** |  |  [optional] |
+| **createdAt** | **kotlin.String** |  |  |
+| **id** | **kotlin.Int** |  |  |
+| **name** | **kotlin.String** |  |  |
+| **type** | **kotlin.String** |  |  |
+| **updatedAt** | **kotlin.String** |  |  |
+| **userId** | **kotlin.Int** |  |  |
 
 
 

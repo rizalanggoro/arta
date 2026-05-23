@@ -10,15 +10,15 @@ import (
 // GoldPrice represents gold price history in the domain layer
 // @name GoldPrice
 type GoldPrice struct {
-	ID                uint
-	Symbol            string
-	Currency          string
-	CurrencySymbol    string
-	ExchangeRate      float64
-	PricePerOunceUSD  float64
-	SourceUpdatedAt   time.Time
-	SourceReadableAge string
-	CreatedAt         time.Time
+	ID                uint      `json:"id"`
+	Symbol            string    `json:"symbol"`
+	Currency          string    `json:"currency"`
+	CurrencySymbol    string    `json:"currency_symbol"`
+	ExchangeRate      float64   `json:"exchange_rate"`
+	PricePerOunceUSD  float64   `json:"price_per_ounce_usd"`
+	SourceUpdatedAt   time.Time `json:"source_updated_at"`
+	SourceReadableAge string    `json:"source_readable_age"`
+	CreatedAt         time.Time `json:"created_at"`
 }
 
 // FromGoldPriceModel maps a gold price model to the domain layer.

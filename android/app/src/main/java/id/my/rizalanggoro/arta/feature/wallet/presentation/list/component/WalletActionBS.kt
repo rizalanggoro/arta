@@ -119,6 +119,9 @@ private fun Preview() {
             id = 1,
             name = "Dompet Utama",
             type = "cash_savings"
+            ,createdAt = "2026-05-23T00:00:00Z",
+            updatedAt = "2026-05-23T00:00:00Z",
+            userId = 1,
         )
     )
 }

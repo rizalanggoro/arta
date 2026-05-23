@@ -10,12 +10,12 @@ import (
 // Wallet represents a wallet in the domain layer.
 // @name Wallet
 type Wallet struct {
-	ID        uint
-	UserID    uint
-	Name      string
-	Type      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uint      `json:"id"`
+	UserID    uint      `json:"user_id"`
+	Name      string    `json:"name"`
+	Type      string    `json:"type"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // FromWalletModel maps a wallet model to the domain layer.

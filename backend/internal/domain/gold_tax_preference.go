@@ -10,12 +10,12 @@ import (
 // GoldTaxPreference represents a user's gold tax preference in the domain layer.
 // @name GoldTaxPreference
 type GoldTaxPreference struct {
-	ID        uint
-	UserID    uint
-	Carat     float64
-	TaxRate   float64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uint      `json:"id"`
+	UserID    uint      `json:"user_id"`
+	Carat     float64   `json:"carat"`
+	TaxRate   float64   `json:"tax_rate"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // FromGoldTaxPreferenceModel maps a gold tax preference model to the domain layer.
