@@ -38,7 +38,12 @@ class SelectCategoryVM @Inject constructor(
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")
             }.onSuccess { response ->
-                _uiState.update { it.copy(categories = response.categories, isLoading = false) }
+                _uiState.update {
+                    it.copy(
+                        categories = response.categories,
+                        isLoading = false
+                    )
+                }
             }.onFailure { throwable ->
                 _uiState.update {
                     it.copy(
@@ -67,8 +72,4 @@ class SelectCategoryVM @Inject constructor(
     init {
         loadCategories()
     }
-}
-
-sealed interface SelectCategoryEffect {
-    data object NavigateBack : SelectCategoryEffect
 }

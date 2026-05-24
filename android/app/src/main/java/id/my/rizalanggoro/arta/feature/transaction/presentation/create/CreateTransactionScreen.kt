@@ -78,7 +78,13 @@ fun CreateTransactionScreen(
         isLoading = uiState.isLoading,
         onAmountChanged = vm::onAmountChanged,
         onDescriptionChanged = vm::onDescriptionChanged,
-        onClickSelectCategory = { backStack.add(CategorySelectRoute) },
+        onClickSelectCategory = {
+            backStack.add(
+                CategorySelectRoute(
+                    categoryId = null
+                )
+            )
+        },
         onClickSubmit = vm::createTransaction,
         onClickBack = { backStack.removeLastOrNull() },
         onClickSelectDate = { vm.onChangeDatePickerDialog(isOpen = true) }

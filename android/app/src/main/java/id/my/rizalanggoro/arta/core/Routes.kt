@@ -75,7 +75,9 @@ object Routes {
     data object CategoryRoute : NavKey
 
     @Serializable
-    data object CategorySelectRoute : NavKey
+    data class CategorySelectRoute(
+        val categoryId: Int? = null,
+    ) : NavKey
 
     @Serializable
     data class CategoryUpsertRoute(

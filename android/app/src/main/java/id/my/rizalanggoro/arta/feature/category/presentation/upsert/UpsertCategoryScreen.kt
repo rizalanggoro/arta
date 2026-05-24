@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,35 +24,26 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.constant.categoryTypes
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun UpsertCategoryScreen(
-    categoryId: Int,
     vm: UpsertCategoryVM = hiltViewModel(),
 ) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
 
-    LaunchedEffect(categoryId) {
-        vm.setCategoryId(categoryId)
-    }
-
     LaunchedEffect(Unit) {
-        vm.effect.collect { effect ->
-            when (effect) {
-                UpsertCategoryEffect.NavigateBack -> backStack.removeLastOrNull()
-            }
-        }
+        AppEventBus.event
+            .filterIsInstance<AppEvent.CategoryChanged>()
+            .collect { backStack.removeLastOrNull() }
     }
 
     Content(
-        isUpdate = uiState.isUpdate,
-        isLoading = uiState.isLoading,
-        name = uiState.name,
-        nameError = uiState.nameError,
-        type = uiState.type,
-        errorMessage = uiState.errorMessage,
+        uiState = uiState,
         onChangeName = vm::onChangeName,
         onChangeType = vm::onChangeType,
         onClickSubmit = vm::submit,
@@ -62,49 +52,40 @@ fun UpsertCategoryScreen(
 
 @Composable
 private fun Content(
-    isUpdate: Boolean = false,
-    isLoading: Boolean = false,
-    name: String = "",
-    nameError: String? = null,
-    type: String = "expense",
-    errorMessage: String? = null,
+    uiState: UpsertCategoryUiState = UpsertCategoryUiState(),
     onChangeName: (String) -> Unit = {},
     onChangeType: (String) -> Unit = {},
     onClickSubmit: () -> Unit = {},
 ) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         Text(
             text = when {
-                isUpdate -> "Ubah Kategori"
+                uiState.isUpdate -> "Ubah Kategori"
                 else -> "Buat Kategori"
             },
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Text(
-            text = when {
-                isUpdate -> "Perbarui nama dan tipe kategori."
-                else -> "Isi nama dan tipe kategori untuk transaksi."
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 8.dp),
+            style = MaterialTheme.typography.titleLarge,
         )
 
         Column(
-            modifier = Modifier.padding(top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             TextField(
-                value = name,
+                value = uiState.name,
                 onValueChange = onChangeName,
                 label = { Text("Nama kategori") },
                 modifier = Modifier.fillMaxWidth(),
-                isError = nameError != null,
+                isError = uiState.nameError != null,
                 supportingText = when {
-                    nameError != null -> { { Text(nameError) } }
+                    uiState.nameError != null -> {
+                        { Text(uiState.nameError) }
+                    }
+
                     else -> null
                 },
-                enabled = !isLoading,
+                enabled = !uiState.isLoading,
                 singleLine = true,
             )
 
@@ -116,13 +97,13 @@ private fun Content(
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     categoryTypes.forEachIndexed { index, option ->
                         SegmentedButton(
-                            selected = type == option.value,
+                            selected = uiState.type == option.value,
                             onClick = { onChangeType(option.value) },
                             shape = SegmentedButtonDefaults.itemShape(
                                 index = index,
                                 count = categoryTypes.size,
                             ),
-                            enabled = !isLoading,
+                            enabled = !uiState.isLoading,
                         ) {
                             Text(option.name)
                         }
@@ -130,21 +111,22 @@ private fun Content(
                 }
             }
 
-            if (errorMessage != null) {
+            if (uiState.errorMessage != null) {
                 Text(
-                    text = errorMessage,
+                    text = uiState.errorMessage,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
 
             when {
-                isLoading -> Box(
+                uiState.isLoading -> Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
                     LoadingIndicator()
                 }
+
                 else -> Button(
                     onClick = onClickSubmit,
                     modifier = Modifier.fillMaxWidth(),
@@ -156,7 +138,7 @@ private fun Content(
     }
 }
 
-@Preview(showBackground = true, name = "Category Upsert - Create")
+@Preview(showBackground = true)
 @Composable
 private fun CreatePreview() {
     ArtaTheme {
@@ -164,14 +146,46 @@ private fun CreatePreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Category Upsert - Update", showSystemUi = false)
+@Preview(showBackground = true)
 @Composable
 private fun UpdatePreview() {
     ArtaTheme {
         Content(
-            isUpdate = true,
-            name = "Makanan",
-            type = "expense",
+            uiState = UpsertCategoryUiState(
+                isUpdate = true,
+                name = "Makanan",
+                type = "expense",
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UpdateLoadingPreview() {
+    ArtaTheme {
+        Content(
+            uiState = UpsertCategoryUiState(
+                isUpdate = true,
+                isLoading = true,
+                name = "Makanan",
+                type = "expense",
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UpdateErrorPreview() {
+    ArtaTheme {
+        Content(
+            uiState = UpsertCategoryUiState(
+                isUpdate = true,
+                name = "Makanan",
+                type = "expense",
+                nameError = "Nama kategori tidak boleh kosong",
+            )
         )
     }
 }

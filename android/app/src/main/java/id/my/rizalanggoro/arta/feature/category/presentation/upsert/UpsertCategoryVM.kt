@@ -2,44 +2,39 @@ package id.my.rizalanggoro.arta.feature.category.presentation.upsert
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
 import id.my.rizalanggoro.arta.openapi.models.CategoryCreateCategoryReq
 import id.my.rizalanggoro.arta.openapi.models.CategoryUpdateCategoryReq
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class UpsertCategoryVM @Inject constructor(
+@HiltViewModel(assistedFactory = UpsertCategoryVM.Factory::class)
+class UpsertCategoryVM @AssistedInject constructor(
     private val categoryApi: CategoryApi,
     private val authPrefs: AuthPrefs,
+    @Assisted private val navKey: Routes.CategoryUpsertRoute
 ) : ViewModel() {
-    private var categoryId: Int = 0
-
-    private val _uiState = MutableStateFlow(UpsertCategoryUiState(isUpdate = false))
-    val uiState: StateFlow<UpsertCategoryUiState> = _uiState.asStateFlow()
-
-    private val _effect = MutableSharedFlow<UpsertCategoryEffect>()
-    val effect: SharedFlow<UpsertCategoryEffect> = _effect.asSharedFlow()
-
-    fun setCategoryId(value: Int) {
-        if (categoryId == value) return
-        categoryId = value
-        _uiState.update { it.copy(isUpdate = value != 0) }
-        loadCategory()
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: Routes.CategoryUpsertRoute): UpsertCategoryVM
     }
 
+    private val _uiState = MutableStateFlow(UpsertCategoryUiState())
+    val uiState = _uiState.asStateFlow()
+
     fun loadCategory() {
-        if (categoryId == 0) {
+        if (navKey.categoryId == 0) {
             _uiState.update { it.copy(isLoading = false, isUpdate = false) }
             return
         }
@@ -50,7 +45,7 @@ class UpsertCategoryVM @Inject constructor(
                 val authorization = authorizationHeader()
                     ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                val response = categoryApi.getCategory(authorization, categoryId)
+                val response = categoryApi.getCategory(authorization, navKey.categoryId)
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorMessage())
                 }
@@ -96,59 +91,59 @@ class UpsertCategoryVM @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            val result = if (current.isUpdate) {
-                runCatching {
-                    val authorization = authorizationHeader()
-                        ?: throw IllegalStateException("Sesi login tidak ditemukan")
+            when {
+                current.isUpdate -> {
+                    runCatching {
+                        val authorization = authorizationHeader()
+                            ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                    val response = categoryApi.updateCategory(
-                        authorization = authorization,
-                        id = categoryId,
-                        body = CategoryUpdateCategoryReq(
-                            name = current.name,
-                            type = current.type,
-                        ),
-                    )
+                        val response = categoryApi.updateCategory(
+                            authorization = authorization,
+                            id = navKey.categoryId,
+                            body = CategoryUpdateCategoryReq(
+                                name = current.name,
+                                type = current.type,
+                            ),
+                        )
 
-                    if (!response.isSuccessful) {
-                        throw IllegalStateException(response.errorMessage())
+                        if (!response.isSuccessful) {
+                            throw IllegalStateException(response.errorMessage())
+                        }
+
+                        response.body() ?: throw IllegalStateException("Respons server kosong")
                     }
-
-                    response.body() ?: throw IllegalStateException("Respons server kosong")
                 }
-            } else {
-                runCatching {
-                    val authorization = authorizationHeader()
-                        ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                    val response = categoryApi.createCategory(
-                        authorization = authorization,
-                        body = CategoryCreateCategoryReq(
-                            name = current.name,
-                            type = current.type,
-                        ),
-                    )
+                else -> {
+                    runCatching {
+                        val authorization = authorizationHeader()
+                            ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                    if (!response.isSuccessful) {
-                        throw IllegalStateException(response.errorMessage())
+                        val response = categoryApi.createCategory(
+                            authorization = authorization,
+                            body = CategoryCreateCategoryReq(
+                                name = current.name,
+                                type = current.type,
+                            ),
+                        )
+
+                        if (!response.isSuccessful) {
+                            throw IllegalStateException(response.errorMessage())
+                        }
+
+                        response.body() ?: throw IllegalStateException("Respons server kosong")
                     }
-
-                    response.body() ?: throw IllegalStateException("Respons server kosong")
+                }
+            }.onSuccess {
+                AppEventBus.emit(AppEvent.CategoryChanged)
+            }.onFailure { throwable ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Gagal menyimpan kategori",
+                    )
                 }
             }
-
-            result
-                .onSuccess {
-                    _effect.emit(UpsertCategoryEffect.NavigateBack)
-                }
-                .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Gagal menyimpan kategori",
-                        )
-                    }
-                }
         }
     }
 
@@ -159,8 +154,4 @@ class UpsertCategoryVM @Inject constructor(
     init {
         loadCategory()
     }
-}
-
-sealed interface UpsertCategoryEffect {
-    data object NavigateBack : UpsertCategoryEffect
 }
