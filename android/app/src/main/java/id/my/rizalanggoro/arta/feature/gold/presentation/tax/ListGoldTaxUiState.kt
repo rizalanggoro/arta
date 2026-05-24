@@ -5,6 +5,9 @@ import id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference
 data class ListGoldTaxUiState(
     val preferences: List<DtoGoldTaxPreference> = emptyList(),
     val isLoading: Boolean = false,
-    val deleteTarget: DtoGoldTaxPreference? = null,
     val errorMessage: String? = null,
+
+    // delete
+    val isDeleting: Boolean = false,
+    val deleteTarget: DtoGoldTaxPreference? = null,
 )

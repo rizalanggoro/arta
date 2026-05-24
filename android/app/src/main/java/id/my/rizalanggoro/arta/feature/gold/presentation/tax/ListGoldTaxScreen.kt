@@ -1,10 +1,8 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.tax
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,39 +11,36 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Inbox
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.dropUnlessResumed
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference
-import id.my.rizalanggoro.arta.feature.gold.presentation.tax.component.DeleteGoldTaxConfirmationDialog
+import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
+import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
+import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
+import java.math.BigDecimal
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +49,6 @@ fun ListGoldTaxScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
-    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         AppEventBus.event
@@ -63,48 +57,50 @@ fun ListGoldTaxScreen(
     }
 
     Content(
-        snackbarHostState = snackbarHostState,
         uiState = uiState,
-        onClickDelete = vm::onDeleteRequested,
+        onClickDelete = vm::onDeleteClicked,
         onClickBack = { backStack.removeLastOrNull() },
         onClickCreate = {
             backStack.add(
                 Routes.UpsertGoldTaxRoute()
             )
         },
-        onClickEdit = { preference ->
+        onClickEdit = {
             backStack.add(
                 Routes.UpsertGoldTaxRoute(
-                    id = preference.id
+                    id = it.id
                 )
             )
         },
+        onClickRetry = vm::loadTaxPreferences,
     )
 
-    uiState.deleteTarget?.let { preference ->
-        DeleteGoldTaxConfirmationDialog(
-            preference = preference,
-            onDismiss = vm::dismissDeleteDialog,
-            onConfirm = { vm.confirmDeleteTaxPreference(preference) },
+    if (uiState.deleteTarget != null)
+        ConfirmDialog(
+            title = "Hapus",
+            description = "Apakah Anda yakin akan menghapus preferensi pajak untuk karat " +
+                    "${uiState.deleteTarget!!.carat}? Tindakan ini tidak dapat dipulihkan",
+            onDismissRequest = vm::onDialogDismissed,
+            onConfirmRequest = vm::onDeleteClicked,
+            isLoading = uiState.isDeleting,
+            confirmText = "Hapus"
         )
-    }
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     uiState: ListGoldTaxUiState = ListGoldTaxUiState(),
     onClickCreate: () -> Unit = {},
     onClickEdit: (DtoGoldTaxPreference) -> Unit = {},
     onClickDelete: (DtoGoldTaxPreference) -> Unit = {},
     onClickBack: () -> Unit = {},
+    onClickRetry: () -> Unit = {},
 ) {
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Pajak emas") },
+                title = { Text("Pajak Emas") },
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
@@ -113,7 +109,7 @@ private fun Content(
             )
         },
         floatingActionButton = {
-            if (uiState.isLoading.not())
+            if (uiState.isLoading.not() && uiState.errorMessage.isNullOrBlank())
                 FloatingActionButton(onClick = dropUnlessResumed { onClickCreate() }) {
                     Icon(
                         Icons.Rounded.Add,
@@ -132,24 +128,19 @@ private fun Content(
                 LoadingIndicator()
             }
 
-            uiState.preferences.isEmpty() ->
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Icon(
-                        Icons.Rounded.Inbox,
-                        null,
-                        tint = MaterialTheme.colorScheme.outlineVariant,
-                    )
-                    Text(
-                        text = "Belum ada preferensi pajak",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
+            uiState.errorMessage != null -> ErrorPlaceholder(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                message = uiState.errorMessage,
+                onClickRetry = onClickRetry
+            )
 
-                }
+            uiState.preferences.isEmpty() -> EmptyPlaceholder(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            )
 
             else -> LazyColumn(
                 modifier = Modifier
@@ -157,36 +148,60 @@ private fun Content(
                     .padding(paddingValues)
             ) {
                 items(uiState.preferences) { preference ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text(
-                                text = "Karat ${preference.carat}",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                            Text(
-                                text = "Rasio pajak ${preference.taxRate}%",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.outline,
-                            )
-                            OutlinedButton(
-                                onClick = { onClickEdit(preference) },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Icon(Icons.Rounded.Edit, contentDescription = null)
-                                Text("Ubah")
-                            }
-                            OutlinedButton(
-                                onClick = { onClickDelete(preference) },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Icon(Icons.Rounded.Delete, contentDescription = null)
-                                Text("Hapus")
+                    ListItem(
+                        headlineContent = {
+                            Text("Karat ${preference.carat}")
+                        },
+                        supportingContent = {
+                            Text(text = "Rasio pajak ${preference.taxRate}%")
+                        },
+                        trailingContent = {
+                            Row {
+                                IconButton(onClick = { onClickEdit(preference) }) {
+                                    Icon(
+                                        Icons.Rounded.Edit,
+                                        null
+                                    )
+                                }
+                                IconButton(onClick = { onClickDelete(preference) }) {
+                                    Icon(
+                                        Icons.Rounded.Delete,
+                                        null
+                                    )
+                                }
                             }
                         }
-                    }
+                    )
+//                    Card(modifier = Modifier.fillMaxWidth()) {
+//                        Column(
+//                            modifier = Modifier.padding(16.dp),
+//                            verticalArrangement = Arrangement.spacedBy(12.dp),
+//                        ) {
+//                            Text(
+//                                text = "Karat ${preference.carat}",
+//                                style = MaterialTheme.typography.titleMedium,
+//                            )
+//                            Text(
+//                                text = "Rasio pajak ${preference.taxRate}%",
+//                                style = MaterialTheme.typography.bodyMedium,
+//                                color = MaterialTheme.colorScheme.outline,
+//                            )
+//                            OutlinedButton(
+//                                onClick = { onClickEdit(preference) },
+//                                modifier = Modifier.fillMaxWidth(),
+//                            ) {
+//                                Icon(Icons.Rounded.Edit, contentDescription = null)
+//                                Text("Ubah")
+//                            }
+//                            OutlinedButton(
+//                                onClick = { onClickDelete(preference) },
+//                                modifier = Modifier.fillMaxWidth(),
+//                            ) {
+//                                Icon(Icons.Rounded.Delete, contentDescription = null)
+//                                Text("Hapus")
+//                            }
+//                        }
+//                    }
                 }
             }
         }
@@ -195,15 +210,65 @@ private fun Content(
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewListGoldTaxScreen() {
+private fun Preview() {
     ArtaTheme {
         Content(
             uiState = ListGoldTaxUiState(
                 isLoading = false,
                 preferences = listOf(
-                    DtoGoldTaxPreference(id = 1, userId = 1, carat = java.math.BigDecimal.valueOf(24.0), taxRate = java.math.BigDecimal.valueOf(5.0), createdAt = "", updatedAt = ""),
-                    DtoGoldTaxPreference(id = 2, userId = 1, carat = java.math.BigDecimal.valueOf(18.0), taxRate = java.math.BigDecimal.valueOf(3.5), createdAt = "", updatedAt = ""),
+                    DtoGoldTaxPreference(
+                        id = 1,
+                        userId = 1,
+                        carat = BigDecimal.valueOf(24.0),
+                        taxRate = BigDecimal.valueOf(5.0),
+                        createdAt = "",
+                        updatedAt = ""
+                    ),
+                    DtoGoldTaxPreference(
+                        id = 2,
+                        userId = 1,
+                        carat = BigDecimal.valueOf(18.0),
+                        taxRate = BigDecimal.valueOf(3.5),
+                        createdAt = "",
+                        updatedAt = ""
+                    ),
                 )
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoadingPreview() {
+    ArtaTheme {
+        Content(
+            uiState = ListGoldTaxUiState(
+                isLoading = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ErrorPreview() {
+    ArtaTheme {
+        Content(
+            uiState = ListGoldTaxUiState(
+                errorMessage = "Terjadi kesalahan tak terduga"
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EmptyPreview() {
+    ArtaTheme {
+        Content(
+            uiState = ListGoldTaxUiState(
+                preferences = emptyList()
             ),
         )
     }
