@@ -35,14 +35,14 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes.GoldCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeCashDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeSettingRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeTransactionRoute
-import id.my.rizalanggoro.arta.core.Routes.TransactionCreateRoute
+import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
+import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.HomeGoldDashboardScreen
@@ -75,8 +75,8 @@ fun HomeScreen(
         homeBackStack = homeBackStack,
         onClickFab = {
             when (walletType) {
-                "cash_savings" -> backStack.add(TransactionCreateRoute)
-                "gold_savings" -> backStack.add(GoldCreateRoute)
+                "cash_savings" -> backStack.add(TransactionUpsertRoute())
+                "gold_savings" -> backStack.add(UpsertGoldRoute())
             }
         },
         entryProvider = entryProvider {

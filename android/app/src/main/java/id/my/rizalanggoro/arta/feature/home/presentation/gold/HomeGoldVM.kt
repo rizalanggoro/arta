@@ -20,7 +20,7 @@ class HomeGoldVM @Inject constructor(
     private val _uiState = MutableStateFlow(HomeGoldUiState())
     val uiState: StateFlow<HomeGoldUiState> = _uiState.asStateFlow()
 
-    private fun fetchGolds() {
+    fun loadGolds() {
         _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             runCatching {
@@ -38,6 +38,6 @@ class HomeGoldVM @Inject constructor(
     }
 
     init {
-        fetchGolds()
+        loadGolds()
     }
 }

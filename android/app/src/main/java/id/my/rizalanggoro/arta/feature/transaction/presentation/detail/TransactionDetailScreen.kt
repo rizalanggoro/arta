@@ -18,7 +18,7 @@ import id.my.rizalanggoro.arta.core.LocalBackStack
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.core.Routes
-import id.my.rizalanggoro.arta.core.Routes.TransactionUpdateRoute
+import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
 import androidx.compose.ui.tooling.preview.Preview
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +35,7 @@ fun TransactionDetailScreen(
 
     Content(
         tx = tx,
-        onEdit = { t -> backStack.add(TransactionUpdateRoute(transactionId = t.id)) }
+        onEdit = { t -> backStack.add(TransactionUpsertRoute(transactionId = t.id)) }
     )
 }
 

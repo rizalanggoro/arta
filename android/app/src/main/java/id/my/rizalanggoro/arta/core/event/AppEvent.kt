@@ -7,6 +7,7 @@ sealed class AppEvent {
     data object WalletChanged : AppEvent()
     data object CategoryChanged : AppEvent()
     data object TransactionChanged : AppEvent()
+    data object GoldChanged : AppEvent()
     data object GoldTaxChanged : AppEvent()
 
     data class CategorySelected(val category: DomainCategory) : AppEvent()

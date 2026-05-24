@@ -32,10 +32,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes
-import id.my.rizalanggoro.arta.core.Routes.GoldUpdateRoute
+import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import java.math.BigDecimal
+import kotlinx.coroutines.flow.filterIsInstance
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,10 +56,16 @@ fun GoldDetailScreen(goldId: Int) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is GoldDetailEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-                is GoldDetailEffect.NavigateToEdit -> backStack.add(GoldUpdateRoute(goldId = effect.goldId))
+                is GoldDetailEffect.NavigateToEdit -> backStack.add(UpsertGoldRoute(goldId = effect.goldId))
                 GoldDetailEffect.NavigateBack -> backStack.removeLastOrNull()
             }
         }
+    }
+
+    LaunchedEffect(goldId) {
+        AppEventBus.event
+            .filterIsInstance<AppEvent.GoldChanged>()
+            .collect { viewModel.load(goldId) }
     }
 
     Content(

@@ -1,4 +1,4 @@
-package id.my.rizalanggoro.arta.feature.gold.presentation.create
+package id.my.rizalanggoro.arta.feature.gold.presentation.upsert
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.clickable
@@ -16,11 +16,11 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.constant.goldTypes
-import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
+import id.my.rizalanggoro.arta.core.constant.toWalletName
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import java.time.LocalDate
@@ -53,72 +53,48 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-@Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun CreateGoldScreen(
-    vm: CreateGoldVM = hiltViewModel(),
+@Composable
+fun UpsertGoldScreen(
+    goldId: Int = 0,
+    vm: UpsertGoldVM = hiltViewModel(),
 ) {
     val uiState by vm.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val backStack = LocalBackStack.current
 
+    LaunchedEffect(goldId) {
+        vm.setGoldId(goldId)
+    }
+
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
             when (effect) {
-                is CreateGoldEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-                CreateGoldEffect.NavigateBack -> backStack.removeLastOrNull()
+                is UpsertGoldEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
+                UpsertGoldEffect.NavigateBack -> backStack.removeLastOrNull()
             }
         }
     }
 
     Content(
         snackbarHostState = snackbarHostState,
-        selectedWallet = uiState.selectedWallet,
-        date = uiState.date,
-        grams = uiState.grams,
-        price = uiState.price,
-        type = uiState.type,
-        carat = uiState.carat,
-        notes = uiState.notes,
-        dateError = uiState.dateError,
-        gramsError = uiState.gramsError,
-        priceError = uiState.priceError,
-        caratError = uiState.caratError,
-        isLoading = uiState.isLoading,
+        uiState = uiState,
         onDateChanged = vm::onDateChanged,
         onGramsChanged = vm::onGramsChanged,
-        onPriceChanged = vm::onPricePerGramChanged,
+        onPriceChanged = vm::onPriceChanged,
         onTypeChanged = vm::onTypeChanged,
         onCaratChanged = vm::onCaratChanged,
         onNotesChanged = vm::onNotesChanged,
-        onClickSave = vm::createGold,
+        onClickSave = vm::submit,
         onClickBack = { backStack.removeLastOrNull() },
     )
-
-    if (false)
-        MyDatePickerDialog(
-            state = TODO(),
-            onDismiss = TODO(),
-            onDateSelected = TODO()
-        )
 }
 
-@Composable
 @OptIn(ExperimentalMaterial3Api::class)
+@Composable
 private fun Content(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    selectedWallet: DomainWallet? = null,
-    date: String = "",
-    grams: String = "",
-    price: String = "",
-    type: String = "pure_gold",
-    carat: String = "24.0",
-    notes: String = "",
-    dateError: String? = null,
-    gramsError: String? = null,
-    priceError: String? = null,
-    caratError: String? = null,
-    isLoading: Boolean = false,
+    uiState: UpsertGoldUiState = UpsertGoldUiState(),
     onDateChanged: (String) -> Unit = {},
     onGramsChanged: (String) -> Unit = {},
     onPriceChanged: (String) -> Unit = {},
@@ -130,13 +106,13 @@ private fun Content(
 ) {
     val context = LocalContext.current
     val dateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-    val selectedDate = remember(date) {
-        runCatching { ZonedDateTime.parse(date).toLocalDate() }
+    val selectedDate = remember(uiState.date) {
+        runCatching { ZonedDateTime.parse(uiState.date).toLocalDate() }
             .getOrNull()
-            ?: runCatching { LocalDate.parse(date.take(10)) }.getOrNull()
+            ?: runCatching { LocalDate.parse(uiState.date.take(10)) }.getOrNull()
             ?: LocalDate.now()
     }
-    val datePicker = remember(date) {
+    val datePicker = remember(uiState.date) {
         DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
@@ -153,12 +129,16 @@ private fun Content(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tambah Emas") },
+                title = {
+                    Text(
+                        if (uiState.isUpdate) "Ubah Emas" else "Tambah Emas",
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
                         Icon(
                             Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
                 },
@@ -171,37 +151,62 @@ private fun Content(
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-
+                Button(
+                    onClick = onClickSave,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isLoading,
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(vertical = 2.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Text(if (uiState.isUpdate) "Simpan Perubahan" else "Simpan")
+                    }
+                }
             }
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            ListItem(
-                leadingContent = {
-                    Icon(
-                        Icons.Rounded.Wallet,
-                        null
-                    )
+            Text(
+                text = if (uiState.isUpdate) {
+                    "Perbarui data emas yang sudah tersimpan."
+                } else {
+                    "Tambahkan data emas baru ke dompet aktif."
                 },
-                headlineContent = {
-                    Text("Nama dompet")
-                },
-                supportingContent = {
-                    Text("Jenis dompet")
-                }
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
+            if (!uiState.isUpdate) {
+                ListItem(
+                    leadingContent = {
+                        Icon(Icons.Rounded.Wallet, null)
+                    },
+                    headlineContent = {
+                        Text(uiState.selectedWallet?.name ?: "Dompet aktif")
+                    },
+                    supportingContent = {
+                        Text(
+                            uiState.selectedWallet?.type?.toWalletName()
+                                ?: "Dompet ini akan dipakai saat menyimpan emas"
+                        )
+                    },
+                )
+            }
+
             ListItem(
                 leadingContent = {
-                    Icon(
-                        Icons.Rounded.Today,
-                        null
-                    )
+                    Icon(Icons.Rounded.Today, null)
                 },
                 headlineContent = {
                     Text("Tanggal")
@@ -210,186 +215,177 @@ private fun Content(
                     Text("Pilih tanggal")
                 },
                 trailingContent = {
-                    Icon(
-                        Icons.Rounded.ChevronRight,
-                        null
-                    )
+                    Icon(Icons.Rounded.ChevronRight, null)
                 },
-                modifier = Modifier.clickable(enabled = !isLoading) {
-
-                }
+                modifier = Modifier.clickable(enabled = !uiState.isLoading) {
+                    datePicker.show()
+                },
             )
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 TextField(
-                    value = grams,
+                    value = uiState.grams,
                     onValueChange = { if (it.matches(Regex("^\\d*\\.?\\d*$"))) onGramsChanged(it) },
                     label = { Text("Berat (gram)") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    isError = gramsError != null,
+                    isError = uiState.gramsError != null,
                     supportingText = when {
-                        gramsError != null -> {
-                            { Text(gramsError) }
+                        uiState.gramsError != null -> {
+                            { Text(uiState.gramsError) }
                         }
 
                         else -> null
                     },
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     singleLine = true,
                 )
 
                 TextField(
-                    value = price,
+                    value = uiState.price,
                     onValueChange = { if (it.matches(Regex("^\\d*\\.?\\d*$"))) onPriceChanged(it) },
                     label = { Text("Harga beli") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    isError = priceError != null,
+                    isError = uiState.priceError != null,
                     supportingText = when {
-                        priceError != null -> {
-                            { Text(priceError) }
+                        uiState.priceError != null -> {
+                            { Text(uiState.priceError) }
                         }
 
                         else -> null
                     },
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     singleLine = true,
                 )
-            }
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp)
-            ) {
-                Text(
-                    text = "Tipe emas",
-                    style = MaterialTheme.typography.titleSmall,
-                )
-                SingleChoiceSegmentedButtonRow(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    goldTypes.mapIndexed { index, item ->
-                        SegmentedButton(
-                            enabled = !isLoading,
-                            selected = item.value == type,
-                            onClick = { onTypeChanged(item.value) },
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = goldTypes.size
-                            )
-                        ) {
-                            Text(item.name)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Tipe emas",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                        goldTypes.mapIndexed { index, option ->
+                            SegmentedButton(
+                                selected = uiState.type == option.value,
+                                onClick = { onTypeChanged(option.value) },
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = index,
+                                    count = goldTypes.size,
+                                ),
+                                enabled = !uiState.isLoading,
+                            ) {
+                                Text(option.name)
+                            }
                         }
                     }
                 }
-            }
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp)
-            ) {
                 TextField(
-                    value = carat,
-                    onValueChange = {
-                        if (it.matches(Regex("^\\d*\\.?\\d*$"))) onCaratChanged(it)
-                    },
+                    value = uiState.carat,
+                    onValueChange = { if (it.matches(Regex("^\\d*\\.?\\d*$"))) onCaratChanged(it) },
                     label = { Text("Karat") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    isError = caratError != null,
+                    isError = uiState.caratError != null,
                     supportingText = when {
-                        caratError != null -> {
-                            { Text(caratError) }
+                        uiState.caratError != null -> {
+                            { Text(uiState.caratError) }
                         }
 
                         else -> null
                     },
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     singleLine = true,
                 )
 
                 TextField(
-                    value = notes,
+                    value = uiState.notes,
                     onValueChange = onNotesChanged,
                     label = { Text("Catatan") },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading,
+                    enabled = !uiState.isLoading,
                     minLines = 3,
                 )
-            }
-
-            when {
-                isLoading -> LoadingIndicator(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-
-                else -> Button(
-                    onClick = onClickSave,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                ) {
-                    Text("Simpan")
-                }
             }
         }
     }
 }
 
-@Preview(showBackground = true, name = "Create Gold - Default")
+@Preview(showBackground = true, name = "Create Gold")
 @Composable
-private fun CreateGoldDefaultPreview() {
+private fun CreatePreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
-            selectedWallet = DomainWallet(
-                id = 12,
-                userId = 1,
-                name = "Tabungan Emas",
-                type = "gold_savings",
-                createdAt = "2026-05-23T00:00:00Z",
-                updatedAt = "2026-05-23T00:00:00Z",
-            ),
-            date = "2026-05-16T10:30:00+07:00",
-            grams = "1.5",
-            price = "1200000",
-            carat = "24.0",
+            uiState = UpsertGoldUiState(
+                selectedWallet = DomainWallet(
+                    createdAt = "2026-05-24T00:00:00Z",
+                    id = 1,
+                    name = "Dompet Emas",
+                    type = "gold_savings",
+                    updatedAt = "2026-05-24T00:00:00Z",
+                    userId = 1,
+                ),
+            )
         )
     }
 }
 
-@Preview(showBackground = true, name = "Create Gold - Loading")
+@Preview(showBackground = true, name = "Update Gold")
 @Composable
-private fun CreateGoldLoadingPreview() {
+private fun UpdatePreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
-            isLoading = true,
-            carat = "18.0",
+            uiState = UpsertGoldUiState(
+                goldId = 10,
+                isUpdate = true,
+                date = "2026-05-16",
+                grams = "10",
+                price = "900000",
+                type = "pure_gold",
+                carat = "24.0",
+                notes = "Contoh catatan",
+            )
         )
     }
 }
 
-@Preview(showBackground = true, name = "Create Gold - Error")
+@Preview(showBackground = true, name = "Update Gold Loading")
 @Composable
-private fun CreateGoldErrorPreview() {
+private fun LoadingPreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
-            gramsError = "Gram tidak valid",
-            priceError = "Harga tidak valid",
+            uiState = UpsertGoldUiState(
+                goldId = 10,
+                isUpdate = true,
+                isLoading = true,
+                date = "2026-05-16",
+                grams = "10",
+                price = "900000",
+                type = "pure_gold",
+                carat = "24.0",
+                notes = "Contoh catatan",
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Create Gold Error")
+@Composable
+private fun ErrorPreview() {
+    ArtaTheme {
+        Content(
+            uiState = UpsertGoldUiState(
+                selectedWallet = DomainWallet(
+                    createdAt = "2026-05-24T00:00:00Z",
+                    id = 1,
+                    name = "Dompet Emas",
+                    type = "gold_savings",
+                    updatedAt = "2026-05-24T00:00:00Z",
+                    userId = 1,
+                ),
+                gramsError = "Gram wajib berupa angka lebih dari 0",
+            )
         )
     }
 }

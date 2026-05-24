@@ -18,19 +18,17 @@ import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
 import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
 import id.my.rizalanggoro.arta.core.Routes.CategoryUpsertRoute
 import id.my.rizalanggoro.arta.core.Routes.ForgotPasswordRoute
-import id.my.rizalanggoro.arta.core.Routes.GoldCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldDetailRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
-import id.my.rizalanggoro.arta.core.Routes.GoldUpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeSettingRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeTransactionRoute
 import id.my.rizalanggoro.arta.core.Routes.LoginRoute
 import id.my.rizalanggoro.arta.core.Routes.RegisterRoute
-import id.my.rizalanggoro.arta.core.Routes.TransactionCreateRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionDetailRoute
-import id.my.rizalanggoro.arta.core.Routes.TransactionUpdateRoute
+import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
+import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.UpsertGoldTaxRoute
 import id.my.rizalanggoro.arta.core.Routes.UpsertWalletRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletCreateFirstRoute
@@ -46,18 +44,16 @@ import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategorySc
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryVM
-import id.my.rizalanggoro.arta.feature.gold.presentation.create.CreateGoldScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.tax.ListGoldTaxScreen
-import id.my.rizalanggoro.arta.feature.gold.presentation.update.UpdateGoldScreen
+import id.my.rizalanggoro.arta.feature.gold.presentation.upsert.UpsertGoldScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.upserttax.UpsertGoldTaxScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionScreen
-import id.my.rizalanggoro.arta.feature.transaction.presentation.create.CreateTransactionScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
-import id.my.rizalanggoro.arta.feature.transaction.presentation.update.UpdateTransactionScreen
+import id.my.rizalanggoro.arta.feature.transaction.presentation.upsert.UpsertTransactionScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst.CreateFirstWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletScreen
@@ -135,12 +131,7 @@ fun ComposeApp(
                         }
 
                         // transaction
-                        entry<TransactionCreateRoute> { CreateTransactionScreen() }
-                        entry<TransactionUpdateRoute> {
-                            UpdateTransactionScreen(
-                                transactionId = it.transactionId
-                            )
-                        }
+                        entry<TransactionUpsertRoute> { UpsertTransactionScreen(transactionId = it.transactionId) }
                         entry<TransactionDetailRoute> {
                             TransactionDetailScreen(
                                 transactionId = it.id
@@ -148,12 +139,11 @@ fun ComposeApp(
                         }
 
                         // gold
-                        entry<GoldCreateRoute> { CreateGoldScreen() }
+                        entry<UpsertGoldRoute> { UpsertGoldScreen(goldId = it.goldId) }
                         entry<GoldTaxListRoute> { ListGoldTaxScreen() }
                         entry<UpsertGoldTaxRoute>(
                             metadata = BottomSheetSceneStrategy.bottomSheet()
                         ) { UpsertGoldTaxScreen(taxPreferenceId = it.id) }
-                        entry<GoldUpdateRoute> { UpdateGoldScreen(goldId = it.goldId) }
                         entry<GoldDetailRoute> { GoldDetailScreen(goldId = it.id) }
 
                         // home

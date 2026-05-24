@@ -16,11 +16,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -30,12 +33,19 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.Locale
+import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun HomeGoldDashboardScreen(
     vm: GoldDashboardVM = hiltViewModel()
 ) {
     val uiState by vm.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        AppEventBus.event
+            .filterIsInstance<AppEvent.GoldChanged>()
+            .collect { vm.retry() }
+    }
 
     Content(
         activeWalletName = uiState.activeWalletName,

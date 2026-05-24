@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,9 +34,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import java.math.BigDecimal
+import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun HomeGoldScreen(
@@ -43,6 +47,12 @@ fun HomeGoldScreen(
     onClickManageTax: () -> Unit = {},
 ) {
     val uiState by vm.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        AppEventBus.event
+            .filterIsInstance<AppEvent.GoldChanged>()
+            .collect { vm.loadGolds() }
+    }
 
     Content(
         golds = uiState.golds,

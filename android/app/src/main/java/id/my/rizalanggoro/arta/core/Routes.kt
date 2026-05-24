@@ -53,11 +53,8 @@ object Routes {
 
     // gold
     @Serializable
-    data object GoldCreateRoute : NavKey
-
-    @Serializable
-    data class GoldUpdateRoute(
-        val goldId: Int,
+    data class UpsertGoldRoute(
+        val goldId: Int = 0,
     ) : NavKey
 
     @Serializable
@@ -86,11 +83,8 @@ object Routes {
 
     // transaction
     @Serializable
-    data object TransactionCreateRoute : NavKey
-
-    @Serializable
-    data class TransactionUpdateRoute(
-        val transactionId: Int,
+    data class TransactionUpsertRoute(
+        val transactionId: Int = 0,
     ) : NavKey
 
     @Serializable
