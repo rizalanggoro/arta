@@ -3,6 +3,7 @@ package id.my.rizalanggoro.arta.feature.gold.presentation.upsert
 import android.app.DatePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,11 +17,11 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -85,7 +86,7 @@ fun UpsertGoldScreen(
         onTypeChanged = vm::onTypeChanged,
         onCaratChanged = vm::onCaratChanged,
         onNotesChanged = vm::onNotesChanged,
-        onClickSave = vm::submit,
+        onClickSubmit = vm::submit,
         onClickBack = { backStack.removeLastOrNull() },
     )
 }
@@ -101,7 +102,7 @@ private fun Content(
     onTypeChanged: (String) -> Unit = {},
     onCaratChanged: (String) -> Unit = {},
     onNotesChanged: (String) -> Unit = {},
-    onClickSave: () -> Unit = {},
+    onClickSubmit: () -> Unit = {},
     onClickBack: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -145,25 +146,21 @@ private fun Content(
             )
         },
         bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Button(
-                    onClick = onClickSave,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !uiState.isLoading,
+            when {
+                uiState.isLoading -> Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(vertical = 2.dp),
-                            strokeWidth = 2.dp,
-                        )
-                    } else {
-                        Text(if (uiState.isUpdate) "Simpan Perubahan" else "Simpan")
-                    }
+                    LoadingIndicator()
+                }
+
+                else -> Button(
+                    onClick = onClickSubmit,
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                ) {
+                    Text("Simpan")
                 }
             }
         },
@@ -312,7 +309,7 @@ private fun Content(
     }
 }
 
-@Preview(showBackground = true, name = "Create Gold")
+@Preview(showBackground = true)
 @Composable
 private fun CreatePreview() {
     ArtaTheme {
@@ -331,7 +328,7 @@ private fun CreatePreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Update Gold")
+@Preview(showBackground = true)
 @Composable
 private fun UpdatePreview() {
     ArtaTheme {
@@ -350,7 +347,7 @@ private fun UpdatePreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Update Gold Loading")
+@Preview(showBackground = true)
 @Composable
 private fun LoadingPreview() {
     ArtaTheme {
@@ -370,7 +367,7 @@ private fun LoadingPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Create Gold Error")
+@Preview(showBackground = true)
 @Composable
 private fun ErrorPreview() {
     ArtaTheme {
