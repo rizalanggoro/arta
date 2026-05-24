@@ -7,6 +7,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -44,6 +45,7 @@ import id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryScreen
+import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.create.CreateGoldScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.tax.ListGoldTaxScreen
@@ -125,8 +127,11 @@ fun ComposeApp(
                         }
                         entry<CategoryUpsertRoute>(
                             metadata = BottomSheetSceneStrategy.bottomSheet()
-                        ) {
-                            UpsertCategoryScreen()
+                        ) { navKey ->
+                            UpsertCategoryScreen(
+                                vm = hiltViewModel<UpsertCategoryVM, UpsertCategoryVM.Factory>(
+                                creationCallback = { it.create(navKey = navKey) }
+                            ))
                         }
 
                         // transaction

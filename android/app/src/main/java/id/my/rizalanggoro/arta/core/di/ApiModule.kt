@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ApiService {
+object ApiModule {
     @Provides
     @Singleton
     fun provideAuthApi(): AuthApi =

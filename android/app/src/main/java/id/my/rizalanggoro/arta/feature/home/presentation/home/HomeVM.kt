@@ -2,8 +2,8 @@ package id.my.rizalanggoro.arta.feature.home.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +29,8 @@ class HomeVM @Inject constructor(
             selectedWalletPrefs.selectedWallet.collect { wallet ->
                 _uiState.update {
                     it.copy(
-                        selectedWallet = wallet
+                        selectedWallet = wallet,
+                        selectedIndex = 0
                     )
                 }
             }
