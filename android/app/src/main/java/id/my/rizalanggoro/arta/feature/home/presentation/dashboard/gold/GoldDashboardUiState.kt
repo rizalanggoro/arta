@@ -1,9 +1,10 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold
 
+import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
 
 data class GoldDashboardUiState(
-    val activeWalletName: String = "Tabungan Emas",
+    val selectedWallet: DomainWallet? = null,
     val totalAsset: String = "Rp 0",
     val buyPrice: String = "Rp 0",
     val profit: String = "Rp 0",

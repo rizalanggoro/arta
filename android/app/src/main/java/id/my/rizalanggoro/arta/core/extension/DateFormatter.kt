@@ -8,7 +8,7 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 fun Long.toIndonesianDate(): String {
-    val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale("id", "ID"))
+    val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.forLanguageTag("id-ID"))
 
     val localDate = Instant.ofEpochMilli(this)
         .atZone(ZoneId.systemDefault())
