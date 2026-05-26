@@ -25,11 +25,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import id.my.rizalanggoro.arta.shared.component.SmoothWavyDivider
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PriceSummary() {
+fun PriceSummary(onClickManageTax: () -> Unit = {}) {
     Card(
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         modifier = Modifier
@@ -54,9 +53,7 @@ fun PriceSummary() {
                     fontWeight = FontWeight.Bold
                 )
 
-                Button(
-                    onClick = {}
-                ) {
+                Button(onClick = onClickManageTax) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(ButtonDefaults.IconSpacing),
                         verticalAlignment = Alignment.CenterVertically

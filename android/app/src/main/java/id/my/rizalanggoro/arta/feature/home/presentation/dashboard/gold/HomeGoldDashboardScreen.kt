@@ -32,9 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.LocalHomeBackStack
+import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component.LatestGold
@@ -51,6 +53,8 @@ import java.math.BigDecimal
 fun HomeGoldDashboardScreen(
     vm: GoldDashboardVM = hiltViewModel()
 ) {
+    val backStack = LocalBackStack.current
+    val homeBackStack = LocalHomeBackStack.current
     val uiState by vm.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -62,6 +66,13 @@ fun HomeGoldDashboardScreen(
     Content(
         uiState = uiState,
         onClickRetry = vm::retry,
+        onClickManageTax = { backStack.add(Routes.GoldTaxListRoute) },
+        onClickShowMore = {
+            if (homeBackStack != null) {
+                homeBackStack.clear()
+                homeBackStack.add(Routes.HomeGoldRoute)
+            }
+        }
     )
 }
 
@@ -70,6 +81,8 @@ fun HomeGoldDashboardScreen(
 private fun Content(
     uiState: GoldDashboardUiState = GoldDashboardUiState(),
     onClickRetry: () -> Unit = {},
+    onClickManageTax: () -> Unit = {},
+    onClickShowMore: () -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -240,23 +253,20 @@ private fun Content(
             }
 
             item {
-                PriceSummary()
+                PriceSummary(onClickManageTax = onClickManageTax)
             }
 
             item {
                 LatestGold(
                     golds = uiState.recentGolds,
-                    onClickShowMore = {},
+                    onClickShowMore = onClickShowMore,
                 )
             }
         }
     }
 }
 
-@Preview(
-    showBackground = true,
-    wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE, device = "id:pixel_9_pro_xl"
-)
+@Preview(showBackground = true)
 @Composable
 private fun Preview() {
     ArtaTheme {

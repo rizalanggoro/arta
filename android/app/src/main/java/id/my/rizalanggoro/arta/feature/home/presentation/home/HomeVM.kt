@@ -30,7 +30,7 @@ class HomeVM @Inject constructor(
                 _uiState.update {
                     it.copy(
                         selectedWallet = wallet,
-                        selectedIndex = 2
+                        selectedIndex = 0
                     )
                 }
             }

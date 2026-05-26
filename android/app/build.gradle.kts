@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -28,6 +30,16 @@ android {
     }
 
     buildTypes {
+        val properties = Properties()
+        properties.load(rootProject.file(".env").inputStream())
+
+        debug {
+            buildConfigField("String", "BASE_URL", properties.getProperty("BASE_URL"))
+
+            applicationIdSuffix = ".debug"
+            resValue("string", "app_name", "Arta (Dev)")
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -42,6 +54,8 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+        resValues = true
     }
 }
 

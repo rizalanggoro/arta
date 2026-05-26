@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -37,8 +38,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import id.my.rizalanggoro.arta.core.LocalHomeBackStack
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.Routes.HomeCashDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
@@ -66,30 +67,32 @@ fun HomeScreen(
 
     val homeBackStack = when (walletType) {
         "cash_savings" -> rememberNavBackStack(HomeCashDashboardRoute)
-        "gold_savings" -> rememberNavBackStack(HomeSettingRoute)
+        "gold_savings" -> rememberNavBackStack(HomeGoldDashboardRoute)
         else -> null
     }
 
-    Content(
-        destinations = destinations,
-        uiState = uiState,
-        onDestinationSelected = vm::onDestinationSelected,
-        onClickSelectWallet = { backStack.add(WalletSelectRoute) },
-        homeBackStack = homeBackStack,
-        onClickFab = {
-            when (walletType) {
-                "cash_savings" -> backStack.add(TransactionUpsertRoute())
-                "gold_savings" -> backStack.add(UpsertGoldRoute())
+    CompositionLocalProvider(LocalHomeBackStack provides homeBackStack) {
+        Content(
+            destinations = destinations,
+            uiState = uiState,
+            onDestinationSelected = vm::onDestinationSelected,
+            onClickSelectWallet = { backStack.add(WalletSelectRoute) },
+            homeBackStack = homeBackStack,
+            onClickFab = {
+                when (walletType) {
+                    "cash_savings" -> backStack.add(TransactionUpsertRoute())
+                    "gold_savings" -> backStack.add(UpsertGoldRoute())
+                }
+            },
+            entryProvider = entryProvider {
+                entry<HomeCashDashboardRoute> { HomeCashDashboardScreen() }
+                entry<HomeGoldDashboardRoute> { HomeGoldDashboardScreen() }
+                entry<HomeTransactionRoute> { HomeTransactionScreen() }
+                entry<HomeGoldRoute> { HomeGoldScreen() }
+                entry<HomeSettingRoute> { HomeSettingScreen() }
             }
-        },
-        entryProvider = entryProvider {
-            entry<HomeCashDashboardRoute> { HomeCashDashboardScreen() }
-            entry<HomeGoldDashboardRoute> { HomeGoldDashboardScreen() }
-            entry<HomeTransactionRoute> { HomeTransactionScreen() }
-            entry<HomeGoldRoute> { HomeGoldScreen() }
-            entry<HomeSettingRoute> { HomeSettingScreen() }
-        }
-    )
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

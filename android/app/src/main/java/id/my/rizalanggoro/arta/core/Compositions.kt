@@ -7,3 +7,7 @@ import androidx.navigation3.runtime.NavKey
 val LocalBackStack = compositionLocalOf<NavBackStack<NavKey>> {
     error("error: LocalBackStack not provided")
 }
+
+val LocalHomeBackStack = compositionLocalOf<NavBackStack<NavKey>?> {
+    error("error: LocalBackStack not provided")
+}
