@@ -690,23 +690,26 @@ definitions:
   gold.CreateGoldReq:
     properties:
       carat:
+        format: double
         type: number
       date:
         type: string
       grams:
+        format: double
         type: number
       notes:
         type: string
       price:
-        description: Price is the total purchase price for the recorded grams
-        type: number
+        type: integer
       type:
         type: string
       wallet_id:
         type: integer
     required:
+    - carat
     - date
     - grams
+    - notes
     - price
     - type
     - wallet_id
@@ -741,7 +744,7 @@ definitions:
       notes:
         type: string
       price:
-        type: number
+        type: integer
       type:
         type: string
     type: object

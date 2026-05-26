@@ -127,7 +127,7 @@ func (h *Handler) list(c *fiber.Ctx) error {
 		res.Golds = append(res.Golds, dto.Gold{
 			Data:      g,
 			SellPrice: sellPrice,
-			Profit:    sellPrice - g.Price,
+			Profit:    sellPrice - float64(g.Price),
 		})
 	}
 
@@ -154,6 +154,14 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "carat must be between 0 and 24"})
 	}
 
+	parsedDate, err := time.Parse("2006-01-02", req.Date)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "invalid date format, expected YYYY-MM-DD",
+		})
+	}
+
 	userID := middleware.GetUserID(c)
 	if userID == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
@@ -170,7 +178,7 @@ func (h *Handler) create(c *fiber.Ctx) error {
 
 	created, err := h.repo.CreateGold(&domain.Gold{
 		WalletID: req.WalletID,
-		Date:     req.Date,
+		Date:     parsedDate,
 		Grams:    req.Grams,
 		Price:    req.Price,
 		Type:     req.Type,
@@ -448,7 +456,14 @@ func (h *Handler) update(c *fiber.Ctx) error {
 	}
 
 	if req.Date != nil {
-		g.Date = *req.Date
+		parsedDate, err := time.Parse("2006-01-02", *req.Date)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+				Code:    fiber.StatusBadRequest,
+				Message: "invalid date format, expected YYYY-MM-DD",
+			})
+		}
+		g.Date = parsedDate
 	}
 	if req.Grams != nil {
 		g.Grams = *req.Grams

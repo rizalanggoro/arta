@@ -2583,28 +2583,31 @@ const docTemplate = `{
         "gold.CreateGoldReq": {
             "type": "object",
             "required": [
+                "carat",
                 "date",
                 "grams",
+                "notes",
                 "price",
                 "type",
                 "wallet_id"
             ],
             "properties": {
                 "carat": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "date": {
                     "type": "string"
                 },
                 "grams": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "notes": {
                     "type": "string"
                 },
                 "price": {
-                    "description": "Price is the total purchase price for the recorded grams",
-                    "type": "number"
+                    "type": "integer"
                 },
                 "type": {
                     "type": "string"
@@ -2659,7 +2662,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "price": {
-                    "type": "number"
+                    "type": "integer"
                 },
                 "type": {
                     "type": "string"

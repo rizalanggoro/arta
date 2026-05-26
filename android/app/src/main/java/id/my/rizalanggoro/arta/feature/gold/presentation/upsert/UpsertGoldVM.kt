@@ -8,9 +8,9 @@ import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.core.extension.toApiFormat
 import id.my.rizalanggoro.arta.openapi.apis.GoldApi
 import id.my.rizalanggoro.arta.openapi.models.GoldCreateGoldReq
-import id.my.rizalanggoro.arta.openapi.models.GoldUpdateGoldReq
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,9 +19,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.OffsetDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,15 +38,25 @@ class UpsertGoldVM @Inject constructor(
     fun setGoldId(value: Int) {
         if (goldId == value) return
         goldId = value
-        if (value == 0) {
-            prepareCreateMode()
-        } else {
-            loadGold(value)
-        }
+//        if (value != 0) {
+//            loadGold(value)
+//        }
     }
 
-    fun onDateChanged(value: String) {
-        _uiState.update { it.copy(date = value, dateError = null) }
+    fun onSelectDateClicked() = _uiState.update {
+        it.copy(isDatePickerOpen = true)
+    }
+
+    fun onDateChanged(date: Long?) = _uiState.update {
+        if (date == null) return@update it
+        it.copy(
+            date = date,
+            isDatePickerOpen = false
+        )
+    }
+
+    fun onDatePickerDismissed() = _uiState.update {
+        it.copy(isDatePickerOpen = false)
     }
 
     fun onGramsChanged(value: String) {
@@ -60,14 +67,8 @@ class UpsertGoldVM @Inject constructor(
         _uiState.update { it.copy(price = value, priceError = null) }
     }
 
-    fun onTypeChanged(value: String) {
-        _uiState.update {
-            it.copy(
-                type = value,
-                carat = defaultCaratForType(value),
-                caratError = null,
-            )
-        }
+    fun onTypeChanged(value: String) = _uiState.update {
+        it.copy(type = value)
     }
 
     fun onCaratChanged(value: String) {
@@ -78,14 +79,9 @@ class UpsertGoldVM @Inject constructor(
         _uiState.update { it.copy(notes = value) }
     }
 
-    fun submit() {
+    fun onSubmitClicked() {
         val current = _uiState.value
         var hasError = false
-
-        if (!isValidDate(current.date)) {
-            _uiState.update { it.copy(dateError = "Tanggal harus valid") }
-            hasError = true
-        }
 
         val grams = current.grams.toDoubleOrNull()
         if (grams == null || grams <= 0) {
@@ -93,7 +89,7 @@ class UpsertGoldVM @Inject constructor(
             hasError = true
         }
 
-        val price = current.price.toDoubleOrNull()
+        val price = current.price.toIntOrNull()
         if (price == null || price <= 0) {
             _uiState.update { it.copy(priceError = "Harga beli wajib berupa angka lebih dari 0") }
             hasError = true
@@ -123,45 +119,47 @@ class UpsertGoldVM @Inject constructor(
                 val authorization = authorizationHeader()
                     ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                if (current.isUpdate) {
-                    val response = goldApi.updateGold(
-                        authorization = authorization,
-                        id = current.goldId,
-                        body = GoldUpdateGoldReq(
-                            date = current.date.ifBlank { null },
-                            grams = BigDecimal.valueOf(grams!!),
-                            price = BigDecimal.valueOf(price!!),
-                            type = current.type.ifBlank { null },
-                            carat = BigDecimal.valueOf(carat!!),
-                            notes = current.notes.ifBlank { null },
-                        ),
-                    )
+//                if (current.isUpdate) {
+//                    val response = goldApi.updateGold(
+//                        authorization = authorization,
+//                        id = current.goldId,
+//                        body = GoldUpdateGoldReq(
+//                            date = current.date.ifBlank { null },
+//                            grams = BigDecimal.valueOf(grams!!),
+//                            price = BigDecimal.valueOf(price!!),
+//                            type = current.type.ifBlank { null },
+//                            carat = BigDecimal.valueOf(carat!!),
+//                            notes = current.notes.ifBlank { null },
+//                        ),
+//                    )
+//
+//                    if (!response.isSuccessful) {
+//                        throw IllegalStateException(response.errorMessage())
+//                    }
+//
+//                    response.body() ?: throw IllegalStateException("Respons server kosong")
+//                } else {
+                val body = GoldCreateGoldReq(
+                    walletId = requireNotNull(walletId) { "Dompet aktif tidak ditemukan" },
+                    date = current.date.toApiFormat(),
+                    grams = grams!!,
+                    price = price!!,
+                    type = current.type,
+                    carat = carat!!,
+                    notes = current.notes,
+                )
 
-                    if (!response.isSuccessful) {
-                        throw IllegalStateException(response.errorMessage())
-                    }
+                val response = goldApi.createGold(
+                    authorization = authorization,
+                    body = body,
+                )
 
-                    response.body() ?: throw IllegalStateException("Respons server kosong")
-                } else {
-                    val response = goldApi.createGold(
-                        authorization = authorization,
-                        body = GoldCreateGoldReq(
-                            walletId = requireNotNull(walletId) { "Dompet aktif tidak ditemukan" },
-                            date = current.date,
-                            grams = BigDecimal.valueOf(grams!!),
-                            price = BigDecimal.valueOf(price!!),
-                            type = current.type,
-                            carat = BigDecimal.valueOf(carat!!),
-                            notes = current.notes.ifBlank { null },
-                        ),
-                    )
-
-                    if (!response.isSuccessful) {
-                        throw IllegalStateException(response.errorMessage())
-                    }
-
-                    response.body() ?: throw IllegalStateException("Respons server kosong")
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorMessage())
                 }
+
+                response.body() ?: throw IllegalStateException("Respons server kosong")
+//                }
             }.onSuccess {
                 AppEventBus.emit(AppEvent.GoldChanged)
                 _effect.emit(
@@ -181,86 +179,50 @@ class UpsertGoldVM @Inject constructor(
         }
     }
 
-    private fun prepareCreateMode() {
-        val wallet = selectedWalletPrefs.selectedWallet.value
-        _uiState.update {
-            it.copy(
-                goldId = 0,
-                isUpdate = false,
-                selectedWallet = wallet,
-                date = currentIsoDate(),
-                grams = "",
-                price = "",
-                type = "pure_gold",
-                carat = defaultCaratForType("pure_gold"),
-                notes = "",
-                dateError = null,
-                gramsError = null,
-                priceError = null,
-                caratError = null,
-                isLoading = false,
-            )
-        }
-    }
-
-    private fun loadGold(id: Int) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(goldId = id, isUpdate = true, isLoading = true) }
-            runCatching {
-                val authorization = authorizationHeader()
-                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
-
-                val response = goldApi.getGold(authorization, id)
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(response.errorMessage())
-                }
-
-                response.body() ?: throw IllegalStateException("Respons server kosong")
-            }.onSuccess { response ->
-                val gold = response.data
-                _uiState.update {
-                    it.copy(
-                        goldId = gold.id,
-                        isUpdate = true,
-                        date = gold.date,
-                        grams = gold.grams.toString(),
-                        price = gold.price.toString(),
-                        type = gold.type,
-                        carat = gold.carat.toString(),
-                        notes = gold.notes,
-                        dateError = null,
-                        gramsError = null,
-                        priceError = null,
-                        caratError = null,
-                        isLoading = false,
-                    )
-                }
-            }.onFailure { throwable ->
-                _uiState.update { it.copy(isLoading = false) }
-                _effect.emit(
-                    UpsertGoldEffect.ShowMessage(
-                        throwable.message ?: "Gagal memuat data emas",
-                    )
-                )
-            }
-        }
-    }
+//    private fun loadGold(id: Int) {
+//        viewModelScope.launch {
+//            _uiState.update { it.copy(goldId = id, isUpdate = true, isLoading = true) }
+//            runCatching {
+//                val authorization = authorizationHeader()
+//                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+//
+//                val response = goldApi.getGold(authorization, id)
+//                if (!response.isSuccessful) {
+//                    throw IllegalStateException(response.errorMessage())
+//                }
+//
+//                response.body() ?: throw IllegalStateException("Respons server kosong")
+//            }.onSuccess { response ->
+//                val gold = response.data
+//                _uiState.update {
+//                    it.copy(
+//                        goldId = gold.id,
+//                        isUpdate = true,
+//                        date = gold.date,
+//                        grams = gold.grams.toString(),
+//                        price = gold.price.toString(),
+//                        type = gold.type,
+//                        carat = gold.carat.toString(),
+//                        notes = gold.notes,
+//                        gramsError = null,
+//                        priceError = null,
+//                        caratError = null,
+//                        isLoading = false,
+//                    )
+//                }
+//            }.onFailure { throwable ->
+//                _uiState.update { it.copy(isLoading = false) }
+//                _effect.emit(
+//                    UpsertGoldEffect.ShowMessage(
+//                        throwable.message ?: "Gagal memuat data emas",
+//                    )
+//                )
+//            }
+//        }
+//    }
 
     private fun authorizationHeader(): String? {
         return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
-    }
-
-    private fun defaultCaratForType(type: String): String {
-        return when (type) {
-            "pure_gold" -> "24.0"
-            "jewelry" -> "18.0"
-            else -> "0.0"
-        }
-    }
-
-    private fun isValidDate(value: String): Boolean {
-        return runCatching { OffsetDateTime.parse(value) }.isSuccess ||
-            runCatching { LocalDate.parse(value.take(10)) }.isSuccess
     }
 
     init {

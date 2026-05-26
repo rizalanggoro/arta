@@ -13,7 +13,7 @@ type Gold struct {
 	WalletID  uint      `json:"wallet_id"`
 	Date      time.Time `json:"date"`
 	Grams     float64   `json:"grams"`
-	Price     float64   `json:"price"`
+	Price     uint64    `json:"price"`
 	Type      string    `json:"type"` // pure_gold or jewelry
 	Carat     float64   `json:"carat"`
 	Notes     string    `json:"notes"`

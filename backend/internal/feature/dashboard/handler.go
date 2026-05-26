@@ -148,7 +148,7 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 	totalWeight := 0.0
 	totalGoldItems := len(*golds)
 	for index, gold := range *golds {
-		totalBuyPrice += gold.Price
+		totalBuyPrice += float64(gold.Price)
 		totalWeight += gold.Grams
 
 		if _, exists := mappedTax[uint(gold.Carat)]; exists {
@@ -158,7 +158,7 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 			mappedGolds[index] = dto.Gold{
 				Data:      gold,
 				SellPrice: sellPrice,
-				Profit:    sellPrice - gold.Price,
+				Profit:    sellPrice - float64(gold.Price),
 			}
 		}
 	}
