@@ -75,3 +75,4 @@ jobs:
             "$API_BASE_URL/api/release" \
             --header "Content-Type: application/json" \
             --data "{\"url\":\"$RELEASE_URL\",\"version_code\":$VERSION_CODE}"
+        working-directory: ./android
