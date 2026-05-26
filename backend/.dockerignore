@@ -1,0 +1,8 @@
+.env
+.env.*
+bin/
+tmp/
+build/
+.git/
+.gitignore
+README.md

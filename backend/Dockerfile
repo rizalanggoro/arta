@@ -1,36 +1,24 @@
-# Build stage
-FROM golang:1.21-alpine AS builder
+FROM golang:1.25-alpine3.22 AS builder
 
 WORKDIR /app
 
-# Install dependencies
-RUN apk add --no-cache git
+COPY go.mod .
+COPY go.sum .
 
-# Copy go mod files
-COPY go.mod go.sum ./
-
-# Download dependencies
 RUN go mod download
 
-# Copy source code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o api cmd/api/main.go
+RUN go build -o app ./cmd/api/main.go
 
-# Final stage
-FROM alpine:latest
+FROM alpine:3.22
 
-RUN apk --no-cache add ca-certificates
+RUN apk add --no-cache tzdata
 
-WORKDIR /root/
+WORKDIR /app
 
-# Copy binary from builder
-COPY --from=builder /app/api .
+COPY --from=builder /app/app .
 
-# Copy .env if exists
-COPY .env* ./
+EXPOSE 8080
 
-EXPOSE 3000
-
-CMD ["./api"]
+ENTRYPOINT ["./app"]
