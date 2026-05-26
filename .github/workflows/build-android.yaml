@@ -1,9 +1,9 @@
 name: Build and Release Android Application
 
 on:
-  push:
-    paths:
-      - "android/**"
+  # push:
+  #   paths:
+  #     - "android/**"
   workflow_dispatch:
 
 jobs:
