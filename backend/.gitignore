@@ -23,8 +23,6 @@ dist/
 
 # Go
 vendor/
-*.go.sum
-go.sum
 
 # Temp files
 tmp/
