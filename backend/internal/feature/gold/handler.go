@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/artafinance/backend/internal/cron/fxrate"
+	"github.com/artafinance/backend/internal/cron/goldprice"
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
 	"github.com/artafinance/backend/pkg/jwt"
@@ -18,14 +20,28 @@ func isValidGoldType(value string) bool {
 
 // Handler exposes gold HTTP endpoints.
 type Handler struct {
-	repo    *Repository
-	jwtMgr  *jwt.Manager
-	checker middleware.TokenStatusChecker
+	repo          *Repository
+	fxRepo        *fxrate.Repository
+	goldPriceRepo *goldprice.Repository
+	jwtMgr        *jwt.Manager
+	checker       middleware.TokenStatusChecker
 }
 
 // NewHandler creates a new gold handler.
-func NewHandler(repo *Repository, jwtMgr *jwt.Manager, checker middleware.TokenStatusChecker) *Handler {
-	return &Handler{repo: repo, jwtMgr: jwtMgr, checker: checker}
+func NewHandler(
+	repo *Repository,
+	fxRepo *fxrate.Repository,
+	goldPriceRepo *goldprice.Repository,
+	jwtMgr *jwt.Manager,
+	checker middleware.TokenStatusChecker,
+) *Handler {
+	return &Handler{
+		repo:          repo,
+		fxRepo:        fxRepo,
+		goldPriceRepo: goldPriceRepo,
+		jwtMgr:        jwtMgr,
+		checker:       checker,
+	}
 }
 
 // RegisterRoutes registers gold routes.
@@ -47,27 +63,72 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 // @tags                 gold
 // @accept               json
 // @produce              json
-// @param                Authorization header string true "Bearer token"
+// @param								Authorization header string true "Bearer token"
 // @success              200 {object} ListGoldsRes
 // @router               /api/gold [get]
 func (h *Handler) list(c *fiber.Ctx) error {
 	userID := middleware.GetUserID(c)
 	if userID == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{
+			Code:    fiber.StatusUnauthorized,
+			Message: "unauthorized",
+		})
 	}
 	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	fxRate, err := h.fxRepo.GetLatest()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	goldPrice, err := h.goldPriceRepo.GetLatest()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	goldPriceIDRPerGram := (goldPrice.PricePerOunceUSD / 31.1035) * float64(fxRate.Rate)
+
+	tax, err := h.repo.GetTaxPreferencesByUserID(uint(parsedUserID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	mappedTax := make(map[float64]float64)
+	for _, t := range tax {
+		mappedTax[t.Carat] = t.TaxRate
 	}
 
 	golds, err := h.repo.GetGoldsByUserID(uint(parsedUserID))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
 	res := ListGoldsRes{Golds: make([]dto.Gold, 0, len(golds))}
 	for _, g := range golds {
-		res.Golds = append(res.Golds, dto.Gold{Data: g})
+		sellPrice := g.Grams * goldPriceIDRPerGram * (1 - mappedTax[g.Carat]/100)
+		res.Golds = append(res.Golds, dto.Gold{
+			Data:      g,
+			SellPrice: sellPrice,
+			Profit:    sellPrice - g.Price,
+		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(res)
@@ -453,4 +514,3 @@ func (h *Handler) delete(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(DeleteGoldRes{Message: "gold deleted"})
 }
-

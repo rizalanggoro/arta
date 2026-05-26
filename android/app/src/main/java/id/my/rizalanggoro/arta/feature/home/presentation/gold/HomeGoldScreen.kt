@@ -1,32 +1,16 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.gold
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.automirrored.rounded.TrendingUp
-import androidx.compose.material.icons.rounded.Inbox
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,14 +21,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
+import id.my.rizalanggoro.arta.openapi.models.DtoGold
+import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
+import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
+import id.my.rizalanggoro.arta.shared.component.GoldListItem
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import java.math.BigDecimal
 import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun HomeGoldScreen(
     vm: HomeGoldVM = hiltViewModel(),
-    onClickManageTax: () -> Unit = {},
 ) {
     val uiState by vm.uiState.collectAsState()
 
@@ -55,189 +41,116 @@ fun HomeGoldScreen(
     }
 
     Content(
-        golds = uiState.golds,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
-        onClickManageTax = onClickManageTax,
+        uiState = uiState
     )
 }
 
 @Composable
 private fun Content(
-    golds: List<DomainGold> = emptyList(),
-    isLoading: Boolean = false,
-    errorMessage: String? = null,
-    onClickManageTax: () -> Unit = {},
+    uiState: HomeGoldUiState = HomeGoldUiState(),
+    onClickRetry: () -> Unit = {},
 ) {
     when {
-        isLoading -> Box(
+        uiState.isLoading -> Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize(),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                TaxActions(onClickManageTax = onClickManageTax)
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    LoadingIndicator()
-                }
-            }
+            LoadingIndicator()
         }
 
-        golds.isEmpty() -> Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            TaxActions(onClickManageTax = onClickManageTax)
-            Icon(
-                Icons.Rounded.Inbox,
-                null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.outlineVariant,
-            )
-            Text(
-                "Belum ada emas yang ditambahkan",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
-        }
+        uiState.errorMessage != null -> ErrorPlaceholder(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            onClickRetry = onClickRetry
+        )
+
+        uiState.golds.isEmpty() -> EmptyPlaceholder(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        )
 
         else -> LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = (56 + 32).dp)
+                .clip(RoundedCornerShape(16.dp)),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            item {
-                TaxActions(onClickManageTax = onClickManageTax)
-            }
-            items(golds) { gold ->
-                GoldItem(gold = gold)
-            }
-        }
-    }
-}
-
-@Composable
-private fun TaxActions(
-    onClickManageTax: () -> Unit,
-) {
-    OutlinedButton(onClick = onClickManageTax, modifier = Modifier.fillMaxWidth()) {
-        Icon(Icons.Rounded.Edit, contentDescription = null)
-        Text(text = "Kelola pajak emas")
-    }
-}
-
-@Composable
-private fun GoldItem(gold: DomainGold) {
-    OutlinedCard {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Rounded.TrendingUp,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Column {
-                    Text(
-                        text = gold.date,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Text(
-                        text = "Rp ${gold.price}",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "${gold.grams} gram",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
-            }
-            HorizontalDivider()
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Karat ${gold.carat}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
-                Text("Catatan ${gold.notes.ifBlank { "-" }}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Gold List")
-@Composable
-private fun HomeGoldListPreview() {
-    ArtaTheme {
-        Content(
-            golds = List(5) {
-                DomainGold(
-                    id = it,
-                    walletId = 1,
-                    date = "2026-05-20",
-                    grams = BigDecimal.valueOf(1.0),
-                    price = BigDecimal.valueOf(7800000.0),
-                    type = "pure_gold",
-                    carat = BigDecimal.valueOf(24.0),
-                    notes = "",
-                    createdAt = "",
-                    updatedAt = "",
+            items(uiState.golds) {
+                GoldListItem(
+                    gold = it,
+                    onClick = {},
                 )
-            },
-            isLoading = false,
-            errorMessage = null,
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview() {
+    ArtaTheme {
+        Content(
+            uiState = HomeGoldUiState(
+                golds = List(5) {
+                    DtoGold(
+                        data = DomainGold(
+                            carat = 24.toBigDecimal(),
+                            createdAt = "2026-05-25T14:38:00.000+07:00",
+                            date = "2026-05-25T14:38:00.000+07:00",
+                            grams = 3.3.toBigDecimal(),
+                            id = 1,
+                            notes = "",
+                            price = 1500000.toBigDecimal(),
+                            type = "jewelry",
+                            updatedAt = "2026-05-25T14:38:00.000+07:00",
+                            walletId = 1
+                        ),
+                        profit = ((it - 1) * 500000).toBigDecimal(),
+                        sellPrice = (1500000 + ((it - 1) * 500000)).toBigDecimal(),
+                    )
+                },
+                isLoading = false,
+                errorMessage = null,
+            )
         )
     }
 }
 
-@Preview(showBackground = true, name = "Gold List Loading")
+@Preview(showBackground = true)
 @Composable
-private fun HomeGoldListLoadingPreview() {
+private fun LoadingPreview() {
     ArtaTheme {
         Content(
-            isLoading = true
+            uiState = HomeGoldUiState(
+                isLoading = true
+            )
         )
     }
 }
 
-@Preview(showBackground = true, name = "Gold List Empty")
+@Preview(showBackground = true)
 @Composable
-private fun HomeGoldListEmptyPreview() {
+private fun EmptyPreview() {
     ArtaTheme {
         Content(
-            golds = emptyList(),
+            uiState = HomeGoldUiState(
+                golds = emptyList()
+            )
         )
     }
 }
 
-@Preview(showBackground = true, name = "Gold List Error")
+@Preview(showBackground = true)
 @Composable
-private fun HomeGoldListErrorPreview() {
+private fun ErrorPreview() {
     ArtaTheme {
         Content(
-            golds = emptyList(),
-            isLoading = false,
-            errorMessage = "Terjadi kesalahan",
+            uiState = HomeGoldUiState(
+                errorMessage = "Terjadi kesalahan tak terduga"
+            )
         )
     }
 }

@@ -7,18 +7,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.rounded.Balance
+import androidx.compose.material.icons.rounded.Tag
+import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
@@ -36,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component.LatestGold
+import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component.PriceSummary
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
@@ -43,12 +46,6 @@ import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
 import java.math.BigDecimal
-import java.text.NumberFormat
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.util.Locale
-import kotlin.math.abs
 
 @Composable
 fun HomeGoldDashboardScreen(
@@ -69,7 +66,7 @@ fun HomeGoldDashboardScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 private fun Content(
     uiState: GoldDashboardUiState = GoldDashboardUiState(),
     onClickRetry: () -> Unit = {},
@@ -103,7 +100,7 @@ private fun Content(
                 ) {
                     Text(
                         text = "Total asset",
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
@@ -145,16 +142,47 @@ private fun Content(
                         .padding(horizontal = 16.dp)
                         .padding(top = 16.dp)
                 ) {
-                    SummaryCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Total berat",
-                        value = uiState.totalWeight
-                    )
-                    SummaryCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Total emas",
-                        value = uiState.totalGoldItems
-                    )
+                    listOf(
+                        mapOf(
+                            "title" to "Total berat",
+                            "value" to uiState.totalWeight,
+                            "icon" to Icons.Rounded.Balance
+                        ),
+                        mapOf(
+                            "title" to "Total emas",
+                            "value" to uiState.totalGoldItems,
+                            "icon" to Icons.Rounded.Tag
+                        )
+                    ).forEach {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                            ),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    it["icon"] as ImageVector,
+                                    null
+                                )
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Text(
+                                        text = it["value"] as String,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(
+                                        text = it["title"] as String,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.outline,
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -166,139 +194,71 @@ private fun Content(
                         .padding(horizontal = 16.dp)
                         .padding(top = 8.dp)
                 ) {
-                    SummaryCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Harga dollar terbaru",
-                        value = uiState.latestDollarPrice
-                    )
-                    SummaryCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Harga emas / gram",
-                        value = uiState.latestGoldPricePerGramIdr
-                    )
-                }
-            }
-
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-                    shape = CardDefaults.shape,
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                    ) {
-                        Text(
-                            text = "Emas Terbaru",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            uiState.recentGolds.take(5).forEachIndexed { index, gold ->
-                                GoldRow(gold = gold)
-                                if (index < uiState.recentGolds.take(5).lastIndex) {
-                                    HorizontalDivider()
-                                }
-                            }
-                        }
-
-                        Button(
-                            onClick = {}, modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
+                    listOf(
+                        mapOf("title" to "Emas dunia", "value" to "$4000"),
+                        mapOf("title" to "Nilai dollar", "value" to uiState.latestDollarPrice)
+                    ).forEach {
+                        Card(
+                            modifier = Modifier.weight(1f),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                            )
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                Text("Lihat lainnya")
-                                Icon(
-                                    Icons.AutoMirrored.Rounded.ArrowForward,
-                                    null
+                                Text(
+                                    text = it["title"] as String,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Normal
                                 )
+                                Text(
+                                    text = it["value"] as String,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Rounded.Update,
+                                        null,
+                                        modifier = Modifier.size(12.dp),
+                                        tint = MaterialTheme.colorScheme.outline
+                                    )
+                                    Text(
+                                        text = "25/05/26 07.19",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.outline,
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-    }
-}
 
-@Composable
-private fun SummaryCard(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier, colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(text = value, style = MaterialTheme.typography.titleMedium)
-        }
-    }
-}
+            item {
+                PriceSummary()
+            }
 
-@Composable
-private fun GoldRow(
-    gold: DtoGold,
-    modifier: Modifier = Modifier,
-) {
-    val data = gold.data
-
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = data.notes.ifBlank { "Emas #${data.id}" },
-                style = MaterialTheme.typography.titleSmall
-            )
-            Text(
-                text = listOfNotNull(
-                    data.type.replace('_', ' '),
-                    formatDate(data.date),
-                ).joinToString(" · "),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = "Jual: ${formatMoney(gold.sellPrice)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = "${formatWeight(data.grams)} · ${formatMoney(data.price)}",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = "Profit: ${formatSignedMoney(gold.profit.toDouble())}",
-                style = MaterialTheme.typography.bodySmall,
-                color = if (gold.profit.toDouble() >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-            )
+            item {
+                LatestGold(
+                    golds = uiState.recentGolds,
+                    onClickShowMore = {},
+                )
+            }
         }
     }
 }
 
 @Preview(
     showBackground = true,
-    wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE
+    wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE, device = "id:pixel_9_pro_xl"
 )
 @Composable
-private fun HomeGoldDashboardPreviewDefault() {
+private fun Preview() {
     ArtaTheme {
         Content(
             uiState = GoldDashboardUiState(
@@ -446,38 +406,4 @@ private fun HomeGoldDashboardPreviewError() {
             ),
         )
     }
-}
-
-private fun formatMoney(value: Double): String {
-    val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).apply {
-        maximumFractionDigits = 0
-    }
-    return "Rp ${formatter.format(value.toLong())}"
-}
-
-private fun formatWeight(value: Double): String {
-    val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).apply {
-        minimumFractionDigits = 2
-        maximumFractionDigits = 2
-    }
-    return "${formatter.format(value)} g"
-}
-
-private fun formatWeight(value: BigDecimal): String = formatWeight(value.toDouble())
-
-private fun formatMoney(value: BigDecimal): String = formatMoney(value.toDouble())
-
-private fun formatSignedMoney(value: Double): String {
-    val sign = if (value >= 0) "+" else "-"
-    return "$sign${formatMoney(abs(value))}"
-}
-
-private fun formatDate(value: String): String {
-    if (value.isBlank()) return "-"
-
-    val formatted = runCatching { OffsetDateTime.parse(value) }.getOrNull()?.toLocalDate()
-        ?: runCatching { LocalDateTime.parse(value).toLocalDate() }.getOrNull()
-        ?: runCatching { LocalDate.parse(value) }.getOrNull()
-
-    return formatted?.toString() ?: value
 }

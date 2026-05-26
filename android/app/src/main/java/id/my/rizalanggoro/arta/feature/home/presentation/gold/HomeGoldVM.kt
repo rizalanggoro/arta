@@ -16,23 +16,34 @@ class HomeGoldVM @Inject constructor(
     private val goldApi: GoldApi,
     private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(HomeGoldUiState())
     val uiState: StateFlow<HomeGoldUiState> = _uiState.asStateFlow()
 
     fun loadGolds() {
-        _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            errorMessage = null
+        )
         viewModelScope.launch {
             runCatching {
-                val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val token = authPrefs.currentSession.value?.token
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
                 val response = goldApi.listGolds("Bearer $token")
-                if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
+                if (!response.isSuccessful) throw IllegalStateException(
+                    response.errorBody()?.string() ?: "Request failed"
+                )
                 response.body() ?: throw IllegalStateException("Respons server kosong")
-            }.onSuccess { res ->
-                val list = res.golds.map { it.`data` }
-                _uiState.value = _uiState.value.copy(isLoading = false, golds = list)
+            }.onSuccess { response ->
+                println("Response golds: ${response.golds}")
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    golds = response.golds
+                )
             }.onFailure { thr ->
-                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = thr.message)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = thr.message
+                )
             }
         }
     }

@@ -1,27 +1,35 @@
 package id.my.rizalanggoro.arta.core.extension
 
 import java.time.Instant
+import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
-fun Long.toIndonesianDate(): String {
-    val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.forLanguageTag("id-ID"))
+private val formatter = DateTimeFormatter.ofPattern(
+    "EEEE, d MMMM yyyy",
+    Locale.forLanguageTag("id-ID")
+)
 
-    val localDate = Instant.ofEpochMilli(this)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
+private val apiFormatter = DateTimeFormatter.ofPattern(
+    "yyyy-MM-dd"
+)
 
-    return localDate.format(formatter).replaceFirstChar { it.uppercase() }
-}
+fun Long.toIndonesianDate() = Instant
+    .ofEpochMilli(this)
+    .atZone(ZoneId.systemDefault())
+    .toLocalDate()
+    .format(formatter)
+    .replaceFirstChar { it.uppercase() }
 
-fun Long.toApiFormat(): String {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+fun Long.toApiFormat(): String = Instant
+    .ofEpochMilli(this)
+    .atZone(ZoneId.systemDefault())
+    .toLocalDate()
+    .format(apiFormatter)
 
-    return Instant.ofEpochMilli(this)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
-        .format(formatter)
-}
+fun String.toIndonesianDate() = OffsetDateTime
+    .parse(this)
+    .toLocalDate()
+    .format(formatter)
+    .replaceFirstChar { it.uppercase() }

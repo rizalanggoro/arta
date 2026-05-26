@@ -61,6 +61,16 @@ definitions:
     required:
     - preference
     type: object
+  CreateReleaseReq:
+    properties:
+      url:
+        type: string
+      version_code:
+        type: integer
+    required:
+    - url
+    - version_code
+    type: object
   CreateTransactionReq:
     properties:
       amount:
@@ -289,6 +299,13 @@ definitions:
     - token
     - user_id
     type: object
+  ReleaseRes:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Release'
+    required:
+    - data
+    type: object
   UpdateCategoryRes:
     properties:
       data:
@@ -428,6 +445,25 @@ definitions:
     - type
     - updated_at
     - wallet_id
+    type: object
+  domain.Release:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      url:
+        type: string
+      version_code:
+        type: integer
+    required:
+    - created_at
+    - id
+    - updated_at
+    - url
+    - version_code
     type: object
   domain.Transaction:
     properties:
@@ -1224,6 +1260,59 @@ paths:
             $ref: '#/definitions/UpdateGoldTaxPreferenceRes'
       tags:
       - gold
+  /api/release:
+    post:
+      consumes:
+      - application/json
+      description: Store a new APK release url and its version code.
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateReleaseReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ReleaseRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Create a new release
+      tags:
+      - release
+  /api/release/latest:
+    get:
+      consumes:
+      - application/json
+      description: Return the release with the highest version code.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ReleaseRes'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Get latest release
+      tags:
+      - release
   /api/transaction:
     get:
       consumes:

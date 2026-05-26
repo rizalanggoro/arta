@@ -12,6 +12,7 @@ docs/CategoryUpdateCategoryReq.md
 docs/CreateCategoryRes.md
 docs/CreateGoldRes.md
 docs/CreateGoldTaxPreferenceRes.md
+docs/CreateReleaseReq.md
 docs/CreateTransactionReq.md
 docs/CreateTransactionRes.md
 docs/CreateWalletRes.md
@@ -23,6 +24,7 @@ docs/DeleteTransactionRes.md
 docs/DeleteWalletRes.md
 docs/DomainCategory.md
 docs/DomainGold.md
+docs/DomainRelease.md
 docs/DomainTransaction.md
 docs/DomainUser.md
 docs/DomainWallet.md
@@ -50,6 +52,8 @@ docs/LogoutRes.md
 docs/MeRes.md
 docs/RegisterReq.md
 docs/RegisterRes.md
+docs/ReleaseApi.md
+docs/ReleaseRes.md
 docs/TransactionApi.md
 docs/UpdateCategoryRes.md
 docs/UpdateGoldRes.md
@@ -71,6 +75,7 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/apis/AuthApi.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/apis/CategoryApi.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/apis/DashboardApi.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/apis/GoldApi.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/apis/ReleaseApi.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/apis/TransactionApi.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/apis/WalletApi.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/auth/ApiKeyAuth.kt
@@ -99,6 +104,7 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CategoryUpdateCategoryReq
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CreateCategoryRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CreateGoldRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CreateGoldTaxPreferenceRes.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CreateReleaseReq.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CreateTransactionReq.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CreateTransactionRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CreateWalletRes.kt
@@ -109,6 +115,7 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DeleteTransactionRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DeleteWalletRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainCategory.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainGold.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainRelease.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainTransaction.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainUser.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainWallet.kt
@@ -135,6 +142,7 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/LogoutRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/MeRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/RegisterReq.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/RegisterRes.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/ReleaseRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/UpdateCategoryRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/UpdateGoldRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/UpdateGoldTaxPreferenceRes.kt

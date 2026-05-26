@@ -11,18 +11,21 @@ import androidx.compose.material.icons.rounded.Payment
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,14 +38,14 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
+import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.Routes.HomeCashDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeSettingRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeTransactionRoute
-import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
+import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.HomeGoldDashboardScreen
@@ -63,13 +66,13 @@ fun HomeScreen(
 
     val homeBackStack = when (walletType) {
         "cash_savings" -> rememberNavBackStack(HomeCashDashboardRoute)
-        "gold_savings" -> rememberNavBackStack(HomeGoldDashboardRoute)
+        "gold_savings" -> rememberNavBackStack(HomeSettingRoute)
         else -> null
     }
 
     Content(
         destinations = destinations,
-        selectedIndex = uiState.selectedIndex,
+        uiState = uiState,
         onDestinationSelected = vm::onDestinationSelected,
         onClickSelectWallet = { backStack.add(WalletSelectRoute) },
         homeBackStack = homeBackStack,
@@ -83,11 +86,7 @@ fun HomeScreen(
             entry<HomeCashDashboardRoute> { HomeCashDashboardScreen() }
             entry<HomeGoldDashboardRoute> { HomeGoldDashboardScreen() }
             entry<HomeTransactionRoute> { HomeTransactionScreen() }
-            entry<HomeGoldRoute> {
-                HomeGoldScreen(
-                    onClickManageTax = { backStack.add(GoldTaxListRoute) },
-                )
-            }
+            entry<HomeGoldRoute> { HomeGoldScreen() }
             entry<HomeSettingRoute> { HomeSettingScreen() }
         }
     )
@@ -97,7 +96,7 @@ fun HomeScreen(
 @Composable
 private fun Content(
     destinations: List<HomeDestination>,
-    selectedIndex: Int,
+    uiState: HomeUiState = HomeUiState(),
     onDestinationSelected: (Int) -> Unit,
     onClickSelectWallet: () -> Unit,
     homeBackStack: (NavBackStack<NavKey>)? = null,
@@ -107,10 +106,23 @@ private fun Content(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Arta") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = when (uiState.selectedIndex == 0) {
+                        true -> MaterialTheme.colorScheme.surfaceContainer
+                        else -> Color.Unspecified
+                    }
+                ),
+                title = {
+                    Text(
+                        text = uiState.selectedWallet?.name.let {
+                            if (it != null && uiState.selectedIndex in 0..1) it
+                            else "Arta"
+                        }
+                    )
+                },
                 actions = {
-                    if (selectedIndex in 0..1)
-                        FilledTonalIconButton(onClick = onClickSelectWallet) {
+                    if (uiState.selectedIndex in 0..1)
+                        IconButton(onClick = onClickSelectWallet) {
                             Icon(
                                 Icons.Rounded.Wallet,
                                 null
@@ -124,7 +136,7 @@ private fun Content(
                 NavigationBar {
                     destinations.forEachIndexed { index, destination ->
                         NavigationBarItem(
-                            selected = selectedIndex == index,
+                            selected = uiState.selectedIndex == index,
                             onClick = {
                                 onDestinationSelected(index)
                                 homeBackStack.removeFirstOrNull()
@@ -142,7 +154,7 @@ private fun Content(
                 }
         },
         floatingActionButton = {
-            if (selectedIndex in 0..1) {
+            if (uiState.selectedIndex in 0..1) {
                 FloatingActionButton(onClick = onClickFab) {
                     Icon(
                         Icons.Rounded.Add,
@@ -215,7 +227,9 @@ private fun HomeCashPreview() {
     ArtaTheme {
         Content(
             destinations = walletDestinations("cash_savings"),
-            selectedIndex = 0,
+            uiState = HomeUiState(
+                selectedIndex = 0,
+            ),
             onDestinationSelected = {},
             onClickSelectWallet = {},
         )
@@ -228,7 +242,9 @@ private fun HomeGoldPreview() {
     ArtaTheme {
         Content(
             destinations = walletDestinations("gold_savings"),
-            selectedIndex = 0,
+            uiState = HomeUiState(
+                selectedIndex = 0,
+            ),
             onDestinationSelected = {},
             onClickSelectWallet = {},
         )

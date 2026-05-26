@@ -8,7 +8,7 @@ import (
 	"github.com/artafinance/backend/pkg/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	// "gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -18,14 +18,14 @@ func Initialize(cfg *config.Config) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 	dialector = postgres.Open(cfg.GetDatabaseURL())
 
-	logLevel := logger.Silent
-	if cfg.IsDevelopment() {
-		logLevel = logger.Info
-	}
+	// logLevel := logger.Silent
+	// if cfg.IsDevelopment() {
+	// 	logLevel = logger.Info
+	// }
 
 	var err error
 	db, err = gorm.Open(dialector, &gorm.Config{
-		Logger: logger.Default.LogMode(logLevel),
+		// Logger: logger.Default.LogMode(logLevel),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
@@ -58,6 +58,7 @@ func runMigrations(database *gorm.DB) error {
 		&model.GoldTaxPreference{},
 		&model.GoldPrice{},
 		&model.FxRate{},
+		&model.Release{},
 	); err != nil {
 		return err
 	}

@@ -869,6 +869,87 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/release": {
+            "post": {
+                "description": "Store a new APK release url and its version code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "release"
+                ],
+                "summary": "Create a new release",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateReleaseReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ReleaseRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/release/latest": {
+            "get": {
+                "description": "Return the release with the highest version code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "release"
+                ],
+                "summary": "Get latest release",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ReleaseRes"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/transaction": {
             "get": {
                 "consumes": [
@@ -1580,6 +1661,21 @@ const docTemplate = `{
                 }
             }
         },
+        "CreateReleaseReq": {
+            "type": "object",
+            "required": [
+                "url",
+                "version_code"
+            ],
+            "properties": {
+                "url": {
+                    "type": "string"
+                },
+                "version_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "CreateTransactionReq": {
             "type": "object",
             "required": [
@@ -1921,6 +2017,17 @@ const docTemplate = `{
                 }
             }
         },
+        "ReleaseRes": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.Release"
+                }
+            }
+        },
         "UpdateCategoryRes": {
             "type": "object",
             "required": [
@@ -2123,6 +2230,33 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "wallet_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.Release": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "updated_at",
+                "url",
+                "version_code"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "version_code": {
                     "type": "integer"
                 }
             }

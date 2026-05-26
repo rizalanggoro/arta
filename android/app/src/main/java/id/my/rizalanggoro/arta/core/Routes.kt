@@ -36,6 +36,9 @@ object Routes {
     @Serializable
     data object HomeSettingRoute : NavKey
 
+    @Serializable
+    data object UpdateRoute : NavKey
+
     // wallet
     @Serializable
     data object WalletRoute : NavKey

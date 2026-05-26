@@ -1,5 +1,10 @@
 package id.my.rizalanggoro.arta.core
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -26,6 +31,7 @@ import id.my.rizalanggoro.arta.core.Routes.HomeSettingRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeTransactionRoute
 import id.my.rizalanggoro.arta.core.Routes.LoginRoute
 import id.my.rizalanggoro.arta.core.Routes.RegisterRoute
+import id.my.rizalanggoro.arta.core.Routes.UpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionDetailRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
 import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
@@ -52,6 +58,7 @@ import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionScreen
+import id.my.rizalanggoro.arta.feature.update.presentation.check.CheckUpdateScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.upsert.UpsertTransactionScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst.CreateFirstWalletScreen
@@ -92,6 +99,26 @@ fun ComposeApp(
                         rememberViewModelStoreNavEntryDecorator(),
                     ),
                     sceneStrategies = listOf(bottomSheetStrategy),
+                    transitionSpec = {
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                        ) + fadeIn() togetherWith slideOutHorizontally(
+                            targetOffsetX = { -it },
+                        ) + fadeOut()
+                    },
+                    popTransitionSpec = {
+                        slideInHorizontally(
+                            initialOffsetX = { -it },
+                        ) + fadeIn() togetherWith slideOutHorizontally(
+                            targetOffsetX = { it },
+                        ) + fadeOut()
+                    },
+                    predictivePopTransitionSpec = {
+                        slideInHorizontally(initialOffsetX = { -it }
+                        ) + fadeIn() togetherWith slideOutHorizontally(
+                            targetOffsetX = { it },
+                        ) + fadeOut()
+                    },
                     entryProvider = entryProvider {
                         // auth
                         entry<LoginRoute> { LoginScreen() }
@@ -126,8 +153,8 @@ fun ComposeApp(
                         ) { navKey ->
                             UpsertCategoryScreen(
                                 vm = hiltViewModel<UpsertCategoryVM, UpsertCategoryVM.Factory>(
-                                creationCallback = { it.create(navKey = navKey) }
-                            ))
+                                    creationCallback = { it.create(navKey = navKey) }
+                                ))
                         }
 
                         // transaction
@@ -151,6 +178,7 @@ fun ComposeApp(
                         entry<HomeRoute> { HomeScreen() }
                         entry<HomeTransactionRoute> { HomeTransactionScreen() }
                         entry<HomeSettingRoute> { HomeSettingScreen() }
+                        entry<UpdateRoute> { CheckUpdateScreen() }
                     },
                 )
             }

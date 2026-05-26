@@ -11,6 +11,7 @@ import (
 	"github.com/artafinance/backend/internal/feature/category"
 	"github.com/artafinance/backend/internal/feature/dashboard"
 	"github.com/artafinance/backend/internal/feature/gold"
+	"github.com/artafinance/backend/internal/feature/release"
 	"github.com/artafinance/backend/internal/feature/transaction"
 	"github.com/artafinance/backend/internal/feature/wallet"
 	"github.com/artafinance/backend/pkg/config"
@@ -44,6 +45,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	goldPriceRepo := goldprice.NewRepository(db)
+	goldPriceClient := goldprice.NewClient()
+	goldPriceJob := goldprice.NewScheduler(goldPriceRepo, goldPriceClient, log.Default())
+	go goldPriceJob.Start(context.Background())
+
+	fxRateRepo := fxrate.NewRepository(db)
+	fxRateClient := fxrate.NewClient()
+	fxRateJob := fxrate.NewScheduler(fxRateRepo, fxRateClient, log.Default())
+	go fxRateJob.Start(context.Background())
+
 	jwtManager := jwt.New(cfg.JWTSecret, cfg.JWTExpiration)
 	authRepo := auth.NewRepository(db)
 	authHandler := auth.NewHandler(authRepo, jwtManager)
@@ -55,20 +66,19 @@ func main() {
 	categoryHandler := category.NewHandler(categoryRepo, jwtManager, authRepo)
 
 	goldRepo := gold.NewRepository(db)
-	goldHandler := gold.NewHandler(goldRepo, jwtManager, authRepo)
+	goldHandler := gold.NewHandler(
+		goldRepo,
+		fxRateRepo,
+		goldPriceRepo,
+		jwtManager,
+		authRepo,
+	)
+
+	releaseRepo := release.NewRepository(db)
+	releaseHandler := release.NewHandler(releaseRepo)
 
 	transactionRepo := transaction.NewRepository(db)
 	transactionHandler := transaction.NewHandler(transactionRepo, categoryRepo, jwtManager, authRepo)
-
-	goldPriceRepo := goldprice.NewRepository(db)
-	goldPriceClient := goldprice.NewClient()
-	goldPriceJob := goldprice.NewScheduler(goldPriceRepo, goldPriceClient, log.Default())
-	go goldPriceJob.Start(context.Background())
-
-	fxRateRepo := fxrate.NewRepository(db)
-	fxRateClient := fxrate.NewClient()
-	fxRateJob := fxrate.NewScheduler(fxRateRepo, fxRateClient, log.Default())
-	go fxRateJob.Start(context.Background())
 
 	dashboardHandler := dashboard.NewHandler(walletRepo, goldRepo, goldPriceRepo, fxRateRepo, transactionRepo, categoryRepo, jwtManager, authRepo)
 
@@ -79,6 +89,7 @@ func main() {
 	walletHandler.RegisterRoutes(api)
 	categoryHandler.RegisterRoutes(api)
 	goldHandler.RegisterRoutes(api)
+	releaseHandler.RegisterRoutes(api)
 	transactionHandler.RegisterRoutes(api)
 	dashboardHandler.RegisterRoutes(api)
 

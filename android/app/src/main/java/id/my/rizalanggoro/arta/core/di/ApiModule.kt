@@ -9,6 +9,7 @@ import id.my.rizalanggoro.arta.openapi.apis.AuthApi
 import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
 import id.my.rizalanggoro.arta.openapi.apis.GoldApi
+import id.my.rizalanggoro.arta.openapi.apis.ReleaseApi
 import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import javax.inject.Singleton
@@ -45,4 +46,9 @@ object ApiModule {
     @Singleton
     fun provideDashboardApi(): DashboardApi =
         RetrofitProvider.create(DashboardApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideReleaseApi(): ReleaseApi =
+        RetrofitProvider.create(ReleaseApi::class.java)
 }

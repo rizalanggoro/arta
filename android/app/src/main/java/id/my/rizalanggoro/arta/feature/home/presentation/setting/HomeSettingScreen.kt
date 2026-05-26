@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.Balance
@@ -17,10 +18,12 @@ import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -38,8 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
-import id.my.rizalanggoro.arta.core.Routes.LoginRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
+import id.my.rizalanggoro.arta.core.Routes.LoginRoute
+import id.my.rizalanggoro.arta.core.Routes.UpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
@@ -66,6 +70,7 @@ fun HomeSettingScreen(
         onClickManageCategory = { backStack.add(CategoryRoute) },
         onClickManageWallet = { backStack.add(WalletRoute) },
         onClickManageGoldTax = { backStack.add(GoldTaxListRoute) },
+        onClickUpdate = { backStack.add(UpdateRoute) },
         onClickLogout = vm::logout,
     )
 
@@ -83,6 +88,7 @@ private fun Content(
     onClickManageWallet: () -> Unit = {},
     onClickManageCategory: () -> Unit = {},
     onClickManageGoldTax: () -> Unit = {},
+    onClickUpdate: () -> Unit = {},
     onClickLogout: () -> Unit = {},
 ) {
     Column {
@@ -116,108 +122,143 @@ private fun Content(
             }
         }
 
-        ListItem(
-            leadingContent = {
-                Icon(
-                    Icons.Rounded.DarkMode,
-                    contentDescription = null
-                )
-            },
-            headlineContent = {
-                Text("Tema gelap")
-            },
-            trailingContent = {
-                Switch(
-                    checked = uiState.isDarkTheme,
-                    onCheckedChange = onToggleTheme,
-                )
-            }
-        )
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(16.dp)),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                leadingContent = {
+                    Icon(
+                        Icons.Rounded.DarkMode,
+                        contentDescription = null
+                    )
+                },
+                headlineContent = {
+                    Text("Tema gelap")
+                },
+                trailingContent = {
+                    Switch(
+                        checked = uiState.isDarkTheme,
+                        onCheckedChange = onToggleTheme,
+                    )
+                }
+            )
 
-        ListItem(
-            leadingContent = {
-                Icon(
-                    Icons.Rounded.Wallet,
-                    contentDescription = null
-                )
-            },
-            headlineContent = {
-                Text("Dompet")
-            },
-            supportingContent = {
-                Text("Kelola dompet tabungan uang dan emas")
-            },
-            trailingContent = {
-                Icon(
-                    Icons.Rounded.ChevronRight,
-                    null
-                )
-            },
-            modifier = Modifier.clickable { onClickManageWallet() }
-        )
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                leadingContent = {
+                    Icon(
+                        Icons.Rounded.Wallet,
+                        contentDescription = null
+                    )
+                },
+                headlineContent = {
+                    Text("Dompet")
+                },
+                supportingContent = {
+                    Text("Kelola dompet tabungan uang dan emas")
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.Rounded.ChevronRight,
+                        null
+                    )
+                },
+                modifier = Modifier.clickable { onClickManageWallet() }
+            )
 
-        ListItem(
-            leadingContent = {
-                Icon(
-                    Icons.Rounded.Category,
-                    contentDescription = null
-                )
-            },
-            headlineContent = {
-                Text("Kategori")
-            },
-            supportingContent = {
-                Text("Kelola kategori pengeluaran dan pemasukan transaksi")
-            },
-            trailingContent = {
-                Icon(
-                    Icons.Rounded.ChevronRight,
-                    null
-                )
-            },
-            modifier = Modifier.clickable { onClickManageCategory() }
-        )
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                leadingContent = {
+                    Icon(
+                        Icons.Rounded.Category,
+                        contentDescription = null
+                    )
+                },
+                headlineContent = {
+                    Text("Kategori")
+                },
+                supportingContent = {
+                    Text("Kelola kategori pengeluaran dan pemasukan transaksi")
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.Rounded.ChevronRight,
+                        null
+                    )
+                },
+                modifier = Modifier.clickable { onClickManageCategory() }
+            )
 
-        ListItem(
-            leadingContent = {
-                Icon(
-                    Icons.Rounded.Balance,
-                    null
-                )
-            },
-            headlineContent = {
-                Text("Pajak emas")
-            },
-            supportingContent = {
-                Text("Atur preferensi pajak jual emas berdasarkan ukuran karat")
-            },
-            trailingContent = {
-                Icon(
-                    Icons.Rounded.ChevronRight,
-                    null
-                )
-            },
-            modifier = Modifier.clickable { onClickManageGoldTax() }
-        )
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                leadingContent = {
+                    Icon(
+                        Icons.Rounded.Balance,
+                        null,
+                    )
+                },
+                headlineContent = {
+                    Text("Pajak emas")
+                },
+                supportingContent = {
+                    Text("Atur preferensi pajak jual emas berdasarkan ukuran karat")
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.Rounded.ChevronRight,
+                        null
+                    )
+                },
+                modifier = Modifier.clickable { onClickManageGoldTax() }
+            )
 
-        ListItem(
-            leadingContent = {
-                Icon(
-                    Icons.AutoMirrored.Rounded.Logout,
-                    contentDescription = null
-                )
-            },
-            headlineContent = {
-                Text("Keluar")
-            },
-            trailingContent = {
-                Icon(
-                    Icons.Rounded.ChevronRight,
-                    null
-                )
-            },
-            modifier = Modifier.clickable { onClickLogout() }
-        )
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                leadingContent = {
+                    Icon(
+                        Icons.Rounded.Update,
+                        null,
+                    )
+                },
+                headlineContent = {
+                    Text("Pembaruan")
+                },
+                supportingContent = {
+                    Text("Periksa dan unduh pembaruan aplikasi")
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.Rounded.ChevronRight,
+                        null
+                    )
+                },
+                modifier = Modifier.clickable { onClickUpdate() }
+            )
+
+            ListItem(
+                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                leadingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Rounded.Logout,
+                        contentDescription = null
+                    )
+                },
+                headlineContent = {
+                    Text("Keluar")
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.Rounded.ChevronRight,
+                        null
+                    )
+                },
+                modifier = Modifier.clickable { onClickLogout() }
+            )
+        }
     }
 }
 
