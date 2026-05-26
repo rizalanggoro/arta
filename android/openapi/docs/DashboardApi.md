@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost:3000/api*
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
 | [**getCashDashboard**](DashboardApi.md#getCashDashboard) | **GET** api/dashboard/cash | Get cash dashboard overview |
-| [**getGoldDashboard**](DashboardApi.md#getGoldDashboard) | **GET** api/dashboard/gold | Get gold dashboard overview |
+| [**getGoldDashboard**](DashboardApi.md#getGoldDashboard) | **GET** api/dashboard/gold |  |
 
 
 
@@ -50,9 +50,7 @@ launch(Dispatchers.IO) {
  - **Accept**: application/json
 
 
-Get gold dashboard overview
 
-Return the active gold wallet name, asset summary, current prices, and the latest 5 gold entries.
 
 ### Example
 ```kotlin
@@ -64,16 +62,18 @@ Return the active gold wallet name, asset summary, current prices, and the lates
 val apiClient = ApiClient()
 val webService = apiClient.createWebservice(DashboardApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
+val walletId : kotlin.Int = 56 // kotlin.Int | wallet_id
 
 launch(Dispatchers.IO) {
-    val result : GoldDashboardRes = webService.getGoldDashboard(authorization)
+    val result : GoldDashboardRes = webService.getGoldDashboard(authorization, walletId)
 }
 ```
 
 ### Parameters
+| **authorization** | **kotlin.String**| Bearer token | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **authorization** | **kotlin.String**| Bearer token | |
+| **walletId** | **kotlin.Int**| wallet_id | |
 
 ### Return type
 
@@ -81,7 +81,7 @@ launch(Dispatchers.IO) {
 
 ### Authorization
 
-
+No authorization required
 
 ### HTTP request headers
 

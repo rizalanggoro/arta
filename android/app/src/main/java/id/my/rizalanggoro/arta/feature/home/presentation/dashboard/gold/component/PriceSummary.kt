@@ -25,10 +25,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
+import id.my.rizalanggoro.arta.openapi.models.DomainGoldTaxPreference
+import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PriceSummary(onClickManageTax: () -> Unit = {}) {
+fun PriceSummary(
+    goldPrice: BigDecimal = 0.toBigDecimal(),
+    taxPreferences: List<DomainGoldTaxPreference> = emptyList(),
+    onClickManageTax: () -> Unit = {}
+) {
     Card(
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         modifier = Modifier
@@ -76,47 +83,57 @@ fun PriceSummary(onClickManageTax: () -> Unit = {}) {
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    Text("Rp 2.783.135,08", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Harga emas per gram",
+                        goldPrice.toIndonesianCurrency(),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        "Harga emas/gram (sebelum pajak)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.outline
                     )
                 }
 
                 // price per carat
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp)),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    listOf("17K", "24K").forEach {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainer)
-                                .padding(16.dp)
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
+                if (taxPreferences.isNotEmpty()) {
+                    Text(
+                        "Berikut harga emas/gram untuk setiap karat setelah perhitungan konfigurasi pajak",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp)),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        taxPreferences.forEach {
+                            val pricePerCarat = goldPrice * it.carat / 24.toBigDecimal()
+                            val price =
+                                pricePerCarat - (pricePerCarat * it.taxRate / 100.toBigDecimal())
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                                    .padding(16.dp)
+                            ) {
                                 Text(
-                                    "Rp 2.783.135,08",
-                                    style = MaterialTheme.typography.titleMedium
+                                    price.toIndonesianCurrency(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.weight(1f)
                                 )
                                 Text(
-                                    "Harga emas per gram",
+                                    "${it.carat.toInt()}k",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.outline
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
-                            Text(
-                                "24k", style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold
-                            )
                         }
                     }
                 }
@@ -126,7 +143,33 @@ fun PriceSummary(onClickManageTax: () -> Unit = {}) {
 }
 
 @Composable
-@Preview(device = "id:pixel_9_pro_xl")
+@Preview
 private fun Preview() {
+    PriceSummary(
+        goldPrice = 2800000.toBigDecimal(),
+        taxPreferences = listOf(
+            DomainGoldTaxPreference(
+                carat = 17.toBigDecimal(),
+                createdAt = "",
+                id = 1,
+                taxRate = 5.toBigDecimal(),
+                updatedAt = "",
+                userId = 1,
+            ),
+            DomainGoldTaxPreference(
+                carat = 24.toBigDecimal(),
+                createdAt = "",
+                id = 1,
+                taxRate = 10.toBigDecimal(),
+                updatedAt = "",
+                userId = 1,
+            )
+        )
+    )
+}
+
+@Composable
+@Preview
+private fun EmptyPreview() {
     PriceSummary()
 }

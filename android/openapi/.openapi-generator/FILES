@@ -1,4 +1,3 @@
-.openapi-generator-ignore
 README.md
 build.gradle
 docs/AuthApi.md
@@ -23,7 +22,10 @@ docs/DeleteGoldTaxPreferenceRes.md
 docs/DeleteTransactionRes.md
 docs/DeleteWalletRes.md
 docs/DomainCategory.md
+docs/DomainFxRate.md
 docs/DomainGold.md
+docs/DomainGoldPrice.md
+docs/DomainGoldTaxPreference.md
 docs/DomainRelease.md
 docs/DomainTransaction.md
 docs/DomainUser.md
@@ -31,6 +33,7 @@ docs/DomainWallet.md
 docs/DtoCategory.md
 docs/DtoError.md
 docs/DtoGold.md
+docs/DtoGoldDashboard.md
 docs/DtoGoldTaxPreference.md
 docs/DtoTransaction.md
 docs/DtoWallet.md
@@ -114,7 +117,10 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DeleteGoldTaxPreferenceRe
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DeleteTransactionRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DeleteWalletRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainCategory.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainFxRate.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainGold.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainGoldPrice.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainGoldTaxPreference.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainRelease.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainTransaction.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainUser.kt
@@ -122,6 +128,7 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainWallet.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoCategory.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoError.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGold.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGoldDashboard.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGoldTaxPreference.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoTransaction.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoWallet.kt

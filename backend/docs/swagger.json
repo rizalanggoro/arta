@@ -473,12 +473,6 @@
         },
         "/api/dashboard/gold": {
             "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Return the active gold wallet name, asset summary, current prices, and the latest 5 gold entries.",
                 "consumes": [
                     "application/json"
                 ],
@@ -488,7 +482,6 @@
                 "tags": [
                     "dashboard"
                 ],
-                "summary": "Get gold dashboard overview",
                 "operationId": "GetGoldDashboard",
                 "parameters": [
                     {
@@ -496,6 +489,13 @@
                         "description": "Bearer token",
                         "name": "Authorization",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "wallet_id",
+                        "name": "wallet_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -1838,46 +1838,11 @@
         "GoldDashboardRes": {
             "type": "object",
             "required": [
-                "active_wallet_name",
-                "buy_price",
-                "latest_dollar_price",
-                "latest_gold_price_per_gram_idr",
-                "profit",
-                "recent_golds",
-                "total_asset",
-                "total_gold_items",
-                "total_weight"
+                "data"
             ],
             "properties": {
-                "active_wallet_name": {
-                    "type": "string"
-                },
-                "buy_price": {
-                    "type": "number"
-                },
-                "latest_dollar_price": {
-                    "type": "number"
-                },
-                "latest_gold_price_per_gram_idr": {
-                    "type": "number"
-                },
-                "profit": {
-                    "type": "number"
-                },
-                "recent_golds": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.Gold"
-                    }
-                },
-                "total_asset": {
-                    "type": "number"
-                },
-                "total_gold_items": {
-                    "type": "integer"
-                },
-                "total_weight": {
-                    "type": "number"
+                "data": {
+                    "$ref": "#/definitions/dto.GoldDashboard"
                 }
             }
         },
@@ -2184,6 +2149,33 @@
                 }
             }
         },
+        "domain.FxRate": {
+            "type": "object",
+            "required": [
+                "base",
+                "created_at",
+                "date",
+                "id",
+                "rate"
+            ],
+            "properties": {
+                "base": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "rate": {
+                    "type": "integer"
+                }
+            }
+        },
         "domain.Gold": {
             "type": "object",
             "required": [
@@ -2228,6 +2220,80 @@
                     "type": "string"
                 },
                 "wallet_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.GoldPrice": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "currency",
+                "currency_symbol",
+                "exchange_rate",
+                "id",
+                "price_per_ounce_usd",
+                "source_readable_age",
+                "source_updated_at",
+                "symbol"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "currency_symbol": {
+                    "type": "string"
+                },
+                "exchange_rate": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "price_per_ounce_usd": {
+                    "type": "number"
+                },
+                "source_readable_age": {
+                    "type": "string"
+                },
+                "source_updated_at": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.GoldTaxPreference": {
+            "type": "object",
+            "required": [
+                "carat",
+                "created_at",
+                "id",
+                "tax_rate",
+                "updated_at",
+                "user_id"
+            ],
+            "properties": {
+                "carat": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "tax_rate": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "integer"
                 }
             }
@@ -2403,6 +2469,55 @@
                     "type": "number"
                 },
                 "sell_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.GoldDashboard": {
+            "type": "object",
+            "required": [
+                "fx_rate",
+                "gold_price",
+                "profit",
+                "recent_golds",
+                "tax_preferences",
+                "total_asset",
+                "total_buy_price",
+                "total_gold_items",
+                "total_weight"
+            ],
+            "properties": {
+                "fx_rate": {
+                    "$ref": "#/definitions/domain.FxRate"
+                },
+                "gold_price": {
+                    "$ref": "#/definitions/domain.GoldPrice"
+                },
+                "profit": {
+                    "type": "number"
+                },
+                "recent_golds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Gold"
+                    }
+                },
+                "tax_preferences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.GoldTaxPreference"
+                    }
+                },
+                "total_asset": {
+                    "type": "number"
+                },
+                "total_buy_price": {
+                    "type": "number"
+                },
+                "total_gold_items": {
+                    "type": "integer"
+                },
+                "total_weight": {
                     "type": "number"
                 }
             }

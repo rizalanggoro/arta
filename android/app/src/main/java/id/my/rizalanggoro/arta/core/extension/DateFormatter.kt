@@ -33,3 +33,18 @@ fun String.toIndonesianDate() = OffsetDateTime
     .toLocalDate()
     .format(formatter)
     .replaceFirstChar { it.uppercase() }
+
+fun String?.toFormattedDate(pattern: String? = null) = runCatching {
+    OffsetDateTime
+        .parse(this)
+        .format(
+            DateTimeFormatter.ofPattern(
+                pattern ?: "EEEE, d MMMM yyyy",
+                Locale.forLanguageTag("id-ID")
+            )
+        )
+        .replaceFirstChar { it.uppercase() }
+}.getOrElse { throwable ->
+    throwable.printStackTrace()
+    "-"
+}

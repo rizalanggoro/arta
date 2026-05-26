@@ -1,0 +1,18 @@
+
+# DomainGoldPrice
+
+## Properties
+| Name | Type | Description | Notes |
+| ------------ | ------------- | ------------- | ------------- |
+| **createdAt** | **kotlin.String** |  |  |
+| **currency** | **kotlin.String** |  |  |
+| **currencySymbol** | **kotlin.String** |  |  |
+| **exchangeRate** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **id** | **kotlin.Int** |  |  |
+| **pricePerOunceUsd** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **sourceReadableAge** | **kotlin.String** |  |  |
+| **sourceUpdatedAt** | **kotlin.String** |  |  |
+| **symbol** | **kotlin.String** |  |  |
+
+
+

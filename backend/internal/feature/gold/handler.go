@@ -123,7 +123,7 @@ func (h *Handler) list(c *fiber.Ctx) error {
 
 	res := ListGoldsRes{Golds: make([]dto.Gold, 0, len(golds))}
 	for _, g := range golds {
-		sellPrice := g.Grams * goldPriceIDRPerGram * (1 - mappedTax[g.Carat]/100)
+		sellPrice := g.Grams * goldPriceIDRPerGram * (g.Carat / 24.0) * (1 - mappedTax[g.Carat]/100)
 		res.Golds = append(res.Golds, dto.Gold{
 			Data:      g,
 			SellPrice: sellPrice,

@@ -35,16 +35,56 @@ func (r *Repository) GetGoldByID(id uint) (*domain.Gold, error) {
 }
 
 // GetGoldsByWalletID returns gold entries for a wallet.
-func (r *Repository) GetGoldsByWalletID(walletID uint) ([]domain.Gold, error) {
-	var m []model.Gold
-	if err := r.db.Where("wallet_id = ?", walletID).Order("date desc").Find(&m).Error; err != nil {
+// func (r *Repository) GetGoldsByWalletID(walletID uint) ([]domain.Gold, error) {
+// 	var m []model.Gold
+// 	if err := r.db.Where("wallet_id = ?", walletID).Order("date desc").Find(&m).Error; err != nil {
+// 		return nil, err
+// 	}
+// 	out := make([]domain.Gold, 0, len(m))
+// 	for i := range m {
+// 		out = append(out, *domain.FromGoldModel(&m[i]))
+// 	}
+// 	return out, nil
+// }
+
+type GetAllFilter struct {
+	WalletId uint
+	Limit    int
+	OrderBy  string
+	OrderDir string
+}
+
+func (r *Repository) GetAll(filter GetAllFilter) (*[]domain.Gold, error) {
+	var golds []model.Gold
+
+	query := r.db
+
+	if filter.WalletId != 0 {
+		query = query.Where("wallet_id = ?", filter.WalletId)
+	}
+
+	if filter.Limit > 0 {
+		query = query.Limit(filter.Limit)
+	}
+
+	if filter.OrderBy != "" {
+		orderDir := "asc"
+		if filter.OrderDir == "desc" {
+			orderDir = "desc"
+		}
+		query = query.Order(filter.OrderBy + " " + orderDir)
+	}
+
+	if err := query.Find(&golds).Error; err != nil {
 		return nil, err
+	} else {
+		result := make([]domain.Gold, len(golds))
+		for index, gold := range golds {
+			result[index] = *domain.FromGoldModel(&gold)
+		}
+
+		return &result, nil
 	}
-	out := make([]domain.Gold, 0, len(m))
-	for i := range m {
-		out = append(out, *domain.FromGoldModel(&m[i]))
-	}
-	return out, nil
 }
 
 // GetGoldsByUserID returns all golds for a user's wallets.
@@ -95,29 +135,29 @@ func (r *Repository) GetWalletOwnerID(walletID uint) (uint, error) {
 }
 
 // GetSummary computes total grams and total value grouped by type for a user.
-func (r *Repository) GetSummary(userID uint) (float64, float64, map[string]interface{}, error) {
-	golds, err := r.GetGoldsByUserID(userID)
-	if err != nil {
-		return 0, 0, nil, err
-	}
-	var totalGrams, totalValue float64
-	byType := make(map[string]interface{})
-	// simple aggregation
-	typeAgg := make(map[string]map[string]float64)
-	for _, g := range golds {
-		totalGrams += g.Grams
-		totalValue += g.Price
-		if _, ok := typeAgg[g.Type]; !ok {
-			typeAgg[g.Type] = map[string]float64{"grams": 0, "value": 0}
-		}
-		typeAgg[g.Type]["grams"] += g.Grams
-		typeAgg[g.Type]["value"] += g.Price
-	}
-	for k, v := range typeAgg {
-		byType[k] = v
-	}
-	return totalGrams, totalValue, byType, nil
-}
+// func (r *Repository) GetSummary(userID uint) (float64, float64, map[string]interface{}, error) {
+// 	golds, err := r.GetGoldsByUserID(userID)
+// 	if err != nil {
+// 		return 0, 0, nil, err
+// 	}
+// 	var totalGrams, totalValue float64
+// 	byType := make(map[string]interface{})
+// 	// simple aggregation
+// 	typeAgg := make(map[string]map[string]float64)
+// 	for _, g := range golds {
+// 		totalGrams += g.Grams
+// 		totalValue += g.Price
+// 		if _, ok := typeAgg[g.Type]; !ok {
+// 			typeAgg[g.Type] = map[string]float64{"grams": 0, "value": 0}
+// 		}
+// 		typeAgg[g.Type]["grams"] += g.Grams
+// 		typeAgg[g.Type]["value"] += g.Price
+// 	}
+// 	for k, v := range typeAgg {
+// 		byType[k] = v
+// 	}
+// 	return totalGrams, totalValue, byType, nil
+// }
 
 // GetTaxPreferencesByUserID returns gold tax preferences for a user.
 func (r *Repository) GetTaxPreferencesByUserID(userID uint) ([]domain.GoldTaxPreference, error) {

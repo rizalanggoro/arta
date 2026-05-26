@@ -32,8 +32,8 @@ interface DashboardApi {
 
     /**
      * GET api/dashboard/gold
-     * Get gold dashboard overview
-     * Return the active gold wallet name, asset summary, current prices, and the latest 5 gold entries.
+     * 
+     * 
      * Responses:
      *  - 200: OK
      *  - 401: Unauthorized
@@ -41,9 +41,10 @@ interface DashboardApi {
      *  - 500: Internal Server Error
      *
      * @param authorization Bearer token
+     * @param walletId wallet_id
      * @return [GoldDashboardRes]
      */
     @GET("api/dashboard/gold")
-    suspend fun getGoldDashboard(@Header("Authorization") authorization: kotlin.String): Response<GoldDashboardRes>
+    suspend fun getGoldDashboard(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int): Response<GoldDashboardRes>
 
 }

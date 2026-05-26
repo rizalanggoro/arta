@@ -55,7 +55,7 @@ All URIs are relative to *http://localhost:3000/api*
 | *CategoryApi* | [**listCategories**](docs/CategoryApi.md#listcategories) | **GET** api/category |  |
 | *CategoryApi* | [**updateCategory**](docs/CategoryApi.md#updatecategory) | **PUT** api/category/{id} |  |
 | *DashboardApi* | [**getCashDashboard**](docs/DashboardApi.md#getcashdashboard) | **GET** api/dashboard/cash | Get cash dashboard overview |
-| *DashboardApi* | [**getGoldDashboard**](docs/DashboardApi.md#getgolddashboard) | **GET** api/dashboard/gold | Get gold dashboard overview |
+| *DashboardApi* | [**getGoldDashboard**](docs/DashboardApi.md#getgolddashboard) | **GET** api/dashboard/gold |  |
 | *GoldApi* | [**createGold**](docs/GoldApi.md#creategold) | **POST** api/gold |  |
 | *GoldApi* | [**createGoldTaxPreference**](docs/GoldApi.md#creategoldtaxpreference) | **POST** api/gold/tax |  |
 | *GoldApi* | [**deleteGold**](docs/GoldApi.md#deletegold) | **DELETE** api/gold/{id} |  |
@@ -101,7 +101,10 @@ All URIs are relative to *http://localhost:3000/api*
  - [id.my.rizalanggoro.arta.openapi.models.DeleteTransactionRes](docs/DeleteTransactionRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.DeleteWalletRes](docs/DeleteWalletRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainCategory](docs/DomainCategory.md)
+ - [id.my.rizalanggoro.arta.openapi.models.DomainFxRate](docs/DomainFxRate.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainGold](docs/DomainGold.md)
+ - [id.my.rizalanggoro.arta.openapi.models.DomainGoldPrice](docs/DomainGoldPrice.md)
+ - [id.my.rizalanggoro.arta.openapi.models.DomainGoldTaxPreference](docs/DomainGoldTaxPreference.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainRelease](docs/DomainRelease.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainTransaction](docs/DomainTransaction.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainUser](docs/DomainUser.md)
@@ -109,6 +112,7 @@ All URIs are relative to *http://localhost:3000/api*
  - [id.my.rizalanggoro.arta.openapi.models.DtoCategory](docs/DtoCategory.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoError](docs/DtoError.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGold](docs/DtoGold.md)
+ - [id.my.rizalanggoro.arta.openapi.models.DtoGoldDashboard](docs/DtoGoldDashboard.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference](docs/DtoGoldTaxPreference.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoTransaction](docs/DtoTransaction.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoWallet](docs/DtoWallet.md)

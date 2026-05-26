@@ -12,6 +12,14 @@ fun BigDecimal.toIndonesianCurrency(): String = NumberFormat
     )
     .format(this)
 
+fun Int.toIndonesianCurrency(): String = NumberFormat
+    .getCurrencyInstance(
+        Locale.forLanguageTag(
+            "id-ID"
+        )
+    )
+    .format(this)
+
 fun BigDecimal.toAmericanCurrency(): String = NumberFormat
     .getCurrencyInstance(
         Locale.forLanguageTag(

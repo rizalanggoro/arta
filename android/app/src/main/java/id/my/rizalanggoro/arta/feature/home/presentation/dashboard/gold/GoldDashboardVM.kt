@@ -29,17 +29,35 @@ class GoldDashboardVM @Inject constructor(
     }
 
     private fun loadDashboard() {
+        val currentState = _uiState.value
+        val selectedWallet = currentState.selectedWallet ?: return
+
         viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null
+                )
+            }
+
             runCatching {
                 val token = authPrefs.currentSession.value?.token
                     ?: throw IllegalStateException("Sesi login tidak ditemukan")
-                val response = dashboardApi.getGoldDashboard("Bearer $token")
+                val response = dashboardApi.getGoldDashboard(
+                    authorization = "Bearer $token",
+                    walletId = selectedWallet.id
+                )
                 if (!response.isSuccessful) throw IllegalStateException(
                     response.errorBody()?.string() ?: "Request failed"
                 )
                 response.body() ?: throw IllegalStateException("Response body is null")
-            }.onSuccess { res ->
-                _uiState.value = res.toUiState()
+            }.onSuccess { response ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        data = response.data
+                    )
+                }
             }.onFailure { throwable ->
                 _uiState.update {
                     it.copy(
@@ -51,44 +69,7 @@ class GoldDashboardVM @Inject constructor(
         }
     }
 
-    private fun GoldDashboardRes.toUiState(): GoldDashboardUiState {
-        return GoldDashboardUiState(
-            totalAsset = formatMoney(totalAsset.toDouble()),
-            buyPrice = formatMoney(buyPrice.toDouble()),
-            profit = formatSignedMoney(profit.toDouble()),
-            totalWeight = formatWeight(totalWeight.toDouble()),
-            totalGoldItems = "$totalGoldItems item",
-            latestDollarPrice = formatMoney(latestDollarPrice.toDouble()),
-            latestGoldPricePerGramIdr = formatMoney(latestGoldPricePerGramIdr.toDouble()),
-            recentGolds = recentGolds,
-            isLoading = false,
-            errorMessage = null,
-        )
-    }
-
-    private fun formatMoney(value: Double): String {
-        val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).apply {
-            maximumFractionDigits = 0
-        }
-        return "Rp ${formatter.format(value.toLong())}"
-    }
-
-    private fun formatSignedMoney(value: Double): String {
-        val sign = if (value >= 0) "+" else "-"
-        return "$sign${formatMoney(kotlin.math.abs(value))}"
-    }
-
-    private fun formatWeight(value: Double): String {
-        val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).apply {
-            minimumFractionDigits = 2
-            maximumFractionDigits = 2
-        }
-        return "${formatter.format(value)} g"
-    }
-
     init {
-        loadDashboard()
-
         viewModelScope.launch {
             selectedWalletPrefs.selectedWallet.collect { wallet ->
                 _uiState.update {
@@ -96,6 +77,8 @@ class GoldDashboardVM @Inject constructor(
                         selectedWallet = wallet
                     )
                 }
+
+                if (wallet != null) loadDashboard()
             }
         }
     }

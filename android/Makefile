@@ -23,7 +23,7 @@ api: delete-old-generated copy-swagger
       --additional-properties=library=jvm-retrofit2,packageName=id.my.rizalanggoro.arta.openapi,serializationLibrary=kotlinx_serialization,useCoroutines=true \
       --global-property=apiTests=false,modelTests=false
 
-api-linux: delete-old-generated-linux copy-swagger-linux
+api-linux: copy-swagger-linux
 	sudo openapi-generator-cli generate \
 		-i ./swagger.json \
 		-g kotlin \

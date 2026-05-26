@@ -9,5 +9,5 @@ type CashDashboardRes struct {
 
 // GoldDashboardRes response for gold dashboard.
 type GoldDashboardRes struct {
-	dto.GoldDashboard
+	Data dto.GoldDashboard `json:"data"`
 } // @name GoldDashboardRes

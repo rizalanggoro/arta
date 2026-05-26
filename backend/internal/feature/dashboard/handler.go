@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"math"
 	"strconv"
 	"time"
 
@@ -63,119 +62,120 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	protected.Get("/gold", h.gold)
 }
 
-// @ID GetGoldDashboard
-// @Summary Get gold dashboard overview
-// @Description Return the active gold wallet name, asset summary, current prices, and the latest 5 gold entries.
-// @Tags dashboard
-// @Accept json
-// @Produce json
-// @Param Authorization header string true "Bearer token"
-// @Success 200 {object} GoldDashboardRes
-// @Failure 401 {object} dto.Error
-// @Failure 404 {object} dto.Error
-// @Failure 500 {object} dto.Error
-// @Security Bearer
-// @Router /api/dashboard/gold [get]
+// @ID 					GetGoldDashboard
+// @Tags 				dashboard
+// @Accept 			json
+// @Produce 		json
+// @Param 			Authorization header string true "Bearer token"
+// @param 			wallet_id query int true "wallet_id"
+// @Success 		200 {object} GoldDashboardRes
+// @Failure 		401 {object} dto.Error
+// @Failure 		404 {object} dto.Error
+// @Failure 		500 {object} dto.Error
+// @Router 			/api/dashboard/gold [get]
 func (h *Handler) gold(c *fiber.Ctx) error {
-	userID := middleware.GetUserID(c)
-	if userID == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	userIdStr := middleware.GetUserID(c)
+	if userIdStr == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{
+			Code:    fiber.StatusUnauthorized,
+			Message: "unauthorized",
+		})
 	}
 
-	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
+	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	wallets, err := h.walletRepo.GetWalletsByUserID(uint(parsedUserID))
+	walletId := c.QueryInt("wallet_id", 0)
+	if walletId == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "wallet_id is required and must be a valid number",
+		})
+	}
+
+	goldPrice, err := h.goldPriceRepo.GetLatest()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	var activeWallet domain.Wallet
-	ok := false
-	for i := range wallets {
-		if wallets[i].Type == "gold_savings" {
-			activeWallet = wallets[i]
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: "gold wallet not found"})
-	}
-
-	golds, err := h.goldRepo.GetGoldsByUserID(uint(parsedUserID))
+	fxRate, err := h.fxRateRepo.GetLatest()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	latestGoldPrice, err := h.goldPriceRepo.GetLatest()
+	golds, err := h.goldRepo.GetAll(goldfeature.GetAllFilter{
+		WalletId: uint(walletId),
+		OrderBy:  "created_at",
+		OrderDir: "desc",
+	})
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	taxPreferences, err := h.goldRepo.GetTaxPreferencesByUserID(uint(parsedUserID))
+	taxPreferences, err := h.goldRepo.GetTaxPreferencesByUserID(uint(userId))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
-	}
-	taxByCarat := make(map[float64]float64, len(taxPreferences))
-	for i := range taxPreferences {
-		taxByCarat[taxPreferences[i].Carat] = taxPreferences[i].TaxRate
-	}
-
-	latestFxRate, err := h.fxRateRepo.GetLatest()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	latestDollarPrice := float64(latestFxRate.Rate)
-	latestGoldPricePerGramIDR := (latestGoldPrice.PricePerOunceUSD * latestDollarPrice) / gramsPerTroyOunce
-
-	totalWeight := 0.0
-	buyPrice := 0.0
-	recentGoldsLimit := 5
-	if len(golds) < recentGoldsLimit {
-		recentGoldsLimit = len(golds)
+	mappedTax := map[uint]domain.GoldTaxPreference{}
+	for _, tp := range taxPreferences {
+		mappedTax[uint(tp.Carat)] = tp
 	}
 
-	recentGolds := make([]dto.Gold, 0, recentGoldsLimit)
-	for i := range golds {
-		goldItem := golds[i]
-		totalWeight += goldItem.Grams
-		buyPrice += goldItem.Price
-		if len(recentGolds) < 5 {
-			taxRate := taxByCarat[goldItem.Carat]
-			sellPrice := goldItem.Grams * latestGoldPricePerGramIDR * (1 - (taxRate / 100))
-			profit := sellPrice - goldItem.Price
-			recentGolds = append(recentGolds, dto.Gold{
-				Data:      goldItem,
-				SellPrice: math.Round(sellPrice*100) / 100,
-				Profit:    math.Round(profit*100) / 100,
-			})
-		}
-	}
+	mappedGolds := make([]dto.Gold, len(*golds))
+
+	goldPricePerGramIDR := goldPrice.PricePerOunceUSD / gramsPerTroyOunce * float64(fxRate.Rate)
+
 	totalAsset := 0.0
-	for i := range golds {
-		taxRate := taxByCarat[golds[i].Carat]
-		sellValue := golds[i].Grams * latestGoldPricePerGramIDR * (1 - (taxRate / 100))
-		totalAsset += sellValue
+	totalBuyPrice := 0.0
+	totalWeight := 0.0
+	totalGoldItems := len(*golds)
+	for index, gold := range *golds {
+		totalBuyPrice += gold.Price
+		totalWeight += gold.Grams
+
+		if _, exists := mappedTax[uint(gold.Carat)]; exists {
+			sellPrice := goldPricePerGramIDR * gold.Grams * (gold.Carat / 24.0) * (1 - mappedTax[uint(gold.Carat)].TaxRate/100)
+			totalAsset += sellPrice
+
+			mappedGolds[index] = dto.Gold{
+				Data:      gold,
+				SellPrice: sellPrice,
+				Profit:    sellPrice - gold.Price,
+			}
+		}
 	}
-	totalAsset = math.Round(totalAsset*100) / 100
-	profit := math.Round((totalAsset-buyPrice)*100) / 100
 
-	res := GoldDashboardRes{}
-	res.ActiveWalletName = activeWallet.Name
-	res.TotalAsset = totalAsset
-	res.BuyPrice = math.Round(buyPrice*100) / 100
-	res.Profit = profit
-	res.TotalWeight = math.Round(totalWeight*100) / 100
-	res.TotalGoldItems = len(golds)
-	res.LatestDollarPrice = latestDollarPrice
-	res.LatestGoldPricePerGramIDR = math.Round(latestGoldPricePerGramIDR*100) / 100
-	res.RecentGolds = recentGolds
-
-	return c.Status(fiber.StatusOK).JSON(res)
+	return c.Status(fiber.StatusOK).JSON(GoldDashboardRes{
+		Data: dto.GoldDashboard{
+			TotalAsset:     totalAsset,
+			TotalBuyPrice:  totalBuyPrice,
+			Profit:         totalAsset - totalBuyPrice,
+			TotalWeight:    totalWeight,
+			TotalGoldItems: totalGoldItems,
+			GoldPrice:      *goldPrice,
+			FxRate:         *fxRate,
+			RecentGolds:    mappedGolds[:min(5, len(mappedGolds))],
+			TaxPreferences: taxPreferences,
+		},
+	})
 }
 
 // @ID GetCashDashboard
@@ -196,17 +196,20 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 func (h *Handler) cash(c *fiber.Ctx) error {
 	userID := middleware.GetUserID(c)
 	if userID == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+		return c.Status(fiber.StatusUnauthorized).
+			JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
 	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).
+			JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	wallets, err := h.walletRepo.GetWalletsByUserID(uint(parsedUserID))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).
+			JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	walletIDParam := c.Query("wallet_id")
@@ -216,7 +219,8 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 	if walletIDParam != "" {
 		walletID, parseErr := strconv.ParseUint(walletIDParam, 10, 64)
 		if parseErr != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "wallet_id must be a valid number"})
+			return c.Status(fiber.StatusBadRequest).
+				JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "wallet_id must be a valid number"})
 		}
 
 		for i := range wallets {
@@ -237,12 +241,14 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 	}
 
 	if !ok {
-		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: "cash wallet not found"})
+		return c.Status(fiber.StatusNotFound).
+			JSON(dto.Error{Code: fiber.StatusNotFound, Message: "cash wallet not found"})
 	}
 
 	categories, err := h.categoryRepo.GetCategoriesByUserID(uint(parsedUserID), "")
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).
+			JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 	categoryByID := make(map[uint]domain.Category, len(categories))
 	for i := range categories {
@@ -251,7 +257,8 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 
 	transactions, err := h.transactionRepo.GetTransactionsByWalletID(activeWallet.ID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).
+			JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	now := time.Now()
