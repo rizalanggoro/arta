@@ -32,6 +32,7 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+        working-directory: ./android
 
       - name: Decode signing key
         env:
