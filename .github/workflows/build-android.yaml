@@ -51,16 +51,27 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Create Release using gh CLI
+      - name: Create Release and notify API
         env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           TAG_NAME="build-${{ steps.date_and_hash.outputs.date }}-${{ steps.date_and_hash.outputs.hash }}"
           RELEASE_NAME="Continuous Integration Build"
+          VERSION_CODE=$(grep -m1 -E '^\s*versionCode\s*=' app/build.gradle.kts | sed -E 's/.*=\s*([0-9]+).*/\1/')
+          APK_PATH=$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)
+          APK_NAME=$(basename "$APK_PATH")
 
           gh release create "$TAG_NAME" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$RELEASE_NAME" \
             --notes "Automated release from commit ${{ github.sha }}" \
             --target "$GITHUB_SHA" \
-            "android/app/build/outputs/apk/release/*.apk"
+            "$APK_PATH"
+
+          RELEASE_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG_NAME/$APK_NAME"
+
+          curl --fail --silent --show-error --request POST \
+            "$API_BASE_URL/api/release" \
+            --header "Content-Type: application/json" \
+            --data "{\"url\":\"$RELEASE_URL\",\"version_code\":$VERSION_CODE}"
