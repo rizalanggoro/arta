@@ -1,6 +1,5 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,22 +28,17 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.LocalHomeBackStack
 import id.my.rizalanggoro.arta.core.Routes
-import id.my.rizalanggoro.arta.core.event.AppEvent
-import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.toAmericanCurrency
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
@@ -53,14 +47,12 @@ import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.componen
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun HomeGoldDashboardScreen(
     vm: GoldDashboardVM = hiltViewModel()
 ) {
     val backStack = LocalBackStack.current
-    val homeBackStack = LocalHomeBackStack.current
     val uiState by vm.uiState.collectAsState()
 
     Content(
@@ -69,12 +61,6 @@ fun HomeGoldDashboardScreen(
         refreshState = rememberPullToRefreshState(),
         onRefresh = { vm.loadDashboard(isRefresh = true) },
         onClickManageTax = { backStack.add(Routes.GoldTaxListRoute) },
-        onClickShowMore = {
-            if (homeBackStack != null) {
-                homeBackStack.clear()
-                homeBackStack.add(Routes.HomeGoldRoute)
-            }
-        }
     )
 }
 
@@ -85,7 +71,6 @@ private fun Content(
     uiState: GoldDashboardUiState = GoldDashboardUiState(),
     onClickRetry: () -> Unit = {},
     onClickManageTax: () -> Unit = {},
-    onClickShowMore: () -> Unit = {},
     onRefresh: () -> Unit = {},
 ) {
     when {
@@ -204,7 +189,9 @@ private fun Content(
                                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                             Text(
                                                 text = it["value"] as String,
-                                                style = MaterialTheme.typography.titleMedium
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
                                             )
                                             Text(
                                                 text = it["title"] as String,
@@ -252,11 +239,13 @@ private fun Content(
                                         Text(
                                             text = it["title"] as String,
                                             style = MaterialTheme.typography.bodySmall,
-                                            fontWeight = FontWeight.Normal
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer
                                         )
                                         Text(
                                             text = it["value"] as String,
-                                            style = MaterialTheme.typography.titleMedium
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer
                                         )
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
@@ -291,7 +280,6 @@ private fun Content(
 
                     item {
                         LatestGold(
-                            onClickShowMore = onClickShowMore,
                             golds = data?.recentGolds ?: emptyList(),
                         )
                     }

@@ -18,19 +18,12 @@ class HomeVM @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    fun onDestinationSelected(index: Int) {
-        _uiState.update { currentState ->
-            currentState.copy(selectedIndex = index.coerceAtLeast(0))
-        }
-    }
-
     init {
         viewModelScope.launch {
             selectedWalletPrefs.selectedWallet.collect { wallet ->
                 _uiState.update {
                     it.copy(
                         selectedWallet = wallet,
-                        selectedIndex = 0
                     )
                 }
             }

@@ -116,7 +116,7 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 
 	golds, err := h.goldRepo.GetAll(goldfeature.GetAllFilter{
 		WalletId: uint(walletId),
-		OrderBy:  "created_at",
+		OrderBy:  "date",
 		OrderDir: "desc",
 	})
 	if err != nil {
