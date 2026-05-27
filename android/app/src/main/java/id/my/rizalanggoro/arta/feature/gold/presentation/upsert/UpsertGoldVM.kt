@@ -13,8 +13,6 @@ import id.my.rizalanggoro.arta.openapi.apis.GoldApi
 import id.my.rizalanggoro.arta.openapi.models.GoldCreateGoldReq
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -30,10 +28,10 @@ class UpsertGoldVM @Inject constructor(
     private var goldId: Int = 0
 
     private val _uiState = MutableStateFlow(UpsertGoldUiState())
-    val uiState: StateFlow<UpsertGoldUiState> = _uiState.asStateFlow()
+    val uiState = _uiState.asStateFlow()
 
-    private val _effect = MutableSharedFlow<UpsertGoldEffect>()
-    val effect: SharedFlow<UpsertGoldEffect> = _effect.asSharedFlow()
+    private val _event = MutableSharedFlow<UpsertGoldUiState.Event>()
+    val event = _event.asSharedFlow()
 
     fun setGoldId(value: Int) {
         if (goldId == value) return
@@ -106,12 +104,7 @@ class UpsertGoldVM @Inject constructor(
             hasError = true
         }
 
-        if (hasError) {
-            viewModelScope.launch {
-                _effect.emit(UpsertGoldEffect.ShowMessage("Periksa kembali isian emas"))
-            }
-            return
-        }
+        if (hasError) return
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -139,19 +132,18 @@ class UpsertGoldVM @Inject constructor(
 //
 //                    response.body() ?: throw IllegalStateException("Respons server kosong")
 //                } else {
-                val body = GoldCreateGoldReq(
-                    walletId = requireNotNull(walletId) { "Dompet aktif tidak ditemukan" },
-                    date = current.date.toApiFormat(),
-                    grams = grams!!,
-                    price = price!!,
-                    type = current.type,
-                    carat = carat!!,
-                    notes = current.notes,
-                )
 
                 val response = goldApi.createGold(
                     authorization = authorization,
-                    body = body,
+                    body = GoldCreateGoldReq(
+                        walletId = requireNotNull(walletId) { "Dompet aktif tidak ditemukan" },
+                        date = current.date.toApiFormat(),
+                        grams = grams!!,
+                        price = price!!,
+                        type = current.type,
+                        carat = carat!!,
+                        notes = current.notes,
+                    ),
                 )
 
                 if (!response.isSuccessful) {
@@ -162,15 +154,9 @@ class UpsertGoldVM @Inject constructor(
 //                }
             }.onSuccess {
                 AppEventBus.emit(AppEvent.GoldChanged)
-                _effect.emit(
-                    UpsertGoldEffect.ShowMessage(
-                        if (current.isUpdate) "Data emas berhasil diperbarui" else "Data emas berhasil dibuat",
-                    )
-                )
-                _effect.emit(UpsertGoldEffect.NavigateBack)
             }.onFailure { throwable ->
-                _effect.emit(
-                    UpsertGoldEffect.ShowMessage(
+                _event.emit(
+                    UpsertGoldUiState.Event.ShowMessage(
                         throwable.message ?: "Terjadi kesalahan tak terduga"
                     )
                 )
@@ -232,9 +218,4 @@ class UpsertGoldVM @Inject constructor(
             }
         }
     }
-}
-
-sealed interface UpsertGoldEffect {
-    data class ShowMessage(val message: String) : UpsertGoldEffect
-    data object NavigateBack : UpsertGoldEffect
 }

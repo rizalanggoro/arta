@@ -49,10 +49,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.constant.goldTypes
 import id.my.rizalanggoro.arta.core.constant.toWalletName
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import kotlinx.coroutines.flow.filterIsInstance
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,12 +72,13 @@ fun UpsertGoldScreen(
     }
 
     LaunchedEffect(Unit) {
-        vm.effect.collect { effect ->
-            when (effect) {
-                is UpsertGoldEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-                UpsertGoldEffect.NavigateBack -> backStack.removeLastOrNull()
-            }
-        }
+        AppEventBus.event.filterIsInstance<AppEvent.GoldChanged>()
+            .collect { backStack.removeLastOrNull() }
+    }
+
+    LaunchedEffect(Unit) {
+        vm.event.filterIsInstance<UpsertGoldUiState.Event.ShowMessage>()
+            .collect { snackbarHostState.showSnackbar(it.message) }
     }
 
     Content(

@@ -10,6 +10,8 @@ import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.Payment
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Wallet
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -146,10 +148,14 @@ private fun Content(
                                 homeBackStack.add(destination.route)
                             },
                             icon = {
+//                                BadgedBox(
+//                                    badge = { Badge() }
+//                                ) {
                                 Icon(
                                     destination.icon,
                                     contentDescription = null
                                 )
+//                                }
                             },
                             label = { Text(destination.label) },
                         )

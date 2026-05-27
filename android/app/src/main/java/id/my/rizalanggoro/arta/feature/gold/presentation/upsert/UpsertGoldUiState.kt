@@ -17,4 +17,8 @@ data class UpsertGoldUiState(
     val caratError: String? = null,
     val isLoading: Boolean = false,
     val isDatePickerOpen: Boolean = false,
-)
+) {
+    sealed class Event {
+        data class ShowMessage(val message: String) : Event()
+    }
+}

@@ -7,5 +7,6 @@ data class GoldDashboardUiState(
     val selectedWallet: DomainWallet? = null,
     val data: DtoGoldDashboard? = null,
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
 )

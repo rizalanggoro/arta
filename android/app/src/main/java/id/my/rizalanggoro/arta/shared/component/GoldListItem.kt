@@ -27,11 +27,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
+import id.my.rizalanggoro.arta.core.helper.getBottomRadius
+import id.my.rizalanggoro.arta.core.helper.getTopRadius
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
 
 @Composable
 fun GoldListItem(
+    index: Int = 0,
+    size: Int = 1,
     gold: DtoGold,
     onClick: () -> Unit = {}
 ) {
@@ -49,7 +53,14 @@ fun GoldListItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp))
+            .clip(
+                RoundedCornerShape(
+                    topStart = getTopRadius(index, size),
+                    topEnd = getTopRadius(index, size),
+                    bottomStart = getBottomRadius(index, size),
+                    bottomEnd = getBottomRadius(index, size),
+                )
+            )
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .clickable {
                 onClick()

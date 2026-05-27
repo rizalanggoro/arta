@@ -1,5 +1,6 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,15 +63,11 @@ fun HomeGoldDashboardScreen(
     val homeBackStack = LocalHomeBackStack.current
     val uiState by vm.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        AppEventBus.event
-            .filterIsInstance<AppEvent.GoldChanged>()
-            .collect { vm.retry() }
-    }
-
     Content(
         uiState = uiState,
-        onClickRetry = vm::retry,
+        onClickRetry = { vm.loadDashboard() },
+        refreshState = rememberPullToRefreshState(),
+        onRefresh = { vm.loadDashboard(isRefresh = true) },
         onClickManageTax = { backStack.add(Routes.GoldTaxListRoute) },
         onClickShowMore = {
             if (homeBackStack != null) {
@@ -79,10 +81,12 @@ fun HomeGoldDashboardScreen(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 private fun Content(
+    refreshState: PullToRefreshState = PullToRefreshState(),
     uiState: GoldDashboardUiState = GoldDashboardUiState(),
     onClickRetry: () -> Unit = {},
     onClickManageTax: () -> Unit = {},
     onClickShowMore: () -> Unit = {},
+    onRefresh: () -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -100,184 +104,197 @@ private fun Content(
         )
 
         else -> with(uiState) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
+            PullToRefreshBox(
+                state = refreshState,
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = onRefresh,
+                indicator = {
+                    PullToRefreshDefaults.LoadingIndicator(
+                        state = refreshState,
+                        isRefreshing = uiState.isRefreshing,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
             ) {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "Total asset",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = (data?.totalAsset
-                                ?: 0.toBigDecimal()).toIndonesianCurrency(),
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Column {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                ) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
                             Text(
-                                text = "Harga beli ${(data?.totalBuyPrice ?: 0.toBigDecimal()).toIndonesianCurrency()}",
+                                text = "Total asset",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.outline
+                                color = MaterialTheme.colorScheme.primary
                             )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    Icons.AutoMirrored.Rounded.TrendingUp,
-                                    null,
-                                    modifier = Modifier.size(MaterialTheme.typography.bodyMedium.fontSize.value.dp),
-                                    tint = MaterialTheme.colorScheme.outline
-                                )
+                            Text(
+                                text = (data?.totalAsset
+                                    ?: 0.toBigDecimal()).toIndonesianCurrency(),
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Column {
                                 Text(
-                                    text = (data?.profit ?: 0.toBigDecimal())
-                                        .toIndonesianCurrency(),
+                                    text = "Harga beli ${(data?.totalBuyPrice ?: 0.toBigDecimal()).toIndonesianCurrency()}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.outline
                                 )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.TrendingUp,
+                                        null,
+                                        modifier = Modifier.size(MaterialTheme.typography.bodyMedium.fontSize.value.dp),
+                                        tint = MaterialTheme.colorScheme.outline
+                                    )
+                                    Text(
+                                        text = (data?.profit ?: 0.toBigDecimal())
+                                            .toIndonesianCurrency(),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                item {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 16.dp)
-                    ) {
-                        listOf(
-                            mapOf(
-                                "title" to "Total berat",
-                                "value" to "${(data?.totalWeight?.toFloat() ?: 0)} gr",
-                                "icon" to Icons.Rounded.Balance
-                            ),
-                            mapOf(
-                                "title" to "Total emas",
-                                "value" to (data?.totalGoldItems ?: 0).toString(),
-                                "icon" to Icons.Rounded.Tag
-                            )
-                        ).forEach {
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    item {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp)
+                        ) {
+                            listOf(
+                                mapOf(
+                                    "title" to "Total berat",
+                                    "value" to "${(data?.totalWeight?.toFloat() ?: 0)} gr",
+                                    "icon" to Icons.Rounded.Balance
                                 ),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(16.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                mapOf(
+                                    "title" to "Total emas",
+                                    "value" to (data?.totalGoldItems ?: 0).toString(),
+                                    "icon" to Icons.Rounded.Tag
+                                )
+                            ).forEach {
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                    ),
+                                    modifier = Modifier.weight(1f)
                                 ) {
-                                    Icon(
-                                        it["icon"] as ImageVector,
-                                        null
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            it["icon"] as ImageVector,
+                                            null
+                                        )
+                                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                            Text(
+                                                text = it["value"] as String,
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            Text(
+                                                text = it["title"] as String,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.outline,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 8.dp)
+                        ) {
+                            listOf(
+                                mapOf(
+                                    "title" to "Emas dunia",
+                                    "value" to (data?.goldPrice?.pricePerOunceUsd
+                                        ?: 0.toBigDecimal()).toAmericanCurrency(),
+                                    "date" to data?.goldPrice?.createdAt
+                                ),
+                                mapOf(
+                                    "title" to "Nilai dollar",
+                                    "value" to (data?.fxRate?.rate ?: 0).toIndonesianCurrency(),
+                                    "date" to data?.fxRate?.createdAt
+                                )
+                            ).forEach {
+                                Card(
+                                    modifier = Modifier.weight(1f),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.secondaryContainer
                                     )
-                                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        Text(
+                                            text = it["title"] as String,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Normal
+                                        )
                                         Text(
                                             text = it["value"] as String,
                                             style = MaterialTheme.typography.titleMedium
                                         )
-                                        Text(
-                                            text = it["title"] as String,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.outline,
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.Update,
+                                                null,
+                                                modifier = Modifier.size(12.dp),
+                                                tint = MaterialTheme.colorScheme.outline
+                                            )
+                                            Text(
+                                                text = it["date"].toFormattedDate("dd/MM/yyyy HH:mm"),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.outline,
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                item {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 8.dp)
-                    ) {
-                        listOf(
-                            mapOf(
-                                "title" to "Emas dunia",
-                                "value" to (data?.goldPrice?.pricePerOunceUsd
-                                    ?: 0.toBigDecimal()).toAmericanCurrency(),
-                                "date" to data?.goldPrice?.createdAt
-                            ),
-                            mapOf(
-                                "title" to "Nilai dollar",
-                                "value" to (data?.fxRate?.rate ?: 0).toIndonesianCurrency(),
-                                "date" to data?.fxRate?.createdAt
-                            )
-                        ).forEach {
-                            Card(
-                                modifier = Modifier.weight(1f),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                )
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Text(
-                                        text = it["title"] as String,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = FontWeight.Normal
-                                    )
-                                    Text(
-                                        text = it["value"] as String,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Rounded.Update,
-                                            null,
-                                            modifier = Modifier.size(12.dp),
-                                            tint = MaterialTheme.colorScheme.outline
-                                        )
-                                        Text(
-                                            text = it["date"].toFormattedDate("dd/MM/yyyy HH:mm"),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.outline,
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                    item {
+                        PriceSummary(
+                            onClickManageTax = onClickManageTax,
+                            taxPreferences = data?.taxPreferences ?: emptyList(),
+                            goldPrice = data?.goldPrice?.pricePerOunceUsd?.div(31.1034768.toBigDecimal())
+                                ?.times(data.fxRate.rate.toBigDecimal()) ?: 0.toBigDecimal()
+                        )
                     }
-                }
 
-                item {
-                    PriceSummary(
-                        onClickManageTax = onClickManageTax,
-                        taxPreferences = data?.taxPreferences ?: emptyList(),
-                        goldPrice = data?.goldPrice?.pricePerOunceUsd?.div(31.1034768.toBigDecimal())
-                            ?.times(data.fxRate.rate.toBigDecimal()) ?: 0.toBigDecimal()
-                    )
-                }
-
-                item {
-                    LatestGold(
-                        onClickShowMore = onClickShowMore,
-                        golds = data?.recentGolds ?: emptyList(),
-                    )
+                    item {
+                        LatestGold(
+                            onClickShowMore = onClickShowMore,
+                            golds = data?.recentGolds ?: emptyList(),
+                        )
+                    }
                 }
             }
         }

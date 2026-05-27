@@ -5,14 +5,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
-import id.my.rizalanggoro.arta.openapi.models.GoldDashboardRes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,18 +24,21 @@ class GoldDashboardVM @Inject constructor(
     private val _uiState = MutableStateFlow(GoldDashboardUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun retry() {
-        loadDashboard()
-    }
-
-    private fun loadDashboard() {
+    fun loadDashboard(isRefresh: Boolean = false) {
         val currentState = _uiState.value
         val selectedWallet = currentState.selectedWallet ?: return
 
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
-                    isLoading = true,
+                    isLoading = when {
+                        isRefresh -> it.isLoading
+                        else -> true
+                    },
+                    isRefreshing = when {
+                        isRefresh -> true
+                        else -> it.isRefreshing
+                    },
                     errorMessage = null
                 )
             }
@@ -54,14 +57,28 @@ class GoldDashboardVM @Inject constructor(
             }.onSuccess { response ->
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
+                        isLoading = when {
+                            isRefresh -> it.isLoading
+                            else -> false
+                        },
+                        isRefreshing = when {
+                            isRefresh -> false
+                            else -> it.isRefreshing
+                        },
                         data = response.data
                     )
                 }
             }.onFailure { throwable ->
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
+                        isLoading = when {
+                            isRefresh -> it.isLoading
+                            else -> false
+                        },
+                        isRefreshing = when {
+                            isRefresh -> false
+                            else -> it.isRefreshing
+                        },
                         errorMessage = throwable.message ?: "Gagal memuat dashboard emas",
                     )
                 }
@@ -80,6 +97,11 @@ class GoldDashboardVM @Inject constructor(
 
                 if (wallet != null) loadDashboard()
             }
+        }
+
+        viewModelScope.launch {
+            AppEventBus.event.filterIsInstance<AppEvent.GoldChanged>()
+                .collect { loadDashboard(isRefresh = true) }
         }
     }
 }
