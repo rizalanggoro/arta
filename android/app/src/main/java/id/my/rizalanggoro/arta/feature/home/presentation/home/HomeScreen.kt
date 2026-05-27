@@ -10,6 +10,8 @@ import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.Payment
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Wallet
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -22,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -39,7 +40,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.LocalHomeBackStack
 import id.my.rizalanggoro.arta.core.Routes.HomeCashDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldDashboardRoute
 import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
@@ -48,6 +48,7 @@ import id.my.rizalanggoro.arta.core.Routes.HomeTransactionRoute
 import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
 import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.HomeGoldDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
@@ -71,27 +72,26 @@ fun HomeScreen(
         else -> null
     }
 
-    CompositionLocalProvider(LocalHomeBackStack provides homeBackStack) {
-        Content(
-            destinations = destinations,
-            uiState = uiState,
-            onClickSelectWallet = { backStack.add(WalletSelectRoute) },
-            homeBackStack = homeBackStack,
-            onClickFab = {
-                when (walletType) {
-                    "cash_savings" -> backStack.add(TransactionUpsertRoute())
-                    "gold_savings" -> backStack.add(UpsertGoldRoute())
-                }
-            },
-            entryProvider = entryProvider {
-                entry<HomeCashDashboardRoute> { HomeCashDashboardScreen() }
-                entry<HomeGoldDashboardRoute> { HomeGoldDashboardScreen() }
-                entry<HomeTransactionRoute> { HomeTransactionScreen() }
-                entry<HomeGoldRoute> { HomeGoldScreen() }
-                entry<HomeSettingRoute> { HomeSettingScreen() }
+    Content(
+        destinations = destinations,
+        uiState = uiState,
+        onClickSelectWallet = { backStack.add(WalletSelectRoute) },
+        homeBackStack = homeBackStack,
+        onClickFab = {
+            when (walletType) {
+                "cash_savings" -> backStack.add(TransactionUpsertRoute())
+                "gold_savings" -> backStack.add(UpsertGoldRoute())
             }
-        )
-    }
+        },
+        entryProvider = entryProvider {
+            entry<HomeCashDashboardRoute> { HomeCashDashboardScreen() }
+            entry<HomeGoldDashboardRoute> { HomeGoldDashboardScreen() }
+            entry<HomeTransactionRoute> { HomeTransactionScreen() }
+            entry<HomeGoldRoute> { HomeGoldScreen() }
+            entry<HomeSettingRoute> { HomeSettingScreen() }
+        },
+        hasUpdate = AppEventBus.updateEvent.collectAsState().value
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,6 +103,7 @@ private fun Content(
     homeBackStack: (NavBackStack<NavKey>)? = null,
     entryProvider: ((NavKey) -> NavEntry<NavKey>)? = null,
     onClickFab: () -> Unit = {},
+    hasUpdate: Boolean = false,
 ) {
     val lastDestination = homeBackStack?.lastOrNull()
 
@@ -137,7 +138,7 @@ private fun Content(
         bottomBar = {
             if (destinations.isNotEmpty() && homeBackStack != null)
                 NavigationBar {
-                    destinations.forEachIndexed { index, destination ->
+                    destinations.forEach { destination ->
                         NavigationBarItem(
                             selected = homeBackStack.lastOrNull() == destination.route,
                             onClick = {
@@ -145,14 +146,17 @@ private fun Content(
                                 homeBackStack.add(destination.route)
                             },
                             icon = {
-//                                BadgedBox(
-//                                    badge = { Badge() }
-//                                ) {
-                                Icon(
-                                    destination.icon,
-                                    contentDescription = null
-                                )
-//                                }
+                                BadgedBox(
+                                    badge = {
+                                        if (destination.route == HomeSettingRoute && hasUpdate)
+                                            Badge()
+                                    }
+                                ) {
+                                    Icon(
+                                        destination.icon,
+                                        contentDescription = null
+                                    )
+                                }
                             },
                             label = { Text(destination.label) },
                         )

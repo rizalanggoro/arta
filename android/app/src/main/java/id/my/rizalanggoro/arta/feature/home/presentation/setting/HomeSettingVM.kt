@@ -2,11 +2,12 @@ package id.my.rizalanggoro.arta.feature.home.presentation.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.data.ThemePrefs
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.apis.AuthApi
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -63,16 +64,19 @@ class HomeSettingVM @Inject constructor(
             combine(
                 authPrefs.currentSession,
                 themePrefs.isDarkTheme,
-            ) { session, isDarkTheme ->
+                AppEventBus.updateEvent,
+            ) { session, isDarkTheme, hasUpdate ->
                 HomeSettingUiState(
                     session = session,
                     isDarkTheme = isDarkTheme,
+                    hasUpdate = hasUpdate
                 )
             }.collect { state ->
                 _uiState.update {
                     it.copy(
                         session = state.session,
                         isDarkTheme = state.isDarkTheme,
+                        hasUpdate = state.hasUpdate
                     )
                 }
             }

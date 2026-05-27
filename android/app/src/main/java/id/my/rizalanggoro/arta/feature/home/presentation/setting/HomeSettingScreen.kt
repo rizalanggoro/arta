@@ -21,6 +21,8 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -219,10 +221,17 @@ private fun Content(
             ListItem(
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 leadingContent = {
-                    Icon(
-                        Icons.Rounded.Update,
-                        null,
-                    )
+                    BadgedBox(
+                        badge = {
+                            if (uiState.hasUpdate)
+                                Badge()
+                        }
+                    ) {
+                        Icon(
+                            Icons.Rounded.Update,
+                            null,
+                        )
+                    }
                 },
                 headlineContent = {
                     Text("Pembaruan")

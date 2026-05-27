@@ -1,4 +1,4 @@
-package id.my.rizalanggoro.arta.core.helper
+package id.my.rizalanggoro.arta.core.utils
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp

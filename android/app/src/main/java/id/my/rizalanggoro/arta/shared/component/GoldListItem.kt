@@ -27,8 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
-import id.my.rizalanggoro.arta.core.helper.getBottomRadius
-import id.my.rizalanggoro.arta.core.helper.getTopRadius
+import id.my.rizalanggoro.arta.core.utils.getBottomRadius
+import id.my.rizalanggoro.arta.core.utils.getTopRadius
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
 
