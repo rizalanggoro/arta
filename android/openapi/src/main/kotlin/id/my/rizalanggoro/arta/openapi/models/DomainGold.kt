@@ -64,8 +64,8 @@ data class DomainGold (
     @SerialName(value = "notes")
     val notes: kotlin.String,
 
-    @Contextual @SerialName(value = "price")
-    val price: java.math.BigDecimal,
+    @SerialName(value = "price")
+    val price: kotlin.Int,
 
     /* pure_gold or jewelry */
     @SerialName(value = "type")

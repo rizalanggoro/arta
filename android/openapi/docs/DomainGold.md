@@ -10,7 +10,7 @@
 | **grams** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
 | **id** | **kotlin.Int** |  |  |
 | **notes** | **kotlin.String** |  |  |
-| **price** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **price** | **kotlin.Int** |  |  |
 | **type** | **kotlin.String** | pure_gold or jewelry |  |
 | **updatedAt** | **kotlin.String** |  |  |
 | **walletId** | **kotlin.Int** |  |  |

@@ -175,7 +175,7 @@ private fun GoldDetailScreenPreview() {
                     walletId = 2,
                     date = "2026-05-16",
                     grams = BigDecimal.valueOf(10.0),
-                    price = BigDecimal.valueOf(9000000.0),
+                    price = 9000000,
                     type = "pure_gold",
                     carat = BigDecimal.valueOf(24.0),
                     notes = "Contoh catatan",

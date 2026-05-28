@@ -10,7 +10,7 @@ data class CashDashboardUiState(
     val balanceDisplay: String = "Rp 0",
     val todayIncomeDisplay: String = "Rp 0",
     val todayExpenseDisplay: String = "Rp 0",
-    val recentTransactions: List<CashDashboardResRecentTransactionsInner> = emptyList(),
+    val latestTransactions: List<CashDashboardResRecentTransactionsInner> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )

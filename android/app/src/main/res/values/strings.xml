@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Arta</string>
+    <string name="client_error">Terjadi kesalahan tak terduga!</string>
 </resources>

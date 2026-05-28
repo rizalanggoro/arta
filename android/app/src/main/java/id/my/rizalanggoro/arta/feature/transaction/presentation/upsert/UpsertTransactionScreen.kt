@@ -1,21 +1,30 @@
 package id.my.rizalanggoro.arta.feature.transaction.presentation.upsert
 
-import android.app.DatePickerDialog
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Category
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Today
+import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -23,20 +32,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
-import id.my.rizalanggoro.arta.openapi.models.DomainWallet
+import id.my.rizalanggoro.arta.core.extension.isValidInputNumber
+import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,9 +54,9 @@ fun UpsertTransactionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val backStack = LocalBackStack.current
 
-    LaunchedEffect(transactionId) {
-        vm.setTransactionId(transactionId)
-    }
+//    LaunchedEffect(transactionId) {
+//        vm.setTransactionId(transactionId)
+//    }
 
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
@@ -64,16 +70,19 @@ fun UpsertTransactionScreen(
     Content(
         snackbarHostState = snackbarHostState,
         uiState = uiState,
-        onWalletIdChanged = vm::onWalletIdChanged,
         onAmountChanged = vm::onAmountChanged,
         onDescriptionChanged = vm::onDescriptionChanged,
-        onCategoryIdChanged = vm::onCategoryIdChanged,
-        onDateChanged = vm::onDateChanged,
-        onClickSelectWallet = { backStack.add(WalletSelectRoute) },
         onClickSelectCategory = { backStack.add(CategorySelectRoute(categoryId = null)) },
-        onClickSave = vm::submit,
+        onClickSelectDate = vm::onSelectDateClicked,
+        onClickSubmit = vm::submit,
         onClickBack = { backStack.removeLastOrNull() },
     )
+
+    if (uiState.isDatePickerOpen)
+        MyDatePickerDialog(
+            onDismiss = vm::onDatePickerDismissed,
+            onDateSelected = vm::onDateSelected
+        )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,124 +90,75 @@ fun UpsertTransactionScreen(
 private fun Content(
     snackbarHostState: SnackbarHostState,
     uiState: UpsertTransactionUiState = UpsertTransactionUiState(),
-    onWalletIdChanged: (String) -> Unit = {},
     onAmountChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
-    onCategoryIdChanged: (String) -> Unit = {},
-    onDateChanged: (String) -> Unit = {},
-    onClickSelectWallet: () -> Unit = {},
     onClickSelectCategory: () -> Unit = {},
-    onClickSave: () -> Unit = {},
+    onClickSelectDate: () -> Unit = {},
+    onClickSubmit: () -> Unit = {},
     onClickBack: () -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val dateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-    val selectedDate = remember(uiState.date) {
-        runCatching { ZonedDateTime.parse(uiState.date).toLocalDate() }
-            .getOrNull()
-            ?: runCatching { LocalDate.parse(uiState.date.take(10)) }.getOrNull()
-            ?: LocalDate.now()
-    }
-    val datePicker = remember(uiState.date) {
-        DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-                val localDate = LocalDate.of(year, month + 1, dayOfMonth)
-                val zoned = localDate.atStartOfDay(ZoneId.systemDefault())
-                onDateChanged(zoned.format(dateFormatter))
-            },
-            selectedDate.year,
-            selectedDate.monthValue - 1,
-            selectedDate.dayOfMonth,
-        )
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (uiState.isUpdate) "Ubah Transaksi" else "Buat Transaksi")
+                    Text(
+                        when {
+                            uiState.isUpdate -> "Ubah Transaksi"
+                            else -> "Tambah Transaksi"
+                        }
+                    )
                 },
                 navigationIcon = {
-                    TextButton(onClick = onClickBack) {
-                        Text("Batal")
+                    IconButton(onClick = onClickBack) {
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            null
+                        )
                     }
                 },
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Button(
-                    onClick = onClickSave,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !uiState.isLoading,
-                ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp,
-                        )
-                    } else {
-                        Text(if (uiState.isUpdate) "Simpan Perubahan" else "Simpan")
-                    }
-                }
-            }
-        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 16.dp),
         ) {
-            Text(
-                text = if (uiState.isUpdate) "Perbarui data transaksi." else "Isi data transaksi baru.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            SnackbarHost(hostState = snackbarHostState)
-
-            TextField(
-                value = uiState.walletId,
-                onValueChange = onWalletIdChanged,
-                label = { Text("Wallet ID") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = uiState.walletIdError != null,
-                supportingText = when {
-                    uiState.walletIdError != null -> {
-                        { Text(uiState.walletIdError) }
-                    }
-
-                    else -> null
+            ListItem(
+                modifier = Modifier.clip(RoundedCornerShape(16.dp)),
+                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                leadingContent = {
+                    Icon(
+                        Icons.Rounded.Wallet,
+                        null
+                    )
                 },
-                enabled = !uiState.isLoading,
-                singleLine = true,
-            )
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Wallet", style = MaterialTheme.typography.labelLarge)
-                Text(
-                    text = uiState.selectedWalletName.ifBlank { if (uiState.walletId.isBlank()) "Belum dipilih" else "Wallet ID: ${uiState.walletId}" },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                TextButton(onClick = onClickSelectWallet, enabled = !uiState.isLoading) {
-                    Text("Pilih wallet")
+                headlineContent = {
+                    Text("Dompet")
+                },
+                supportingContent = {
+                    Text("Tidak ada dompet")
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.Rounded.ChevronRight,
+                        null
+                    )
                 }
-            }
+            )
 
             TextField(
                 value = uiState.amount,
-                onValueChange = onAmountChanged,
+                onValueChange = {
+                    if (it.isValidInputNumber())
+                        onAmountChanged(it)
+                },
                 label = { Text("Jumlah") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
                 isError = uiState.amountError != null,
                 supportingText = when {
                     uiState.amountError != null -> {
@@ -211,68 +171,111 @@ private fun Content(
                 singleLine = true,
             )
 
-            TextField(
-                value = uiState.categoryId,
-                onValueChange = onCategoryIdChanged,
-                label = { Text("Kategori ID") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = uiState.categoryError != null,
-                supportingText = when {
-                    uiState.categoryError != null -> {
-                        { Text(uiState.categoryError) }
-                    }
-
-                    else -> null
+            ListItem(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 4.dp
+                        )
+                    )
+                    .clickable {
+                        onClickSelectCategory()
+                    },
+                colors = ListItemDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                leadingContent = {
+                    Icon(
+                        Icons.Rounded.Category,
+                        null
+                    )
                 },
-                enabled = !uiState.isLoading,
-                singleLine = true,
+                headlineContent = {
+                    Text("Kategori")
+                },
+                supportingContent = {
+                    Text("Pilih kategori")
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.Rounded.ChevronRight,
+                        null
+                    )
+                }
             )
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Kategori", style = MaterialTheme.typography.labelLarge)
-                Text(
-                    text = uiState.selectedCategoryName.ifBlank { if (uiState.categoryId.isBlank()) "Belum dipilih" else "Kategori #${uiState.categoryId}" },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                TextButton(onClick = onClickSelectCategory, enabled = !uiState.isLoading) {
-                    Text("Pilih kategori")
+            ListItem(
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 4.dp,
+                            topEnd = 4.dp,
+                            bottomStart = 16.dp,
+                            bottomEnd = 16.dp
+                        )
+                    )
+                    .clickable {
+                        onClickSelectDate()
+                    },
+                colors = ListItemDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                leadingContent = {
+                    Icon(
+                        Icons.Rounded.Today,
+                        null
+                    )
+                },
+                headlineContent = {
+                    Text("Tanggal")
+                },
+                supportingContent = {
+                    Text("Pilih tanggal")
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.Rounded.ChevronRight,
+                        null
+                    )
                 }
-            }
-
-            TextField(
-                value = uiState.date,
-                onValueChange = {},
-                label = { Text("Tanggal (ISO 8601)") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = uiState.dateError != null,
-                supportingText = when {
-                    uiState.dateError != null -> {
-                        { Text(uiState.dateError) }
-                    }
-
-                    else -> {
-                        { Text("Contoh: 2026-05-16T10:30:00+07:00") }
-                    }
-                },
-                enabled = !uiState.isLoading,
-                singleLine = true,
-                readOnly = true,
-                trailingIcon = {
-                    TextButton(onClick = { datePicker.show() }, enabled = !uiState.isLoading) {
-                        Text("Pilih")
-                    }
-                },
             )
 
             TextField(
                 value = uiState.description,
                 onValueChange = onDescriptionChanged,
                 label = { Text("Catatan (opsional)") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
                 enabled = !uiState.isLoading,
                 singleLine = false,
-                minLines = 4,
+                minLines = 5,
             )
+
+            when {
+                uiState.isLoading -> Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingIndicator()
+                }
+
+                else -> Button(
+                    onClick = onClickSubmit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                ) {
+                    Text("Simpan")
+                }
+            }
         }
     }
 }
@@ -311,7 +314,7 @@ private fun UpdateTransactionPreview() {
                 selectedCategoryName = "Makanan",
                 amount = "50000",
                 description = "Contoh transaksi",
-                date = "2026-05-16T10:30:00+07:00",
+                date = System.currentTimeMillis(),
             ),
         )
     }
@@ -347,7 +350,6 @@ private fun UpsertTransactionErrorPreview() {
                 walletIdError = "Wallet wajib dipilih",
                 amountError = "Jumlah tidak valid",
                 categoryError = "Kategori wajib dipilih",
-                dateError = "Tanggal wajib diisi",
             ),
         )
     }

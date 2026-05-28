@@ -3,7 +3,7 @@ package transaction
 // CreateTransactionReq defines payload for creating a transaction.
 type CreateTransactionReq struct {
 	WalletID    uint    `json:"wallet_id"`
-	Amount      float64 `json:"amount"`
+	Amount      float64 `json:"amount" format:"double"`
 	CategoryID  uint    `json:"category_id"`
 	Description string  `json:"description,omitempty"`
 	Date        string  `json:"date"`

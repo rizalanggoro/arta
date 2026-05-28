@@ -69,7 +69,7 @@ private fun Content(tx: DomainTransaction?, onEdit: (DomainTransaction) -> Unit 
 @Preview(showBackground = true)
 @Composable
 private fun TransactionDetailScreenPreview() {
-    Content(tx = DomainTransaction(amount = java.math.BigDecimal(100000), categoryId = 1, createdAt = "", date = "2026-05-16", description = "Contoh transaksi", id = 1, updatedAt = "", walletId = 1))
+    Content(tx = DomainTransaction(amount = 100000.0, categoryId = 1, createdAt = "", date = "2026-05-16", description = "Contoh transaksi", id = 1, updatedAt = "", walletId = 1))
 }
 
 @Preview(showBackground = true, name = "Transaction Detail - Loading")

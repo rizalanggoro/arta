@@ -74,6 +74,7 @@ definitions:
   CreateTransactionReq:
     properties:
       amount:
+        format: double
         type: number
       category_id:
         type: integer
@@ -419,7 +420,7 @@ definitions:
       notes:
         type: string
       price:
-        type: number
+        type: integer
       type:
         description: pure_gold or jewelry
         type: string
@@ -514,6 +515,7 @@ definitions:
   domain.Transaction:
     properties:
       amount:
+        format: double
         type: number
       category_id:
         type: integer

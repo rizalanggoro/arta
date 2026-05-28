@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.time.LocalTime
 import java.util.Locale
-import kotlin.math.roundToLong
 import javax.inject.Inject
+import kotlin.math.roundToLong
 
 @HiltViewModel
 class HomeCashDashboardVM @Inject constructor(
@@ -48,9 +48,12 @@ class HomeCashDashboardVM @Inject constructor(
 
         viewModelScope.launch {
             runCatching {
-                val token = authPrefs.currentSession.value?.token ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val token = authPrefs.currentSession.value?.token
+                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
                 val response = dashboardApi.getCashDashboard("Bearer $token", walletId)
-                if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
+                if (!response.isSuccessful) throw IllegalStateException(
+                    response.errorBody()?.string() ?: "Request failed"
+                )
                 response.body() ?: throw IllegalStateException("Respons server kosong")
             }.onSuccess { res ->
                 _uiState.value = res.toUiState(
@@ -80,7 +83,7 @@ class HomeCashDashboardVM @Inject constructor(
             balanceDisplay = formatMoney(financialSummary.currentBalance.toDouble()),
             todayIncomeDisplay = formatMoney(financialSummary.todayIncome.toDouble()),
             todayExpenseDisplay = formatMoney(financialSummary.todayExpense.toDouble()),
-            recentTransactions = recentTransactions,
+            latestTransactions = recentTransactions,
             isLoading = false,
             errorMessage = null,
         )

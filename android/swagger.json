@@ -1684,7 +1684,8 @@
             ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "category_id": {
                     "type": "integer"
@@ -2210,7 +2211,7 @@
                     "type": "string"
                 },
                 "price": {
-                    "type": "number"
+                    "type": "integer"
                 },
                 "type": {
                     "description": "pure_gold or jewelry",
@@ -2339,7 +2340,8 @@
             ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "category_id": {
                     "type": "integer"

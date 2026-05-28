@@ -1686,7 +1686,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "category_id": {
                     "type": "integer"
@@ -2212,7 +2213,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "price": {
-                    "type": "number"
+                    "type": "integer"
                 },
                 "type": {
                     "description": "pure_gold or jewelry",
@@ -2341,7 +2342,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "category_id": {
                     "type": "integer"

@@ -74,7 +74,7 @@ fun LatestGold(
 }
 
 @Composable
-@Preview(device = "id:pixel_10_pro_xl")
+@Preview
 private fun Preview() {
     LatestGold(
         golds = List(3) {
@@ -86,7 +86,7 @@ private fun Preview() {
                     grams = 3.3.toBigDecimal(),
                     id = 1,
                     notes = "",
-                    price = 1500000.toBigDecimal(),
+                    price = 1500000,
                     type = "jewelry",
                     updatedAt = "2026-05-25T14:38:00.000+07:00",
                     walletId = 1

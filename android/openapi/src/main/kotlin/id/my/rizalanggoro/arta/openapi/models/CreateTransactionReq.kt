@@ -41,8 +41,8 @@ import kotlinx.serialization.Contextual
 
 data class CreateTransactionReq (
 
-    @Contextual @SerialName(value = "amount")
-    val amount: java.math.BigDecimal,
+    @SerialName(value = "amount")
+    val amount: kotlin.Double,
 
     @SerialName(value = "category_id")
     val categoryId: kotlin.Int,

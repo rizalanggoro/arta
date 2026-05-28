@@ -4,7 +4,16 @@ import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Locale
 
+@Deprecated("use double instead")
 fun BigDecimal.toIndonesianCurrency(): String = NumberFormat
+    .getCurrencyInstance(
+        Locale.forLanguageTag(
+            "id-ID"
+        )
+    )
+    .format(this)
+
+fun Double.toIndonesianCurrency(): String = NumberFormat
     .getCurrencyInstance(
         Locale.forLanguageTag(
             "id-ID"
@@ -20,6 +29,7 @@ fun Int.toIndonesianCurrency(): String = NumberFormat
     )
     .format(this)
 
+@Deprecated("use double instead")
 fun BigDecimal.toAmericanCurrency(): String = NumberFormat
     .getCurrencyInstance(
         Locale.forLanguageTag(
@@ -27,3 +37,7 @@ fun BigDecimal.toAmericanCurrency(): String = NumberFormat
         )
     )
     .format(this)
+
+fun String.isValidInputNumber() = matches(
+    Regex("^\\d*\\.?\\d*$")
+)

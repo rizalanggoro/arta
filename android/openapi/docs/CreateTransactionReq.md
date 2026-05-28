@@ -4,7 +4,7 @@
 ## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-| **amount** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **amount** | **kotlin.Double** |  |  |
 | **categoryId** | **kotlin.Int** |  |  |
 | **date** | **kotlin.String** |  |  |
 | **walletId** | **kotlin.Int** |  |  |
