@@ -33,18 +33,18 @@ import kotlinx.serialization.Contextual
 /**
  * 
  *
- * @param `data` 
  * @param category 
+ * @param `data` 
  */
 @Serializable
 
 data class UpdateTransactionRes (
 
-    @SerialName(value = "data")
-    val `data`: DomainTransaction,
-
     @SerialName(value = "category")
-    val category: DomainCategory? = null
+    val category: DomainCategory,
+
+    @SerialName(value = "data")
+    val `data`: DomainTransaction
 
 ) {
 

@@ -142,17 +142,19 @@ val apiClient = ApiClient()
 val webService = apiClient.createWebservice(TransactionApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val walletId : kotlin.Int = 56 // kotlin.Int | wallet id
+val includeCategory : kotlin.Boolean = true // kotlin.Boolean | include_category
 
 launch(Dispatchers.IO) {
-    val result : ListTransactionsRes = webService.listTransactions(authorization, walletId)
+    val result : ListTransactionsRes = webService.listTransactions(authorization, walletId, includeCategory)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
+| **walletId** | **kotlin.Int**| wallet id | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **walletId** | **kotlin.Int**| wallet id | |
+| **includeCategory** | **kotlin.Boolean**| include_category | [optional] |
 
 ### Return type
 

@@ -6,5 +6,5 @@ import "github.com/artafinance/backend/internal/domain"
 // @name Transaction
 type Transaction struct {
 	Data     domain.Transaction `json:"data"`
-	Category domain.Category    `json:"category,omitempty"`
+	Category domain.Category    `json:"category"`
 }

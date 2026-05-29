@@ -82,10 +82,11 @@ interface TransactionApi {
      *
      * @param authorization Bearer token
      * @param walletId wallet id
+     * @param includeCategory include_category (optional)
      * @return [ListTransactionsRes]
      */
     @GET("api/transaction")
-    suspend fun listTransactions(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int): Response<ListTransactionsRes>
+    suspend fun listTransactions(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int, @Query("include_category") includeCategory: kotlin.Boolean? = null): Response<ListTransactionsRes>
 
     /**
      * PUT api/transaction/{id}

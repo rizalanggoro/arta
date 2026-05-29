@@ -42,6 +42,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 // @produce              json
 // @param                Authorization header string true "Bearer token"
 // @param                wallet_id query int true "wallet id"
+// @param 			include_category query bool false "include_category"
 // @success              200 {object} ListTransactionsRes
 // @failure              400 {object} dto.Error
 // @failure              401 {object} dto.Error
@@ -49,41 +50,46 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 // @router               /api/transaction [get]
 // list requires query param `wallet_id` to list transactions for a wallet.
 func (h *Handler) list(c *fiber.Ctx) error {
-	walletID := c.Query("wallet_id")
-	if walletID == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "wallet_id is required"})
-	}
-
-	// verify ownership
-	parsedWalletID, err := strconv.ParseUint(walletID, 10, 64)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
+	walletID := c.QueryInt("wallet_id", 0)
+	if walletID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "wallet_id is required",
+		})
 	}
 
 	userID := middleware.GetUserID(c)
 	if userID == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{
+			Code:    fiber.StatusUnauthorized,
+			Message: "unauthorized",
+		})
 	}
 
-	ownerID, err := h.repo.GetWalletOwnerID(uint(parsedWalletID))
+	ownerID, err := h.repo.GetWalletOwnerID(uint(walletID))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 	if strconv.FormatUint(uint64(ownerID), 10) != userID {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
-	txs, err := h.repo.GetTransactionsByWalletID(uint(parsedWalletID))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	if res, err := h.repo.GetAll(&GetAllFilter{
+		WalletId:        uint(walletID),
+		IncludeCategory: c.QueryBool("include_category", false),
+	}); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	} else {
+		return c.Status(fiber.StatusOK).JSON(ListTransactionsRes{
+			Items: res,
+		})
 	}
-
-	res := ListTransactionsRes{Transactions: make([]dto.Transaction, 0, len(txs))}
-	for _, t := range txs {
-		res.Transactions = append(res.Transactions, dto.Transaction{Data: t})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(res)
 }
 
 // @id                   CreateTransaction

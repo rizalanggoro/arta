@@ -974,6 +974,12 @@
                         "name": "wallet_id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "include_category",
+                        "name": "include_category",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1704,6 +1710,7 @@
         "CreateTransactionRes": {
             "type": "object",
             "required": [
+                "category",
                 "data"
             ],
             "properties": {
@@ -1814,6 +1821,7 @@
         "GetTransactionRes": {
             "type": "object",
             "required": [
+                "category",
                 "data"
             ],
             "properties": {
@@ -2056,6 +2064,7 @@
         "UpdateTransactionRes": {
             "type": "object",
             "required": [
+                "category",
                 "data"
             ],
             "properties": {
@@ -2558,6 +2567,7 @@
         "dto.Transaction": {
             "type": "object",
             "required": [
+                "category",
                 "data"
             ],
             "properties": {

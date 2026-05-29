@@ -976,6 +976,12 @@ const docTemplate = `{
                         "name": "wallet_id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "include_category",
+                        "name": "include_category",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1706,6 +1712,7 @@ const docTemplate = `{
         "CreateTransactionRes": {
             "type": "object",
             "required": [
+                "category",
                 "data"
             ],
             "properties": {
@@ -1816,6 +1823,7 @@ const docTemplate = `{
         "GetTransactionRes": {
             "type": "object",
             "required": [
+                "category",
                 "data"
             ],
             "properties": {
@@ -2058,6 +2066,7 @@ const docTemplate = `{
         "UpdateTransactionRes": {
             "type": "object",
             "required": [
+                "category",
                 "data"
             ],
             "properties": {
@@ -2560,6 +2569,7 @@ const docTemplate = `{
         "dto.Transaction": {
             "type": "object",
             "required": [
+                "category",
                 "data"
             ],
             "properties": {

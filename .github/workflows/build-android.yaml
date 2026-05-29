@@ -4,6 +4,9 @@ on:
   # push:
   #   paths:
   #     - "android/**"
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
 
 jobs:

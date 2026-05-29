@@ -48,7 +48,7 @@ fun TransactionListItem(
                     bottomEnd = getBottomRadius(index, size),
                 )
             )
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -69,10 +69,11 @@ fun TransactionListItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 transaction.data.amount.toIndonesianCurrency(),
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
             )
             Text(
-                transaction.category?.name ?: "Tidak ada kategori",
+                transaction.category.name,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.outline
             )

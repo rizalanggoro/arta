@@ -1,106 +1,175 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.transaction
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.R
+import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
+import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
+import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
+import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
+import id.my.rizalanggoro.arta.shared.component.TransactionListItem
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun HomeTransactionScreen(vm: TransactionListVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
 
     Content(
-        title = uiState.title,
-        description = uiState.description,
-        transactions = uiState.transactions,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
-        onRetry = vm::loadTransactions,
+        uiState = uiState,
+        onClickRetry = vm::loadTransactions,
+        onRefresh = { vm.loadTransactions(isRefresh = true) }
     )
 }
 
 @Composable
 private fun Content(
-    title: String,
-    description: String,
-    transactions: List<DomainTransaction>,
-    isLoading: Boolean,
-    errorMessage: String?,
-    onRetry: () -> Unit = {},
-    modifier: Modifier = Modifier,
+    pullToRefreshState: PullToRefreshState = PullToRefreshState(),
+    uiState: TransactionListUiState = TransactionListUiState(),
+    onClickRetry: () -> Unit = {},
+    onRefresh: () -> Unit = {},
 ) {
-
-    LazyColumn(modifier = modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = title, style = MaterialTheme.typography.titleMedium)
-                    Text(text = description)
-                }
-            }
+    when {
+        uiState.isLoading -> Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            LoadingIndicator()
         }
 
-        item {
-            if (isLoading) {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CircularProgressIndicator()
-                    Text(text = "Memuat transaksi...")
-                }
-            } else if (!errorMessage.isNullOrBlank()) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
-                }
-            } else if (transactions.isEmpty()) {
-                Text(text = "Belum ada transaksi.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
+        uiState.errorMessage != null -> ErrorPlaceholder(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            message = uiState.errorMessage,
+            onClickRetry = onClickRetry
+        )
 
-        items(transactions) { tx ->
-            TransactionRow(transaction = tx)
+        uiState.transactions.isEmpty() -> EmptyPlaceholder(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        )
+
+        else -> PullToRefreshBox(
+            state = pullToRefreshState,
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = onRefresh,
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = pullToRefreshState,
+                    isRefreshing = uiState.isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+            }
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                itemsIndexed(uiState.transactions) { index, transaction ->
+                    TransactionListItem(
+                        transaction = transaction,
+                        index = index,
+                        size = uiState.transactions.size,
+                    )
+                }
+            }
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun TransactionRow(
-    transaction: DomainTransaction,
-    modifier: Modifier = Modifier,
-) {
-    androidx.compose.foundation.layout.Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(text = transaction.description.ifBlank { "Transaksi #${transaction.id}" }, style = MaterialTheme.typography.titleSmall)
-            Text(text = transaction.date, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Text(text = "Rp ${transaction.amount.toLong()}", style = MaterialTheme.typography.titleSmall)
-    }
-}
-
-@Preview(showBackground = true, name = "Transaction List")
-@Composable
-private fun HomeTransactionListPreview() {
+private fun Preview() {
     ArtaTheme {
         Content(
-            title = "Transaksi",
-            description = "Daftar transaksi terbaru.",
-            transactions = listOf(),
-            isLoading = false,
-            errorMessage = null,
+            uiState = TransactionListUiState(
+                transactions = List(5) {
+                    DtoTransaction(
+                        data = DomainTransaction(
+                            amount = (it + 1) * 10000.0,
+                            categoryId = 1,
+                            createdAt = OffsetDateTime.now()
+                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                            date = OffsetDateTime.now()
+                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                            description = "",
+                            id = it + 1,
+                            updatedAt = OffsetDateTime.now()
+                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                            walletId = it + 1
+                        ),
+                        category = DomainCategory(
+                            createdAt = OffsetDateTime.now()
+                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                            id = it + 1,
+                            name = "Makanan dan minuman",
+                            type = "expense",
+                            updatedAt = OffsetDateTime.now()
+                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                            userId = 1
+                        )
+                    )
+                }
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoadingPreview() {
+    ArtaTheme {
+        Content(
+            uiState = TransactionListUiState(
+                isLoading = true
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EmptyPreview() {
+    ArtaTheme {
+        Content(
+            uiState = TransactionListUiState(
+                transactions = emptyList()
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ErrorPreview() {
+    ArtaTheme {
+        Content(
+            uiState = TransactionListUiState(
+                errorMessage = stringResource(R.string.client_error)
+            )
         )
     }
 }

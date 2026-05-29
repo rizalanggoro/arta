@@ -9,15 +9,15 @@ import (
 // Transaction represents a financial transaction.
 type Transaction struct {
 	gorm.Model
-	WalletID    uint      `gorm:"not null;index"`
-	Amount      float64   `gorm:"not null;type:numeric(15,2)"`
-	CategoryID  uint      `gorm:"not null;index"`
-	Description string    `gorm:"type:text"`
-	Date        time.Time `gorm:"not null;index"`
+	WalletID    uint 
+	Wallet      Wallet `gorm:"constraint:OnUpdate:CASCADE;OnDelete:CASCADE"`
+	CategoryID  uint
+	Amount      float64
+	Category    Category `gorm:"constraint:OnUpdate:CASCADE;OnDelete:RESTRICT"`
+	Description string
+	Date        time.Time
 
 	// Foreign keys
-	Wallet   *Wallet   `gorm:"foreignKey:WalletID;references:ID;constraint:OnDelete:CASCADE"`
-	Category *Category `gorm:"foreignKey:CategoryID;references:ID;constraint:OnDelete:RESTRICT"`
 }
 
 // TableName specifies the table name for Transaction model.

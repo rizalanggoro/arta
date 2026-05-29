@@ -258,7 +258,9 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 		categoryByID[categories[i].ID] = categories[i]
 	}
 
-	transactions, err := h.transactionRepo.GetTransactionsByWalletID(activeWallet.ID)
+	transactions, err := h.transactionRepo.GetAll(&transactionfeature.GetAllFilter{
+		WalletId: activeWallet.ID,
+	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).
 			JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
@@ -280,22 +282,22 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 
 	for i := range transactions {
 		transaction := transactions[i]
-		category := categoryByID[transaction.CategoryID]
+		category := categoryByID[transaction.Data.CategoryID]
 		isIncome := category.Type == "income"
 
 		if isIncome {
-			currentBalance += transaction.Amount
+			currentBalance += transaction.Data.Amount
 		} else {
-			currentBalance -= transaction.Amount
+			currentBalance -= transaction.Data.Amount
 		}
 
-		ty, tm, td := transaction.Date.In(time.Local).Date()
+		ty, tm, td := transaction.Data.Date.In(time.Local).Date()
 		ny, nm, nd := now.In(time.Local).Date()
 		if ty == ny && tm == nm && td == nd {
 			if isIncome {
-				todayIncome += transaction.Amount
+				todayIncome += transaction.Data.Amount
 			} else {
-				todayExpense += transaction.Amount
+				todayExpense += transaction.Data.Amount
 			}
 		}
 
@@ -303,7 +305,7 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 			recentTransactions = append(recentTransactions, struct {
 				Data     domain.Transaction `json:"data"`
 				Category domain.Category    `json:"category"`
-			}{Data: transaction, Category: category})
+			}{Data: transaction.Data, Category: category})
 		}
 	}
 

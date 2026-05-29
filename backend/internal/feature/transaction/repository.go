@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"github.com/artafinance/backend/internal/domain"
+	"github.com/artafinance/backend/internal/dto"
 	"github.com/artafinance/backend/internal/model"
 	"gorm.io/gorm"
 )
@@ -34,18 +35,32 @@ func (r *Repository) GetTransactionByID(id uint) (*domain.Transaction, error) {
 	return domain.FromTransactionModel(&m), nil
 }
 
-// GetTransactionsByWalletID returns transactions for a wallet.
-func (r *Repository) GetTransactionsByWalletID(walletID uint) ([]domain.Transaction, error) {
-	var m []model.Transaction
-	if err := r.db.Where("wallet_id = ?", walletID).Order("date desc").Find(&m).Error; err != nil {
-		return nil, err
+// GetAll returns transactions for a wallet.
+type GetAllFilter struct {
+	WalletId        uint
+	IncludeCategory bool
+}
+
+func (r *Repository) GetAll(filter *GetAllFilter) ([]dto.Transaction, error) {
+	var transactions []model.Transaction
+
+	query := r.db.Where("wallet_id = ?", filter.WalletId).Order("date desc")
+	if filter.IncludeCategory {
+		query = query.Preload("Category")
 	}
 
-	out := make([]domain.Transaction, 0, len(m))
-	for i := range m {
-		out = append(out, *domain.FromTransactionModel(&m[i]))
+	if err := query.Find(&transactions).Error; err != nil {
+		return nil, err
+	} else {
+		result := make([]dto.Transaction, len(transactions))
+		for index, transaction := range transactions {
+			result[index] = dto.Transaction{
+				Data:     *domain.FromTransactionModel(&transaction),
+				Category: *domain.FromCategoryModel(&transaction.Category),
+			}
+		}
+		return result, nil
 	}
-	return out, nil
 }
 
 // UpdateTransaction updates an existing transaction.

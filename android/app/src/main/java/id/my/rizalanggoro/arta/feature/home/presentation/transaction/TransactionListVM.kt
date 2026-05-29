@@ -1,17 +1,16 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.transaction
 
-// replaced walletApiErrorMessage usages with core.errorMessage()
-// use OpenAPI models directly (`DtoTransaction.data`) instead of mapper extension
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import id.my.rizalanggoro.arta.R
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
-import id.my.rizalanggoro.arta.openapi.apis.WalletApi
-import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -19,70 +18,93 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TransactionListVM @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val transactionApi: TransactionApi,
-    private val walletApi: WalletApi,
     private val authPrefs: AuthPrefs,
+    private val selectedWalletPrefs: SelectedWalletPrefs
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TransactionListUiState())
-    val uiState: StateFlow<TransactionListUiState> = _uiState.asStateFlow()
+    val uiState = _uiState.asStateFlow()
 
-    init {
-        loadTransactions()
-    }
+    fun loadTransactions(isRefresh: Boolean = false) = viewModelScope.launch {
+        val walletId = _uiState.value.selectedWallet?.id ?: return@launch
 
-    fun loadTransactions() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            runCatching {
-                val authorization = authorizationHeader()
-                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+        _uiState.update {
+            it.copy(
+                isLoading = when {
+                    isRefresh -> it.isLoading
+                    else -> true
+                },
+                isRefreshing = when {
+                    isRefresh -> true
+                    else -> it.isRefreshing
+                },
+                errorMessage = null
+            )
+        }
+        runCatching {
+            val authorization = authorizationHeader()
+                ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                val response = walletApi.listWallets(authorization)
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(response.errorMessage())
-                }
-
-                response.body()?.wallets.orEmpty().mapNotNull { it.data }
+            val response = transactionApi.listTransactions(
+                authorization = authorization,
+                walletId = walletId,
+                includeCategory = true
+            )
+            if (!response.isSuccessful) {
+                throw IllegalStateException(response.errorMessage())
             }
-                .onSuccess { wallets ->
-                    val allTxs = mutableListOf<DomainTransaction>()
-                    for (w in wallets) {
-                        val walletId = w.id ?: continue
-                        runCatching {
-                            val authorization = authorizationHeader()
-                                ?: throw IllegalStateException("Sesi login tidak ditemukan")
 
-                            val txResponse =
-                                transactionApi.listTransactions(authorization, walletId)
-                            if (!txResponse.isSuccessful) {
-                                throw IllegalStateException(txResponse.errorMessage())
-                            }
-
-                            txResponse.body()
-                                ?: throw IllegalStateException("Respons server kosong")
-                        }.onSuccess { txResponse ->
-                            allTxs.addAll(txResponse.transactions.map { it.data })
-                        }.onFailure { /* ignore per-wallet failure for now */ }
-                    }
-                    _uiState.update {
-                        it.copy(
-                            transactions = allTxs.sortedByDescending { it.date },
-                            isLoading = false
-                        )
-                    }
-                }
-                .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Gagal memuat transaksi"
-                        )
-                    }
-                }
+            response.body() ?: throw IllegalStateException(
+                context.getString(
+                    R.string.server_empty_error
+                )
+            )
+        }.onSuccess { response ->
+            _uiState.update {
+                it.copy(
+                    isLoading = when {
+                        isRefresh -> it.isLoading
+                        else -> false
+                    },
+                    isRefreshing = when {
+                        isRefresh -> false
+                        else -> it.isRefreshing
+                    },
+                    transactions = response.transactions
+                )
+            }
+        }.onFailure { throwable ->
+            _uiState.update {
+                it.copy(
+                    isLoading = when {
+                        isRefresh -> it.isLoading
+                        else -> false
+                    },
+                    isRefreshing = when {
+                        isRefresh -> false
+                        else -> it.isRefreshing
+                    },
+                    errorMessage = throwable.message ?: context.getString(
+                        R.string.client_error
+                    )
+                )
+            }
         }
     }
 
     private fun authorizationHeader(): String? {
         return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
+    }
+
+    init {
+        viewModelScope.launch {
+            selectedWalletPrefs.selectedWallet.collect { wallet ->
+                _uiState.update {
+                    it.copy(selectedWallet = wallet)
+                }
+                loadTransactions()
+            }
+        }
     }
 }

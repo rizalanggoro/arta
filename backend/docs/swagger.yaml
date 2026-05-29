@@ -97,6 +97,7 @@ definitions:
       data:
         $ref: '#/definitions/domain.Transaction'
     required:
+    - category
     - data
     type: object
   CreateWalletRes:
@@ -168,6 +169,7 @@ definitions:
       data:
         $ref: '#/definitions/domain.Transaction'
     required:
+    - category
     - data
     type: object
   GetWalletRes:
@@ -328,6 +330,7 @@ definitions:
       data:
         $ref: '#/definitions/domain.Transaction'
     required:
+    - category
     - data
     type: object
   UpdateWalletRes:
@@ -680,6 +683,7 @@ definitions:
       data:
         $ref: '#/definitions/domain.Transaction'
     required:
+    - category
     - data
     type: object
   dto.Wallet:
@@ -1415,6 +1419,10 @@ paths:
         name: wallet_id
         required: true
         type: integer
+      - description: include_category
+        in: query
+        name: include_category
+        type: boolean
       produces:
       - application/json
       responses:
