@@ -27,6 +27,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,9 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.isValidInputNumber
+import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import kotlinx.coroutines.flow.filterIsInstance
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,21 +55,23 @@ fun UpsertTransactionScreen(
     transactionId: Int = 0,
     vm: UpsertTransactionVM = hiltViewModel(),
 ) {
-    val uiState by vm.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val backStack = LocalBackStack.current
+    val uiState by vm.uiState.collectAsState()
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.date)
 
 //    LaunchedEffect(transactionId) {
 //        vm.setTransactionId(transactionId)
 //    }
 
     LaunchedEffect(Unit) {
-        vm.effect.collect { effect ->
-            when (effect) {
-                is UpsertTransactionEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-                UpsertTransactionEffect.NavigateBack -> backStack.removeLastOrNull()
-            }
-        }
+        AppEventBus.event.filterIsInstance<AppEvent.TransactionChanged>()
+            .collect { backStack.removeLastOrNull() }
+    }
+
+    LaunchedEffect(Unit) {
+        vm.event.filterIsInstance<UpsertTransactionUiState.Event.ShowMessage>()
+            .collect { snackbarHostState.showSnackbar(it.message) }
     }
 
     Content(
@@ -72,23 +79,29 @@ fun UpsertTransactionScreen(
         uiState = uiState,
         onAmountChanged = vm::onAmountChanged,
         onDescriptionChanged = vm::onDescriptionChanged,
-        onClickSelectCategory = { backStack.add(CategorySelectRoute(categoryId = null)) },
+        onClickSelectCategory = {
+            backStack.add(
+                CategorySelectRoute(
+                    categoryId = uiState.selectedCategory?.id
+                )
+            )
+        },
         onClickSelectDate = vm::onSelectDateClicked,
-        onClickSubmit = vm::submit,
+        onClickSubmit = vm::onSubmitClicked,
         onClickBack = { backStack.removeLastOrNull() },
     )
 
-    if (uiState.isDatePickerOpen)
-        MyDatePickerDialog(
-            onDismiss = vm::onDatePickerDismissed,
-            onDateSelected = vm::onDateSelected
-        )
+    if (uiState.isDatePickerOpen) MyDatePickerDialog(
+        state = datePickerState,
+        onDismiss = vm::onDatePickerDismissed,
+        onDateSelected = vm::onDateSelected
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    snackbarHostState: SnackbarHostState,
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     uiState: UpsertTransactionUiState = UpsertTransactionUiState(),
     onAmountChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
@@ -111,8 +124,7 @@ private fun Content(
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
                         Icon(
-                            Icons.AutoMirrored.Rounded.ArrowBack,
-                            null
+                            Icons.AutoMirrored.Rounded.ArrowBack, null
                         )
                     }
                 },
@@ -131,29 +143,25 @@ private fun Content(
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 leadingContent = {
                     Icon(
-                        Icons.Rounded.Wallet,
-                        null
+                        Icons.Rounded.Wallet, null
                     )
                 },
                 headlineContent = {
                     Text("Dompet")
                 },
                 supportingContent = {
-                    Text("Tidak ada dompet")
+                    Text(uiState.selectedWallet?.name ?: "Tidak ada dompet")
                 },
                 trailingContent = {
                     Icon(
-                        Icons.Rounded.ChevronRight,
-                        null
+                        Icons.Rounded.ChevronRight, null
                     )
-                }
-            )
+                })
 
             TextField(
                 value = uiState.amount,
                 onValueChange = {
-                    if (it.isValidInputNumber())
-                        onAmountChanged(it)
+                    if (it.isValidInputNumber()) onAmountChanged(it)
                 },
                 label = { Text("Jumlah") },
                 modifier = Modifier
@@ -176,34 +184,24 @@ private fun Content(
                     .padding(top = 8.dp)
                     .clip(
                         RoundedCornerShape(
-                            topStart = 16.dp,
-                            topEnd = 16.dp,
-                            bottomStart = 4.dp,
-                            bottomEnd = 4.dp
+                            topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 4.dp
                         )
                     )
                     .clickable {
                         onClickSelectCategory()
-                    },
-                colors = ListItemDefaults.colors(
+                    }, colors = ListItemDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-                leadingContent = {
+                ), leadingContent = {
                     Icon(
-                        Icons.Rounded.Category,
-                        null
+                        Icons.Rounded.Category, null
                     )
-                },
-                headlineContent = {
+                }, headlineContent = {
                     Text("Kategori")
-                },
-                supportingContent = {
-                    Text("Pilih kategori")
-                },
-                trailingContent = {
+                }, supportingContent = {
+                    Text(uiState.selectedCategory?.name ?: "Pilih kategori")
+                }, trailingContent = {
                     Icon(
-                        Icons.Rounded.ChevronRight,
-                        null
+                        Icons.Rounded.ChevronRight, null
                     )
                 }
             )
@@ -213,10 +211,7 @@ private fun Content(
                     .padding(top = 2.dp)
                     .clip(
                         RoundedCornerShape(
-                            topStart = 4.dp,
-                            topEnd = 4.dp,
-                            bottomStart = 16.dp,
-                            bottomEnd = 16.dp
+                            topStart = 4.dp, topEnd = 4.dp, bottomStart = 16.dp, bottomEnd = 16.dp
                         )
                     )
                     .clickable {
@@ -227,20 +222,18 @@ private fun Content(
                 ),
                 leadingContent = {
                     Icon(
-                        Icons.Rounded.Today,
-                        null
+                        Icons.Rounded.Today, null
                     )
                 },
                 headlineContent = {
                     Text("Tanggal")
                 },
                 supportingContent = {
-                    Text("Pilih tanggal")
+                    Text(uiState.date.toIndonesianDate())
                 },
                 trailingContent = {
                     Icon(
-                        Icons.Rounded.ChevronRight,
-                        null
+                        Icons.Rounded.ChevronRight, null
                     )
                 }
             )
@@ -286,12 +279,7 @@ private fun Content(
 private fun CreateTransactionPreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
             uiState = UpsertTransactionUiState(
-                walletId = "12",
-                selectedWalletName = "Tabungan Uang",
-                categoryId = "3",
-                selectedCategoryName = "Makanan",
                 amount = "50000",
             ),
         )
@@ -304,14 +292,9 @@ private fun CreateTransactionPreview() {
 private fun UpdateTransactionPreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
             uiState = UpsertTransactionUiState(
                 transactionId = 10,
                 isUpdate = true,
-                walletId = "12",
-                selectedWalletName = "Wallet Utama",
-                categoryId = "3",
-                selectedCategoryName = "Makanan",
                 amount = "50000",
                 description = "Contoh transaksi",
                 date = System.currentTimeMillis(),
@@ -326,13 +309,8 @@ private fun UpdateTransactionPreview() {
 private fun UpsertTransactionLoadingPreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
             uiState = UpsertTransactionUiState(
                 isLoading = true,
-                walletId = "12",
-                selectedWalletName = "Wallet Utama",
-                categoryId = "3",
-                selectedCategoryName = "Makanan",
                 amount = "50000",
             ),
         )
@@ -345,9 +323,7 @@ private fun UpsertTransactionLoadingPreview() {
 private fun UpsertTransactionErrorPreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
             uiState = UpsertTransactionUiState(
-                walletIdError = "Wallet wajib dipilih",
                 amountError = "Jumlah tidak valid",
                 categoryError = "Kategori wajib dipilih",
             ),

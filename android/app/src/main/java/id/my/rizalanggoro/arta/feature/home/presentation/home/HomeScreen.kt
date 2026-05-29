@@ -112,7 +112,11 @@ private fun Content(
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = when {
-                        lastDestination == HomeGoldDashboardRoute -> MaterialTheme.colorScheme.surfaceContainer
+                        lastDestination in listOf(
+                            HomeCashDashboardRoute,
+                            HomeGoldDashboardRoute,
+                        ) -> MaterialTheme.colorScheme.surfaceContainer
+
                         else -> Color.Unspecified
                     }
                 ),

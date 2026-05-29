@@ -17,8 +17,6 @@ import id.my.rizalanggoro.arta.openapi.models.CreateTransactionReq
 import id.my.rizalanggoro.arta.openapi.models.UpdateTransactionReq
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
@@ -37,10 +35,10 @@ class UpsertTransactionVM @Inject constructor(
 //    private var transactionId: Int = 0
 
     private val _uiState = MutableStateFlow(UpsertTransactionUiState())
-    val uiState: StateFlow<UpsertTransactionUiState> = _uiState.asStateFlow()
+    val uiState = _uiState.asStateFlow()
 
-    private val _effect = MutableSharedFlow<UpsertTransactionEffect>()
-    val effect: SharedFlow<UpsertTransactionEffect> = _effect.asSharedFlow()
+    private val _event = MutableSharedFlow<UpsertTransactionUiState.Event>()
+    val event = _event.asSharedFlow()
 
 //    fun setTransactionId(value: Int) {
 //        if (transactionId == value) return
@@ -81,19 +79,16 @@ class UpsertTransactionVM @Inject constructor(
         )
     }
 
-    fun submit() {
+    fun onSubmitClicked() {
         val current = _uiState.value
-        val walletId = current.walletId.toIntOrNull()
-        val categoryId = current.categoryId.toIntOrNull()
+        val walletId = current.selectedWallet?.id
+        val categoryId = current.selectedCategory?.id
         val amount = current.amount.toDoubleOrNull()
         val resolvedWalletId = walletId ?: 0
         val resolvedCategoryId = categoryId ?: 0
         var hasError = false
 
-        if (walletId == null || walletId <= 0) {
-            _uiState.update { it.copy(walletIdError = "Wallet wajib dipilih") }
-            hasError = true
-        }
+        if (walletId == null || walletId <= 0) hasError = true
 
         if (categoryId == null || categoryId <= 0) {
             _uiState.update { it.copy(categoryError = "Kategori wajib dipilih") }
@@ -151,15 +146,14 @@ class UpsertTransactionVM @Inject constructor(
                 }
             }.onSuccess {
                 AppEventBus.emit(AppEvent.TransactionChanged)
-                _effect.emit(
-                    UpsertTransactionEffect.ShowMessage(
+                _event.emit(
+                    UpsertTransactionUiState.Event.ShowMessage(
                         if (current.isUpdate) "Transaksi berhasil diperbarui" else "Transaksi berhasil dibuat",
                     )
                 )
-                _effect.emit(UpsertTransactionEffect.NavigateBack)
             }.onFailure { throwable ->
-                _effect.emit(
-                    UpsertTransactionEffect.ShowMessage(
+                _event.emit(
+                    UpsertTransactionUiState.Event.ShowMessage(
                         throwable.message ?: context.getString(R.string.client_error)
                     )
                 )

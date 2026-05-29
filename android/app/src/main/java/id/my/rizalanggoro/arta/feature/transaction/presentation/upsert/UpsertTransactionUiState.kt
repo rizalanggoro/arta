@@ -7,21 +7,15 @@ data class UpsertTransactionUiState(
     val selectedWallet: DomainWallet? = null,
     val selectedCategory: DomainCategory? = null,
     val date: Long = System.currentTimeMillis(),
-
     val isDatePickerOpen: Boolean = false,
+    val amount: String = "",
+    val amountError: String? = null,
+    val description: String = "",
+    val categoryError: String? = null,
+    val isUpdate: Boolean = false,
+    val isLoading: Boolean = false,
 
     val transactionId: Int = 0,
-    val isUpdate: Boolean = false,
-    val walletId: String = "",
-    val selectedWalletName: String = "",
-    val amount: String = "",
-    val categoryId: String = "",
-    val selectedCategoryName: String = "",
-    val description: String = "",
-    val walletIdError: String? = null,
-    val amountError: String? = null,
-    val categoryError: String? = null,
-    val isLoading: Boolean = false,
 ) {
     sealed class Event {
         data class ShowMessage(val message: String) : Event()
