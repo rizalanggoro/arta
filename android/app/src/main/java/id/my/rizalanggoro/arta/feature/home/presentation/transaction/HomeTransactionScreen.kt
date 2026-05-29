@@ -3,10 +3,13 @@ package id.my.rizalanggoro.arta.feature.home.presentation.transaction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
@@ -16,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,8 +27,10 @@ import id.my.rizalanggoro.arta.R
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
+import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
+import id.my.rizalanggoro.arta.shared.component.TransactionActionSheet
 import id.my.rizalanggoro.arta.shared.component.TransactionListItem
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import java.time.OffsetDateTime
@@ -37,8 +43,27 @@ fun HomeTransactionScreen(vm: TransactionListVM = hiltViewModel()) {
     Content(
         uiState = uiState,
         onClickRetry = vm::loadTransactions,
-        onRefresh = { vm.loadTransactions(isRefresh = true) }
+        onRefresh = { vm.loadTransactions(isRefresh = true) },
+        onLongClickItem = vm::onTargetTransactionChanged
     )
+
+    if (uiState.targetTransaction != null)
+        TransactionActionSheet(
+            onDismissRequest = vm::onTransactionActionSheetDismissed,
+            onClickEdit = {},
+            onClickDelete = vm::onTransactionActionSheetDeleteClicked
+        )
+
+    if (uiState.targetDeleteTransaction != null)
+        ConfirmDialog(
+            title = "Hapus",
+            description = "Apakah Anda yakin akan menghapus transaksi yang dipilih? " +
+                    "Tindakan ini tidak dapat dipulihkan",
+            onDismissRequest = vm::onDeleteTransactionDialogDismissed,
+            onConfirmRequest = vm::onDeleteTransactionDialogClicked,
+            isLoading = uiState.isDeleting,
+            confirmText = "Hapus"
+        )
 }
 
 @Composable
@@ -47,6 +72,7 @@ private fun Content(
     uiState: TransactionListUiState = TransactionListUiState(),
     onClickRetry: () -> Unit = {},
     onRefresh: () -> Unit = {},
+    onLongClickItem: (DomainTransaction) -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -93,6 +119,20 @@ private fun Content(
                         transaction = transaction,
                         index = index,
                         size = uiState.transactions.size,
+                        onLongClick = {
+                            onLongClickItem(transaction.data)
+                        }
+                    )
+                }
+                item {
+                    Text(
+                        "Tekan dan tahan untuk melihat opsi lainnya",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     )
                 }
             }

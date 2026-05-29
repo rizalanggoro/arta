@@ -1,6 +1,7 @@
 package id.my.rizalanggoro.arta.shared.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.CallMade
+import androidx.compose.material.icons.automirrored.rounded.CallReceived
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,6 +38,8 @@ fun TransactionListItem(
     transaction: DtoTransaction,
     index: Int = 0,
     size: Int = 1,
+    onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -49,6 +53,10 @@ fun TransactionListItem(
                 )
             )
             .background(MaterialTheme.colorScheme.surfaceContainer)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -57,13 +65,24 @@ fun TransactionListItem(
             modifier = Modifier
                 .clip(CircleShape)
                 .size(40.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer),
+                .background(
+                    when {
+                        transaction.category.type == "income" -> MaterialTheme.colorScheme.primaryContainer
+                        else -> MaterialTheme.colorScheme.errorContainer
+                    }
+                ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                Icons.AutoMirrored.Rounded.CallMade,
+                when {
+                    transaction.category.type == "income" -> Icons.AutoMirrored.Rounded.CallReceived
+                    else -> Icons.AutoMirrored.Rounded.CallMade
+                },
                 null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = when {
+                    transaction.category.type == "income" -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.error
+                }
             )
         }
         Column(modifier = Modifier.weight(1f)) {
@@ -74,7 +93,7 @@ fun TransactionListItem(
             )
             Text(
                 transaction.category.name,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.outline
             )
         }
