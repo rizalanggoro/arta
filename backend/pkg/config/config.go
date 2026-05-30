@@ -50,7 +50,7 @@ func New() *Config {
 // GetDatabaseURL returns the PostgreSQL connection string
 func (c *Config) GetDatabaseURL() string {
 	return fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Jakarta",
 		c.DBHost,
 		c.DBPort,
 		c.DBUser,
