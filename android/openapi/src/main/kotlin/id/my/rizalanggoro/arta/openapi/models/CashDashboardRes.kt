@@ -23,8 +23,7 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
-import id.my.rizalanggoro.arta.openapi.models.CashDashboardResFinancialSummary
-import id.my.rizalanggoro.arta.openapi.models.CashDashboardResRecentTransactionsInner
+import id.my.rizalanggoro.arta.openapi.models.DtoCashDashboard
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
@@ -33,22 +32,14 @@ import kotlinx.serialization.Contextual
 /**
  * 
  *
- * @param activeWalletName 
- * @param financialSummary 
- * @param recentTransactions 
+ * @param `data` 
  */
 @Serializable
 
 data class CashDashboardRes (
 
-    @SerialName(value = "active_wallet_name")
-    val activeWalletName: kotlin.String,
-
-    @SerialName(value = "financial_summary")
-    val financialSummary: CashDashboardResFinancialSummary,
-
-    @SerialName(value = "recent_transactions")
-    val recentTransactions: kotlin.collections.List<CashDashboardResRecentTransactionsInner>
+    @SerialName(value = "data")
+    val `data`: DtoCashDashboard
 
 ) {
 

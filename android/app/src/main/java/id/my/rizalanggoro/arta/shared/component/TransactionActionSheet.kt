@@ -108,7 +108,7 @@ fun TransactionActionSheet(
 }
 
 @Composable
-@Preview()
+@Preview(showSystemUi = true)
 private fun Preview() {
     ArtaTheme {
         TransactionActionSheet()

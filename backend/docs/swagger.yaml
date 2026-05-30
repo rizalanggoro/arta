@@ -2,37 +2,10 @@ basePath: /api
 definitions:
   CashDashboardRes:
     properties:
-      active_wallet_name:
-        type: string
-      financial_summary:
-        properties:
-          current_balance:
-            type: number
-          today_expense:
-            type: number
-          today_income:
-            type: number
-        required:
-        - current_balance
-        - today_expense
-        - today_income
-        type: object
-      recent_transactions:
-        items:
-          properties:
-            category:
-              $ref: '#/definitions/domain.Category'
-            data:
-              $ref: '#/definitions/domain.Transaction'
-          required:
-          - category
-          - data
-          type: object
-        type: array
+      data:
+        $ref: '#/definitions/dto.CashDashboard'
     required:
-    - active_wallet_name
-    - financial_summary
-    - recent_transactions
+    - data
     type: object
   CreateCategoryRes:
     properties:
@@ -589,6 +562,27 @@ definitions:
     - updated_at
     - user_id
     type: object
+  dto.CashDashboard:
+    properties:
+      current_balance:
+        format: double
+        type: number
+      latest_transactions:
+        items:
+          $ref: '#/definitions/dto.Transaction'
+        type: array
+      total_expense:
+        format: double
+        type: number
+      total_income:
+        format: double
+        type: number
+    required:
+    - current_balance
+    - latest_transactions
+    - total_expense
+    - total_income
+    type: object
   dto.Category:
     properties:
       data:
@@ -1057,9 +1051,10 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: Selected cash wallet ID
+      - description: wallet_id
         in: query
         name: wallet_id
+        required: true
         type: integer
       produces:
       - application/json

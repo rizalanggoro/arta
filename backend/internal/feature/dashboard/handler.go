@@ -2,7 +2,6 @@ package dashboard
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/artafinance/backend/internal/cron/fxrate"
 	"github.com/artafinance/backend/internal/cron/goldprice"
@@ -188,7 +187,7 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param Authorization header string true "Bearer token"
-// @Param wallet_id query int false "Selected cash wallet ID"
+// @Param wallet_id query int true "wallet_id"
 // @Success 200 {object} CashDashboardRes
 // @Failure 400 {object} dto.Error
 // @Failure 401 {object} dto.Error
@@ -199,122 +198,60 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 func (h *Handler) cash(c *fiber.Ctx) error {
 	userID := middleware.GetUserID(c)
 	if userID == "" {
-		return c.Status(fiber.StatusUnauthorized).
-			JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{
+			Code:    fiber.StatusUnauthorized,
+			Message: "unauthorized",
+		})
 	}
 
-	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).
-			JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	walletId := c.QueryInt("wallet_id", 0)
+	if walletId == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "wallet_id is required and must be a valid number",
+		})
 	}
 
-	wallets, err := h.walletRepo.GetWalletsByUserID(uint(parsedUserID))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).
-			JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
-	}
-
-	walletIDParam := c.Query("wallet_id")
-	var activeWallet domain.Wallet
-	var ok bool
-
-	if walletIDParam != "" {
-		walletID, parseErr := strconv.ParseUint(walletIDParam, 10, 64)
-		if parseErr != nil {
-			return c.Status(fiber.StatusBadRequest).
-				JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "wallet_id must be a valid number"})
-		}
-
-		for i := range wallets {
-			if wallets[i].ID == uint(walletID) && wallets[i].Type == "cash_savings" {
-				activeWallet = wallets[i]
-				ok = true
-				break
-			}
-		}
-	} else {
-		for i := range wallets {
-			if wallets[i].Type == "cash_savings" {
-				activeWallet = wallets[i]
-				ok = true
-				break
-			}
-		}
-	}
-
-	if !ok {
-		return c.Status(fiber.StatusNotFound).
-			JSON(dto.Error{Code: fiber.StatusNotFound, Message: "cash wallet not found"})
-	}
-
-	categories, err := h.categoryRepo.GetCategoriesByUserID(uint(parsedUserID), "")
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).
-			JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
-	}
-	categoryByID := make(map[uint]domain.Category, len(categories))
-	for i := range categories {
-		categoryByID[categories[i].ID] = categories[i]
-	}
-
-	transactions, err := h.transactionRepo.GetAll(&transactionfeature.GetAllFilter{
-		WalletId: activeWallet.ID,
+	currentBalance, err := h.transactionRepo.GetCurrentBalance(transactionfeature.GetCurrentBalanceFilter{
+		WalletId: uint(walletId),
 	})
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).
-			JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	now := time.Now()
-	currentBalance := 0.0
-	todayIncome := 0.0
-	todayExpense := 0.0
-	recentTransactionsLimit := 5
-	if len(transactions) < recentTransactionsLimit {
-		recentTransactionsLimit = len(transactions)
+	totalIncome, totalExpense, err := h.transactionRepo.GetTotalIncomeExpense(transactionfeature.GetTotalIncomeExpenseFilter{
+		WalletId: uint(walletId),
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	recentTransactions := make([]struct {
-		Data     domain.Transaction `json:"data"`
-		Category domain.Category    `json:"category"`
-	}, 0, recentTransactionsLimit)
-
-	for i := range transactions {
-		transaction := transactions[i]
-		category := categoryByID[transaction.Data.CategoryID]
-		isIncome := category.Type == "income"
-
-		if isIncome {
-			currentBalance += transaction.Data.Amount
-		} else {
-			currentBalance -= transaction.Data.Amount
-		}
-
-		ty, tm, td := transaction.Data.Date.In(time.Local).Date()
-		ny, nm, nd := now.In(time.Local).Date()
-		if ty == ny && tm == nm && td == nd {
-			if isIncome {
-				todayIncome += transaction.Data.Amount
-			} else {
-				todayExpense += transaction.Data.Amount
-			}
-		}
-
-		if len(recentTransactions) < 5 {
-			recentTransactions = append(recentTransactions, struct {
-				Data     domain.Transaction `json:"data"`
-				Category domain.Category    `json:"category"`
-			}{Data: transaction.Data, Category: category})
-		}
+	latestTransactions, err := h.transactionRepo.GetAll(&transactionfeature.GetAllFilter{
+		WalletId:        uint(walletId),
+		IncludeCategory: true,
+		Limit:           5,
+		OrderBy:         "date",
+		OrderDirection:  "desc",
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	res := CashDashboardRes{}
-	res.ActiveWalletName = activeWallet.Name
-	res.FinancialSummary.CurrentBalance = currentBalance
-	res.FinancialSummary.TodayIncome = todayIncome
-	res.FinancialSummary.TodayExpense = todayExpense
-	res.RecentTransactions = recentTransactions
-
-	return c.Status(fiber.StatusOK).JSON(res)
+	return c.Status(fiber.StatusOK).JSON(CashDashboardRes{
+		Data: dto.CashDashboard{
+			CurrentBalance:     *currentBalance,
+			TotalIncome:        *totalIncome,
+			TotalExpense:       *totalExpense,
+			LatestTransactions: latestTransactions,
+		},
+	})
 }

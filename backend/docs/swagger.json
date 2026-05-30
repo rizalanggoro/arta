@@ -432,9 +432,10 @@
                     },
                     {
                         "type": "integer",
-                        "description": "Selected cash wallet ID",
+                        "description": "wallet_id",
                         "name": "wallet_id",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1577,50 +1578,11 @@
         "CashDashboardRes": {
             "type": "object",
             "required": [
-                "active_wallet_name",
-                "financial_summary",
-                "recent_transactions"
+                "data"
             ],
             "properties": {
-                "active_wallet_name": {
-                    "type": "string"
-                },
-                "financial_summary": {
-                    "type": "object",
-                    "required": [
-                        "current_balance",
-                        "today_expense",
-                        "today_income"
-                    ],
-                    "properties": {
-                        "current_balance": {
-                            "type": "number"
-                        },
-                        "today_expense": {
-                            "type": "number"
-                        },
-                        "today_income": {
-                            "type": "number"
-                        }
-                    }
-                },
-                "recent_transactions": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "required": [
-                            "category",
-                            "data"
-                        ],
-                        "properties": {
-                            "category": {
-                                "$ref": "#/definitions/domain.Category"
-                            },
-                            "data": {
-                                "$ref": "#/definitions/domain.Transaction"
-                            }
-                        }
-                    }
+                "data": {
+                    "$ref": "#/definitions/dto.CashDashboard"
                 }
             }
         },
@@ -2436,6 +2398,35 @@
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.CashDashboard": {
+            "type": "object",
+            "required": [
+                "current_balance",
+                "latest_transactions",
+                "total_expense",
+                "total_income"
+            ],
+            "properties": {
+                "current_balance": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "latest_transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Transaction"
+                    }
+                },
+                "total_expense": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "total_income": {
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },

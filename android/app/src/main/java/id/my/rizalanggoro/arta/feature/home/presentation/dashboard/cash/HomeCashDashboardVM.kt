@@ -1,131 +1,84 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import id.my.rizalanggoro.arta.R
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.authorization
+import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
-import id.my.rizalanggoro.arta.openapi.models.CashDashboardRes
-import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
-import java.time.LocalTime
-import java.util.Locale
 import javax.inject.Inject
-import kotlin.math.roundToLong
 
 @HiltViewModel
 class HomeCashDashboardVM @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val dashboardApi: DashboardApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
     private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-    private val sessionName: String? = authPrefs.currentSession.value?.name
+    private val _uiState = MutableStateFlow(CashDashboardUiState())
+    val uiState = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(
-        CashDashboardUiState(
-            activeWalletName = "Memuat...",
-            greeting = greetingForName(sessionName),
-            isLoading = true,
-        ),
-    )
-    val uiState: StateFlow<CashDashboardUiState> = _uiState.asStateFlow()
-
-    fun retry() {
-        loadDashboard()
-    }
-
-    private fun loadDashboard() {
-        val walletId = _uiState.value.selectedWallet?.id
-
+    private fun loadDashboard(isRefresh: Boolean = false) =
         viewModelScope.launch {
+            val walletId = _uiState.value.selectedWallet?.id ?: return@launch
+
             runCatching {
-                val token = authPrefs.currentSession.value?.token
-                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
-                val response = dashboardApi.getCashDashboard("Bearer $token", walletId)
-                if (!response.isSuccessful) throw IllegalStateException(
-                    response.errorBody()?.string() ?: "Request failed"
+                val response = dashboardApi.getCashDashboard(
+                    authPrefs.authorization(),
+                    walletId = walletId
                 )
-                response.body() ?: throw IllegalStateException("Respons server kosong")
-            }.onSuccess { res ->
-                _uiState.value = res.toUiState(
-                    sessionName = sessionName,
-                    selectedWallet = _uiState.value.selectedWallet,
+
+                if (!response.isSuccessful) throw IllegalStateException(response.errorMessage())
+
+                response.body() ?: throw IllegalStateException(
+                    context.getString(R.string.server_empty_error)
                 )
+            }.onSuccess { body ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        data = body.data
+                    )
+                }
             }.onFailure { throwable ->
                 _uiState.update {
                     it.copy(
-                        activeWalletName = it.selectedWallet?.name ?: "Tabungan Uang",
                         isLoading = false,
-                        errorMessage = throwable.message ?: "Gagal memuat dashboard",
+                        errorMessage = throwable.message ?: context.getString(
+                            R.string.client_error
+                        ),
                     )
                 }
             }
         }
-    }
-
-    private fun CashDashboardRes.toUiState(
-        sessionName: String?,
-        selectedWallet: DomainWallet?,
-    ): CashDashboardUiState {
-        return CashDashboardUiState(
-            selectedWallet = selectedWallet,
-            activeWalletName = activeWalletName,
-            greeting = greetingForName(sessionName),
-            balanceDisplay = formatMoney(financialSummary.currentBalance.toDouble()),
-            todayIncomeDisplay = formatMoney(financialSummary.todayIncome.toDouble()),
-            todayExpenseDisplay = formatMoney(financialSummary.todayExpense.toDouble()),
-            latestTransactions = recentTransactions,
-            isLoading = false,
-            errorMessage = null,
-        )
-    }
-
-    private fun greetingForName(name: String?): String {
-        val displayName = name?.takeIf { it.isNotBlank() } ?: "Pengguna"
-        val greeting = when (LocalTime.now().hour) {
-            in 5..10 -> "Selamat pagi"
-            in 11..14 -> "Selamat siang"
-            else -> "Selamat sore"
-        }
-        return "$greeting, $displayName"
-    }
-
-    private fun formatMoney(value: Double): String {
-        val rounded = value.roundToLong()
-        val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).apply {
-            maximumFractionDigits = 0
-        }
-        return "Rp ${formatter.format(rounded)}"
-    }
 
     init {
         viewModelScope.launch {
             selectedWalletPrefs.selectedWallet.collect { wallet ->
                 _uiState.update {
-                    it.copy(
-                        selectedWallet = wallet,
-                        activeWalletName = wallet?.name ?: it.activeWalletName,
-                        isLoading = true,
-                        errorMessage = null,
-                    )
+                    it.copy(selectedWallet = wallet)
                 }
+
                 loadDashboard()
             }
         }
 
         viewModelScope.launch {
-            AppEventBus.event
-                .filter { it is AppEvent.TransactionChanged }
-                .collect { loadDashboard() }
+            AppEventBus.event.collect {
+                if (it in listOf(AppEvent.TransactionChanged, AppEvent.CategoryChanged))
+                    loadDashboard(isRefresh = true)
+            }
         }
     }
 }

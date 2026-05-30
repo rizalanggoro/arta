@@ -24,11 +24,11 @@ interface DashboardApi {
      *  - 500: Internal Server Error
      *
      * @param authorization Bearer token
-     * @param walletId Selected cash wallet ID (optional)
+     * @param walletId wallet_id
      * @return [CashDashboardRes]
      */
     @GET("api/dashboard/cash")
-    suspend fun getCashDashboard(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int? = null): Response<CashDashboardRes>
+    suspend fun getCashDashboard(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int): Response<CashDashboardRes>
 
     /**
      * GET api/dashboard/gold

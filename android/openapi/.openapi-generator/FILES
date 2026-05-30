@@ -3,8 +3,6 @@ README.md
 build.gradle
 docs/AuthApi.md
 docs/CashDashboardRes.md
-docs/CashDashboardResFinancialSummary.md
-docs/CashDashboardResRecentTransactionsInner.md
 docs/CategoryApi.md
 docs/CategoryCreateCategoryReq.md
 docs/CategoryListCategoriesRes.md
@@ -31,6 +29,7 @@ docs/DomainRelease.md
 docs/DomainTransaction.md
 docs/DomainUser.md
 docs/DomainWallet.md
+docs/DtoCashDashboard.md
 docs/DtoCategory.md
 docs/DtoError.md
 docs/DtoGold.md
@@ -100,8 +99,6 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/infrastructure/URIAdapter.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/infrastructure/URLAdapter.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/infrastructure/UUIDAdapter.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CashDashboardRes.kt
-src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CashDashboardResFinancialSummary.kt
-src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CashDashboardResRecentTransactionsInner.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CategoryCreateCategoryReq.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CategoryListCategoriesRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/CategoryUpdateCategoryReq.kt
@@ -126,6 +123,7 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainRelease.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainTransaction.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainUser.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainWallet.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoCashDashboard.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoCategory.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoError.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGold.kt

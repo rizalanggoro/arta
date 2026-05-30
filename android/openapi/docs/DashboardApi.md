@@ -23,7 +23,7 @@ Return the active cash wallet name, balance summary, today totals, and the lates
 val apiClient = ApiClient()
 val webService = apiClient.createWebservice(DashboardApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
-val walletId : kotlin.Int = 56 // kotlin.Int | Selected cash wallet ID
+val walletId : kotlin.Int = 56 // kotlin.Int | wallet_id
 
 launch(Dispatchers.IO) {
     val result : CashDashboardRes = webService.getCashDashboard(authorization, walletId)
@@ -34,7 +34,7 @@ launch(Dispatchers.IO) {
 | **authorization** | **kotlin.String**| Bearer token | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **walletId** | **kotlin.Int**| Selected cash wallet ID | [optional] |
+| **walletId** | **kotlin.Int**| wallet_id | |
 
 ### Return type
 

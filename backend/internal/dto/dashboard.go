@@ -5,16 +5,10 @@ import "github.com/artafinance/backend/internal/domain"
 // CashDashboard represents the cash home dashboard response DTO.
 // @name CashDashboard
 type CashDashboard struct {
-	ActiveWalletName string `json:"active_wallet_name"`
-	FinancialSummary struct {
-		CurrentBalance float64 `json:"current_balance"`
-		TodayIncome    float64 `json:"today_income"`
-		TodayExpense   float64 `json:"today_expense"`
-	} `json:"financial_summary"`
-	RecentTransactions []struct {
-		Data     domain.Transaction `json:"data"`
-		Category domain.Category    `json:"category"`
-	} `json:"recent_transactions"`
+	CurrentBalance     float64       `json:"current_balance" format:"double"`
+	TotalIncome        float64       `json:"total_income" format:"double"`
+	TotalExpense       float64       `json:"total_expense" format:"double"`
+	LatestTransactions []Transaction `json:"latest_transactions"`
 }
 
 // GoldDashboard represents the gold home dashboard response DTO.

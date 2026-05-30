@@ -39,12 +39,25 @@ func (r *Repository) GetTransactionByID(id uint) (*domain.Transaction, error) {
 type GetAllFilter struct {
 	WalletId        uint
 	IncludeCategory bool
+	Limit           int
+	OrderBy         string
+	OrderDirection  string
 }
 
 func (r *Repository) GetAll(filter *GetAllFilter) ([]dto.Transaction, error) {
 	var transactions []model.Transaction
 
-	query := r.db.Where("wallet_id = ?", filter.WalletId).Order("date desc")
+	query := r.db.Where("wallet_id = ?", filter.WalletId)
+	if filter.Limit > 0 {
+		query = query.Limit(filter.Limit)
+	}
+	if filter.OrderBy != "" {
+		orderDir := "asc"
+		if filter.OrderDirection != "" {
+			orderDir = filter.OrderDirection
+		}
+		query = query.Order(filter.OrderBy + " " + orderDir)
+	}
 	if filter.IncludeCategory {
 		query = query.Preload("Category")
 	}
@@ -60,6 +73,71 @@ func (r *Repository) GetAll(filter *GetAllFilter) ([]dto.Transaction, error) {
 			}
 		}
 		return result, nil
+	}
+}
+
+type GetCurrentBalanceFilter struct {
+	WalletId uint
+}
+
+func (r *Repository) GetCurrentBalance(filter GetCurrentBalanceFilter) (*float64, error) {
+	var currentBalance float64
+	if err := r.db.Model(&model.Transaction{}).
+		Joins("JOIN categories on categories.id = transactions.category_id").
+		Select(`
+			COALESCE(
+				SUM(
+					CASE
+						WHEN categories.type = 'income' THEN transactions.amount
+						WHEN categories.type = 'expense' THEN -transactions.amount
+						ELSE 0 
+					END
+				), 0
+			)
+		`).
+		Where("wallet_id = ?", filter.WalletId).
+		Find(&currentBalance).Error; err != nil {
+		return nil, err
+	} else {
+		return &currentBalance, nil
+	}
+}
+
+type GetTotalIncomeExpenseFilter struct {
+	WalletId uint
+}
+
+func (r *Repository) GetTotalIncomeExpense(filter GetTotalIncomeExpenseFilter) (*float64, *float64, error) {
+	var result struct {
+		Income  float64
+		Expense float64
+	}
+
+	if err := r.db.Model(&model.Transaction{}).
+		Joins("JOIN categories on categories.id = transactions.category_id").
+		Select(`
+			COALESCE(
+				SUM(
+					CASE
+						WHEN categories.type = 'income' THEN transactions.amount
+						ELSE 0 
+					END
+				), 0
+			) as income, 
+			COALESCE(
+				SUM(
+					CASE
+						WHEN categories.type = 'expense' THEN transactions.amount
+						ELSE 0 
+					END
+				), 0
+			) as expense
+		`).
+		Where("wallet_id = ?", filter.WalletId).
+		Find(&result).Error; err != nil {
+		return nil, nil, err
+	} else {
+		return &result.Income, &result.Expense, nil
 	}
 }
 

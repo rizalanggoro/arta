@@ -83,8 +83,6 @@ All URIs are relative to *http://localhost:3000/api*
 ## Documentation for Models
 
  - [id.my.rizalanggoro.arta.openapi.models.CashDashboardRes](docs/CashDashboardRes.md)
- - [id.my.rizalanggoro.arta.openapi.models.CashDashboardResFinancialSummary](docs/CashDashboardResFinancialSummary.md)
- - [id.my.rizalanggoro.arta.openapi.models.CashDashboardResRecentTransactionsInner](docs/CashDashboardResRecentTransactionsInner.md)
  - [id.my.rizalanggoro.arta.openapi.models.CategoryCreateCategoryReq](docs/CategoryCreateCategoryReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.CategoryListCategoriesRes](docs/CategoryListCategoriesRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.CategoryUpdateCategoryReq](docs/CategoryUpdateCategoryReq.md)
@@ -109,6 +107,7 @@ All URIs are relative to *http://localhost:3000/api*
  - [id.my.rizalanggoro.arta.openapi.models.DomainTransaction](docs/DomainTransaction.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainUser](docs/DomainUser.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainWallet](docs/DomainWallet.md)
+ - [id.my.rizalanggoro.arta.openapi.models.DtoCashDashboard](docs/DtoCashDashboard.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoCategory](docs/DtoCategory.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoError](docs/DtoError.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGold](docs/DtoGold.md)
