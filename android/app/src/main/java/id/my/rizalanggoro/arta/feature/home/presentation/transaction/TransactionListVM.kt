@@ -10,9 +10,9 @@ import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
-import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -46,11 +46,8 @@ class TransactionListVM @Inject constructor(
             )
         }
         runCatching {
-            val authorization = authorizationHeader()
-                ?: throw IllegalStateException("Sesi login tidak ditemukan")
-
             val response = transactionApi.listTransactions(
-                authorization = authorization,
+                authorization = authPrefs.authorization(),
                 walletId = walletId,
                 includeCategory = true
             )
@@ -96,28 +93,12 @@ class TransactionListVM @Inject constructor(
         }
     }
 
-    fun onTargetTransactionChanged(transaction: DomainTransaction) =
-        _uiState.update {
-            it.copy(targetTransaction = transaction)
-        }
-
-    fun onTransactionActionSheetDeleteClicked() = _uiState.update {
-        it.copy(
-            targetTransaction = null,
-            targetDeleteTransaction = it.targetTransaction
-        )
-    }
-
-    fun onTransactionActionSheetDismissed() = _uiState.update {
-        it.copy(targetTransaction = null)
-    }
-
     fun onDeleteTransactionDialogDismissed() = _uiState.update {
-        it.copy(targetDeleteTransaction = null)
+        it.copy(targetDeleteTransactionId = null)
     }
 
     fun onDeleteTransactionDialogClicked() = viewModelScope.launch {
-        val current = _uiState.value.targetDeleteTransaction ?: return@launch
+        val transactionId = _uiState.value.targetDeleteTransactionId ?: return@launch
 
         _uiState.update {
             it.copy(isDeleting = true)
@@ -129,7 +110,7 @@ class TransactionListVM @Inject constructor(
 
             val response = transactionApi.deleteTransaction(
                 authorization = authorization,
-                id = current.id
+                id = transactionId
             )
             if (!response.isSuccessful) throw IllegalStateException(response.errorMessage())
 
@@ -143,14 +124,14 @@ class TransactionListVM @Inject constructor(
             _uiState.update {
                 it.copy(
                     isDeleting = false,
-                    targetDeleteTransaction = null
+                    targetDeleteTransactionId = null
                 )
             }
         }.onFailure { throwable ->
             _uiState.update {
                 it.copy(
                     isDeleting = false,
-                    targetDeleteTransaction = null,
+                    targetDeleteTransactionId = null,
                     errorMessage = throwable.message ?: context.getString(
                         R.string.client_error
                     )
@@ -175,8 +156,20 @@ class TransactionListVM @Inject constructor(
 
         viewModelScope.launch {
             AppEventBus.event.collect { event ->
-                if (event in listOf(AppEvent.TransactionChanged, AppEvent.CategoryChanged))
-                    loadTransactions(isRefresh = true)
+                when (event) {
+                    in listOf(
+                        AppEvent.TransactionChanged,
+                        AppEvent.CategoryChanged
+                    ) -> loadTransactions(isRefresh = true)
+
+                    is AppEvent.TransactionActionSheet.OnDeleteClicked -> _uiState.update {
+                        it.copy(
+                            targetDeleteTransactionId = event.transactionId,
+                        )
+                    }
+
+                    else -> {}
+                }
             }
         }
     }

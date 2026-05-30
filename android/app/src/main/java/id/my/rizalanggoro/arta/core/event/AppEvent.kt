@@ -14,32 +14,31 @@ sealed class AppEvent {
     data class WalletSelected(val wallet: DomainWallet) : AppEvent()
 
     data object WalletActionSheet {
-        data object OnDismissClicked : AppEvent()
         data object OnEditClicked : AppEvent()
         data object OnDeleteClicked : AppEvent()
+        data object OnCancelClicked : AppEvent()
     }
 
     data object CategoryActionSheet {
-        data object OnDismissClicked : AppEvent()
         data object OnEditClicked : AppEvent()
         data object OnDeleteClicked : AppEvent()
+        data object OnCancelClicked : AppEvent()
     }
 
     data object TransactionActionSheet {
-        data object OnDismissClicked : AppEvent()
-        data object OnEditClicked : AppEvent()
-        data object OnDeleteClicked : AppEvent()
+        data class OnEditClicked(val transactionId: Int) : AppEvent()
+        data class OnDeleteClicked(val transactionId: Int) : AppEvent()
     }
 
     data object GoldActionSheet {
-        data object OnDismissClicked : AppEvent()
         data object OnEditClicked : AppEvent()
         data object OnDeleteClicked : AppEvent()
+        data object OnCancelClicked : AppEvent()
     }
 
     data object GoldTaxActionSheet {
-        data object OnDismissClicked : AppEvent()
         data object OnEditClicked : AppEvent()
         data object OnDeleteClicked : AppEvent()
+        data object OnCancelClicked : AppEvent()
     }
 }

@@ -94,4 +94,9 @@ object Routes {
     data class TransactionDetailRoute(
         val id: Int,
     ) : NavKey
+
+    @Serializable
+    data class TransactionActionSheetRoute(
+        val transactionId: Int,
+    ) : NavKey
 }

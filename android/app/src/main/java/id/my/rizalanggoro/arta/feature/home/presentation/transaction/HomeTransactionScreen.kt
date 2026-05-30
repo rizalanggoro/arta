@@ -14,6 +14,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -24,37 +25,54 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.R
+import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
 import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
-import id.my.rizalanggoro.arta.shared.component.TransactionActionSheet
 import id.my.rizalanggoro.arta.shared.component.TransactionListItem
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import kotlinx.coroutines.flow.filterIsInstance
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun HomeTransactionScreen(vm: TransactionListVM = hiltViewModel()) {
+    val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        AppEventBus.event
+            .filterIsInstance<AppEvent.TransactionActionSheet.OnEditClicked>()
+            .collect {
+                backStack.add(
+                    TransactionUpsertRoute(
+                        transactionId = it.transactionId
+                    )
+                )
+            }
+    }
 
     Content(
         uiState = uiState,
         onClickRetry = vm::loadTransactions,
         onRefresh = { vm.loadTransactions(isRefresh = true) },
-        onLongClickItem = vm::onTargetTransactionChanged
+        onLongClickItem = {
+            backStack.add(
+                Routes.TransactionActionSheetRoute(
+                    transactionId = it.id
+                )
+            )
+        }
     )
 
-    if (uiState.targetTransaction != null)
-        TransactionActionSheet(
-            onDismissRequest = vm::onTransactionActionSheetDismissed,
-            onClickEdit = {},
-            onClickDelete = vm::onTransactionActionSheetDeleteClicked
-        )
-
-    if (uiState.targetDeleteTransaction != null)
+    if (uiState.targetDeleteTransactionId != null)
         ConfirmDialog(
             title = "Hapus",
             description = "Apakah Anda yakin akan menghapus transaksi yang dipilih? " +

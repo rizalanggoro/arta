@@ -63,7 +63,11 @@ func runMigrations(database *gorm.DB) error {
 		return err
 	}
 
-	return backfillGoldCarat(database)
+	if err := backfillGoldCarat(database); err != nil {
+		return err
+	}
+
+	return seedDefaultCategoriesIfMissing(database)
 }
 
 func backfillGoldCarat(database *gorm.DB) error {
@@ -98,6 +102,42 @@ func backfillGoldCarat(database *gorm.DB) error {
 		SET carat = COALESCE(carat, purity_percent)
 		WHERE carat IS NULL OR carat = 0
 	`).Error
+}
+
+func seedDefaultCategoriesIfMissing(database *gorm.DB) error {
+	defaultCategories := []model.Category{
+		{Name: "Gaji", Type: "income"},
+		{Name: "Bonus", Type: "income"},
+		{Name: "Investasi", Type: "income"},
+		{Name: "Hadiah", Type: "income"},
+		{Name: "Lainnya", Type: "income"},
+		{Name: "Makanan dan minuman", Type: "expense"},
+		{Name: "Transportasi", Type: "expense"},
+		{Name: "Belanja", Type: "expense"},
+		{Name: "Tagihan", Type: "expense"},
+		{Name: "Hiburan", Type: "expense"},
+		{Name: "Kesehatan", Type: "expense"},
+		{Name: "Pendidikan", Type: "expense"},
+		{Name: "Investasi", Type: "expense"},
+		{Name: "Lainnya", Type: "expense"},
+	}
+
+	for _, category := range defaultCategories {
+		var count int64
+		if err := database.Model(&model.Category{}).
+			Where("user_id IS NULL AND name = ? AND type = ?", category.Name, category.Type).
+			Count(&count).Error; err != nil {
+			return err
+		}
+
+		if count == 0 {
+			if err := database.Create(&category).Error; err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 // Close closes the database connection
