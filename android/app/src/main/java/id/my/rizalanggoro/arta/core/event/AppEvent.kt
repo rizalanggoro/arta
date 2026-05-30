@@ -20,9 +20,8 @@ sealed class AppEvent {
     }
 
     data object CategoryActionSheet {
-        data object OnEditClicked : AppEvent()
-        data object OnDeleteClicked : AppEvent()
-        data object OnCancelClicked : AppEvent()
+        data class OnEditClicked(val categoryId: Int) : AppEvent()
+        data class OnDeleteClicked(val categoryId: Int) : AppEvent()
     }
 
     data object TransactionActionSheet {

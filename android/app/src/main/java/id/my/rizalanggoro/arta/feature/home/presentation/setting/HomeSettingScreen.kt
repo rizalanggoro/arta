@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -93,44 +94,52 @@ private fun Content(
     onClickUpdate: () -> Unit = {},
     onClickLogout: () -> Unit = {},
 ) {
-    Column {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+    LazyColumn {
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Icon(
-                    Icons.Rounded.Person,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            Column {
-                Text(
-                    text = uiState.session?.name ?: "Tidak diketahui",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = uiState.session?.email ?: "Tidak diketahui",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                ) {
+                    Icon(
+                        Icons.Rounded.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Column {
+                    Text(
+                        text = uiState.session?.name ?: "Tidak diketahui",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = uiState.session?.email ?: "Tidak diketahui",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
 
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(16.dp)),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
+        item {
             ListItem(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 4.dp
+                        )
+                    )
+                    .clickable { onToggleTheme(!uiState.isDarkTheme) },
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 leadingContent = {
                     Icon(
@@ -148,8 +157,22 @@ private fun Content(
                     )
                 }
             )
+        }
 
+        item {
             ListItem(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 2.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 4.dp,
+                            topEnd = 4.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 4.dp
+                        )
+                    )
+                    .clickable { onClickManageWallet() },
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 leadingContent = {
                     Icon(
@@ -169,9 +192,10 @@ private fun Content(
                         null
                     )
                 },
-                modifier = Modifier.clickable { onClickManageWallet() }
             )
+        }
 
+        item {
             ListItem(
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 leadingContent = {
@@ -192,9 +216,22 @@ private fun Content(
                         null
                     )
                 },
-                modifier = Modifier.clickable { onClickManageCategory() }
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 2.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 4.dp,
+                            topEnd = 4.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 4.dp
+                        )
+                    )
+                    .clickable { onClickManageCategory() },
             )
+        }
 
+        item {
             ListItem(
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 leadingContent = {
@@ -215,9 +252,22 @@ private fun Content(
                         null
                     )
                 },
-                modifier = Modifier.clickable { onClickManageGoldTax() }
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 2.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 4.dp,
+                            topEnd = 4.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 4.dp
+                        )
+                    )
+                    .clickable { onClickManageGoldTax() }
             )
+        }
 
+        item {
             ListItem(
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 leadingContent = {
@@ -245,9 +295,22 @@ private fun Content(
                         null
                     )
                 },
-                modifier = Modifier.clickable { onClickUpdate() }
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 2.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 4.dp,
+                            topEnd = 4.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 4.dp
+                        )
+                    )
+                    .clickable { onClickUpdate() }
             )
+        }
 
+        item {
             ListItem(
                 colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 leadingContent = {
@@ -265,7 +328,18 @@ private fun Content(
                         null
                     )
                 },
-                modifier = Modifier.clickable { onClickLogout() }
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 2.dp, bottom = 16.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 4.dp,
+                            topEnd = 4.dp,
+                            bottomStart = 16.dp,
+                            bottomEnd = 16.dp
+                        )
+                    )
+                    .clickable { onClickLogout() }
             )
         }
     }
