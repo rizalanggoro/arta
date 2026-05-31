@@ -59,10 +59,6 @@ fun UpsertTransactionScreen(
     val uiState by vm.uiState.collectAsState()
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.date)
 
-//    LaunchedEffect(transactionId) {
-//        vm.setTransactionId(transactionId)
-//    }
-
     LaunchedEffect(Unit) {
         AppEventBus.event.filterIsInstance<AppEvent.TransactionChanged>()
             .collect { backStack.removeLastOrNull() }

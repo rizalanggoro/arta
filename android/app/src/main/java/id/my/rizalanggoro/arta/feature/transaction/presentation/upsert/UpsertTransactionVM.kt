@@ -179,21 +179,6 @@ class UpsertTransactionVM @AssistedInject constructor(
                     selectedCategory = category,
                     date = transaction.date.toMillis(),
                     description = transaction.description,
-//                    transactionId = id,
-//                    isUpdate = true,
-//                    walletId = body.data.walletId.toString(),
-//                    selectedWalletName = "Wallet ID: ${body.data.walletId}",
-//                    amount = body.data.amount.toString(),
-//                    categoryId = body.data.categoryId.toString(),
-//                    selectedCategoryName = body.category?.name
-//                        ?: if (body.data.categoryId > 0) "Kategori #${body.data.categoryId}" else "",
-//                    description = body.data.description,
-//                    date = body.data.date,
-//                    isLoading = false,
-//                    walletIdError = null,
-//                    amountError = null,
-//                    categoryError = null,
-//                    dateError = null,
                 )
             }
         }.onFailure { throwable ->
