@@ -41,20 +41,20 @@ import kotlinx.serialization.Contextual
 
 data class UpdateTransactionReq (
 
-    @Contextual @SerialName(value = "amount")
-    val amount: java.math.BigDecimal? = null,
+    @SerialName(value = "amount")
+    val amount: kotlin.Double,
 
     @SerialName(value = "category_id")
-    val categoryId: kotlin.Int? = null,
+    val categoryId: kotlin.Int,
 
     @SerialName(value = "date")
-    val date: kotlin.String? = null,
+    val date: kotlin.String,
 
     @SerialName(value = "description")
-    val description: kotlin.String? = null,
+    val description: kotlin.String,
 
     @SerialName(value = "wallet_id")
-    val walletId: kotlin.Int? = null
+    val walletId: kotlin.Int
 
 ) {
 

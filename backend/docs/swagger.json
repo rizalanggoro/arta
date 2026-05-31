@@ -1648,6 +1648,7 @@
                 "amount",
                 "category_id",
                 "date",
+                "description",
                 "wallet_id"
             ],
             "properties": {
@@ -2005,9 +2006,17 @@
         },
         "UpdateTransactionReq": {
             "type": "object",
+            "required": [
+                "amount",
+                "category_id",
+                "date",
+                "description",
+                "wallet_id"
+            ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "category_id": {
                     "type": "integer"

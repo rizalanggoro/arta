@@ -57,13 +57,12 @@ fun TransactionActionSheet(
                     )
                     .clickable {
                         scope.launch {
+                            backStack.removeLastOrNull()
                             AppEventBus.emit(
                                 AppEvent.TransactionActionSheet.OnEditClicked(
                                     transactionId = transactionId,
                                 )
                             )
-                        }.invokeOnCompletion {
-                            backStack.removeLastOrNull()
                         }
                     },
                 leadingContent = {
@@ -100,7 +99,6 @@ fun TransactionActionSheet(
                                     transactionId = transactionId
                                 )
                             )
-                        }.invokeOnCompletion {
                             backStack.removeLastOrNull()
                         }
                     },

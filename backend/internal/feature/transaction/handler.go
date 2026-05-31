@@ -166,26 +166,27 @@ func (h *Handler) create(c *fiber.Ctx) error {
 // @failure              500 {object} dto.Error
 // @router               /api/transaction/{id} [get]
 func (h *Handler) get(c *fiber.Ctx) error {
-	id := c.Params("id")
-	parsedID, err := strconv.ParseUint(id, 10, 64)
+	id, err := c.ParamsInt("id")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
-	}
-	tx, err := h.repo.GetTransactionByID(uint(parsedID))
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: err.Error(),
+		})
 	}
 
-	userID := middleware.GetUserID(c)
-	ownerID, err := h.repo.GetWalletOwnerID(tx.WalletID)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	if transaction, err := h.repo.Get(GetFilter{
+		TransactionId:   uint(id),
+		IncludeCategory: true,
+	}); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(dto.Error{
+			Code:    fiber.StatusNotFound,
+			Message: err.Error(),
+		})
+	} else {
+		return c.Status(fiber.StatusOK).JSON(GetTransactionRes{
+			*transaction,
+		})
 	}
-	if strconv.FormatUint(uint64(ownerID), 10) != userID {
-		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(GetTransactionRes{dto.Transaction{Data: *tx}})
 }
 
 // @id                   UpdateTransaction

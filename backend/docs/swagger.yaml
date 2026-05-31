@@ -61,6 +61,7 @@ definitions:
     - amount
     - category_id
     - date
+    - description
     - wallet_id
     type: object
   CreateTransactionRes:
@@ -286,6 +287,7 @@ definitions:
   UpdateTransactionReq:
     properties:
       amount:
+        format: double
         type: number
       category_id:
         type: integer
@@ -295,6 +297,12 @@ definitions:
         type: string
       wallet_id:
         type: integer
+    required:
+    - amount
+    - category_id
+    - date
+    - description
+    - wallet_id
     type: object
   UpdateTransactionRes:
     properties:

@@ -28,6 +28,10 @@ fun Long.toApiFormat(): String = Instant
     .toLocalDate()
     .format(apiFormatter)
 
+fun String.toMillis(): Long = Instant
+    .parse(this)
+    .toEpochMilli()
+
 fun String.toIndonesianDate() = OffsetDateTime
     .parse(this)
     .toLocalDate()

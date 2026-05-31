@@ -3,15 +3,21 @@ package id.my.rizalanggoro.arta.feature.transaction.presentation.upsert
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.R
+import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.core.extension.toApiFormat
+import id.my.rizalanggoro.arta.core.extension.toMillis
 import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
 import id.my.rizalanggoro.arta.openapi.models.CreateTransactionReq
 import id.my.rizalanggoro.arta.openapi.models.UpdateTransactionReq
@@ -22,33 +28,25 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
-import javax.inject.Inject
 
-@HiltViewModel
-class UpsertTransactionVM @Inject constructor(
+@HiltViewModel(assistedFactory = UpsertTransactionVM.Factory::class)
+class UpsertTransactionVM @AssistedInject constructor(
     @param:ApplicationContext private val context: Context,
+    @Assisted private val navKey: TransactionUpsertRoute,
     private val transactionApi: TransactionApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
     private val authPrefs: AuthPrefs,
 ) : ViewModel() {
-//    private var transactionId: Int = 0
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: TransactionUpsertRoute): UpsertTransactionVM
+    }
 
     private val _uiState = MutableStateFlow(UpsertTransactionUiState())
     val uiState = _uiState.asStateFlow()
 
     private val _event = MutableSharedFlow<UpsertTransactionUiState.Event>()
     val event = _event.asSharedFlow()
-
-//    fun setTransactionId(value: Int) {
-//        if (transactionId == value) return
-//        transactionId = value
-//        if (value == 0) {
-//            prepareCreateMode()
-//        } else {
-//            loadTransaction(value)
-//        }
-//    }
 
     fun onAmountChanged(value: String) {
         _uiState.update {
@@ -81,14 +79,10 @@ class UpsertTransactionVM @Inject constructor(
 
     fun onSubmitClicked() {
         val current = _uiState.value
-        val walletId = current.selectedWallet?.id
+        val walletId = current.selectedWallet?.id ?: return
         val categoryId = current.selectedCategory?.id
         val amount = current.amount.toDoubleOrNull()
-        val resolvedWalletId = walletId ?: 0
-        val resolvedCategoryId = categoryId ?: 0
         var hasError = false
-
-        if (walletId == null || walletId <= 0) hasError = true
 
         if (categoryId == null || categoryId <= 0) {
             _uiState.update { it.copy(categoryError = "Kategori wajib dipilih") }
@@ -102,21 +96,18 @@ class UpsertTransactionVM @Inject constructor(
 
         if (hasError) return
 
+        _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
             runCatching {
-                val authorization = authorizationHeader()
-                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
-
                 if (current.isUpdate) {
                     val response = transactionApi.updateTransaction(
-                        authorization = authorization,
+                        authorization = authPrefs.authorization(),
                         id = current.transactionId,
                         body = UpdateTransactionReq(
-                            walletId = resolvedWalletId,
-                            amount = BigDecimal.valueOf(amount!!),
-                            categoryId = resolvedCategoryId,
-                            description = current.description.ifBlank { null },
+                            walletId = walletId,
+                            amount = amount!!,
+                            categoryId = categoryId!!,
+                            description = current.description,
                             date = current.date.toApiFormat(),
                         ),
                     )
@@ -128,13 +119,13 @@ class UpsertTransactionVM @Inject constructor(
                     response.body() ?: throw IllegalStateException("Respons server kosong")
                 } else {
                     val response = transactionApi.createTransaction(
-                        authorization = authorization,
+                        authorization = authPrefs.authorization(),
                         body = CreateTransactionReq(
                             amount = amount!!,
-                            categoryId = resolvedCategoryId,
+                            categoryId = categoryId!!,
                             date = current.date.toApiFormat(),
-                            walletId = resolvedWalletId,
-                            description = current.description.ifBlank { null },
+                            walletId = walletId,
+                            description = current.description,
                         ),
                     )
 
@@ -142,15 +133,12 @@ class UpsertTransactionVM @Inject constructor(
                         throw IllegalStateException(response.errorMessage())
                     }
 
-                    response.body() ?: throw IllegalStateException("Respons server kosong")
+                    response.body() ?: throw IllegalStateException(
+                        context.getString(R.string.server_empty_error)
+                    )
                 }
             }.onSuccess {
                 AppEventBus.emit(AppEvent.TransactionChanged)
-                _event.emit(
-                    UpsertTransactionUiState.Event.ShowMessage(
-                        if (current.isUpdate) "Transaksi berhasil diperbarui" else "Transaksi berhasil dibuat",
-                    )
-                )
             }.onFailure { throwable ->
                 _event.emit(
                     UpsertTransactionUiState.Event.ShowMessage(
@@ -162,55 +150,64 @@ class UpsertTransactionVM @Inject constructor(
         }
     }
 
-//    private fun loadTransaction(id: Int) {
-//        viewModelScope.launch {
-//            _uiState.update { it.copy(transactionId = id, isUpdate = true, isLoading = true) }
-//            runCatching {
-//                val authorization = authorizationHeader()
-//                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
-//
-//                val response = transactionApi.getTransaction(authorization, id)
-//                if (!response.isSuccessful) {
-//                    throw IllegalStateException(response.errorMessage())
-//                }
-//
-//                response.body() ?: throw IllegalStateException("Respons server kosong")
-//            }.onSuccess { response ->
-//                _uiState.update {
-//                    it.copy(
-//                        transactionId = id,
-//                        isUpdate = true,
-//                        walletId = response.data.walletId.toString(),
-//                        selectedWalletName = "Wallet ID: ${response.data.walletId}",
-//                        amount = response.data.amount.toString(),
-//                        categoryId = response.data.categoryId.toString(),
-//                        selectedCategoryName = response.category?.name
-//                            ?: if (response.data.categoryId > 0) "Kategori #${response.data.categoryId}" else "",
-//                        description = response.data.description,
-//                        date = response.data.date,
-//                        isLoading = false,
-//                        walletIdError = null,
-//                        amountError = null,
-//                        categoryError = null,
-//                        dateError = null,
-//                    )
-//                }
-//            }.onFailure { throwable ->
-//                _uiState.update {
-//                    it.copy(
-//                        isLoading = false,
-//                        dateError = throwable.message,
-//                    )
-//                }
-//            }
-//        }
-//    }
+    private fun loadTransaction() = viewModelScope.launch {
+        _uiState.update {
+            it.copy(
+                transactionId = navKey.transactionId,
+                isUpdate = true,
+                isLoading = true
+            )
+        }
+        runCatching {
+            val response = transactionApi.getTransaction(
+                authorization = authPrefs.authorization(),
+                id = navKey.transactionId
+            )
 
-    private fun authorizationHeader(): String? {
-        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
+            if (!response.isSuccessful) throw IllegalStateException(response.errorMessage())
+
+            response.body() ?: throw IllegalStateException(
+                context.getString(R.string.server_empty_error)
+            )
+        }.onSuccess { body ->
+            val transaction = body.data
+            val category = body.category
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    amount = transaction.amount.toString(),
+                    selectedCategory = category,
+                    date = transaction.date.toMillis(),
+                    description = transaction.description,
+//                    transactionId = id,
+//                    isUpdate = true,
+//                    walletId = body.data.walletId.toString(),
+//                    selectedWalletName = "Wallet ID: ${body.data.walletId}",
+//                    amount = body.data.amount.toString(),
+//                    categoryId = body.data.categoryId.toString(),
+//                    selectedCategoryName = body.category?.name
+//                        ?: if (body.data.categoryId > 0) "Kategori #${body.data.categoryId}" else "",
+//                    description = body.data.description,
+//                    date = body.data.date,
+//                    isLoading = false,
+//                    walletIdError = null,
+//                    amountError = null,
+//                    categoryError = null,
+//                    dateError = null,
+                )
+            }
+        }.onFailure { throwable ->
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                )
+            }
+        }
     }
 
     init {
+        loadTransaction()
+
         viewModelScope.launch {
             selectedWalletPrefs.selectedWallet.collect { wallet ->
                 _uiState.update {
@@ -233,9 +230,4 @@ class UpsertTransactionVM @Inject constructor(
                 }
         }
     }
-}
-
-sealed interface UpsertTransactionEffect {
-    data class ShowMessage(val message: String) : UpsertTransactionEffect
-    data object NavigateBack : UpsertTransactionEffect
 }

@@ -61,6 +61,7 @@ import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingScre
 import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.upsert.UpsertTransactionScreen
+import id.my.rizalanggoro.arta.feature.transaction.presentation.upsert.UpsertTransactionVM
 import id.my.rizalanggoro.arta.feature.update.presentation.check.CheckUpdateScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst.CreateFirstWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
@@ -160,11 +161,18 @@ fun ComposeApp(
                             UpsertCategoryScreen(
                                 vm = hiltViewModel<UpsertCategoryVM, UpsertCategoryVM.Factory>(
                                     creationCallback = { it.create(navKey = navKey) }
-                                ))
+                                )
+                            )
                         }
 
                         // transaction
-                        entry<TransactionUpsertRoute> { UpsertTransactionScreen(transactionId = it.transactionId) }
+                        entry<TransactionUpsertRoute> { navKey ->
+                            UpsertTransactionScreen(
+                                vm = hiltViewModel<UpsertTransactionVM, UpsertTransactionVM.Factory>(
+                                    creationCallback = { it.create(navKey = navKey) }
+                                )
+                            )
+                        }
                         entry<TransactionDetailRoute> {
                             TransactionDetailScreen(
                                 transactionId = it.id

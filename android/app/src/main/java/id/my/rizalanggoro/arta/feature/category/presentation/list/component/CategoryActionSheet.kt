@@ -25,6 +25,7 @@ import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Deprecated("migrasi menggunakan bottom sheet scenenario")
 fun CategoryActionSheet(
     category: DomainCategory,
     onClickEdit: () -> Unit = {},

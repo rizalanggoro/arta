@@ -52,7 +52,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpsertTransactionScreen(
-    transactionId: Int = 0,
     vm: UpsertTransactionVM = hiltViewModel(),
 ) {
     val snackbarHostState = remember { SnackbarHostState() }

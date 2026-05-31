@@ -4,11 +4,11 @@
 ## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-| **amount** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional] |
-| **categoryId** | **kotlin.Int** |  |  [optional] |
-| **date** | **kotlin.String** |  |  [optional] |
-| **description** | **kotlin.String** |  |  [optional] |
-| **walletId** | **kotlin.Int** |  |  [optional] |
+| **amount** | **kotlin.Double** |  |  |
+| **categoryId** | **kotlin.Int** |  |  |
+| **date** | **kotlin.String** |  |  |
+| **description** | **kotlin.String** |  |  |
+| **walletId** | **kotlin.Int** |  |  |
 
 
 

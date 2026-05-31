@@ -34,8 +34,8 @@ import kotlinx.serialization.Contextual
  * @param amount 
  * @param categoryId 
  * @param date 
- * @param walletId 
  * @param description 
+ * @param walletId 
  */
 @Serializable
 
@@ -50,11 +50,11 @@ data class CreateTransactionReq (
     @SerialName(value = "date")
     val date: kotlin.String,
 
-    @SerialName(value = "wallet_id")
-    val walletId: kotlin.Int,
-
     @SerialName(value = "description")
-    val description: kotlin.String? = null
+    val description: kotlin.String,
+
+    @SerialName(value = "wallet_id")
+    val walletId: kotlin.Int
 
 ) {
 

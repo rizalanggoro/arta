@@ -26,7 +26,31 @@ func (r *Repository) CreateTransaction(t *domain.Transaction) (*domain.Transacti
 	return domain.FromTransactionModel(m), nil
 }
 
+type GetFilter struct {
+	TransactionId   uint
+	IncludeCategory bool
+}
+
+func (r *Repository) Get(filter GetFilter) (*dto.Transaction, error) {
+	var transaction model.Transaction
+
+	query := r.db.Where("id = ?", filter.TransactionId)
+	if filter.IncludeCategory {
+		query = query.Preload("Category")
+	}
+
+	if err := query.First(&transaction).Error; err != nil {
+		return nil, err
+	} else {
+		return &dto.Transaction{
+			Data:     *domain.FromTransactionModel(&transaction),
+			Category: *domain.FromCategoryModel(&transaction.Category),
+		}, nil
+	}
+}
+
 // GetTransactionByID fetches a transaction by numeric ID.
+// Deprecated: use get
 func (r *Repository) GetTransactionByID(id uint) (*domain.Transaction, error) {
 	var m model.Transaction
 	if err := r.db.First(&m, id).Error; err != nil {

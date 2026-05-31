@@ -1650,6 +1650,7 @@ const docTemplate = `{
                 "amount",
                 "category_id",
                 "date",
+                "description",
                 "wallet_id"
             ],
             "properties": {
@@ -2007,9 +2008,17 @@ const docTemplate = `{
         },
         "UpdateTransactionReq": {
             "type": "object",
+            "required": [
+                "amount",
+                "category_id",
+                "date",
+                "description",
+                "wallet_id"
+            ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "category_id": {
                     "type": "integer"
