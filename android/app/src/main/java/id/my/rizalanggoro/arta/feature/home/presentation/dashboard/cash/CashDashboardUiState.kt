@@ -7,5 +7,6 @@ data class CashDashboardUiState(
     val selectedWallet: DomainWallet? = null,
     val data: DtoCashDashboard? = null,
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
 )

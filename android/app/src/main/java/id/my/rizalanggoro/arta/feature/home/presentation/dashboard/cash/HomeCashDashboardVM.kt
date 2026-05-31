@@ -33,6 +33,19 @@ class HomeCashDashboardVM @Inject constructor(
         viewModelScope.launch {
             val walletId = _uiState.value.selectedWallet?.id ?: return@launch
 
+            _uiState.update {
+                it.copy(
+                    isLoading = when {
+                        isRefresh -> it.isLoading
+                        else -> true
+                    },
+                    isRefreshing = when {
+                        isRefresh -> true
+                        else -> it.isRefreshing
+                    }
+                )
+            }
+
             runCatching {
                 val response = dashboardApi.getCashDashboard(
                     authPrefs.authorization(),
@@ -47,17 +60,28 @@ class HomeCashDashboardVM @Inject constructor(
             }.onSuccess { body ->
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
                         data = body.data
                     )
                 }
             }.onFailure { throwable ->
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
                         errorMessage = throwable.message ?: context.getString(
                             R.string.client_error
                         ),
+                    )
+                }
+            }.also {
+                _uiState.update {
+                    it.copy(
+                        isLoading = when {
+                            isRefresh -> it.isLoading
+                            else -> false
+                        },
+                        isRefreshing = when {
+                            isRefresh -> false
+                            else -> it.isRefreshing
+                        },
                     )
                 }
             }

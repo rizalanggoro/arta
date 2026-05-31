@@ -38,8 +38,8 @@ fun TransactionListItem(
     transaction: DtoTransaction,
     index: Int = 0,
     size: Int = 1,
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
+    onClick: (DomainTransaction) -> Unit = {},
+    onLongClick: (DomainTransaction) -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -54,8 +54,8 @@ fun TransactionListItem(
             )
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
+                onClick = { onClick(transaction.data) },
+                onLongClick = { onLongClick(transaction.data) }
             )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,

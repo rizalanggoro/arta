@@ -32,19 +32,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.R
+import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.component.IncomeExpenseSummary
+import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.shared.component.TransactionListItem
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
 fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
+    val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 
     Content(
         uiState = uiState,
-//        onClickRetry = vm::retry,
+        onLongClickTransaction = {
+            backStack.add(
+                Routes.TransactionActionSheetRoute(
+                    transactionId = it.id
+                )
+            )
+        }
     )
 }
 
@@ -53,6 +63,7 @@ fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
 private fun Content(
     uiState: CashDashboardUiState = CashDashboardUiState(),
     onClickRetry: () -> Unit = {},
+    onLongClickTransaction: (DomainTransaction) -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -181,7 +192,7 @@ private fun Content(
                     index = index,
                     size = uiState.data?.latestTransactions?.size ?: 0,
                     onClick = {},
-                    onLongClick = {}
+                    onLongClick = onLongClickTransaction
                 )
             }
 
