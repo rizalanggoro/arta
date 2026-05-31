@@ -80,6 +80,8 @@ func (h *Handler) list(c *fiber.Ctx) error {
 	if res, err := h.repo.GetAll(&GetAllFilter{
 		WalletId:        uint(walletID),
 		IncludeCategory: c.QueryBool("include_category", false),
+		OrderBy:         "date",
+		OrderDirection:  "desc",
 	}); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
 			Code:    fiber.StatusInternalServerError,
