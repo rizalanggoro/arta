@@ -93,8 +93,21 @@ func main() {
 	transactionHandler.RegisterRoutes(api)
 	dashboardHandler.RegisterRoutes(api)
 
+	latestFxRate, err := fxRateRepo.GetLatest()
+	if err != nil {
+		log.Printf("Error fetching latest FX rate: %v", err)
+	}
+	latestGoldPrice, err := goldPriceRepo.GetLatest()
+	if err != nil {
+		log.Printf("Error fetching latest gold price: %v", err)
+	}
+
 	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"status": "ok"})
+		return c.JSON(fiber.Map{
+			"status":     "ok",
+			"gold_price": latestGoldPrice,
+			"fx_rate":    latestFxRate,
+		})
 	})
 
 	fmt.Printf("ARTA Backend Server starting on port %s\n", cfg.ServerPort)
