@@ -120,7 +120,7 @@ private fun Content(
                 FloatingActionButton(onClick = onClickCreate) {
                     Icon(
                         Icons.Rounded.Add,
-                        contentDescription = null
+                         null
                     )
                 }
         }
@@ -146,7 +146,7 @@ private fun Content(
                     onClickRetry = onClickRetry
                 )
 
-                uiState.categories.isEmpty() -> EmptyPlaceholder(
+                uiState.incomeCategories.isEmpty() || uiState.expenseCategories.isEmpty() -> EmptyPlaceholder(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp)
@@ -178,7 +178,12 @@ private fun Content(
                             .weight(1f),
                     ) {
                         item { Box(modifier = Modifier.height(8.dp)) }
-                        items(uiState.categories) { category ->
+                        items(
+                            when {
+                                uiState.selectedType == "income" -> uiState.incomeCategories
+                                else -> uiState.expenseCategories
+                            }
+                        ) { category ->
                             ListItem(
                                 leadingContent = {
                                     Box(
@@ -209,11 +214,13 @@ private fun Content(
                                 headlineContent = {
                                     Text(category.data.name)
                                 },
-                                supportingContent = when {
-                                    category.data.userId != null -> null
-                                    else -> {
-                                        { Text("Bawaan") }
-                                    }
+                                supportingContent = {
+                                    Text(
+                                        when {
+                                            category.data.userId == null -> "Bawaan"
+                                            else -> "Kustom"
+                                        }
+                                    )
                                 },
                                 modifier = Modifier.clickable(enabled = category.data.userId != null) {
                                     onClickCategory(category.data)
@@ -244,7 +251,7 @@ private fun ListCategoryDefaultPreview() {
     ArtaTheme {
         Content(
             uiState = ListCategoryUiState(
-                categories = listOf(
+                incomeCategories = listOf(
                     DtoCategory(
                         data = DomainCategory(
                             createdAt = "2026-05-23T10:00:00Z",

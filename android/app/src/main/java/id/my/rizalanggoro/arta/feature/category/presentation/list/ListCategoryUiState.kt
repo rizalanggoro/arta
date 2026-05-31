@@ -4,10 +4,11 @@ import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DtoCategory
 
 data class ListCategoryUiState(
-    val categories: List<DtoCategory> = emptyList(),
+    val incomeCategories: List<DtoCategory> = emptyList(),
+    val expenseCategories: List<DtoCategory> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val selectedType: String = "expense",
+    val selectedType: String = "income",
     val actionTarget: DomainCategory? = null,
 
     // delete

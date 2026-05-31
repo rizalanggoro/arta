@@ -1,14 +1,17 @@
 package id.my.rizalanggoro.arta.feature.category.presentation.list
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import id.my.rizalanggoro.arta.R
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -16,11 +19,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListCategoryVM @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val categoryApi: CategoryApi,
     private val authPrefs: AuthPrefs,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ListCategoryUiState())
-    val uiState: StateFlow<ListCategoryUiState> = _uiState.asStateFlow()
+    val uiState = _uiState.asStateFlow()
 
     fun loadCategories(type: String = _uiState.value.selectedType) {
         viewModelScope.launch {
@@ -33,19 +37,21 @@ class ListCategoryVM @Inject constructor(
                 )
             }
             runCatching {
-                val authorization = authorizationHeader()
-                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
-
-                val response = categoryApi.listCategories(authorization)
+                val response = categoryApi.listCategories(
+                    authorization = authPrefs.authorization()
+                )
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorMessage())
                 }
 
-                response.body() ?: throw IllegalStateException("Respons server kosong")
+                response.body() ?: throw IllegalStateException(
+                    context.getString(R.string.server_empty_error)
+                )
             }.onSuccess { response ->
                 _uiState.update {
                     it.copy(
-                        categories = response.categories,
+                        incomeCategories = response.categories.filter { it.data.type == "income" },
+                        expenseCategories = response.categories.filter { it.data.type == "expense" },
                         isLoading = false,
                         errorMessage = null,
                         actionTarget = null,
@@ -56,7 +62,8 @@ class ListCategoryVM @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = throwable.message ?: "Gagal memuat kategori",
+                        errorMessage = throwable.message
+                            ?: context.getString(R.string.client_error),
                     )
                 }
             }
