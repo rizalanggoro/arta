@@ -4,7 +4,7 @@ import id.my.rizalanggoro.arta.openapi.models.DtoCategory
 
 data class SelectCategoryUiState(
     val categories: List<DtoCategory> = emptyList(),
-    val selectedType: String = "expense",
+    val selectedType: String = "income",
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )

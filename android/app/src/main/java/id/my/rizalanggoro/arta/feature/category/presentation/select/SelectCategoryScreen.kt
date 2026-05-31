@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ListItem
@@ -131,8 +132,7 @@ private fun Content(
 
             else -> {
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     items(visibleCategories) { category ->
                         ListItem(
@@ -141,6 +141,7 @@ private fun Content(
                                 RadioButton(
                                     selected = selectedCategoryId == category.data.id,
                                     onClick = { onClickCategory(category.data) },
+                                    modifier = Modifier.size(24.dp)
                                 )
                             },
                             headlineContent = {

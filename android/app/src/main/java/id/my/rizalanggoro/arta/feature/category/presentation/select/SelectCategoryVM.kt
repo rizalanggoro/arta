@@ -2,10 +2,15 @@ package id.my.rizalanggoro.arta.feature.category.presentation.select
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
@@ -14,13 +19,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class SelectCategoryVM @Inject constructor(
+@HiltViewModel(assistedFactory = SelectCategoryVM.Factory::class)
+class SelectCategoryVM @AssistedInject constructor(
+    @Assisted private val navKey: CategorySelectRoute,
     private val categoryApi: CategoryApi,
     private val authPrefs: AuthPrefs,
 ) : ViewModel() {
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: CategorySelectRoute): SelectCategoryVM
+    }
+
     private val _uiState = MutableStateFlow(SelectCategoryUiState())
     val uiState: StateFlow<SelectCategoryUiState> = _uiState.asStateFlow()
 
@@ -28,28 +38,35 @@ class SelectCategoryVM @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             runCatching {
-                val authorization = authorizationHeader()
-                    ?: throw IllegalStateException("Sesi login tidak ditemukan")
+                val response = categoryApi.listCategories(
+                    authorization = authPrefs.authorization()
+                )
 
-                val response = categoryApi.listCategories(authorization)
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(response.errorMessage())
-                }
+                if (!response.isSuccessful) throw IllegalStateException(response.errorMessage())
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")
             }.onSuccess { response ->
+                val selectedCategoryType = response
+                    .categories
+                    .firstOrNull { it.data.id == navKey.categoryId }
+                    ?.data
+                    ?.type ?: "income"
+
                 _uiState.update {
                     it.copy(
                         categories = response.categories,
-                        isLoading = false
+                        selectedType = selectedCategoryType
                     )
                 }
             }.onFailure { throwable ->
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
                         errorMessage = throwable.message ?: "Gagal memuat kategori"
                     )
+                }
+            }.also {
+                _uiState.update {
+                    it.copy(isLoading = false)
                 }
             }
         }
@@ -63,10 +80,6 @@ class SelectCategoryVM @Inject constructor(
         viewModelScope.launch {
             AppEventBus.emit(AppEvent.CategorySelected(category = category))
         }
-    }
-
-    private fun authorizationHeader(): String? {
-        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
     }
 
     init {

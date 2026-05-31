@@ -191,7 +191,8 @@ class UpsertTransactionVM @AssistedInject constructor(
     }
 
     init {
-        loadTransaction()
+        if (navKey.transactionId > 0)
+            loadTransaction()
 
         viewModelScope.launch {
             selectedWalletPrefs.selectedWallet.collect { wallet ->

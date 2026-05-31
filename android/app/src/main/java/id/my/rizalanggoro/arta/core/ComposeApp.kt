@@ -49,6 +49,7 @@ import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
+import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryVM
 import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
@@ -150,9 +151,12 @@ fun ComposeApp(
                         entry<CategoryRoute> { ListCategoryScreen() }
                         entry<CategorySelectRoute>(
                             metadata = BottomSheetSceneStrategy.bottomSheet()
-                        ) {
+                        ) { navKey ->
                             SelectCategoryScreen(
-                                selectedCategoryId = it.categoryId
+                                selectedCategoryId = navKey.categoryId,
+                                vm = hiltViewModel<SelectCategoryVM, SelectCategoryVM.Factory>(
+                                    creationCallback = { it.create(navKey = navKey) }
+                                )
                             )
                         }
                         entry<CategoryUpsertRoute>(
