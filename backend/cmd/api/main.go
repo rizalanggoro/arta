@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/artafinance/backend/internal/cron/fxrate"
 	"github.com/artafinance/backend/internal/cron/goldprice"
@@ -40,6 +41,12 @@ func main() {
 	}
 
 	cfg := config.New()
+	if location, err := time.LoadLocation(cfg.AppTimeZone); err != nil {
+		log.Printf("Warning: failed to load timezone %q, using system local timezone: %v", cfg.AppTimeZone, err)
+	} else {
+		time.Local = location
+	}
+
 	db, err := database.Initialize(cfg)
 	if err != nil {
 		log.Fatal(err)

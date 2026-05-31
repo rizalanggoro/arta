@@ -13,11 +13,12 @@ type Config struct {
 	ServerEnv  string
 
 	// Database
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
+	DBHost      string
+	DBPort      string
+	DBUser      string
+	DBPassword  string
+	DBName      string
+	AppTimeZone string
 
 	// JWT
 	JWTSecret     string
@@ -39,6 +40,7 @@ func New() *Config {
 		DBUser:        getEnv("DB_USER", "postgres"),
 		DBPassword:    getEnv("DB_PASSWORD", "postgres"),
 		DBName:        getEnv("DB_NAME", "arta"),
+		AppTimeZone:   getEnv("APP_TIMEZONE", "Asia/Jakarta"),
 		JWTSecret:     getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
 		JWTExpiration: getEnvInt("JWT_EXPIRATION", 168), // 7 days in hours
 		EmailService:  getEnv("EMAIL_SERVICE", ""),
@@ -50,12 +52,13 @@ func New() *Config {
 // GetDatabaseURL returns the PostgreSQL connection string
 func (c *Config) GetDatabaseURL() string {
 	return fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Jakarta",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=%s",
 		c.DBHost,
 		c.DBPort,
 		c.DBUser,
 		c.DBPassword,
 		c.DBName,
+		c.AppTimeZone,
 	)
 }
 
