@@ -46,6 +46,7 @@ import id.my.rizalanggoro.arta.core.LocalBackStack
 import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
 import id.my.rizalanggoro.arta.core.Routes.LoginRoute
+import id.my.rizalanggoro.arta.core.Routes.TestDialogRoute
 import id.my.rizalanggoro.arta.core.Routes.UpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -75,6 +76,9 @@ fun HomeSettingScreen(
         onClickManageGoldTax = { backStack.add(GoldTaxListRoute) },
         onClickUpdate = { backStack.add(UpdateRoute) },
         onClickLogout = vm::logout,
+        onClickTest = {
+            backStack.add(TestDialogRoute)
+        }
     )
 
     if (uiState.isLogoutOpen)
@@ -93,6 +97,7 @@ private fun Content(
     onClickManageGoldTax: () -> Unit = {},
     onClickUpdate: () -> Unit = {},
     onClickLogout: () -> Unit = {},
+    onClickTest: () -> Unit = {},
 ) {
     LazyColumn {
         item {
@@ -107,6 +112,9 @@ private fun Content(
                         .size(56.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primaryContainer)
+                        .clickable {
+                            onClickTest()
+                        }
                 ) {
                     Icon(
                         Icons.Rounded.Person,

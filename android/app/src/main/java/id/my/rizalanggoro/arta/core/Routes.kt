@@ -99,4 +99,8 @@ object Routes {
     data class TransactionActionSheetRoute(
         val transactionId: Int,
     ) : NavKey
+
+    // dialog
+    @Serializable
+    data object TestDialogRoute : NavKey
 }

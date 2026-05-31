@@ -18,6 +18,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
 import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
@@ -88,6 +89,7 @@ fun ComposeApp(
 
     val backStack = rememberNavBackStack(startRoute)
     val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
+    val dialogStrategy = remember { DialogSceneStrategy<NavKey>() }
 
     ArtaTheme(darkTheme = isDarkTheme) {
         CompositionLocalProvider(LocalBackStack provides backStack) {
@@ -99,7 +101,10 @@ fun ComposeApp(
                         rememberSaveableStateHolderNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator(),
                     ),
-                    sceneStrategies = listOf(bottomSheetStrategy),
+                    sceneStrategies = listOf(
+                        bottomSheetStrategy,
+                        dialogStrategy
+                    ),
                     transitionSpec = {
                         slideInHorizontally(
                             initialOffsetX = { it },
