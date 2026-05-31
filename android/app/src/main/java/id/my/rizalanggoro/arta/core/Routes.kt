@@ -70,6 +70,16 @@ object Routes {
         val id: Int = 0
     ) : NavKey
 
+    @Serializable
+    data class GoldActionSheetRoute(
+        val goldId: Int
+    ) : NavKey
+
+    @Serializable
+    data class DeleteGoldRoute(
+        val goldId: Int
+    ) : NavKey
+
     // category
     @Serializable
     data object CategoryRoute : NavKey

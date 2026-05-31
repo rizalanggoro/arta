@@ -52,6 +52,9 @@ import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCatego
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryVM
 import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryVM
+import id.my.rizalanggoro.arta.feature.gold.presentation.action.GoldActionSheet
+import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldDialog
+import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.tax.ListGoldTaxScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.upsert.UpsertGoldScreen
@@ -193,6 +196,23 @@ fun ComposeApp(
                             metadata = BottomSheetSceneStrategy.bottomSheet()
                         ) { UpsertGoldTaxScreen(taxPreferenceId = it.id) }
                         entry<GoldDetailRoute> { GoldDetailScreen(goldId = it.id) }
+                        // --> action sheet and dialog
+                        entry<Routes.GoldActionSheetRoute>(
+                            metadata = BottomSheetSceneStrategy.bottomSheet()
+                        ) {
+                            GoldActionSheet(
+                                goldId = it.goldId
+                            )
+                        }
+                        entry<Routes.DeleteGoldRoute>(
+                            metadata = DialogSceneStrategy.dialog()
+                        ) { navKey ->
+                            DeleteGoldDialog(
+                                vm = hiltViewModel<DeleteGoldVM, DeleteGoldVM.Factory>(
+                                    creationCallback = { it.create(navKey = navKey) }
+                                )
+                            )
+                        }
 
                         // home
                         entry<HomeGoldRoute> { HomeGoldScreen() }

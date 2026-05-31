@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 fun HomeGoldScreen(
     vm: HomeGoldVM = hiltViewModel(),
 ) {
+    val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -40,7 +43,14 @@ fun HomeGoldScreen(
     }
 
     Content(
-        uiState = uiState
+        uiState = uiState,
+        onClickGold = {
+            backStack.add(
+                Routes.GoldActionSheetRoute(
+                    goldId = it.id
+                )
+            )
+        }
     )
 }
 
@@ -48,6 +58,7 @@ fun HomeGoldScreen(
 private fun Content(
     uiState: HomeGoldUiState = HomeGoldUiState(),
     onClickRetry: () -> Unit = {},
+    onClickGold: (DomainGold) -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -77,7 +88,7 @@ private fun Content(
             itemsIndexed(uiState.golds) { index, gold ->
                 GoldListItem(
                     gold = gold,
-                    onClick = {},
+                    onClick = onClickGold,
                     index = index,
                     size = uiState.golds.size
                 )

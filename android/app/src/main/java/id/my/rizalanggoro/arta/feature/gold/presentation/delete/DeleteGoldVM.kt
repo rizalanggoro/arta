@@ -1,0 +1,64 @@
+package id.my.rizalanggoro.arta.feature.gold.presentation.delete
+
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import id.my.rizalanggoro.arta.R
+import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.authorization
+import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.openapi.apis.GoldApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+@HiltViewModel(assistedFactory = DeleteGoldVM.Factory::class)
+class DeleteGoldVM @AssistedInject constructor(
+    @Assisted private val navKey: Routes.DeleteGoldRoute,
+    @param:ApplicationContext private val context: Context,
+    private val authPrefs: AuthPrefs,
+    private val goldApi: GoldApi
+) : ViewModel() {
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: Routes.DeleteGoldRoute): DeleteGoldVM
+    }
+
+    private var _uiState = MutableStateFlow(DeleteGoldUiState())
+    val uiState = _uiState.asStateFlow()
+
+    fun delete() = viewModelScope.launch {
+        _uiState.update {
+            it.copy(isLoading = true)
+        }
+
+        runCatching {
+            val response = goldApi.deleteGold(
+                authorization = authPrefs.authorization(),
+                id = navKey.goldId
+            )
+
+            if (response.isSuccessful.not()) throw IllegalStateException(response.errorMessage())
+
+            response.body() ?: throw IllegalStateException(
+                context.getString(R.string.server_empty_error)
+            )
+        }.onSuccess {
+            AppEventBus.emit(AppEvent.GoldChanged)
+        }.onFailure {
+        }.also {
+            _uiState.update {
+                it.copy(isLoading = false)
+            }
+        }
+    }
+}

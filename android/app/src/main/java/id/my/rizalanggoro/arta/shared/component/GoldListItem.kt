@@ -37,7 +37,7 @@ fun GoldListItem(
     index: Int = 0,
     size: Int = 1,
     gold: DtoGold,
-    onClick: () -> Unit = {}
+    onClick: (DomainGold) -> Unit = {}
 ) {
     val status = when {
         gold.profit > 0.toBigDecimal() -> 1
@@ -62,9 +62,7 @@ fun GoldListItem(
                 )
             )
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clickable {
-                onClick()
-            }
+            .clickable { onClick(gold.data) }
             .padding(16.dp),
         verticalAlignment = Alignment.Top,
     ) {
