@@ -46,12 +46,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.constant.goldTypes
 import id.my.rizalanggoro.arta.core.constant.toWalletName
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.isValidInputNumber
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -221,12 +222,14 @@ private fun Content(
                 TextField(
                     value = uiState.grams,
                     onValueChange = {
-                        if (it.matches(Regex("^\\d*\\.?\\d*$")))
+                        if (it.isValidInputNumber())
                             onGramsChanged(it)
                     },
                     label = { Text("Berat (gram)") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
                     isError = uiState.gramsError != null,
                     supportingText = when {
                         uiState.gramsError != null -> {
@@ -242,12 +245,14 @@ private fun Content(
                 TextField(
                     value = uiState.price,
                     onValueChange = {
-                        if (it.matches(Regex("^\\d*\\.?\\d*$")))
+                        if (it.isValidInputNumber())
                             onPriceChanged(it)
                     },
                     label = { Text("Harga beli") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
                     isError = uiState.priceError != null,
                     supportingText = when {
                         uiState.priceError != null -> {
@@ -263,12 +268,14 @@ private fun Content(
                 TextField(
                     value = uiState.carat,
                     onValueChange = {
-                        if (it.matches(Regex("^\\d*\\.?\\d*$")))
+                        if (it.isValidInputNumber())
                             onCaratChanged(it)
                     },
                     label = { Text("Karat") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
                     isError = uiState.caratError != null,
                     supportingText = when {
                         uiState.caratError != null -> {
@@ -284,7 +291,7 @@ private fun Content(
                 TextField(
                     value = uiState.notes,
                     onValueChange = onNotesChanged,
-                    label = { Text("Catatan") },
+                    label = { Text("Catatan (opsional)") },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading,
                     minLines = 3,

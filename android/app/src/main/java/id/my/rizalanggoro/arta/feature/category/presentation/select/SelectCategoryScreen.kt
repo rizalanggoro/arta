@@ -4,11 +4,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.EditNote
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
@@ -28,10 +33,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes
 import id.my.rizalanggoro.arta.core.constant.categoryTypes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DtoCategory
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
@@ -59,6 +65,12 @@ fun SelectCategoryScreen(
         onClickRetry = vm::loadCategories,
         onClickType = vm::onCategoryTypeSelected,
         onClickCategory = vm::selectCategory,
+        onClickManageCategory = {
+            backStack.apply {
+                removeLastOrNull()
+                add(Routes.CategoryRoute)
+            }
+        }
     )
 }
 
@@ -69,6 +81,7 @@ private fun Content(
     onClickRetry: () -> Unit = {},
     onClickType: (String) -> Unit = {},
     onClickCategory: (DomainCategory) -> Unit = {},
+    onClickManageCategory: () -> Unit = {},
 ) {
     val visibleCategories = uiState.categories.filter { it.data.type == uiState.selectedType }
 
@@ -78,11 +91,24 @@ private fun Content(
             .padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Pilih Kategori",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Pilih Kategori",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            FilledTonalIconButton(onClick = onClickManageCategory) {
+                Icon(
+                    Icons.Rounded.EditNote,
+                    null
+                )
+            }
+        }
 
         if (!uiState.isLoading && visibleCategories.isNotEmpty() && uiState.errorMessage.isNullOrEmpty())
             SingleChoiceSegmentedButtonRow(
