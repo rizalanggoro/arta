@@ -1,39 +1,51 @@
 package id.my.rizalanggoro.arta.core.application.entry
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.WalletCreateFirstRoute
-import id.my.rizalanggoro.arta.core.application.Routes.WalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.WalletSelectRoute
-import id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst.CreateFirstWalletScreen
-import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
-import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletScreen
-import id.my.rizalanggoro.arta.feature.wallet.presentation.upsert.UpsertWalletScreen
+import id.my.rizalanggoro.arta.core.application.Routes.CategoryRoute
+import id.my.rizalanggoro.arta.core.application.Routes.CategorySelectRoute
+import id.my.rizalanggoro.arta.core.application.Routes.CategoryUpsertRoute
+import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategoryScreen
+import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
+import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryVM
+import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryScreen
+import id.my.rizalanggoro.arta.feature.category.presentation.upsert.UpsertCategoryVM
 import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 
 @OptIn(ExperimentalMaterial3Api::class)
-fun EntryProviderScope<NavKey>.walletEntry() {
-    entry<WalletRoute> {
-        ListWalletScreen()
+fun EntryProviderScope<NavKey>.categoryEntry() {
+    entry<CategoryRoute> {
+        ListCategoryScreen()
     }
 
-    entry<WalletSelectRoute>(
+    entry<CategorySelectRoute>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
-    ) {
-        SelectWalletScreen()
-    }
-
-    entry<UpsertWalletRoute>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
-    ) {
-        UpsertWalletScreen(
-            walletId = it.walletId
+    ) { navKey ->
+        SelectCategoryScreen(
+            selectedCategoryId = navKey.categoryId,
+            vm = hiltViewModel<SelectCategoryVM, SelectCategoryVM.Factory>(
+                creationCallback = {
+                    it.create(
+                        navKey = navKey
+                    )
+                }
+            )
         )
     }
 
-    entry<WalletCreateFirstRoute> {
-        CreateFirstWalletScreen()
+    entry<CategoryUpsertRoute>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) { navKey ->
+        UpsertCategoryScreen(
+            vm = hiltViewModel<UpsertCategoryVM, UpsertCategoryVM.Factory>(
+                creationCallback = {
+                    it.create(
+                        navKey = navKey
+                    )
+                }
+            )
+        )
     }
 }

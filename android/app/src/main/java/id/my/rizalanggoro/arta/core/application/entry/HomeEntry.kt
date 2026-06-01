@@ -3,37 +3,36 @@ package id.my.rizalanggoro.arta.core.application.entry
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.WalletCreateFirstRoute
-import id.my.rizalanggoro.arta.core.application.Routes.WalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.WalletSelectRoute
-import id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst.CreateFirstWalletScreen
-import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
-import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletScreen
-import id.my.rizalanggoro.arta.feature.wallet.presentation.upsert.UpsertWalletScreen
-import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
+import id.my.rizalanggoro.arta.core.application.Routes.HomeGoldRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeSettingRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeTransactionRoute
+import id.my.rizalanggoro.arta.core.application.Routes.UpdateRoute
+import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
+import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeScreen
+import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingScreen
+import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionScreen
+import id.my.rizalanggoro.arta.feature.update.presentation.check.CheckUpdateScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
-fun EntryProviderScope<NavKey>.walletEntry() {
-    entry<WalletRoute> {
-        ListWalletScreen()
+fun EntryProviderScope<NavKey>.homeEntry() {
+    entry<HomeGoldRoute> {
+        HomeGoldScreen()
     }
 
-    entry<WalletSelectRoute>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
-    ) {
-        SelectWalletScreen()
+    entry<HomeRoute> {
+        HomeScreen()
     }
 
-    entry<UpsertWalletRoute>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
-    ) {
-        UpsertWalletScreen(
-            walletId = it.walletId
-        )
+    entry<HomeTransactionRoute> {
+        HomeTransactionScreen()
     }
 
-    entry<WalletCreateFirstRoute> {
-        CreateFirstWalletScreen()
+    entry<HomeSettingRoute> {
+        HomeSettingScreen()
+    }
+
+    entry<UpdateRoute> {
+        CheckUpdateScreen()
     }
 }

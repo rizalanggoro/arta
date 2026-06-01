@@ -1,33 +1,39 @@
 package id.my.rizalanggoro.arta.core.application.entry
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.scene.DialogSceneStrategy
-import id.my.rizalanggoro.arta.core.application.Routes
-import id.my.rizalanggoro.arta.core.application.Routes.ForgotPasswordRoute
-import id.my.rizalanggoro.arta.core.application.Routes.LoginRoute
-import id.my.rizalanggoro.arta.core.application.Routes.RegisterRoute
-import id.my.rizalanggoro.arta.feature.auth.presentation.forgotpassword.ForgotPasswordScreen
-import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
-import id.my.rizalanggoro.arta.feature.auth.presentation.logout.LogoutDialog
-import id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterScreen
+import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
+import id.my.rizalanggoro.arta.core.application.Routes.WalletCreateFirstRoute
+import id.my.rizalanggoro.arta.core.application.Routes.WalletRoute
+import id.my.rizalanggoro.arta.core.application.Routes.WalletSelectRoute
+import id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst.CreateFirstWalletScreen
+import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
+import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletScreen
+import id.my.rizalanggoro.arta.feature.wallet.presentation.upsert.UpsertWalletScreen
+import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 
-fun EntryProviderScope<NavKey>.authEntry() {
-    entry<LoginRoute> {
-        LoginScreen()
+@OptIn(ExperimentalMaterial3Api::class)
+fun EntryProviderScope<NavKey>.walletEntry() {
+    entry<WalletRoute> {
+        ListWalletScreen()
     }
 
-    entry<RegisterRoute> {
-        RegisterScreen()
-    }
-
-    entry<ForgotPasswordRoute> {
-        ForgotPasswordScreen()
-    }
-
-    entry<Routes.LogoutRoute>(
-        metadata = DialogSceneStrategy.dialog()
+    entry<WalletSelectRoute>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
-        LogoutDialog()
+        SelectWalletScreen()
+    }
+
+    entry<UpsertWalletRoute>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) {
+        UpsertWalletScreen(
+            walletId = it.walletId
+        )
+    }
+
+    entry<WalletCreateFirstRoute> {
+        CreateFirstWalletScreen()
     }
 }
