@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes.UpsertWalletRoute
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
 import id.my.rizalanggoro.arta.core.constant.toWalletName
 import id.my.rizalanggoro.arta.feature.wallet.presentation.list.component.WalletActionBS
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet

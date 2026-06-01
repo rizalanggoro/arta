@@ -39,15 +39,15 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes.HomeCashDashboardRoute
-import id.my.rizalanggoro.arta.core.Routes.HomeGoldDashboardRoute
-import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
-import id.my.rizalanggoro.arta.core.Routes.HomeSettingRoute
-import id.my.rizalanggoro.arta.core.Routes.HomeTransactionRoute
-import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
-import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes.HomeCashDashboardRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeGoldDashboardRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeGoldRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeSettingRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeTransactionRoute
+import id.my.rizalanggoro.arta.core.application.Routes.TransactionUpsertRoute
+import id.my.rizalanggoro.arta.core.application.Routes.UpsertGoldRoute
+import id.my.rizalanggoro.arta.core.application.Routes.WalletSelectRoute
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.HomeGoldDashboardScreen
@@ -199,7 +199,7 @@ private fun Content(
 private data class HomeDestination(
     val label: String,
     val icon: ImageVector,
-    val route: NavKey
+    val route: NavKey,
 )
 
 private fun walletDestinations(type: String?): List<HomeDestination> {

@@ -21,12 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes
 
 @Composable
 fun GoldActionSheet(
-    goldId: Int
+    goldId: Int,
 ) {
     val backStack = LocalBackStack.current
 
@@ -50,7 +50,7 @@ fun GoldActionSheet(
 private fun Content(
     onClickEdit: () -> Unit = {},
     onClickDelete: () -> Unit = {},
-    onClickCancel: () -> Unit = {}
+    onClickCancel: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier

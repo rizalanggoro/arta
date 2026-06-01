@@ -13,7 +13,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -30,9 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes
-import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes.UpsertGoldRoute
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
@@ -171,17 +169,17 @@ private fun GoldDetailScreenPreview() {
         Content(
             snackbarHostState = remember { SnackbarHostState() },
             gold = DomainGold(
-                    id = 1,
-                    walletId = 2,
-                    date = "2026-05-16",
-                    grams = BigDecimal.valueOf(10.0),
-                    price = 9000000,
-                    type = "pure_gold",
-                    carat = BigDecimal.valueOf(24.0),
-                    notes = "Contoh catatan",
-                    createdAt = "",
-                    updatedAt = "",
-                ),
+                id = 1,
+                walletId = 2,
+                date = "2026-05-16",
+                grams = BigDecimal.valueOf(10.0),
+                price = 9000000,
+                type = "pure_gold",
+                carat = BigDecimal.valueOf(24.0),
+                notes = "Contoh catatan",
+                createdAt = "",
+                updatedAt = "",
+            ),
         )
     }
 }

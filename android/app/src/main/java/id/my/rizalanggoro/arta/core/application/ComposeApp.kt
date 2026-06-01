@@ -1,4 +1,4 @@
-package id.my.rizalanggoro.arta.core
+package id.my.rizalanggoro.arta.core.application
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,34 +20,30 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
-import id.my.rizalanggoro.arta.core.Routes.CategorySelectRoute
-import id.my.rizalanggoro.arta.core.Routes.CategoryUpsertRoute
-import id.my.rizalanggoro.arta.core.Routes.ForgotPasswordRoute
-import id.my.rizalanggoro.arta.core.Routes.GoldDetailRoute
-import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
-import id.my.rizalanggoro.arta.core.Routes.HomeGoldRoute
-import id.my.rizalanggoro.arta.core.Routes.HomeRoute
-import id.my.rizalanggoro.arta.core.Routes.HomeSettingRoute
-import id.my.rizalanggoro.arta.core.Routes.HomeTransactionRoute
-import id.my.rizalanggoro.arta.core.Routes.LoginRoute
-import id.my.rizalanggoro.arta.core.Routes.RegisterRoute
-import id.my.rizalanggoro.arta.core.Routes.TransactionDetailRoute
-import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
-import id.my.rizalanggoro.arta.core.Routes.UpdateRoute
-import id.my.rizalanggoro.arta.core.Routes.UpsertGoldRoute
-import id.my.rizalanggoro.arta.core.Routes.UpsertGoldTaxRoute
-import id.my.rizalanggoro.arta.core.Routes.UpsertWalletRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletCreateFirstRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletSelectRoute
+import id.my.rizalanggoro.arta.core.application.Routes.CategoryRoute
+import id.my.rizalanggoro.arta.core.application.Routes.CategorySelectRoute
+import id.my.rizalanggoro.arta.core.application.Routes.CategoryUpsertRoute
+import id.my.rizalanggoro.arta.core.application.Routes.GoldDetailRoute
+import id.my.rizalanggoro.arta.core.application.Routes.GoldTaxListRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeGoldRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeSettingRoute
+import id.my.rizalanggoro.arta.core.application.Routes.HomeTransactionRoute
+import id.my.rizalanggoro.arta.core.application.Routes.LoginRoute
+import id.my.rizalanggoro.arta.core.application.Routes.TransactionDetailRoute
+import id.my.rizalanggoro.arta.core.application.Routes.TransactionUpsertRoute
+import id.my.rizalanggoro.arta.core.application.Routes.UpdateRoute
+import id.my.rizalanggoro.arta.core.application.Routes.UpsertGoldRoute
+import id.my.rizalanggoro.arta.core.application.Routes.UpsertGoldTaxRoute
+import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
+import id.my.rizalanggoro.arta.core.application.Routes.WalletCreateFirstRoute
+import id.my.rizalanggoro.arta.core.application.Routes.WalletRoute
+import id.my.rizalanggoro.arta.core.application.Routes.WalletSelectRoute
+import id.my.rizalanggoro.arta.core.application.entry.authEntry
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.data.ThemePrefs
-import id.my.rizalanggoro.arta.feature.auth.presentation.forgotpassword.ForgotPasswordScreen
-import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
-import id.my.rizalanggoro.arta.feature.auth.presentation.logout.LogoutDialog
-import id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterScreen
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryVM
@@ -64,6 +60,7 @@ import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.home.HomeScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionScreen
+import id.my.rizalanggoro.arta.feature.transaction.presentation.action.TransactionActionSheet
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.upsert.UpsertTransactionScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.upsert.UpsertTransactionVM
@@ -73,7 +70,6 @@ import id.my.rizalanggoro.arta.feature.wallet.presentation.list.ListWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.upsert.UpsertWalletScreen
 import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
-import id.my.rizalanggoro.arta.shared.component.TransactionActionSheet
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +77,7 @@ import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 fun ComposeApp(
     authPrefs: AuthPrefs,
     selectedWalletPrefs: SelectedWalletPrefs,
-    themePrefs: ThemePrefs
+    themePrefs: ThemePrefs,
 ) {
     val session by authPrefs.currentSession.collectAsState()
     val selectedWallet by selectedWalletPrefs.selectedWallet.collectAsState()
@@ -132,13 +128,7 @@ fun ComposeApp(
                         ) + fadeOut()
                     },
                     entryProvider = entryProvider {
-                        // auth
-                        entry<LoginRoute> { LoginScreen() }
-                        entry<RegisterRoute> { RegisterScreen() }
-                        entry<ForgotPasswordRoute> { ForgotPasswordScreen() }
-                        entry<Routes.LogoutRoute>(
-                            metadata = DialogSceneStrategy.dialog()
-                        ) { LogoutDialog() }
+                        authEntry()
 
                         // wallet
                         entry<WalletRoute> { ListWalletScreen() }
@@ -189,6 +179,7 @@ fun ComposeApp(
                                 transactionId = it.id
                             )
                         }
+                        // --> action sheet and dialog
                         entry<Routes.TransactionActionSheetRoute>(
                             metadata = BottomSheetSceneStrategy.bottomSheet()
                         ) { TransactionActionSheet(transactionId = it.transactionId) }
@@ -203,11 +194,7 @@ fun ComposeApp(
                         // --> action sheet and dialog
                         entry<Routes.GoldActionSheetRoute>(
                             metadata = BottomSheetSceneStrategy.bottomSheet()
-                        ) {
-                            GoldActionSheet(
-                                goldId = it.goldId
-                            )
-                        }
+                        ) { GoldActionSheet(goldId = it.goldId) }
                         entry<Routes.DeleteGoldRoute>(
                             metadata = DialogSceneStrategy.dialog()
                         ) { navKey ->

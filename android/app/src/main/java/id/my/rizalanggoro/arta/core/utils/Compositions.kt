@@ -1,4 +1,4 @@
-package id.my.rizalanggoro.arta.core
+package id.my.rizalanggoro.arta.core.utils
 
 import androidx.compose.runtime.compositionLocalOf
 import androidx.navigation3.runtime.NavBackStack

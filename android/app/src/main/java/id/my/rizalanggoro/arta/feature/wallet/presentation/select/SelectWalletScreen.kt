@@ -30,8 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes
 import id.my.rizalanggoro.arta.core.constant.toWalletName
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -167,8 +167,8 @@ private fun SelectWalletPreview() {
                             id = 1,
                             userId = 1,
                             name = "Dompet Harian",
-                            type = "cash_savings"
-                            ,createdAt = "2026-05-23T00:00:00Z",
+                            type = "cash_savings",
+                            createdAt = "2026-05-23T00:00:00Z",
                             updatedAt = "2026-05-23T00:00:00Z",
                         )
                     ),
@@ -177,8 +177,8 @@ private fun SelectWalletPreview() {
                             id = 2,
                             userId = 1,
                             name = "Dompet Harian",
-                            type = "cash_savings"
-                            ,createdAt = "2026-05-23T00:00:00Z",
+                            type = "cash_savings",
+                            createdAt = "2026-05-23T00:00:00Z",
                             updatedAt = "2026-05-23T00:00:00Z",
                         )
                     ),
@@ -187,8 +187,8 @@ private fun SelectWalletPreview() {
                             id = 3,
                             userId = 1,
                             name = "Dompet Harian",
-                            type = "cash_savings"
-                            ,createdAt = "2026-05-23T00:00:00Z",
+                            type = "cash_savings",
+                            createdAt = "2026-05-23T00:00:00Z",
                             updatedAt = "2026-05-23T00:00:00Z",
                         )
                     ),

@@ -14,13 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes
 import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun LogoutDialog(
-    vm: LogoutVM = hiltViewModel()
+    vm: LogoutVM = hiltViewModel(),
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
@@ -45,7 +45,7 @@ fun LogoutDialog(
 private fun Content(
     uiState: LogoutUiState = LogoutUiState(),
     onClickCancel: () -> Unit = {},
-    onClickLogout: () -> Unit = {}
+    onClickLogout: () -> Unit = {},
 ) {
     AlertDialog(
         onDismissRequest = {

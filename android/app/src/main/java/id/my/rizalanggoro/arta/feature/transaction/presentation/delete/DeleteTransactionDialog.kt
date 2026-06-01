@@ -1,4 +1,4 @@
-package id.my.rizalanggoro.arta.feature.gold.presentation.delete
+package id.my.rizalanggoro.arta.feature.transaction.presentation.delete
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,15 +20,15 @@ import id.my.rizalanggoro.arta.core.event.AppEventBus
 import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
-fun DeleteGoldDialog(
-    vm: DeleteGoldVM = hiltViewModel(),
+fun DeleteTransactionDialog(
+    vm: DeleteTransactionVM = hiltViewModel(),
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         AppEventBus.event
-            .filterIsInstance<AppEvent.GoldChanged>()
+            .filterIsInstance<AppEvent.TransactionChanged>()
             .collect { backStack.removeLastOrNull() }
     }
 
@@ -41,7 +41,7 @@ fun DeleteGoldDialog(
 
 @Composable
 private fun Content(
-    uiState: DeleteGoldUiState = DeleteGoldUiState(),
+    uiState: DeleteTransactionUiState = DeleteTransactionUiState(),
     onClickCancel: () -> Unit = {},
     onClickDelete: () -> Unit = {},
 ) {
@@ -62,7 +62,7 @@ private fun Content(
                 }
 
                 else -> Text(
-                    "Apakah Anda yakin akan menghapus emas yang dipilih? " +
+                    "Apakah Anda yakin akan menghapus transaksi yang dipilih? " +
                             "Tindakan ini tidak dapat dipulihkan"
                 )
             }
@@ -92,7 +92,7 @@ private fun Preview() {
 @Preview
 private fun LoadingPreview() {
     Content(
-        uiState = DeleteGoldUiState(
+        uiState = DeleteTransactionUiState(
             isLoading = true
         )
     )

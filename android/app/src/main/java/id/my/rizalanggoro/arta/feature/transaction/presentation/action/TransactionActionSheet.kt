@@ -1,4 +1,4 @@
-package id.my.rizalanggoro.arta.shared.component
+package id.my.rizalanggoro.arta.feature.transaction.presentation.action
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,25 +18,52 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.event.AppEvent
-import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionActionSheet(
-    transactionId: Int = 0
+    transactionId: Int,
 ) {
     val backStack = LocalBackStack.current
-    val scope = rememberCoroutineScope()
 
+    Content(
+        onClickEdit = {
+            backStack.apply {
+                removeLastOrNull()
+                add(
+                    Routes.TransactionUpsertRoute(
+                        transactionId = transactionId
+                    )
+                )
+            }
+        },
+        onClickDelete = {
+            backStack.apply {
+                removeLastOrNull()
+                add(
+                    Routes.DeleteTransactionRoute(
+                        transactionId = transactionId
+                    )
+                )
+            }
+        },
+        onClickCancel = { backStack.removeLastOrNull() },
+    )
+}
+
+@Composable
+private fun Content(
+    onClickEdit: () -> Unit = {},
+    onClickDelete: () -> Unit = {},
+    onClickCancel: () -> Unit = {},
+) {
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
@@ -55,16 +82,7 @@ fun TransactionActionSheet(
                             bottomEnd = 4.dp
                         )
                     )
-                    .clickable {
-                        scope.launch {
-                            backStack.removeLastOrNull()
-                            AppEventBus.emit(
-                                AppEvent.TransactionActionSheet.OnEditClicked(
-                                    transactionId = transactionId,
-                                )
-                            )
-                        }
-                    },
+                    .clickable(onClick = onClickEdit),
                 leadingContent = {
                     Icon(
                         Icons.Rounded.Edit,
@@ -92,16 +110,7 @@ fun TransactionActionSheet(
                             bottomEnd = 16.dp,
                         )
                     )
-                    .clickable {
-                        scope.launch {
-                            AppEventBus.emit(
-                                AppEvent.TransactionActionSheet.OnDeleteClicked(
-                                    transactionId = transactionId
-                                )
-                            )
-                            backStack.removeLastOrNull()
-                        }
-                    },
+                    .clickable(onClick = onClickDelete),
                 leadingContent = {
                     Icon(
                         Icons.Rounded.Delete,
@@ -120,9 +129,7 @@ fun TransactionActionSheet(
             )
         }
         FilledTonalButton(
-            onClick = {
-                backStack.removeLastOrNull()
-            },
+            onClick = onClickCancel,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Batal")
@@ -134,6 +141,6 @@ fun TransactionActionSheet(
 @Preview(showBackground = true)
 private fun Preview() {
     ArtaTheme {
-        TransactionActionSheet()
+        Content()
     }
 }

@@ -6,7 +6,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.application.Routes
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 class UpsertCategoryVM @AssistedInject constructor(
     private val categoryApi: CategoryApi,
     private val authPrefs: AuthPrefs,
-    @Assisted private val navKey: Routes.CategoryUpsertRoute
+    @Assisted private val navKey: Routes.CategoryUpsertRoute,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {

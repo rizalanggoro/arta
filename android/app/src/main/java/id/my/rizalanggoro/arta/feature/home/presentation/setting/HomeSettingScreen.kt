@@ -37,13 +37,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes
-import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
-import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
-import id.my.rizalanggoro.arta.core.Routes.TestDialogRoute
-import id.my.rizalanggoro.arta.core.Routes.UpdateRoute
-import id.my.rizalanggoro.arta.core.Routes.WalletRoute
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes
+import id.my.rizalanggoro.arta.core.application.Routes.CategoryRoute
+import id.my.rizalanggoro.arta.core.application.Routes.GoldTaxListRoute
+import id.my.rizalanggoro.arta.core.application.Routes.UpdateRoute
+import id.my.rizalanggoro.arta.core.application.Routes.WalletRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
@@ -61,7 +60,6 @@ fun HomeSettingScreen(
         onClickManageGoldTax = { backStack.add(GoldTaxListRoute) },
         onClickUpdate = { backStack.add(UpdateRoute) },
         onClickLogout = { backStack.add(Routes.LogoutRoute) },
-        onClickTest = { backStack.add(TestDialogRoute) }
     )
 }
 
@@ -74,7 +72,6 @@ private fun Content(
     onClickManageGoldTax: () -> Unit = {},
     onClickUpdate: () -> Unit = {},
     onClickLogout: () -> Unit = {},
-    onClickTest: () -> Unit = {},
 ) {
     LazyColumn {
         item {
@@ -89,9 +86,6 @@ private fun Content(
                         .size(56.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primaryContainer)
-                        .clickable {
-                            onClickTest()
-                        }
                 ) {
                     Icon(
                         Icons.Rounded.Person,

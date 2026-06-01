@@ -14,11 +14,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import id.my.rizalanggoro.arta.core.Routes
-import id.my.rizalanggoro.arta.core.Routes.TransactionUpsertRoute
+import id.my.rizalanggoro.arta.core.application.Routes.TransactionUpsertRoute
 import androidx.compose.ui.tooling.preview.Preview
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,9 +46,15 @@ private fun Content(tx: DomainTransaction?, onEdit: (DomainTransaction) -> Unit 
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
             Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     if (tx == null) {
-                        Text(text = "Memuat transaksi...", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = "Memuat transaksi...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     } else {
                         Text(text = "Jumlah: ${tx.amount}")
                         Text(text = "Kategori ID: ${tx.categoryId}")
@@ -69,7 +74,18 @@ private fun Content(tx: DomainTransaction?, onEdit: (DomainTransaction) -> Unit 
 @Preview(showBackground = true)
 @Composable
 private fun TransactionDetailScreenPreview() {
-    Content(tx = DomainTransaction(amount = 100000.0, categoryId = 1, createdAt = "", date = "2026-05-16", description = "Contoh transaksi", id = 1, updatedAt = "", walletId = 1))
+    Content(
+        tx = DomainTransaction(
+            amount = 100000.0,
+            categoryId = 1,
+            createdAt = "",
+            date = "2026-05-16",
+            description = "Contoh transaksi",
+            id = 1,
+            updatedAt = "",
+            walletId = 1
+        )
+    )
 }
 
 @Preview(showBackground = true, name = "Transaction Detail - Loading")

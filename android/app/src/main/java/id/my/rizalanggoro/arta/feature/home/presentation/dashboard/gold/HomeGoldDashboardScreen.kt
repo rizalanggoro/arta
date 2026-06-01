@@ -37,8 +37,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.LocalBackStack
-import id.my.rizalanggoro.arta.core.Routes
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.application.Routes
 import id.my.rizalanggoro.arta.core.extension.toAmericanCurrency
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
@@ -50,7 +50,7 @@ import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
 fun HomeGoldDashboardScreen(
-    vm: GoldDashboardVM = hiltViewModel()
+    vm: GoldDashboardVM = hiltViewModel(),
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()

@@ -1,4 +1,4 @@
-package id.my.rizalanggoro.arta.core
+package id.my.rizalanggoro.arta.core.application
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
@@ -70,17 +70,17 @@ object Routes {
 
     @Serializable
     data class UpsertGoldTaxRoute(
-        val id: Int = 0
+        val id: Int = 0,
     ) : NavKey
 
     @Serializable
     data class GoldActionSheetRoute(
-        val goldId: Int
+        val goldId: Int,
     ) : NavKey
 
     @Serializable
     data class DeleteGoldRoute(
-        val goldId: Int
+        val goldId: Int,
     ) : NavKey
 
     // category
@@ -113,7 +113,8 @@ object Routes {
         val transactionId: Int,
     ) : NavKey
 
-    // dialog
     @Serializable
-    data object TestDialogRoute : NavKey
+    data class DeleteTransactionRoute(
+        val transactionId: Int,
+    ) : NavKey
 }
