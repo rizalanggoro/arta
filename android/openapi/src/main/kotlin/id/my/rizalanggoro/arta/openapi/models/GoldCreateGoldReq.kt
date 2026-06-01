@@ -56,7 +56,7 @@ data class GoldCreateGoldReq (
     val notes: kotlin.String,
 
     @SerialName(value = "price")
-    val price: kotlin.Int,
+    val price: kotlin.Double,
 
     @SerialName(value = "type")
     val type: kotlin.String,

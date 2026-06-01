@@ -8,7 +8,7 @@
 | **date** | **kotlin.String** |  |  |
 | **grams** | **kotlin.Double** |  |  |
 | **notes** | **kotlin.String** |  |  |
-| **price** | **kotlin.Int** |  |  |
+| **price** | **kotlin.Double** |  |  |
 | **type** | **kotlin.String** |  |  |
 | **walletId** | **kotlin.Int** |  |  |
 

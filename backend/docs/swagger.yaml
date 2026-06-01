@@ -412,7 +412,9 @@ definitions:
       notes:
         type: string
       price:
-        type: integer
+        description: price per gram in IDR
+        format: double
+        type: number
       type:
         description: pure_gold or jewelry
         type: string
@@ -445,6 +447,7 @@ definitions:
       id:
         type: integer
       price_per_ounce_usd:
+        format: double
         type: number
       source_readable_age:
         type: string
@@ -466,12 +469,14 @@ definitions:
   domain.GoldTaxPreference:
     properties:
       carat:
+        format: double
         type: number
       created_at:
         type: string
       id:
         type: integer
       tax_rate:
+        format: double
         type: number
       updated_at:
         type: string
@@ -637,9 +642,10 @@ definitions:
         $ref: '#/definitions/domain.FxRate'
       gold_price:
         $ref: '#/definitions/domain.GoldPrice'
-      gold_price_per_gram_idr:
-        format: double
-        type: number
+      gold_taxes:
+        items:
+          $ref: '#/definitions/dto.GoldTax'
+        type: array
       latest_golds:
         items:
           $ref: '#/definitions/dto.Gold'
@@ -647,10 +653,9 @@ definitions:
       profit:
         format: double
         type: number
-      tax_preferences:
-        items:
-          $ref: '#/definitions/domain.GoldTaxPreference'
-        type: array
+      retail_price:
+        format: double
+        type: number
       total_asset:
         format: double
         type: number
@@ -665,14 +670,25 @@ definitions:
     required:
     - fx_rate
     - gold_price
-    - gold_price_per_gram_idr
+    - gold_taxes
     - latest_golds
     - profit
-    - tax_preferences
+    - retail_price
     - total_asset
     - total_buy_price
     - total_gold_items
     - total_weight
+    type: object
+  dto.GoldTax:
+    properties:
+      data:
+        $ref: '#/definitions/domain.GoldTaxPreference'
+      sell_price:
+        format: double
+        type: number
+    required:
+    - data
+    - sell_price
     type: object
   dto.GoldTaxPreference:
     properties:
@@ -726,7 +742,8 @@ definitions:
       notes:
         type: string
       price:
-        type: integer
+        format: double
+        type: number
       type:
         type: string
       wallet_id:
@@ -770,7 +787,7 @@ definitions:
       notes:
         type: string
       price:
-        type: integer
+        type: number
       type:
         type: string
     type: object

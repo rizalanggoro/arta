@@ -6,10 +6,10 @@
 | ------------ | ------------- | ------------- | ------------- |
 | **fxRate** | [**DomainFxRate**](DomainFxRate.md) |  |  |
 | **goldPrice** | [**DomainGoldPrice**](DomainGoldPrice.md) |  |  |
-| **goldPricePerGramIdr** | **kotlin.Double** |  |  |
+| **goldTaxes** | [**kotlin.collections.List&lt;DtoGoldTax&gt;**](DtoGoldTax.md) |  |  |
 | **latestGolds** | [**kotlin.collections.List&lt;DtoGold&gt;**](DtoGold.md) |  |  |
 | **profit** | **kotlin.Double** |  |  |
-| **taxPreferences** | [**kotlin.collections.List&lt;DomainGoldTaxPreference&gt;**](DomainGoldTaxPreference.md) |  |  |
+| **retailPrice** | **kotlin.Double** |  |  |
 | **totalAsset** | **kotlin.Double** |  |  |
 | **totalBuyPrice** | **kotlin.Double** |  |  |
 | **totalGoldItems** | **kotlin.Int** |  |  |

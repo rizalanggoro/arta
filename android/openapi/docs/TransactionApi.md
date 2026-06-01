@@ -1,6 +1,6 @@
 # TransactionApi
 
-All URIs are relative to *http://localhost:3000/api*
+All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |

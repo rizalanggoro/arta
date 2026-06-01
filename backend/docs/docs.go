@@ -2202,7 +2202,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "price": {
-                    "type": "integer"
+                    "description": "price per gram in IDR",
+                    "type": "number",
+                    "format": "double"
                 },
                 "type": {
                     "description": "pure_gold or jewelry",
@@ -2246,7 +2248,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "price_per_ounce_usd": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "source_readable_age": {
                     "type": "string"
@@ -2271,7 +2274,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "carat": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "created_at": {
                     "type": "string"
@@ -2280,7 +2284,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "tax_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "updated_at": {
                     "type": "string"
@@ -2502,10 +2507,10 @@ const docTemplate = `{
             "required": [
                 "fx_rate",
                 "gold_price",
-                "gold_price_per_gram_idr",
+                "gold_taxes",
                 "latest_golds",
                 "profit",
-                "tax_preferences",
+                "retail_price",
                 "total_asset",
                 "total_buy_price",
                 "total_gold_items",
@@ -2518,9 +2523,11 @@ const docTemplate = `{
                 "gold_price": {
                     "$ref": "#/definitions/domain.GoldPrice"
                 },
-                "gold_price_per_gram_idr": {
-                    "type": "number",
-                    "format": "double"
+                "gold_taxes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.GoldTax"
+                    }
                 },
                 "latest_golds": {
                     "type": "array",
@@ -2532,11 +2539,9 @@ const docTemplate = `{
                     "type": "number",
                     "format": "double"
                 },
-                "tax_preferences": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/domain.GoldTaxPreference"
-                    }
+                "retail_price": {
+                    "type": "number",
+                    "format": "double"
                 },
                 "total_asset": {
                     "type": "number",
@@ -2550,6 +2555,22 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "total_weight": {
+                    "type": "number",
+                    "format": "double"
+                }
+            }
+        },
+        "dto.GoldTax": {
+            "type": "object",
+            "required": [
+                "data",
+                "sell_price"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.GoldTaxPreference"
+                },
+                "sell_price": {
                     "type": "number",
                     "format": "double"
                 }
@@ -2639,7 +2660,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "price": {
-                    "type": "integer"
+                    "type": "number",
+                    "format": "double"
                 },
                 "type": {
                     "type": "string"
@@ -2694,7 +2716,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "price": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "type": {
                     "type": "string"

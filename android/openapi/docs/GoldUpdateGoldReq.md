@@ -8,7 +8,7 @@
 | **date** | **kotlin.String** |  |  [optional] |
 | **grams** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional] |
 | **notes** | **kotlin.String** |  |  [optional] |
-| **price** | **kotlin.Int** |  |  [optional] |
+| **price** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional] |
 | **type** | **kotlin.String** |  |  [optional] |
 
 

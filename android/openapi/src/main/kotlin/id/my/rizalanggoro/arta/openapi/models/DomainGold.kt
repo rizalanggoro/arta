@@ -37,7 +37,7 @@ import kotlinx.serialization.Contextual
  * @param grams 
  * @param id 
  * @param notes 
- * @param price 
+ * @param price price per gram in IDR
  * @param type pure_gold or jewelry
  * @param updatedAt 
  * @param walletId 
@@ -64,8 +64,9 @@ data class DomainGold (
     @SerialName(value = "notes")
     val notes: kotlin.String,
 
+    /* price per gram in IDR */
     @SerialName(value = "price")
-    val price: kotlin.Int,
+    val price: kotlin.Double,
 
     /* pure_gold or jewelry */
     @SerialName(value = "type")

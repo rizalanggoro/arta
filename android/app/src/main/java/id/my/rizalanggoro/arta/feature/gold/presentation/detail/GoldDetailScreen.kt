@@ -29,13 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.application.Routes.UpsertGoldRoute
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import java.math.BigDecimal
 import kotlinx.coroutines.flow.filterIsInstance
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,7 +81,7 @@ fun GoldDetailScreen(goldId: Int) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    snackbarHostState: SnackbarHostState,
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     gold: DomainGold? = null,
     isLoading: Boolean = false,
     showDeleteDialog: Boolean = false,
@@ -167,15 +166,14 @@ private fun Content(
 private fun GoldDetailScreenPreview() {
     ArtaTheme {
         Content(
-            snackbarHostState = remember { SnackbarHostState() },
             gold = DomainGold(
                 id = 1,
                 walletId = 2,
                 date = "2026-05-16",
-                grams = BigDecimal.valueOf(10.0),
-                price = 9000000,
+                grams = 10.0,
+                price = 9000000.0,
                 type = "pure_gold",
-                carat = BigDecimal.valueOf(24.0),
+                carat = 24.0,
                 notes = "Contoh catatan",
                 createdAt = "",
                 updatedAt = "",

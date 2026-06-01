@@ -27,12 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.openapi.models.DomainGoldTaxPreference
+import id.my.rizalanggoro.arta.openapi.models.DtoGoldTax
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PriceSummary(
-    goldPrice: Double = 0.0,
-    taxPreferences: List<DomainGoldTaxPreference> = emptyList(),
+    retailPrice: Double = 0.0,
+    goldTaxes: List<DtoGoldTax> = emptyList(),
     onClickManageTax: () -> Unit = {},
 ) {
     Card(
@@ -83,7 +84,7 @@ fun PriceSummary(
                         .padding(16.dp)
                 ) {
                     Text(
-                        goldPrice.toIndonesianCurrency(),
+                        retailPrice.toIndonesianCurrency(),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
@@ -94,7 +95,7 @@ fun PriceSummary(
                 }
 
                 // price per carat
-                if (taxPreferences.isNotEmpty()) {
+                if (goldTaxes.isNotEmpty()) {
                     Text(
                         "Berikut harga emas/gram untuk setiap karat setelah perhitungan konfigurasi pajak",
                         style = MaterialTheme.typography.bodySmall,
@@ -107,11 +108,7 @@ fun PriceSummary(
                             .clip(RoundedCornerShape(16.dp)),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        taxPreferences.forEach {
-                            val pricePerCarat = goldPrice * it.carat.toDouble() / 24.0
-                            val price =
-                                pricePerCarat - (pricePerCarat * it.taxRate.toDouble() / 100.0)
-
+                        goldTaxes.forEach {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -121,13 +118,22 @@ fun PriceSummary(
                                     .background(MaterialTheme.colorScheme.surfaceContainer)
                                     .padding(16.dp)
                             ) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    Text(
+                                        it.sellPrice.toIndonesianCurrency(),
+                                        style = MaterialTheme.typography.titleMedium,
+                                    )
+                                    Text(
+                                        "Besaran pajak ${it.data.taxRate}%",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Normal,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                }
                                 Text(
-                                    price.toIndonesianCurrency(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Text(
-                                    "${it.carat.toInt()}k",
+                                    "${it.data.carat.toInt()}k",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.SemiBold
@@ -145,24 +151,19 @@ fun PriceSummary(
 @Preview
 private fun Preview() {
     PriceSummary(
-        goldPrice = 2800000.0,
-        taxPreferences = listOf(
-            DomainGoldTaxPreference(
-                carat = 17.toBigDecimal(),
-                createdAt = "",
-                id = 1,
-                taxRate = 5.toBigDecimal(),
-                updatedAt = "",
-                userId = 1,
+        retailPrice = 2800000.0,
+        goldTaxes = listOf(
+            DtoGoldTax(
+                data = DomainGoldTaxPreference(
+                    carat = 17.0,
+                    createdAt = "",
+                    id = 1,
+                    taxRate = 5.0,
+                    updatedAt = "",
+                    userId = 1,
+                ),
+                sellPrice = 1200000.0
             ),
-            DomainGoldTaxPreference(
-                carat = 24.toBigDecimal(),
-                createdAt = "",
-                id = 1,
-                taxRate = 10.toBigDecimal(),
-                updatedAt = "",
-                userId = 1,
-            )
         )
     )
 }

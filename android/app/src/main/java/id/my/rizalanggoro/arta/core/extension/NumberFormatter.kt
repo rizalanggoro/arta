@@ -38,6 +38,14 @@ fun BigDecimal.toAmericanCurrency(): String = NumberFormat
     )
     .format(this)
 
+fun Double.toAmericanCurrency(): String = NumberFormat
+    .getCurrencyInstance(
+        Locale.forLanguageTag(
+            "us-US"
+        )
+    )
+    .format(this)
+
 fun String.isValidInputNumber() = matches(
     Regex("^\\d*\\.?\\d*$")
 )

@@ -42,8 +42,8 @@ import kotlinx.serialization.Contextual
 
 data class DomainGoldTaxPreference (
 
-    @Contextual @SerialName(value = "carat")
-    val carat: java.math.BigDecimal,
+    @SerialName(value = "carat")
+    val carat: kotlin.Double,
 
     @SerialName(value = "created_at")
     val createdAt: kotlin.String,
@@ -51,8 +51,8 @@ data class DomainGoldTaxPreference (
     @SerialName(value = "id")
     val id: kotlin.Int,
 
-    @Contextual @SerialName(value = "tax_rate")
-    val taxRate: java.math.BigDecimal,
+    @SerialName(value = "tax_rate")
+    val taxRate: kotlin.Double,
 
     @SerialName(value = "updated_at")
     val updatedAt: kotlin.String,

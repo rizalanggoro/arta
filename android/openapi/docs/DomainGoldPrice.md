@@ -9,7 +9,7 @@
 | **currencySymbol** | **kotlin.String** |  |  |
 | **exchangeRate** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
 | **id** | **kotlin.Int** |  |  |
-| **pricePerOunceUsd** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **pricePerOunceUsd** | **kotlin.Double** |  |  |
 | **sourceReadableAge** | **kotlin.String** |  |  |
 | **sourceUpdatedAt** | **kotlin.String** |  |  |
 | **symbol** | **kotlin.String** |  |  |

@@ -219,7 +219,7 @@ private fun Content(
                                 mapOf(
                                     "title" to "Emas dunia",
                                     "value" to (data?.goldPrice?.pricePerOunceUsd
-                                        ?: 0.toBigDecimal()).toAmericanCurrency(),
+                                        ?: 0.0).toAmericanCurrency(),
                                     "date" to data?.goldPrice?.createdAt
                                 ),
                                 mapOf(
@@ -274,9 +274,8 @@ private fun Content(
                     item {
                         PriceSummary(
                             onClickManageTax = onClickManageTax,
-                            taxPreferences = data?.taxPreferences ?: emptyList(),
-//                            goldPrice = data?.goldPrice?.pricePerOunceUsd?.div(31.1034768.toBigDecimal())
-//                                ?.times(data.fxRate.rate.toBigDecimal()) ?: 0.toBigDecimal()
+                            retailPrice = data?.retailPrice ?: 0.0,
+                            goldTaxes = data?.goldTaxes ?: emptyList(),
                         )
                     }
 

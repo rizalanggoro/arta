@@ -25,8 +25,8 @@ package id.my.rizalanggoro.arta.openapi.models
 
 import id.my.rizalanggoro.arta.openapi.models.DomainFxRate
 import id.my.rizalanggoro.arta.openapi.models.DomainGoldPrice
-import id.my.rizalanggoro.arta.openapi.models.DomainGoldTaxPreference
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
+import id.my.rizalanggoro.arta.openapi.models.DtoGoldTax
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
@@ -37,10 +37,10 @@ import kotlinx.serialization.Contextual
  *
  * @param fxRate 
  * @param goldPrice 
- * @param goldPricePerGramIdr 
+ * @param goldTaxes 
  * @param latestGolds 
  * @param profit 
- * @param taxPreferences 
+ * @param retailPrice 
  * @param totalAsset 
  * @param totalBuyPrice 
  * @param totalGoldItems 
@@ -56,8 +56,8 @@ data class DtoGoldDashboard (
     @SerialName(value = "gold_price")
     val goldPrice: DomainGoldPrice,
 
-    @SerialName(value = "gold_price_per_gram_idr")
-    val goldPricePerGramIdr: kotlin.Double,
+    @SerialName(value = "gold_taxes")
+    val goldTaxes: kotlin.collections.List<DtoGoldTax>,
 
     @SerialName(value = "latest_golds")
     val latestGolds: kotlin.collections.List<DtoGold>,
@@ -65,8 +65,8 @@ data class DtoGoldDashboard (
     @SerialName(value = "profit")
     val profit: kotlin.Double,
 
-    @SerialName(value = "tax_preferences")
-    val taxPreferences: kotlin.collections.List<DomainGoldTaxPreference>,
+    @SerialName(value = "retail_price")
+    val retailPrice: kotlin.Double,
 
     @SerialName(value = "total_asset")
     val totalAsset: kotlin.Double,

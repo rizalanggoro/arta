@@ -80,19 +80,19 @@ private fun Preview() {
         golds = List(3) {
             DtoGold(
                 data = DomainGold(
-                    carat = 24.toBigDecimal(),
+                    carat = 24.0,
                     createdAt = "2026-05-25T14:38:00.000+07:00",
                     date = "2026-05-25T14:38:00.000+07:00",
-                    grams = 3.3.toBigDecimal(),
+                    grams = 3.3,
                     id = 1,
                     notes = "",
-                    price = 1500000,
+                    price = 1500000.0,
                     type = "jewelry",
                     updatedAt = "2026-05-25T14:38:00.000+07:00",
                     walletId = 1
                 ),
-                profit = ((it - 1) * 500000).toBigDecimal(),
-                sellPrice = (1500000 + ((it - 1) * 500000)).toBigDecimal(),
+                profit = ((it - 1) * 500000.0),
+                sellPrice = (1500000 + ((it - 1) * 500000.0)),
             )
         }
     )

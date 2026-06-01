@@ -87,7 +87,7 @@ class UpsertGoldVM @Inject constructor(
             hasError = true
         }
 
-        val price = current.price.toIntOrNull()
+        val price = current.price.toDoubleOrNull()
         if (price == null || price <= 0) {
             _uiState.update { it.copy(priceError = "Harga beli wajib berupa angka lebih dari 0") }
             hasError = true

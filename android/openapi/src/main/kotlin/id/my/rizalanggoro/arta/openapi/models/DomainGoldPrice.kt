@@ -60,8 +60,8 @@ data class DomainGoldPrice (
     @SerialName(value = "id")
     val id: kotlin.Int,
 
-    @Contextual @SerialName(value = "price_per_ounce_usd")
-    val pricePerOunceUsd: java.math.BigDecimal,
+    @SerialName(value = "price_per_ounce_usd")
+    val pricePerOunceUsd: kotlin.Double,
 
     @SerialName(value = "source_readable_age")
     val sourceReadableAge: kotlin.String,

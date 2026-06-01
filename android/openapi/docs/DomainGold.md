@@ -10,7 +10,7 @@
 | **grams** | **kotlin.Double** |  |  |
 | **id** | **kotlin.Int** |  |  |
 | **notes** | **kotlin.String** |  |  |
-| **price** | **kotlin.Int** |  |  |
+| **price** | **kotlin.Double** | price per gram in IDR |  |
 | **type** | **kotlin.String** | pure_gold or jewelry |  |
 | **updatedAt** | **kotlin.String** |  |  |
 | **walletId** | **kotlin.Int** |  |  |

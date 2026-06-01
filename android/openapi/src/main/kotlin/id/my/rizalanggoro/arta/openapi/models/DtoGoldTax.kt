@@ -23,6 +23,7 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
+import id.my.rizalanggoro.arta.openapi.models.DomainGoldTaxPreference
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
@@ -31,34 +32,18 @@ import kotlinx.serialization.Contextual
 /**
  * 
  *
- * @param carat 
- * @param date 
- * @param grams 
- * @param notes 
- * @param price 
- * @param type 
+ * @param `data` 
+ * @param sellPrice 
  */
 @Serializable
 
-data class GoldUpdateGoldReq (
+data class DtoGoldTax (
 
-    @Contextual @SerialName(value = "carat")
-    val carat: java.math.BigDecimal? = null,
+    @SerialName(value = "data")
+    val `data`: DomainGoldTaxPreference,
 
-    @SerialName(value = "date")
-    val date: kotlin.String? = null,
-
-    @Contextual @SerialName(value = "grams")
-    val grams: java.math.BigDecimal? = null,
-
-    @SerialName(value = "notes")
-    val notes: kotlin.String? = null,
-
-    @Contextual @SerialName(value = "price")
-    val price: java.math.BigDecimal? = null,
-
-    @SerialName(value = "type")
-    val type: kotlin.String? = null
+    @SerialName(value = "sell_price")
+    val sellPrice: kotlin.Double
 
 ) {
 

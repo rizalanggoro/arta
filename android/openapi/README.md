@@ -41,7 +41,7 @@ This runs all tests and packages the library.
 <a id="documentation-for-api-endpoints"></a>
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://localhost:3000/api*
+All URIs are relative to *http://localhost:8080*
 
 | Class | Method | HTTP request | Description |
 | ------------ | ------------- | ------------- | ------------- |
@@ -112,6 +112,7 @@ All URIs are relative to *http://localhost:3000/api*
  - [id.my.rizalanggoro.arta.openapi.models.DtoError](docs/DtoError.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGold](docs/DtoGold.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGoldDashboard](docs/DtoGoldDashboard.md)
+ - [id.my.rizalanggoro.arta.openapi.models.DtoGoldTax](docs/DtoGoldTax.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference](docs/DtoGoldTaxPreference.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoTransaction](docs/DtoTransaction.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoWallet](docs/DtoWallet.md)

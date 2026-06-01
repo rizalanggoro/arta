@@ -37,11 +37,11 @@ fun GoldListItem(
     index: Int = 0,
     size: Int = 1,
     gold: DtoGold,
-    onClick: (DomainGold) -> Unit = {}
+    onClick: (DomainGold) -> Unit = {},
 ) {
     val status = when {
-        gold.profit > 0.toBigDecimal() -> 1
-        gold.profit < 0.toBigDecimal() -> -1
+        gold.profit > 0 -> 1
+        gold.profit < 0 -> -1
         else -> 0
     }
     val icons = listOf(
@@ -119,30 +119,41 @@ fun GoldListItem(
                     )
             }
         }
-        Text(
-            text = "${gold.data.grams.toFloat()} gr",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.outline
-        )
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = "${gold.data.carat.toInt()}k",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = "${gold.data.grams.toFloat()} gr",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
     }
 }
 
 private val golds = List(3) {
     DtoGold(
         data = DomainGold(
-            carat = 24.toBigDecimal(),
+            carat = 24.0,
             createdAt = "2026-05-25T14:38:00.000+07:00",
             date = "2026-05-25T14:38:00.000+07:00",
-            grams = 3.3.toBigDecimal(),
+            grams = 3.3,
             id = 1,
             notes = "",
-            price = 1500000,
+            price = 1500000.0,
             type = "jewelry",
             updatedAt = "2026-05-25T14:38:00.000+07:00",
             walletId = 1
         ),
-        profit = ((it - 1) * 500000).toBigDecimal(),
-        sellPrice = (1500000 + ((it - 1) * 500000)).toBigDecimal(),
+        profit = ((it - 1) * 500000.0),
+        sellPrice = (1500000 + ((it - 1) * 500000.0)),
     )
 }
 
