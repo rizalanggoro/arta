@@ -2,18 +2,28 @@ package gold
 
 import (
 	"github.com/artafinance/backend/internal/domain"
+	"github.com/artafinance/backend/internal/dto"
 	"github.com/artafinance/backend/internal/model"
+	"github.com/artafinance/backend/pkg/config"
+	"github.com/artafinance/backend/pkg/constant"
 	"gorm.io/gorm"
 )
 
 // Repository handles gold DB operations.
 type Repository struct {
-	db *gorm.DB
+	db     *gorm.DB
+	config *config.Config
 }
 
 // NewRepository creates a new gold repository.
-func NewRepository(db *gorm.DB) *Repository {
-	return &Repository{db: db}
+func NewRepository(
+	db *gorm.DB,
+	config *config.Config,
+) *Repository {
+	return &Repository{
+		db:     db,
+		config: config,
+	}
 }
 
 // CreateGold inserts a new gold entry.
@@ -34,30 +44,42 @@ func (r *Repository) GetGoldByID(id uint) (*domain.Gold, error) {
 	return domain.FromGoldModel(&m), nil
 }
 
-// GetGoldsByWalletID returns gold entries for a wallet.
-// func (r *Repository) GetGoldsByWalletID(walletID uint) ([]domain.Gold, error) {
-// 	var m []model.Gold
-// 	if err := r.db.Where("wallet_id = ?", walletID).Order("date desc").Find(&m).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	out := make([]domain.Gold, 0, len(m))
-// 	for i := range m {
-// 		out = append(out, *domain.FromGoldModel(&m[i]))
-// 	}
-// 	return out, nil
-// }
-
 type GetAllFilter struct {
+	UserId   uint
 	WalletId uint
 	Limit    int
 	OrderBy  string
 	OrderDir string
 }
 
-func (r *Repository) GetAll(filter GetAllFilter) (*[]domain.Gold, error) {
-	var golds []model.Gold
+func (r *Repository) GetAll(filter GetAllFilter) ([]dto.Gold, error) {
+	var golds []struct {
+		model.Gold
+		SellPrice float64
+	}
 
-	query := r.db
+	query := r.db.Model(&model.Gold{}).
+		Select(`
+			golds.*, 
+			(
+				-- gramasi 
+				golds.grams *
+				-- harga per gram dalam IDR 
+				((gp.price_per_ounce_usd / ?) * fr.rate) *
+				-- purity  
+				(golds.carat / 24.0) *
+				-- retail multiplier 
+				? * 
+				-- tax
+				(1 - (coalesce(gtp.tax_rate, 0) / 100.0))
+			) as sell_price
+		`,
+			constant.GramsPerTroyOunce,
+			r.config.GoldRetailMultiplier,
+		).
+		Joins("left join (select * from gold_prices order by created_at desc limit 1) as gp on true").
+		Joins("left join (select * from fx_rates order by created_at desc limit 1) as fr on true").
+		Joins("left join gold_tax_preferences as gtp on gtp.carat = golds.carat and gtp.user_id = ?", filter.UserId)
 
 	if filter.WalletId != 0 {
 		query = query.Where("wallet_id = ?", filter.WalletId)
@@ -78,12 +100,16 @@ func (r *Repository) GetAll(filter GetAllFilter) (*[]domain.Gold, error) {
 	if err := query.Find(&golds).Error; err != nil {
 		return nil, err
 	} else {
-		result := make([]domain.Gold, len(golds))
+		result := make([]dto.Gold, len(golds))
 		for index, gold := range golds {
-			result[index] = *domain.FromGoldModel(&gold)
+			result[index] = dto.Gold{
+				Data:      *domain.FromGoldModel(&gold.Gold),
+				SellPrice: gold.SellPrice,
+				Profit:    gold.SellPrice - float64(gold.Gold.Price),
+			}
 		}
 
-		return &result, nil
+		return result, nil
 	}
 }
 

@@ -1612,10 +1612,12 @@ const docTemplate = `{
                     "$ref": "#/definitions/domain.Gold"
                 },
                 "profit": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "sell_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -1777,10 +1779,12 @@ const docTemplate = `{
                     "$ref": "#/definitions/domain.Gold"
                 },
                 "profit": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "sell_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -1989,10 +1993,12 @@ const docTemplate = `{
                     "$ref": "#/definitions/domain.Gold"
                 },
                 "profit": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "sell_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -2176,7 +2182,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "carat": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "created_at": {
                     "type": "string"
@@ -2185,7 +2192,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "grams": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "id": {
                     "type": "integer"
@@ -2480,10 +2488,12 @@ const docTemplate = `{
                     "$ref": "#/definitions/domain.Gold"
                 },
                 "profit": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "sell_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -2492,8 +2502,9 @@ const docTemplate = `{
             "required": [
                 "fx_rate",
                 "gold_price",
+                "gold_price_per_gram_idr",
+                "latest_golds",
                 "profit",
-                "recent_golds",
                 "tax_preferences",
                 "total_asset",
                 "total_buy_price",
@@ -2507,14 +2518,19 @@ const docTemplate = `{
                 "gold_price": {
                     "$ref": "#/definitions/domain.GoldPrice"
                 },
-                "profit": {
-                    "type": "number"
+                "gold_price_per_gram_idr": {
+                    "type": "number",
+                    "format": "double"
                 },
-                "recent_golds": {
+                "latest_golds": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.Gold"
                     }
+                },
+                "profit": {
+                    "type": "number",
+                    "format": "double"
                 },
                 "tax_preferences": {
                     "type": "array",
@@ -2523,16 +2539,19 @@ const docTemplate = `{
                     }
                 },
                 "total_asset": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "total_buy_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "total_gold_items": {
                     "type": "integer"
                 },
                 "total_weight": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -2740,8 +2759,8 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:3000",
-	BasePath:         "/api",
+	Host:             "localhost:8080",
+	BasePath:         "/",
 	Schemes:          []string{"http", "https"},
 	Title:            "ARTA API",
 	Description:      "API untuk aplikasi manajemen keuangan dan pencatatan emas - ARTA",

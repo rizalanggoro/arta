@@ -28,24 +28,28 @@ type Config struct {
 	EmailService  string
 	EmailFrom     string
 	EmailPassword string
+
+	// gold price
+	GoldRetailMultiplier float64
 }
 
 // New creates a new Config instance from environment variables
 func New() *Config {
 	return &Config{
-		ServerPort:    getEnv("SERVER_PORT", "3000"),
-		ServerEnv:     getEnv("SERVER_ENV", "development"),
-		DBHost:        getEnv("DB_HOST", "localhost"),
-		DBPort:        getEnv("DB_PORT", "5432"),
-		DBUser:        getEnv("DB_USER", "postgres"),
-		DBPassword:    getEnv("DB_PASSWORD", "postgres"),
-		DBName:        getEnv("DB_NAME", "arta"),
-		AppTimeZone:   getEnv("APP_TIMEZONE", "Asia/Jakarta"),
-		JWTSecret:     getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
-		JWTExpiration: getEnvInt("JWT_EXPIRATION", 168), // 7 days in hours
-		EmailService:  getEnv("EMAIL_SERVICE", ""),
-		EmailFrom:     getEnv("EMAIL_FROM", ""),
-		EmailPassword: getEnv("EMAIL_PASSWORD", ""),
+		ServerPort:           getEnv("SERVER_PORT", "3000"),
+		ServerEnv:            getEnv("SERVER_ENV", "development"),
+		DBHost:               getEnv("DB_HOST", "localhost"),
+		DBPort:               getEnv("DB_PORT", "5432"),
+		DBUser:               getEnv("DB_USER", "postgres"),
+		DBPassword:           getEnv("DB_PASSWORD", "postgres"),
+		DBName:               getEnv("DB_NAME", "arta"),
+		AppTimeZone:          getEnv("APP_TIMEZONE", "Asia/Jakarta"),
+		JWTSecret:            getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
+		JWTExpiration:        getEnvInt("JWT_EXPIRATION", 168), // 7 days in hours
+		EmailService:         getEnv("EMAIL_SERVICE", ""),
+		EmailFrom:            getEnv("EMAIL_FROM", ""),
+		EmailPassword:        getEnv("EMAIL_PASSWORD", ""),
+		GoldRetailMultiplier: getEnvFloat("GOLD_RETAIL_MULTIPLIER", 1.08), // 8% markup by default
 	}
 }
 
@@ -77,6 +81,17 @@ func getEnvInt(key string, defaultValue int64) int64 {
 		return defaultValue
 	}
 	if value, err := strconv.ParseInt(valueStr, 10, 64); err == nil {
+		return value
+	}
+	return defaultValue
+}
+
+func getEnvFloat(key string, defaultValue float64) float64 {
+	valueStr := getEnv(key, "")
+	if valueStr == "" {
+		return defaultValue
+	}
+	if value, err := strconv.ParseFloat(valueStr, 64); err == nil {
 		return value
 	}
 	return defaultValue

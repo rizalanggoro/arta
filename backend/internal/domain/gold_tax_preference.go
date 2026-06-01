@@ -12,8 +12,8 @@ import (
 type GoldTaxPreference struct {
 	ID        uint      `json:"id"`
 	UserID    uint      `json:"user_id"`
-	Carat     float64   `json:"carat"`
-	TaxRate   float64   `json:"tax_rate"`
+	Carat     float64   `json:"carat" format:"double"`
+	TaxRate   float64   `json:"tax_rate" format:"double"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

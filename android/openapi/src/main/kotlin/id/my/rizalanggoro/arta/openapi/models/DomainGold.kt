@@ -46,8 +46,8 @@ import kotlinx.serialization.Contextual
 
 data class DomainGold (
 
-    @Contextual @SerialName(value = "carat")
-    val carat: java.math.BigDecimal,
+    @SerialName(value = "carat")
+    val carat: kotlin.Double,
 
     @SerialName(value = "created_at")
     val createdAt: kotlin.String,
@@ -55,8 +55,8 @@ data class DomainGold (
     @SerialName(value = "date")
     val date: kotlin.String,
 
-    @Contextual @SerialName(value = "grams")
-    val grams: java.math.BigDecimal,
+    @SerialName(value = "grams")
+    val grams: kotlin.Double,
 
     @SerialName(value = "id")
     val id: kotlin.Int,

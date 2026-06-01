@@ -5,29 +5,31 @@ import (
 
 	"github.com/artafinance/backend/internal/cron/fxrate"
 	"github.com/artafinance/backend/internal/cron/goldprice"
-	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
 	categoryfeature "github.com/artafinance/backend/internal/feature/category"
 	goldfeature "github.com/artafinance/backend/internal/feature/gold"
 	transactionfeature "github.com/artafinance/backend/internal/feature/transaction"
 	walletfeature "github.com/artafinance/backend/internal/feature/wallet"
+	"github.com/artafinance/backend/pkg/config"
+	"github.com/artafinance/backend/pkg/constant"
 	"github.com/artafinance/backend/pkg/jwt"
 	"github.com/artafinance/backend/pkg/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
-const gramsPerTroyOunce = 31.1034768
-
 // Handler exposes dashboard HTTP endpoints.
 type Handler struct {
-	walletRepo      *walletfeature.Repository
-	goldRepo        *goldfeature.Repository
-	goldPriceRepo   *goldprice.Repository
-	fxRateRepo      *fxrate.Repository
-	transactionRepo *transactionfeature.Repository
-	categoryRepo    *categoryfeature.Repository
-	jwtMgr          *jwt.Manager
-	checker         middleware.TokenStatusChecker
+	walletRepo        *walletfeature.Repository
+	goldRepo          *goldfeature.Repository
+	goldPriceRepo     *goldprice.Repository
+	fxRateRepo        *fxrate.Repository
+	transactionRepo   *transactionfeature.Repository
+	categoryRepo      *categoryfeature.Repository
+	jwtMgr            *jwt.Manager
+	checker           middleware.TokenStatusChecker
+	config            *config.Config
+	dashboardGoldRepo *DashboardGoldRepository
+	goldTaxRepo       *goldfeature.GoldTaxRepository
 }
 
 // NewHandler creates a new dashboard handler.
@@ -40,16 +42,22 @@ func NewHandler(
 	categoryRepo *categoryfeature.Repository,
 	jwtMgr *jwt.Manager,
 	checker middleware.TokenStatusChecker,
+	config *config.Config,
+	dashboardGoldRepo *DashboardGoldRepository,
+	goldTaxRepo *goldfeature.GoldTaxRepository,
 ) *Handler {
 	return &Handler{
-		walletRepo:      walletRepo,
-		goldRepo:        goldRepo,
-		goldPriceRepo:   goldPriceRepo,
-		fxRateRepo:      fxRateRepo,
-		transactionRepo: transactionRepo,
-		categoryRepo:    categoryRepo,
-		jwtMgr:          jwtMgr,
-		checker:         checker,
+		walletRepo:        walletRepo,
+		goldRepo:          goldRepo,
+		goldPriceRepo:     goldPriceRepo,
+		fxRateRepo:        fxRateRepo,
+		transactionRepo:   transactionRepo,
+		categoryRepo:      categoryRepo,
+		jwtMgr:            jwtMgr,
+		checker:           checker,
+		config:            config,
+		dashboardGoldRepo: dashboardGoldRepo,
+		goldTaxRepo:       goldTaxRepo,
 	}
 }
 
@@ -113,10 +121,9 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 		})
 	}
 
-	golds, err := h.goldRepo.GetAll(goldfeature.GetAllFilter{
+	totalSellPrice, err := h.dashboardGoldRepo.GetTotalSellPrice(GetTotalSellPriceFilter{
 		WalletId: uint(walletId),
-		OrderBy:  "date",
-		OrderDir: "desc",
+		UserId:   uint(userId),
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
@@ -125,7 +132,9 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 		})
 	}
 
-	taxPreferences, err := h.goldRepo.GetTaxPreferencesByUserID(uint(userId))
+	totalBuyPrice, err := h.dashboardGoldRepo.GetTotalBuyPrice(GetTotalBuyPriceFilter{
+		WalletId: uint(walletId),
+	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
 			Code:    fiber.StatusInternalServerError,
@@ -133,49 +142,58 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 		})
 	}
 
-	mappedTax := map[uint]domain.GoldTaxPreference{}
-	for _, tp := range taxPreferences {
-		mappedTax[uint(tp.Carat)] = tp
+	totalWeight, err := h.dashboardGoldRepo.GetTotalWeight(GetTotalWeightFilter{
+		WalletId: uint(walletId),
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	mappedGolds := make([]dto.Gold, len(*golds))
-
-	goldPricePerGramIDR := goldPrice.PricePerOunceUSD / gramsPerTroyOunce * float64(fxRate.Rate)
-
-	totalAsset := 0.0
-	totalBuyPrice := 0.0
-	totalWeight := 0.0
-	totalGoldItems := len(*golds)
-	for index, gold := range *golds {
-		totalBuyPrice += float64(gold.Price)
-		totalWeight += gold.Grams
-
-		tax := 1.0
-		if _, exists := mappedTax[uint(gold.Carat)]; exists {
-			tax = 1 - mappedTax[uint(gold.Carat)].TaxRate/100
-		}
-
-		sellPrice := goldPricePerGramIDR * gold.Grams * (gold.Carat / 24.0) * tax
-		totalAsset += sellPrice
-
-		mappedGolds[index] = dto.Gold{
-			Data:      gold,
-			SellPrice: sellPrice,
-			Profit:    sellPrice - float64(gold.Price),
-		}
+	itemCount, err := h.dashboardGoldRepo.GetItemCount(GetItemCountFilter{
+		WalletId: uint(walletId),
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
+
+	golds, err := h.goldRepo.GetAll(goldfeature.GetAllFilter{
+		UserId:   uint(userId),
+		WalletId: uint(walletId),
+		OrderBy:  "date",
+		OrderDir: "desc",
+		Limit:    5,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	goldTaxes, err := h.goldTaxRepo.GetAllGoldTaxes(goldfeature.GetAllGoldTaxesFilter{
+		UserId: uint(userId),
+	})
+
+	retailPrice := goldPrice.PricePerOunceUSD / constant.GramsPerTroyOunce * float64(fxRate.Rate) * h.config.GoldRetailMultiplier
 
 	return c.Status(fiber.StatusOK).JSON(GoldDashboardRes{
 		Data: dto.GoldDashboard{
-			TotalAsset:     totalAsset,
-			TotalBuyPrice:  totalBuyPrice,
-			Profit:         totalAsset - totalBuyPrice,
-			TotalWeight:    totalWeight,
-			TotalGoldItems: totalGoldItems,
+			TotalAsset:     *totalSellPrice,
+			TotalBuyPrice:  *totalBuyPrice,
+			Profit:         *totalSellPrice - *totalBuyPrice,
+			TotalWeight:    *totalWeight,
+			TotalGoldItems: *itemCount,
 			GoldPrice:      *goldPrice,
 			FxRate:         *fxRate,
-			RecentGolds:    mappedGolds[:min(5, len(mappedGolds))],
-			TaxPreferences: taxPreferences,
+			RetailPrice:    retailPrice,
+			LatestGolds:    golds,
+			GoldTaxes:      goldTaxes,
 		},
 	})
 }

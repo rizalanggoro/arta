@@ -27,14 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.openapi.models.DomainGoldTaxPreference
-import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PriceSummary(
-    goldPrice: BigDecimal = 0.toBigDecimal(),
+    goldPrice: Double = 0.0,
     taxPreferences: List<DomainGoldTaxPreference> = emptyList(),
-    onClickManageTax: () -> Unit = {}
+    onClickManageTax: () -> Unit = {},
 ) {
     Card(
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
@@ -109,9 +108,9 @@ fun PriceSummary(
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         taxPreferences.forEach {
-                            val pricePerCarat = goldPrice * it.carat / 24.toBigDecimal()
+                            val pricePerCarat = goldPrice * it.carat.toDouble() / 24.0
                             val price =
-                                pricePerCarat - (pricePerCarat * it.taxRate / 100.toBigDecimal())
+                                pricePerCarat - (pricePerCarat * it.taxRate.toDouble() / 100.0)
 
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -146,7 +145,7 @@ fun PriceSummary(
 @Preview
 private fun Preview() {
     PriceSummary(
-        goldPrice = 2800000.toBigDecimal(),
+        goldPrice = 2800000.0,
         taxPreferences = listOf(
             DomainGoldTaxPreference(
                 carat = 17.toBigDecimal(),

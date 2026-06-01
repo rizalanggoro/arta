@@ -1,4 +1,4 @@
-basePath: /api
+basePath: /
 definitions:
   CashDashboardRes:
     properties:
@@ -19,8 +19,10 @@ definitions:
       data:
         $ref: '#/definitions/domain.Gold'
       profit:
+        format: double
         type: number
       sell_price:
+        format: double
         type: number
     required:
     - data
@@ -128,8 +130,10 @@ definitions:
       data:
         $ref: '#/definitions/domain.Gold'
       profit:
+        format: double
         type: number
       sell_price:
+        format: double
         type: number
     required:
     - data
@@ -269,8 +273,10 @@ definitions:
       data:
         $ref: '#/definitions/domain.Gold'
       profit:
+        format: double
         type: number
       sell_price:
+        format: double
         type: number
     required:
     - data
@@ -392,12 +398,14 @@ definitions:
   domain.Gold:
     properties:
       carat:
+        format: double
         type: number
       created_at:
         type: string
       date:
         type: string
       grams:
+        format: double
         type: number
       id:
         type: integer
@@ -613,8 +621,10 @@ definitions:
       data:
         $ref: '#/definitions/domain.Gold'
       profit:
+        format: double
         type: number
       sell_price:
+        format: double
         type: number
     required:
     - data
@@ -627,29 +637,37 @@ definitions:
         $ref: '#/definitions/domain.FxRate'
       gold_price:
         $ref: '#/definitions/domain.GoldPrice'
-      profit:
+      gold_price_per_gram_idr:
+        format: double
         type: number
-      recent_golds:
+      latest_golds:
         items:
           $ref: '#/definitions/dto.Gold'
         type: array
+      profit:
+        format: double
+        type: number
       tax_preferences:
         items:
           $ref: '#/definitions/domain.GoldTaxPreference'
         type: array
       total_asset:
+        format: double
         type: number
       total_buy_price:
+        format: double
         type: number
       total_gold_items:
         type: integer
       total_weight:
+        format: double
         type: number
     required:
     - fx_rate
     - gold_price
+    - gold_price_per_gram_idr
+    - latest_golds
     - profit
-    - recent_golds
     - tax_preferences
     - total_asset
     - total_buy_price
@@ -785,7 +803,7 @@ definitions:
     - name
     - type
     type: object
-host: localhost:3000
+host: localhost:8080
 info:
   contact: {}
   description: API untuk aplikasi manajemen keuangan dan pencatatan emas - ARTA

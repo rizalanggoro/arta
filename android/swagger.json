@@ -1610,10 +1610,12 @@
                     "$ref": "#/definitions/domain.Gold"
                 },
                 "profit": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "sell_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -1775,10 +1777,12 @@
                     "$ref": "#/definitions/domain.Gold"
                 },
                 "profit": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "sell_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -1987,10 +1991,12 @@
                     "$ref": "#/definitions/domain.Gold"
                 },
                 "profit": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "sell_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -2174,7 +2180,8 @@
             ],
             "properties": {
                 "carat": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "created_at": {
                     "type": "string"
@@ -2183,7 +2190,8 @@
                     "type": "string"
                 },
                 "grams": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "id": {
                     "type": "integer"
@@ -2478,10 +2486,12 @@
                     "$ref": "#/definitions/domain.Gold"
                 },
                 "profit": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "sell_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -2490,8 +2500,9 @@
             "required": [
                 "fx_rate",
                 "gold_price",
+                "gold_price_per_gram_idr",
+                "latest_golds",
                 "profit",
-                "recent_golds",
                 "tax_preferences",
                 "total_asset",
                 "total_buy_price",
@@ -2505,14 +2516,19 @@
                 "gold_price": {
                     "$ref": "#/definitions/domain.GoldPrice"
                 },
-                "profit": {
-                    "type": "number"
+                "gold_price_per_gram_idr": {
+                    "type": "number",
+                    "format": "double"
                 },
-                "recent_golds": {
+                "latest_golds": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.Gold"
                     }
+                },
+                "profit": {
+                    "type": "number",
+                    "format": "double"
                 },
                 "tax_preferences": {
                     "type": "array",
@@ -2521,16 +2537,19 @@
                     }
                 },
                 "total_asset": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "total_buy_price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "total_gold_items": {
                     "type": "integer"
                 },
                 "total_weight": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },

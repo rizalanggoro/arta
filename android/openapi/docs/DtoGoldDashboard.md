@@ -6,13 +6,14 @@
 | ------------ | ------------- | ------------- | ------------- |
 | **fxRate** | [**DomainFxRate**](DomainFxRate.md) |  |  |
 | **goldPrice** | [**DomainGoldPrice**](DomainGoldPrice.md) |  |  |
-| **profit** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
-| **recentGolds** | [**kotlin.collections.List&lt;DtoGold&gt;**](DtoGold.md) |  |  |
+| **goldPricePerGramIdr** | **kotlin.Double** |  |  |
+| **latestGolds** | [**kotlin.collections.List&lt;DtoGold&gt;**](DtoGold.md) |  |  |
+| **profit** | **kotlin.Double** |  |  |
 | **taxPreferences** | [**kotlin.collections.List&lt;DomainGoldTaxPreference&gt;**](DomainGoldTaxPreference.md) |  |  |
-| **totalAsset** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
-| **totalBuyPrice** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **totalAsset** | **kotlin.Double** |  |  |
+| **totalBuyPrice** | **kotlin.Double** |  |  |
 | **totalGoldItems** | **kotlin.Int** |  |  |
-| **totalWeight** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **totalWeight** | **kotlin.Double** |  |  |
 
 
 

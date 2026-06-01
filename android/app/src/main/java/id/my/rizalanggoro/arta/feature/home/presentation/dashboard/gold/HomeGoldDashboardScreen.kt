@@ -37,11 +37,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.application.Routes
 import id.my.rizalanggoro.arta.core.extension.toAmericanCurrency
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component.LatestGold
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component.PriceSummary
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
@@ -119,14 +119,16 @@ private fun Content(
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = (data?.totalAsset
-                                    ?: 0.toBigDecimal()).toIndonesianCurrency(),
+                                text = (data?.totalAsset ?: 0.0).toIndonesianCurrency(),
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Column {
                                 Text(
-                                    text = "Harga beli ${(data?.totalBuyPrice ?: 0.toBigDecimal()).toIndonesianCurrency()}",
+                                    text = "Harga beli ${
+                                        (data?.totalBuyPrice ?: 0.0)
+                                            .toIndonesianCurrency()
+                                    }",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.outline
                                 )
@@ -137,11 +139,11 @@ private fun Content(
                                     Icon(
                                         Icons.AutoMirrored.Rounded.TrendingUp,
                                         null,
-                                        modifier = Modifier.size(MaterialTheme.typography.bodyMedium.fontSize.value.dp),
+                                        modifier = Modifier.size(16.dp),
                                         tint = MaterialTheme.colorScheme.outline
                                     )
                                     Text(
-                                        text = (data?.profit ?: 0.toBigDecimal())
+                                        text = (data?.profit ?: 0.0)
                                             .toIndonesianCurrency(),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.outline
@@ -273,14 +275,14 @@ private fun Content(
                         PriceSummary(
                             onClickManageTax = onClickManageTax,
                             taxPreferences = data?.taxPreferences ?: emptyList(),
-                            goldPrice = data?.goldPrice?.pricePerOunceUsd?.div(31.1034768.toBigDecimal())
-                                ?.times(data.fxRate.rate.toBigDecimal()) ?: 0.toBigDecimal()
+//                            goldPrice = data?.goldPrice?.pricePerOunceUsd?.div(31.1034768.toBigDecimal())
+//                                ?.times(data.fxRate.rate.toBigDecimal()) ?: 0.toBigDecimal()
                         )
                     }
 
                     item {
                         LatestGold(
-                            golds = data?.recentGolds ?: emptyList(),
+                            golds = data?.latestGolds ?: emptyList(),
                         )
                     }
                 }

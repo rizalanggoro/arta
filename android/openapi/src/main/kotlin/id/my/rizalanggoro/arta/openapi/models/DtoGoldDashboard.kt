@@ -37,8 +37,9 @@ import kotlinx.serialization.Contextual
  *
  * @param fxRate 
  * @param goldPrice 
+ * @param goldPricePerGramIdr 
+ * @param latestGolds 
  * @param profit 
- * @param recentGolds 
  * @param taxPreferences 
  * @param totalAsset 
  * @param totalBuyPrice 
@@ -55,26 +56,29 @@ data class DtoGoldDashboard (
     @SerialName(value = "gold_price")
     val goldPrice: DomainGoldPrice,
 
-    @Contextual @SerialName(value = "profit")
-    val profit: java.math.BigDecimal,
+    @SerialName(value = "gold_price_per_gram_idr")
+    val goldPricePerGramIdr: kotlin.Double,
 
-    @SerialName(value = "recent_golds")
-    val recentGolds: kotlin.collections.List<DtoGold>,
+    @SerialName(value = "latest_golds")
+    val latestGolds: kotlin.collections.List<DtoGold>,
+
+    @SerialName(value = "profit")
+    val profit: kotlin.Double,
 
     @SerialName(value = "tax_preferences")
     val taxPreferences: kotlin.collections.List<DomainGoldTaxPreference>,
 
-    @Contextual @SerialName(value = "total_asset")
-    val totalAsset: java.math.BigDecimal,
+    @SerialName(value = "total_asset")
+    val totalAsset: kotlin.Double,
 
-    @Contextual @SerialName(value = "total_buy_price")
-    val totalBuyPrice: java.math.BigDecimal,
+    @SerialName(value = "total_buy_price")
+    val totalBuyPrice: kotlin.Double,
 
     @SerialName(value = "total_gold_items")
     val totalGoldItems: kotlin.Int,
 
-    @Contextual @SerialName(value = "total_weight")
-    val totalWeight: java.math.BigDecimal
+    @SerialName(value = "total_weight")
+    val totalWeight: kotlin.Double
 
 ) {
 

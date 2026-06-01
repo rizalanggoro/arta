@@ -6,6 +6,6 @@ import "github.com/artafinance/backend/internal/domain"
 // @name Gold
 type Gold struct {
 	Data      domain.Gold `json:"data"`
-	SellPrice float64     `json:"sell_price"`
-	Profit    float64     `json:"profit"`
+	SellPrice float64     `json:"sell_price" format:"double"`
+	Profit    float64     `json:"profit" format:"double"`
 }

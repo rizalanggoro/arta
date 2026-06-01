@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	_ "github.com/artafinance/backend/docs"
 	"github.com/artafinance/backend/internal/cron/fxrate"
 	"github.com/artafinance/backend/internal/cron/goldprice"
 	"github.com/artafinance/backend/internal/feature/auth"
@@ -21,13 +22,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
 // @title ARTA API
 // @version 1.0
 // @description API untuk aplikasi manajemen keuangan dan pencatatan emas - ARTA
-// @host localhost:3000
-// @basePath /api
+// @host localhost:8080
+// @basePath /
 // @schemes http https
 // @securityDefinitions.apikey Bearer
 // @in header
@@ -72,7 +74,8 @@ func main() {
 	categoryRepo := category.NewRepository(db)
 	categoryHandler := category.NewHandler(categoryRepo, jwtManager, authRepo)
 
-	goldRepo := gold.NewRepository(db)
+	goldRepo := gold.NewRepository(db, cfg)
+	goldTaxRepo := gold.NewGoldTaxRepository(db, cfg)
 	goldHandler := gold.NewHandler(
 		goldRepo,
 		fxRateRepo,
@@ -87,10 +90,15 @@ func main() {
 	transactionRepo := transaction.NewRepository(db)
 	transactionHandler := transaction.NewHandler(transactionRepo, categoryRepo, jwtManager, authRepo)
 
-	dashboardHandler := dashboard.NewHandler(walletRepo, goldRepo, goldPriceRepo, fxRateRepo, transactionRepo, categoryRepo, jwtManager, authRepo)
+	dashboardGoldRepo := dashboard.NewDashboardGoldRepository(db, cfg)
+	dashboardHandler := dashboard.NewHandler(walletRepo, goldRepo, goldPriceRepo, fxRateRepo,
+		transactionRepo, categoryRepo, jwtManager, authRepo, cfg, dashboardGoldRepo, goldTaxRepo)
 
 	app := fiber.New()
 	app.Use(logger.New())
+
+	app.Get("/swagger/*", fiberSwagger.WrapHandler)
+
 	api := app.Group("/api")
 	authHandler.RegisterRoutes(api)
 	walletHandler.RegisterRoutes(api)

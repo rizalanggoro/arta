@@ -14,13 +14,14 @@ type CashDashboard struct {
 // GoldDashboard represents the gold home dashboard response DTO.
 // @name GoldDashboard
 type GoldDashboard struct {
-	TotalAsset     float64                    `json:"total_asset"`
-	TotalBuyPrice  float64                    `json:"total_buy_price"`
-	Profit         float64                    `json:"profit"`
-	TotalWeight    float64                    `json:"total_weight"`
-	TotalGoldItems int                        `json:"total_gold_items"`
-	GoldPrice      domain.GoldPrice           `json:"gold_price"`
-	FxRate         domain.FxRate              `json:"fx_rate"`
-	RecentGolds    []Gold                     `json:"recent_golds"`
-	TaxPreferences []domain.GoldTaxPreference `json:"tax_preferences"`
+	TotalAsset     float64          `json:"total_asset" format:"double"`
+	TotalBuyPrice  float64          `json:"total_buy_price" format:"double"`
+	Profit         float64          `json:"profit" format:"double"`
+	TotalWeight    float64          `json:"total_weight" format:"double"`
+	TotalGoldItems int              `json:"total_gold_items"`
+	GoldPrice      domain.GoldPrice `json:"gold_price"`
+	FxRate         domain.FxRate    `json:"fx_rate"`
+	RetailPrice    float64          `json:"retail_price" format:"double"`
+	LatestGolds    []Gold           `json:"latest_golds"`
+	GoldTaxes      []GoldTax        `json:"gold_taxes"`
 }

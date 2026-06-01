@@ -43,11 +43,11 @@ data class DtoGold (
     @SerialName(value = "data")
     val `data`: DomainGold,
 
-    @Contextual @SerialName(value = "profit")
-    val profit: java.math.BigDecimal,
+    @SerialName(value = "profit")
+    val profit: kotlin.Double,
 
-    @Contextual @SerialName(value = "sell_price")
-    val sellPrice: java.math.BigDecimal
+    @SerialName(value = "sell_price")
+    val sellPrice: kotlin.Double
 
 ) {
 

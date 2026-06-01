@@ -4,10 +4,10 @@
 ## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-| **carat** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **carat** | **kotlin.Double** |  |  |
 | **createdAt** | **kotlin.String** |  |  |
 | **date** | **kotlin.String** |  |  |
-| **grams** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  |
+| **grams** | **kotlin.Double** |  |  |
 | **id** | **kotlin.Int** |  |  |
 | **notes** | **kotlin.String** |  |  |
 | **price** | **kotlin.Int** |  |  |
