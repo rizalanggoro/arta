@@ -46,9 +46,9 @@ All URIs are relative to *http://localhost:3000/api*
 | Class | Method | HTTP request | Description |
 | ------------ | ------------- | ------------- | ------------- |
 | *AuthApi* | [**apiAuthLoginPost**](docs/AuthApi.md#apiauthloginpost) | **POST** api/auth/login | Login a user |
-| *AuthApi* | [**apiAuthLogoutPost**](docs/AuthApi.md#apiauthlogoutpost) | **POST** api/auth/logout | Logout current session |
 | *AuthApi* | [**apiAuthMeGet**](docs/AuthApi.md#apiauthmeget) | **GET** api/auth/me | Get current user |
 | *AuthApi* | [**apiAuthRegisterPost**](docs/AuthApi.md#apiauthregisterpost) | **POST** api/auth/register | Register a new user |
+| *AuthApi* | [**logout**](docs/AuthApi.md#logout) | **POST** api/auth/logout | Logout current session |
 | *CategoryApi* | [**createCategory**](docs/CategoryApi.md#createcategory) | **POST** api/category |  |
 | *CategoryApi* | [**deleteCategory**](docs/CategoryApi.md#deletecategory) | **DELETE** api/category/{id} |  |
 | *CategoryApi* | [**getCategory**](docs/CategoryApi.md#getcategory) | **GET** api/category/{id} |  |

@@ -33,21 +33,6 @@ interface AuthApi {
     suspend fun apiAuthLoginPost(@Body body: LoginReq): Response<LoginRes>
 
     /**
-     * POST api/auth/logout
-     * Logout current session
-     * Delete the current session token.
-     * Responses:
-     *  - 200: OK
-     *  - 401: Unauthorized
-     *  - 500: Internal Server Error
-     *
-     * @param authorization Bearer token
-     * @return [LogoutRes]
-     */
-    @POST("api/auth/logout")
-    suspend fun apiAuthLogoutPost(@Header("Authorization") authorization: kotlin.String): Response<LogoutRes>
-
-    /**
      * GET api/auth/me
      * Get current user
      * Return the authenticated user&#39;s profile.
@@ -77,5 +62,20 @@ interface AuthApi {
      */
     @POST("api/auth/register")
     suspend fun apiAuthRegisterPost(@Body body: RegisterReq): Response<RegisterRes>
+
+    /**
+     * POST api/auth/logout
+     * Logout current session
+     * Delete the current session token.
+     * Responses:
+     *  - 200: OK
+     *  - 401: Unauthorized
+     *  - 500: Internal Server Error
+     *
+     * @param authorization Bearer token
+     * @return [LogoutRes]
+     */
+    @POST("api/auth/logout")
+    suspend fun logout(@Header("Authorization") authorization: kotlin.String): Response<LogoutRes>
 
 }

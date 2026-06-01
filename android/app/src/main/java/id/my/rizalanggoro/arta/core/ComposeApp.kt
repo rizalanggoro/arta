@@ -46,6 +46,7 @@ import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.data.ThemePrefs
 import id.my.rizalanggoro.arta.feature.auth.presentation.forgotpassword.ForgotPasswordScreen
 import id.my.rizalanggoro.arta.feature.auth.presentation.login.LoginScreen
+import id.my.rizalanggoro.arta.feature.auth.presentation.logout.LogoutDialog
 import id.my.rizalanggoro.arta.feature.auth.presentation.register.RegisterScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
@@ -135,6 +136,9 @@ fun ComposeApp(
                         entry<LoginRoute> { LoginScreen() }
                         entry<RegisterRoute> { RegisterScreen() }
                         entry<ForgotPasswordRoute> { ForgotPasswordScreen() }
+                        entry<Routes.LogoutRoute>(
+                            metadata = DialogSceneStrategy.dialog()
+                        ) { LogoutDialog() }
 
                         // wallet
                         entry<WalletRoute> { ListWalletScreen() }

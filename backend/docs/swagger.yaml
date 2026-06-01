@@ -831,6 +831,7 @@ paths:
       consumes:
       - application/json
       description: Delete the current session token.
+      operationId: logout
       parameters:
       - description: Bearer token
         in: header

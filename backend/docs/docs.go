@@ -85,6 +85,7 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "Logout current session",
+                "operationId": "logout",
                 "parameters": [
                     {
                         "type": "string",

@@ -17,6 +17,9 @@ object Routes {
     @Serializable
     data object ForgotPasswordRoute : NavKey
 
+    @Serializable
+    data object LogoutRoute : NavKey
+
     // home
     @Serializable
     data object HomeRoute : NavKey

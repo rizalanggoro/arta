@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,19 +20,15 @@ import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material.icons.rounded.Wallet
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -43,14 +38,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.LocalBackStack
+import id.my.rizalanggoro.arta.core.Routes
 import id.my.rizalanggoro.arta.core.Routes.CategoryRoute
 import id.my.rizalanggoro.arta.core.Routes.GoldTaxListRoute
-import id.my.rizalanggoro.arta.core.Routes.LoginRoute
 import id.my.rizalanggoro.arta.core.Routes.TestDialogRoute
 import id.my.rizalanggoro.arta.core.Routes.UpdateRoute
 import id.my.rizalanggoro.arta.core.Routes.WalletRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun HomeSettingScreen(
@@ -59,15 +53,6 @@ fun HomeSettingScreen(
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        vm.event
-            .filterIsInstance<HomeSettingEvent.LoggedOut>()
-            .collect {
-                backStack.clear()
-                backStack.add(LoginRoute)
-            }
-    }
-
     Content(
         uiState = uiState,
         onToggleTheme = vm::onToggleTheme,
@@ -75,17 +60,9 @@ fun HomeSettingScreen(
         onClickManageWallet = { backStack.add(WalletRoute) },
         onClickManageGoldTax = { backStack.add(GoldTaxListRoute) },
         onClickUpdate = { backStack.add(UpdateRoute) },
-        onClickLogout = vm::logout,
-        onClickTest = {
-            backStack.add(TestDialogRoute)
-        }
+        onClickLogout = { backStack.add(Routes.LogoutRoute) },
+        onClickTest = { backStack.add(TestDialogRoute) }
     )
-
-    if (uiState.isLogoutOpen)
-        LogoutDialog(
-            onDismiss = { vm.onChangeLogoutDialog(isOpen = false) },
-            onConfirm = { vm.logout() },
-        )
 }
 
 @Composable
@@ -353,46 +330,7 @@ private fun Content(
     }
 }
 
-@Composable
-private fun LogoutDialog(
-    onDismiss: () -> Unit = {},
-    onConfirm: () -> Unit = {},
-    isLoading: Boolean = false,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text("Keluar")
-        },
-        text = {
-            when (isLoading) {
-                true -> Box(modifier = Modifier.fillMaxWidth()) {
-                    LoadingIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-
-                else -> Text("Apakah Anda yakin akan keluar dari akun ini?")
-            }
-        },
-        confirmButton = {
-            if (!isLoading)
-                TextButton(
-                    onClick = onConfirm
-                ) {
-                    Text("Keluar")
-                }
-        },
-        dismissButton = {
-            if (!isLoading)
-                TextButton(
-                    onClick = onDismiss
-                ) {
-                    Text("Batal")
-                }
-        }
-    )
-}
-
-@Preview(showBackground = true, name = "Setting")
+@Preview(showBackground = true)
 @Composable
 private fun HomeSettingPreview() {
     ArtaTheme {
@@ -400,24 +338,6 @@ private fun HomeSettingPreview() {
             uiState = HomeSettingUiState(
                 isDarkTheme = true
             )
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Logout Confirmation")
-@Composable
-private fun LogoutPreview() {
-    ArtaTheme {
-        LogoutDialog()
-    }
-}
-
-@Preview(showBackground = true, name = "Logout Confirmation")
-@Composable
-private fun LogoutLoadingPreview() {
-    ArtaTheme {
-        LogoutDialog(
-            isLoading = true,
         )
     }
 }

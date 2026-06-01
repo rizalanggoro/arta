@@ -206,6 +206,7 @@ func (h *Handler) me(c *fiber.Ctx) error {
 	})
 }
 
+// @id logout
 // @Summary Logout current session
 // @Description Delete the current session token.
 // @Tags auth

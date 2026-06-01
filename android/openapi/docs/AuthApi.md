@@ -5,9 +5,9 @@ All URIs are relative to *http://localhost:3000/api*
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
 | [**apiAuthLoginPost**](AuthApi.md#apiAuthLoginPost) | **POST** api/auth/login | Login a user |
-| [**apiAuthLogoutPost**](AuthApi.md#apiAuthLogoutPost) | **POST** api/auth/logout | Logout current session |
 | [**apiAuthMeGet**](AuthApi.md#apiAuthMeGet) | **GET** api/auth/me | Get current user |
 | [**apiAuthRegisterPost**](AuthApi.md#apiAuthRegisterPost) | **POST** api/auth/register | Register a new user |
+| [**logout**](AuthApi.md#logout) | **POST** api/auth/logout | Logout current session |
 
 
 
@@ -47,45 +47,6 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
-
-
-Logout current session
-
-Delete the current session token.
-
-### Example
-```kotlin
-// Import classes:
-//import id.my.rizalanggoro.arta.openapi.*
-//import id.my.rizalanggoro.arta.openapi.infrastructure.*
-//import id.my.rizalanggoro.arta.openapi.models.*
-
-val apiClient = ApiClient()
-val webService = apiClient.createWebservice(AuthApi::class.java)
-val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
-
-launch(Dispatchers.IO) {
-    val result : LogoutRes = webService.apiAuthLogoutPost(authorization)
-}
-```
-
-### Parameters
-| Name | Type | Description  | Notes |
-| ------------- | ------------- | ------------- | ------------- |
-| **authorization** | **kotlin.String**| Bearer token | |
-
-### Return type
-
-[**LogoutRes**](LogoutRes.md)
-
-### Authorization
-
-
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
  - **Accept**: application/json
 
 
@@ -164,5 +125,44 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+Logout current session
+
+Delete the current session token.
+
+### Example
+```kotlin
+// Import classes:
+//import id.my.rizalanggoro.arta.openapi.*
+//import id.my.rizalanggoro.arta.openapi.infrastructure.*
+//import id.my.rizalanggoro.arta.openapi.models.*
+
+val apiClient = ApiClient()
+val webService = apiClient.createWebservice(AuthApi::class.java)
+val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
+
+launch(Dispatchers.IO) {
+    val result : LogoutRes = webService.logout(authorization)
+}
+```
+
+### Parameters
+| Name | Type | Description  | Notes |
+| ------------- | ------------- | ------------- | ------------- |
+| **authorization** | **kotlin.String**| Bearer token | |
+
+### Return type
+
+[**LogoutRes**](LogoutRes.md)
+
+### Authorization
+
+
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 

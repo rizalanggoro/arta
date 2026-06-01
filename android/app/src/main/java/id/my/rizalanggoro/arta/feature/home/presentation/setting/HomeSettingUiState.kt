@@ -5,6 +5,5 @@ import id.my.rizalanggoro.arta.domain.AuthSession
 data class HomeSettingUiState(
     val session: AuthSession? = null,
     val isDarkTheme: Boolean = false,
-    val isLogoutOpen: Boolean = false,
     val hasUpdate: Boolean = false,
 )
