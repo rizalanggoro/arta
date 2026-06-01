@@ -80,7 +80,8 @@ func (r *Repository) GetAll(filter *GetAllFilter) ([]dto.Transaction, error) {
 		if filter.OrderDirection != "" {
 			orderDir = filter.OrderDirection
 		}
-		query = query.Order(filter.OrderBy + " " + orderDir)
+		query = query.Order(filter.OrderBy + " " + orderDir).
+			Order("created_at desc")
 	}
 	if filter.IncludeCategory {
 		query = query.Preload("Category")
