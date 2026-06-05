@@ -1,12 +1,13 @@
 package id.my.rizalanggoro.arta.feature.wallet.presentation.list
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
@@ -14,8 +15,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -24,18 +25,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
-import id.my.rizalanggoro.arta.core.constant.toWalletName
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.feature.wallet.presentation.list.component.WalletActionBS
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.openapi.models.DtoWallet
 import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
+import id.my.rizalanggoro.arta.shared.component.WalletListItem
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
@@ -46,7 +48,7 @@ fun ListWalletScreen(vm: ListWalletVM = hiltViewModel()) {
     Content(
         uiState = uiState,
         onClickCreate = { backStack.add(UpsertWalletRoute()) },
-        onSelectWallet = vm::onWalletSelected,
+        onLongClickWallet = vm::onWalletSelected,
         onClickRetry = vm::loadWallets,
         onClickBack = { backStack.removeLastOrNull() },
     )
@@ -77,7 +79,7 @@ private fun Content(
     uiState: ListWalletUiState = ListWalletUiState(),
     onClickCreate: () -> Unit = {},
     onClickBack: () -> Unit = {},
-    onSelectWallet: (DomainWallet) -> Unit = {},
+    onLongClickWallet: (DomainWallet) -> Unit = {},
     onClickRetry: () -> Unit = {},
 ) {
     Scaffold(
@@ -132,21 +134,27 @@ private fun Content(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                else -> {
-                    LazyColumn {
-                        items(uiState.wallets) { wallet ->
-                            ListItem(
-                                headlineContent = {
-                                    Text(wallet.data.name.orEmpty())
-                                },
-                                supportingContent = {
-                                    Text(wallet.data.type.orEmpty().toWalletName())
-                                },
-                                modifier = Modifier.clickable {
-                                    onSelectWallet(wallet.data)
-                                },
-                            )
-                        }
+                else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    itemsIndexed(uiState.wallets) { index, wallet ->
+                        WalletListItem(
+                            wallet = wallet.data,
+                            index = index,
+                            size = uiState.wallets.size,
+                            onLongClick = onLongClickWallet,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+
+                    item {
+                        Text(
+                            "Tekan dan tahan untuk melihat opsi lainnya",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }
@@ -154,9 +162,9 @@ private fun Content(
     }
 }
 
-@Preview(showBackground = true, name = "Wallet List")
+@Preview(showBackground = true)
 @Composable
-private fun WalletListPreview() {
+private fun Preview() {
     ArtaTheme {
         Content(
             uiState = ListWalletUiState(
@@ -187,9 +195,9 @@ private fun WalletListPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Wallet List - Loading")
+@Preview(showBackground = true)
 @Composable
-private fun WalletListLoadingPreview() {
+private fun LoadingPreview() {
     ArtaTheme {
         Content(
             uiState = ListWalletUiState(
@@ -201,13 +209,13 @@ private fun WalletListLoadingPreview() {
 
 @Preview(showBackground = true, name = "Wallet List - Empty")
 @Composable
-private fun WalletListEmptyPreview() {
+private fun EmptyPreview() {
     ArtaTheme { Content() }
 }
 
 @Preview(showBackground = true, name = "Wallet List - Error")
 @Composable
-private fun WalletListErrorPreview() {
+private fun ErrorPreview() {
     ArtaTheme {
         Content(
             uiState = ListWalletUiState(
