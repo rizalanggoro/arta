@@ -39,16 +39,16 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.application.Routes.HomeCashDashboardRoute
 import id.my.rizalanggoro.arta.core.application.Routes.HomeGoldDashboardRoute
 import id.my.rizalanggoro.arta.core.application.Routes.HomeGoldRoute
 import id.my.rizalanggoro.arta.core.application.Routes.HomeSettingRoute
 import id.my.rizalanggoro.arta.core.application.Routes.HomeTransactionRoute
+import id.my.rizalanggoro.arta.core.application.Routes.SelectWalletRoute
 import id.my.rizalanggoro.arta.core.application.Routes.TransactionUpsertRoute
 import id.my.rizalanggoro.arta.core.application.Routes.UpsertGoldRoute
-import id.my.rizalanggoro.arta.core.application.Routes.WalletSelectRoute
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.HomeGoldDashboardScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
@@ -75,7 +75,7 @@ fun HomeScreen(
     Content(
         destinations = destinations,
         uiState = uiState,
-        onClickSelectWallet = { backStack.add(WalletSelectRoute) },
+        onClickSelectWallet = { backStack.add(SelectWalletRoute) },
         homeBackStack = homeBackStack,
         onClickFab = {
             when (walletType) {

@@ -19,9 +19,9 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import id.my.rizalanggoro.arta.core.application.Routes.CreateFirstWalletRoute
 import id.my.rizalanggoro.arta.core.application.Routes.HomeRoute
 import id.my.rizalanggoro.arta.core.application.Routes.LoginRoute
-import id.my.rizalanggoro.arta.core.application.Routes.WalletCreateFirstRoute
 import id.my.rizalanggoro.arta.core.application.entry.authEntry
 import id.my.rizalanggoro.arta.core.application.entry.categoryEntry
 import id.my.rizalanggoro.arta.core.application.entry.goldEntry
@@ -47,7 +47,7 @@ fun ComposeApp(
     val isDarkTheme by themePrefs.isDarkTheme.collectAsState()
 
     val startRoute = when {
-        session != null && selectedWallet == null -> WalletCreateFirstRoute
+        session != null && selectedWallet == null -> CreateFirstWalletRoute
         session != null -> HomeRoute
         else -> LoginRoute
     }

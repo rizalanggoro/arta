@@ -1,5 +1,5 @@
 package id.my.rizalanggoro.arta.feature.wallet.presentation.delete
 
-data class DeleteTransactionUiState(
+data class DeleteWalletUiState(
     val isLoading: Boolean = false,
 )

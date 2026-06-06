@@ -1,14 +1,17 @@
 package id.my.rizalanggoro.arta.feature.wallet.presentation.list
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import id.my.rizalanggoro.arta.R
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
-import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListWalletVM @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val walletApi: WalletApi,
     private val authPrefs: AuthPrefs,
 ) : ViewModel() {
@@ -34,87 +38,32 @@ class ListWalletVM @Inject constructor(
                 )
             }
             runCatching {
-                val response = walletApi.listWallets(authorizationHeader() ?: throw IllegalStateException("Sesi login tidak ditemukan"))
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(response.errorMessage())
-                }
+                val response = walletApi.listWallets(
+                    authorization = authPrefs.authorization()
+                )
 
-                response.body() ?: throw IllegalStateException("Response body is null")
+                if (!response.isSuccessful) throw IllegalStateException(response.errorMessage())
+
+                response.body() ?: throw IllegalStateException(
+                    context.getString(
+                        R.string.server_empty_error
+                    )
+                )
             }.onSuccess { response ->
                 _uiState.update {
                     it.copy(
                         wallets = response.wallets,
                         isLoading = false,
                         errorMessage = null,
-                        deleteTarget = null,
                     )
                 }
             }.onFailure { throwable ->
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = throwable.message ?: "Gagal memuat wallet",
-                    )
-                }
-            }
-        }
-    }
-
-    fun onWalletSelected(wallet: DomainWallet) = _uiState.update {
-        it.copy(
-            selectedWallet = wallet
-        )
-    }
-
-    fun onActionDeleteClicked() = _uiState.update {
-        it.copy(
-            deleteTarget = it.selectedWallet,
-            selectedWallet = null
-        )
-    }
-
-    fun onActionDismissed() = _uiState.update {
-        it.copy(
-            selectedWallet = null,
-            deleteTarget = null
-        )
-    }
-
-    fun onDialogDismissed() = _uiState.update {
-        it.copy(deleteTarget = null)
-    }
-
-    fun confirmDeleteWallet() {
-        viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isDeleting = true
-                )
-            }
-            runCatching {
-                val response =
-                    walletApi.deleteWallet(
-                        authorizationHeader() ?: throw IllegalStateException("Sesi login tidak ditemukan"),
-                        requireNotNull(_uiState.value.deleteTarget?.id) {
-                            "Wallet response missing id"
-                        }
-                    )
-                if (!response.isSuccessful) {
-                        throw IllegalStateException(response.errorMessage())
-                }
-            }.onSuccess {
-                _uiState.update {
-                    it.copy(
-                        isDeleting = false,
-                        deleteTarget = null
-                    )
-                }
-                loadWallets()
-            }.onFailure { throwable ->
-                _uiState.update {
-                    it.copy(
-                        isDeleting = false,
-                        // errorMessage = throwable.message ?: "Gagal menghapus wallet",
+                        errorMessage = throwable.message ?: context.getString(
+                            R.string.client_error
+                        ),
                     )
                 }
             }
@@ -129,9 +78,5 @@ class ListWalletVM @Inject constructor(
                 .filterIsInstance<AppEvent.WalletChanged>()
                 .collect { loadWallets() }
         }
-    }
-
-    private fun authorizationHeader(): String? {
-        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
     }
 }

@@ -44,10 +44,10 @@ object Routes {
 
     // wallet
     @Serializable
-    data object WalletRoute : NavKey
+    data object ListWalletRoute : NavKey
 
     @Serializable
-    data object WalletSelectRoute : NavKey
+    data object SelectWalletRoute : NavKey
 
     @Serializable
     data class UpsertWalletRoute(
@@ -55,7 +55,17 @@ object Routes {
     ) : NavKey
 
     @Serializable
-    data object WalletCreateFirstRoute : NavKey
+    data object CreateFirstWalletRoute : NavKey
+
+    @Serializable
+    data class ActionSheetWalletRoute(
+        val walletId: Int,
+    ) : NavKey
+
+    @Serializable
+    data class DeleteWalletRoute(
+        val walletId: Int,
+    ) : NavKey
 
     // gold
     @Serializable

@@ -15,25 +15,25 @@ import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
-import id.my.rizalanggoro.arta.openapi.apis.TransactionApi
+import id.my.rizalanggoro.arta.openapi.apis.WalletApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@HiltViewModel(assistedFactory = DeleteTransactionVM.Factory::class)
-class DeleteTransactionVM @AssistedInject constructor(
-    @Assisted private val navKey: Routes.DeleteTransactionRoute,
+@HiltViewModel(assistedFactory = DeleteWalletVM.Factory::class)
+class DeleteWalletVM @AssistedInject constructor(
+    @Assisted private val navKey: Routes.DeleteWalletRoute,
     @param:ApplicationContext private val context: Context,
     private val authPrefs: AuthPrefs,
-    private val transactionApi: TransactionApi,
+    private val walletApi: WalletApi,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
-        fun create(navKey: Routes.DeleteTransactionRoute): DeleteTransactionVM
+        fun create(navKey: Routes.DeleteWalletRoute): DeleteWalletVM
     }
 
-    private var _uiState = MutableStateFlow(DeleteTransactionUiState())
+    private var _uiState = MutableStateFlow(DeleteWalletUiState())
     val uiState = _uiState.asStateFlow()
 
     fun delete() = viewModelScope.launch {
@@ -42,9 +42,9 @@ class DeleteTransactionVM @AssistedInject constructor(
         }
 
         runCatching {
-            val response = transactionApi.deleteTransaction(
+            val response = walletApi.deleteWallet(
                 authorization = authPrefs.authorization(),
-                id = navKey.transactionId
+                id = navKey.walletId
             )
 
             if (response.isSuccessful.not()) throw IllegalStateException(response.errorMessage())
@@ -53,7 +53,7 @@ class DeleteTransactionVM @AssistedInject constructor(
                 context.getString(R.string.server_empty_error)
             )
         }.onSuccess {
-            AppEventBus.emit(AppEvent.TransactionChanged)
+            AppEventBus.emit(AppEvent.WalletChanged)
         }.onFailure {
         }.also {
             _uiState.update {

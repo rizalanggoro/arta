@@ -1,4 +1,4 @@
-package id.my.rizalanggoro.arta.shared.presentation.action
+package id.my.rizalanggoro.arta.shared.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -22,46 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.NavKey
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.core.application.Routes
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T: NavKey> ActionSheet(
-    transactionId: Int,
-    navKey: T
-) {
-    val backStack = LocalBackStack.current
-
-    Content(
-        onClickEdit = {
-            backStack.apply {
-                removeLastOrNull()
-                add(
-                    Routes.TransactionUpsertRoute(
-                        transactionId = transactionId
-                    )
-                )
-            }
-        },
-        onClickDelete = {
-            backStack.apply {
-                removeLastOrNull()
-                add(
-                    Routes.DeleteTransactionRoute(
-                        transactionId = transactionId
-                    )
-                )
-            }
-        },
-        onClickCancel = { backStack.removeLastOrNull() },
-    )
-}
-
-@Composable
-private fun Content(
+fun ActionSheet(
     onClickEdit: () -> Unit = {},
     onClickDelete: () -> Unit = {},
     onClickCancel: () -> Unit = {},
@@ -143,6 +106,6 @@ private fun Content(
 @Preview(showBackground = true)
 private fun Preview() {
     ArtaTheme {
-        Content()
+        ActionSheet()
     }
 }

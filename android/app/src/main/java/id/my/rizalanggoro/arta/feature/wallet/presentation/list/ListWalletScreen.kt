@@ -29,12 +29,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.application.Routes
 import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.feature.wallet.presentation.list.component.WalletActionBS
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.openapi.models.DtoWallet
-import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.shared.component.WalletListItem
@@ -48,29 +47,16 @@ fun ListWalletScreen(vm: ListWalletVM = hiltViewModel()) {
     Content(
         uiState = uiState,
         onClickCreate = { backStack.add(UpsertWalletRoute()) },
-        onLongClickWallet = vm::onWalletSelected,
+        onLongClickWallet = {
+            backStack.add(
+                Routes.ActionSheetWalletRoute(
+                    walletId = it.id
+                )
+            )
+        },
         onClickRetry = vm::loadWallets,
         onClickBack = { backStack.removeLastOrNull() },
     )
-
-    if (uiState.selectedWallet != null)
-        WalletActionBS(
-            wallet = uiState.selectedWallet!!,
-            onClickEdit = { backStack.add(UpsertWalletRoute(walletId = uiState.selectedWallet!!.id!!)) },
-            onClickDelete = vm::onActionDeleteClicked,
-            onDismissRequest = vm::onActionDismissed,
-        )
-
-    if (uiState.deleteTarget != null)
-        ConfirmDialog(
-            title = "Hapus",
-            description = "Apakah Anda yakin akan menghapus dompet " +
-                    "\"${uiState.deleteTarget!!.name}\"? Tindakan ini tidak dapat dipulihkan",
-            onDismissRequest = vm::onDialogDismissed,
-            onConfirmRequest = vm::confirmDeleteWallet,
-            isLoading = uiState.isDeleting,
-            confirmText = "Hapus"
-        )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

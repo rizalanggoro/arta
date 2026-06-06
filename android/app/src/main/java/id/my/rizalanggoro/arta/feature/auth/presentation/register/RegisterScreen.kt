@@ -30,8 +30,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.application.Routes.CreateFirstWalletRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.core.application.Routes.WalletCreateFirstRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
 
@@ -56,7 +56,7 @@ fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
             .filterIsInstance<RegisterUiState.Event.RegisterSucceeded>()
             .collect {
                 backStack.clear()
-                backStack.add(WalletCreateFirstRoute)
+                backStack.add(CreateFirstWalletRoute)
             }
     }
 

@@ -14,21 +14,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun DeleteWalletDialog(
-    vm: DeleteTransactionVM = hiltViewModel(),
+    vm: DeleteWalletVM = hiltViewModel(),
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         AppEventBus.event
-            .filterIsInstance<AppEvent.TransactionChanged>()
+            .filterIsInstance<AppEvent.WalletChanged>()
             .collect { backStack.removeLastOrNull() }
     }
 
@@ -41,7 +41,7 @@ fun DeleteWalletDialog(
 
 @Composable
 private fun Content(
-    uiState: DeleteTransactionUiState = DeleteTransactionUiState(),
+    uiState: DeleteWalletUiState = DeleteWalletUiState(),
     onClickCancel: () -> Unit = {},
     onClickDelete: () -> Unit = {},
 ) {
@@ -62,7 +62,7 @@ private fun Content(
                 }
 
                 else -> Text(
-                    "Apakah Anda yakin akan menghapus transaksi yang dipilih? " +
+                    "Apakah Anda yakin akan menghapus dompet yang dipilih? " +
                             "Tindakan ini tidak dapat dipulihkan"
                 )
             }
@@ -92,7 +92,7 @@ private fun Preview() {
 @Preview
 private fun LoadingPreview() {
     Content(
-        uiState = DeleteTransactionUiState(
+        uiState = DeleteWalletUiState(
             isLoading = true
         )
     )

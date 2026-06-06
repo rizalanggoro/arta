@@ -13,31 +13,15 @@ sealed interface AppEvent {
     data class CategorySelected(val category: DomainCategory) : AppEvent
     data class WalletSelected(val wallet: DomainWallet) : AppEvent
 
-    data object WalletActionSheet {
-        data object OnEditClicked : AppEvent
-        data object OnDeleteClicked : AppEvent
-        data object OnCancelClicked : AppEvent
-    }
-
+    @Deprecated("use navigation instead")
     data object CategoryActionSheet {
         data class OnEditClicked(val categoryId: Int) : AppEvent
         data class OnDeleteClicked(val categoryId: Int) : AppEvent
     }
 
+    @Deprecated("use navigation instead")
     data object TransactionActionSheet {
         data class OnEditClicked(val transactionId: Int) : AppEvent
         data class OnDeleteClicked(val transactionId: Int) : AppEvent
-    }
-
-    data object GoldActionSheet {
-        data object OnEditClicked : AppEvent
-        data object OnDeleteClicked : AppEvent
-        data object OnCancelClicked : AppEvent
-    }
-
-    data object GoldTaxActionSheet {
-        data object OnEditClicked : AppEvent
-        data object OnDeleteClicked : AppEvent
-        data object OnCancelClicked : AppEvent
     }
 }
