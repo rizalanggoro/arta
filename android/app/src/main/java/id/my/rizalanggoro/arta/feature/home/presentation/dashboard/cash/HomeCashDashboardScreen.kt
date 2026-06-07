@@ -20,6 +20,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,17 +51,15 @@ import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
+    val pullToRefreshState = rememberPullToRefreshState()
 
     Content(
         uiState = uiState,
-        onChangeTimeFilter = vm::timeFilterChanged
-//        onLongClickTransaction = {
-//            backStack.add(
-//                Routes.TransactionActionSheetRoute(
-//                    transactionId = it.id
-//                )
-//            )
-//        }
+        pullToRefreshState = pullToRefreshState,
+        onChangeTimeFilter = vm::timeFilterChanged,
+        onRefresh = {
+            vm.loadDashboard(isRefresh = true)
+        }
     )
 }
 
@@ -65,9 +67,9 @@ fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 private fun Content(
     uiState: CashDashboardUiState = CashDashboardUiState(),
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     onChangeTimeFilter: (TimeFilter) -> Unit = {},
-    onClickRetry: () -> Unit = {},
-//    onLongClickTransaction: (DomainTransaction) -> Unit = {},
+    onRefresh: () -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -84,156 +86,171 @@ private fun Content(
                 .fillMaxSize()
                 .padding(16.dp),
             message = uiState.errorMessage,
-            onClickRetry = onClickRetry
+            onClickRetry = onRefresh
         )
 
-        else -> LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp)
-                ) {
-                    Text(
-                        text = "Saldo saat ini",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Text(
-                        text = (uiState.data?.currentBalance ?: 0.0).toIndonesianCurrency(),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        listOf(
-                            mapOf(
-                                "title" to "Hari ini",
-                                "filter" to TimeFilter.Today
-                            ),
-                            mapOf(
-                                "title" to "Minggu ini",
-                                "filter" to TimeFilter.ThisWeek
-                            ),
-                            mapOf(
-                                "title" to "Bulan ini",
-                                "filter" to TimeFilter.ThisMonth
-                            ),
-                        ).forEachIndexed { index, item ->
-                            ToggleButton(
-                                colors = ToggleButtonDefaults.toggleButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.background
-                                ),
-                                checked = item["filter"] == uiState.timeFilter,
-                                onCheckedChange = {
-                                    onChangeTimeFilter(item["filter"] as TimeFilter)
-                                },
-                                shapes = when (index) {
-                                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                    2 -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                                }
-                            ) {
-                                Text(item["title"] as String)
-                            }
-                        }
-                    }
-                    Text(
-                        "Berikut ringkasan pemasukan, pengeluaran, dan transaksi terbaru Anda " +
-                                when (uiState.timeFilter) {
-                                    TimeFilter.Today -> "pada ${uiState.startDateMillis.toIndonesianDate()}"
-
-                                    TimeFilter.ThisWeek -> "selama satu minggu mulai " +
-                                            "${uiState.startDateMillis.toIndonesianDate()} " +
-                                            "hingga ${uiState.endDateStr}"
-
-                                    TimeFilter.ThisMonth -> "selama bulan " +
-                                            uiState.startDateMillis.toFormattedDate("MMMM yyyy")
-                                },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
-            }
-
-            item {
-                IncomeExpenseSummary(
-                    totalIncome = uiState.data?.totalIncome ?: 0.0,
-                    totalExpense = uiState.data?.totalExpense ?: 0.0,
+        else -> PullToRefreshBox(
+            modifier = Modifier.fillMaxSize(),
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = onRefresh,
+            state = pullToRefreshState,
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = pullToRefreshState,
+                    isRefreshing = uiState.isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter)
                 )
             }
-
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .padding(top = 16.dp)
-                ) {
-                    Text(
-                        "Transaksi terbaru",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
+        ) {
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                item {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(
-                                RoundedCornerShape(
-                                    topStart = 24.dp,
-                                    topEnd = 24.dp
-                                )
-                            )
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
                             .padding(horizontal = 16.dp)
                             .padding(top = 16.dp)
-                    )
+                    ) {
+                        Text(
+                            text = "Saldo saat ini",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        Text(
+                            text = (uiState.data?.currentBalance ?: 0.0).toIndonesianCurrency(),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
-            }
 
-            if (uiState.data?.latestCategories?.isEmpty() ?: true) {
                 item {
-                    EmptyPlaceholder(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(
-                                horizontal = 16.dp,
-                                vertical = 32.dp
-                            )
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            listOf(
+                                mapOf(
+                                    "title" to "Hari ini",
+                                    "filter" to TimeFilter.Today
+                                ),
+                                mapOf(
+                                    "title" to "Minggu ini",
+                                    "filter" to TimeFilter.ThisWeek
+                                ),
+                                mapOf(
+                                    "title" to "Bulan ini",
+                                    "filter" to TimeFilter.ThisMonth
+                                ),
+                            ).forEachIndexed { index, item ->
+                                ToggleButton(
+                                    colors = ToggleButtonDefaults.toggleButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.background
+                                    ),
+                                    checked = item["filter"] == uiState.timeFilter,
+                                    onCheckedChange = {
+                                        onChangeTimeFilter(item["filter"] as TimeFilter)
+                                    },
+                                    shapes = when (index) {
+                                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        2 -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                    },
+                                    enabled = !uiState.isRefreshing
+                                ) {
+                                    Text(item["title"] as String)
+                                }
+                            }
+                        }
+                        Text(
+                            "Berikut ringkasan pemasukan, pengeluaran, dan transaksi terbaru Anda " +
+                                    when (uiState.timeFilter) {
+                                        TimeFilter.Today -> "pada ${uiState.startDateMillis.toIndonesianDate()}"
+
+                                        TimeFilter.ThisWeek -> "selama satu minggu mulai " +
+                                                "${uiState.startDateMillis.toIndonesianDate()} " +
+                                                "hingga ${uiState.endDateStr}"
+
+                                        TimeFilter.ThisMonth -> "selama bulan " +
+                                                uiState.startDateMillis.toFormattedDate("MMMM yyyy")
+                                    },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+
+                item {
+                    IncomeExpenseSummary(
+                        totalIncome = uiState.data?.totalIncome ?: 0.0,
+                        totalExpense = uiState.data?.totalExpense ?: 0.0,
                     )
                 }
-            }
 
-            itemsIndexed(uiState.data?.latestCategories ?: emptyList()) { index, category ->
-                DashboardCategoryListItem(
-                    modifier = Modifier
-                        .padding(
-                            top = when {
-                                index == 0 -> 16.dp
-                                else -> 2.dp
-                            },
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .padding(top = 16.dp)
+                    ) {
+                        Text(
+                            "Transaksi terbaru",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(
+                                    RoundedCornerShape(
+                                        topStart = 24.dp,
+                                        topEnd = 24.dp
+                                    )
+                                )
+                                .background(MaterialTheme.colorScheme.background)
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp)
                         )
-                        .padding(horizontal = 16.dp),
-                    category = category,
-                    index = index,
-                    size = uiState.data?.latestCategories?.size ?: 0,
-                )
-            }
+                    }
+                }
 
-            item {
-                Box(modifier = Modifier.height((56 + 32).dp))
+                if (uiState.data?.latestCategories?.isEmpty() ?: true) {
+                    item {
+                        EmptyPlaceholder(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = 16.dp,
+                                    vertical = 32.dp
+                                )
+                        )
+                    }
+                }
+
+                itemsIndexed(uiState.data?.latestCategories ?: emptyList()) { index, category ->
+                    DashboardCategoryListItem(
+                        modifier = Modifier
+                            .padding(
+                                top = when {
+                                    index == 0 -> 16.dp
+                                    else -> 2.dp
+                                },
+                            )
+                            .padding(horizontal = 16.dp),
+                        category = category,
+                        index = index,
+                        size = uiState.data?.latestCategories?.size ?: 0,
+                    )
+                }
+
+                item {
+                    Box(modifier = Modifier.height((56 + 32).dp))
+                }
             }
         }
     }
@@ -243,9 +260,7 @@ private fun Content(
 @Composable
 private fun Preview() {
     ArtaTheme {
-        Content(
-            onClickRetry = {},
-        )
+        Content()
     }
 }
 
@@ -257,7 +272,18 @@ private fun LoadingPreview() {
             uiState = CashDashboardUiState(
                 isLoading = true
             ),
-            onClickRetry = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RefreshingPreview() {
+    ArtaTheme {
+        Content(
+            uiState = CashDashboardUiState(
+                isRefreshing = true
+            ),
         )
     }
 }
@@ -278,9 +304,7 @@ private fun ErrorPreview() {
 @Composable
 private fun EmptyPreview() {
     ArtaTheme {
-        Content(
-            onClickRetry = {},
-        )
+        Content()
     }
 }
 

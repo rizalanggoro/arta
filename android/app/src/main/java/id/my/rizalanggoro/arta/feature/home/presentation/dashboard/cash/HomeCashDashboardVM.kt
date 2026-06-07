@@ -90,7 +90,7 @@ class HomeCashDashboardVM @Inject constructor(
         }
     }
 
-    private fun loadDashboard(isRefresh: Boolean = false) =
+    fun loadDashboard(isRefresh: Boolean = false) =
         viewModelScope.launch {
             val current = _uiState.value
             val walletId = current.selectedWallet?.id ?: return@launch

@@ -31,17 +31,19 @@ func (r *DashboardGoldRepository) GetTotalSellPrice(filter GetTotalSellPriceFilt
 	var totalSellPrice float64
 	if err := r.db.Model(&model.Gold{}).
 		Select(`
-			sum(
-				-- gramasi 
-				golds.grams *
-				-- harga per gram dalam IDR 
-				((gp.price_per_ounce_usd / ?) * fr.rate) *
-				-- purity  
-				(golds.carat / 24.0) *
-				-- retail multiplier 
-				? * 
-				-- tax
-				(1 - (coalesce(gtp.tax_rate, 0) / 100.0))
+			coalesce(
+				sum(
+					-- gramasi 
+					golds.grams *
+					-- harga per gram dalam IDR 
+					((gp.price_per_ounce_usd / ?) * fr.rate) *
+					-- purity  
+					(golds.carat / 24.0) *
+					-- retail multiplier 
+					? * 
+					-- tax
+					(1 - (coalesce(gtp.tax_rate, 0) / 100.0))
+				), 0
 			)
 		`,
 			constant.GramsPerTroyOunce,
@@ -66,7 +68,7 @@ type GetTotalBuyPriceFilter struct {
 func (r *DashboardGoldRepository) GetTotalBuyPrice(filter GetTotalBuyPriceFilter) (*float64, error) {
 	var totalBuyPrice float64
 	if err := r.db.Model(&model.Gold{}).
-		Select("sum(golds.price)").
+		Select("coalesce(sum(golds.price), 0)").
 		Where("wallet_id = ?", filter.WalletId).
 		Find(&totalBuyPrice).
 		Error; err != nil {
@@ -83,7 +85,7 @@ type GetTotalWeightFilter struct {
 func (r *DashboardGoldRepository) GetTotalWeight(filter GetTotalWeightFilter) (*float64, error) {
 	var totalWeight float64
 	if err := r.db.Model(&model.Gold{}).
-		Select("sum(golds.grams)").
+		Select("coalesce(sum(golds.grams), 0)").
 		Where("wallet_id = ?", filter.WalletId).
 		Find(&totalWeight).
 		Error; err != nil {
