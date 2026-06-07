@@ -1,14 +1,16 @@
 package dto
 
-import "github.com/artafinance/backend/internal/domain"
+import (
+	"github.com/artafinance/backend/internal/domain"
+)
 
 // CashDashboard represents the cash home dashboard response DTO.
 // @name CashDashboard
 type CashDashboard struct {
-	CurrentBalance     float64       `json:"current_balance" format:"double"`
-	TotalIncome        float64       `json:"total_income" format:"double"`
-	TotalExpense       float64       `json:"total_expense" format:"double"`
-	LatestTransactions []Transaction `json:"latest_transactions"`
+	CurrentBalance   float64    `json:"current_balance" format:"double"`
+	TotalIncome      float64    `json:"total_income" format:"double"`
+	TotalExpense     float64    `json:"total_expense" format:"double"`
+	LatestCategories []Category `json:"latest_categories"`
 }
 
 // GoldDashboard represents the gold home dashboard response DTO.

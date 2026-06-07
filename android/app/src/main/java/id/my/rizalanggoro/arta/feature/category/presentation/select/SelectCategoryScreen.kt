@@ -206,7 +206,9 @@ private fun SelectCategoryItemsPreview() {
                             type = "expense",
                             updatedAt = "2026-05-23T10:00:00Z",
                             userId = null,
-                        )
+                        ),
+                        totalAmount = 0.0,
+                        transactionCount = 0
                     ),
                     DtoCategory(
                         data = DomainCategory(
@@ -216,7 +218,9 @@ private fun SelectCategoryItemsPreview() {
                             type = "income",
                             updatedAt = "2026-05-23T10:00:00Z",
                             userId = 10,
-                        )
+                        ),
+                        totalAmount = 0.0,
+                        transactionCount = 0
                     ),
                 ),
                 selectedType = "expense",

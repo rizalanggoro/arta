@@ -33,13 +33,21 @@ import kotlinx.serialization.Contextual
  * 
  *
  * @param `data` 
+ * @param totalAmount 
+ * @param transactionCount 
  */
 @Serializable
 
 data class UpdateCategoryRes (
 
     @SerialName(value = "data")
-    val `data`: DomainCategory
+    val `data`: DomainCategory,
+
+    @SerialName(value = "total_amount")
+    val totalAmount: kotlin.Double,
+
+    @SerialName(value = "transaction_count")
+    val transactionCount: kotlin.Int
 
 ) {
 

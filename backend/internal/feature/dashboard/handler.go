@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/artafinance/backend/internal/cron/fxrate"
 	"github.com/artafinance/backend/internal/cron/goldprice"
@@ -198,27 +199,34 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 	})
 }
 
-// @ID GetCashDashboard
-// @Summary Get cash dashboard overview
-// @Description Return the active cash wallet name, balance summary, today totals, and the latest 5 transactions.
-// @Tags dashboard
-// @Accept json
-// @Produce json
-// @Param Authorization header string true "Bearer token"
-// @Param wallet_id query int true "wallet_id"
-// @Success 200 {object} CashDashboardRes
-// @Failure 400 {object} dto.Error
-// @Failure 401 {object} dto.Error
-// @Failure 404 {object} dto.Error
-// @Failure 500 {object} dto.Error
-// @Security Bearer
-// @Router /api/dashboard/cash [get]
+// @ID 					GetCashDashboard
+// @Tags 				dashboard
+// @Accept 			json
+// @Produce 		json
+// @Param 			Authorization header string true "Bearer token"
+// @Param 			wallet_id query int true "wallet_id"
+// @param 			start_date query string true "start_date"
+// @param 			end_date query string true "end_date"
+// @Success 		200 {object} CashDashboardRes
+// @Failure 		400 {object} dto.Error
+// @Failure 		401 {object} dto.Error
+// @Failure 		404 {object} dto.Error
+// @Failure 		500 {object} dto.Error
+// @Router 			/api/dashboard/cash [get]
 func (h *Handler) cash(c *fiber.Ctx) error {
-	userID := middleware.GetUserID(c)
-	if userID == "" {
+	strUserId := middleware.GetUserID(c)
+	if strUserId == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{
 			Code:    fiber.StatusUnauthorized,
 			Message: "unauthorized",
+		})
+	}
+
+	userId, err := strconv.Atoi(strUserId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
 		})
 	}
 
@@ -227,6 +235,25 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
 			Code:    fiber.StatusBadRequest,
 			Message: "wallet_id is required and must be a valid number",
+		})
+	}
+
+	startDateStr := c.Query("start_date")
+	endDateStr := c.Query("end_date")
+
+	startDate, err := time.Parse("2006-01-02", startDateStr)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
+	endDate, err := time.Parse("2006-01-02", endDateStr)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: err.Error(),
 		})
 	}
 
@@ -242,6 +269,8 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 
 	totalIncome, totalExpense, err := h.transactionRepo.GetTotalIncomeExpense(transactionfeature.GetTotalIncomeExpenseFilter{
 		WalletId: uint(walletId),
+		StartDate: startDate,
+		EndDate:   endDate,
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
@@ -250,26 +279,20 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 		})
 	}
 
-	latestTransactions, err := h.transactionRepo.GetAll(&transactionfeature.GetAllFilter{
-		WalletId:        uint(walletId),
-		IncludeCategory: true,
-		Limit:           5,
-		OrderBy:         "date",
-		OrderDirection:  "desc",
+	categories, err := h.categoryRepo.GetAll(categoryfeature.GetAllCategoriesFilter{
+		UserId:       uint(userId),
+		IncludeStats: true,
+		WalletId:     uint(walletId),
+		StartDate:    startDate,
+		EndDate:      endDate,
 	})
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
-			Code:    fiber.StatusInternalServerError,
-			Message: err.Error(),
-		})
-	}
 
 	return c.Status(fiber.StatusOK).JSON(CashDashboardRes{
 		Data: dto.CashDashboard{
-			CurrentBalance:     *currentBalance,
-			TotalIncome:        *totalIncome,
-			TotalExpense:       *totalExpense,
-			LatestTransactions: latestTransactions,
+			CurrentBalance:   *currentBalance,
+			TotalIncome:      *totalIncome,
+			TotalExpense:     *totalExpense,
+			LatestCategories: categories,
 		},
 	})
 }

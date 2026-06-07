@@ -14,8 +14,8 @@ import id.my.rizalanggoro.arta.openapi.models.GoldDashboardRes
 interface DashboardApi {
     /**
      * GET api/dashboard/cash
-     * Get cash dashboard overview
-     * Return the active cash wallet name, balance summary, today totals, and the latest 5 transactions.
+     * 
+     * 
      * Responses:
      *  - 200: OK
      *  - 400: Bad Request
@@ -25,10 +25,12 @@ interface DashboardApi {
      *
      * @param authorization Bearer token
      * @param walletId wallet_id
+     * @param startDate start_date
+     * @param endDate end_date
      * @return [CashDashboardRes]
      */
     @GET("api/dashboard/cash")
-    suspend fun getCashDashboard(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int): Response<CashDashboardRes>
+    suspend fun getCashDashboard(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int, @Query("start_date") startDate: kotlin.String, @Query("end_date") endDate: kotlin.String): Response<CashDashboardRes>
 
     /**
      * GET api/dashboard/gold

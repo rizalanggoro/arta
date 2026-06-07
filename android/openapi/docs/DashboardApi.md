@@ -4,14 +4,12 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
-| [**getCashDashboard**](DashboardApi.md#getCashDashboard) | **GET** api/dashboard/cash | Get cash dashboard overview |
+| [**getCashDashboard**](DashboardApi.md#getCashDashboard) | **GET** api/dashboard/cash |  |
 | [**getGoldDashboard**](DashboardApi.md#getGoldDashboard) | **GET** api/dashboard/gold |  |
 
 
 
-Get cash dashboard overview
 
-Return the active cash wallet name, balance summary, today totals, and the latest 5 transactions.
 
 ### Example
 ```kotlin
@@ -24,17 +22,21 @@ val apiClient = ApiClient()
 val webService = apiClient.createWebservice(DashboardApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val walletId : kotlin.Int = 56 // kotlin.Int | wallet_id
+val startDate : kotlin.String = startDate_example // kotlin.String | start_date
+val endDate : kotlin.String = endDate_example // kotlin.String | end_date
 
 launch(Dispatchers.IO) {
-    val result : CashDashboardRes = webService.getCashDashboard(authorization, walletId)
+    val result : CashDashboardRes = webService.getCashDashboard(authorization, walletId, startDate, endDate)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
+| **walletId** | **kotlin.Int**| wallet_id | |
+| **startDate** | **kotlin.String**| start_date | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **walletId** | **kotlin.Int**| wallet_id | |
+| **endDate** | **kotlin.String**| end_date | |
 
 ### Return type
 
@@ -42,7 +44,7 @@ launch(Dispatchers.IO) {
 
 ### Authorization
 
-
+No authorization required
 
 ### HTTP request headers
 

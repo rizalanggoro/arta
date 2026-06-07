@@ -54,7 +54,7 @@ All URIs are relative to *http://localhost:8080*
 | *CategoryApi* | [**getCategory**](docs/CategoryApi.md#getcategory) | **GET** api/category/{id} |  |
 | *CategoryApi* | [**listCategories**](docs/CategoryApi.md#listcategories) | **GET** api/category |  |
 | *CategoryApi* | [**updateCategory**](docs/CategoryApi.md#updatecategory) | **PUT** api/category/{id} |  |
-| *DashboardApi* | [**getCashDashboard**](docs/DashboardApi.md#getcashdashboard) | **GET** api/dashboard/cash | Get cash dashboard overview |
+| *DashboardApi* | [**getCashDashboard**](docs/DashboardApi.md#getcashdashboard) | **GET** api/dashboard/cash |  |
 | *DashboardApi* | [**getGoldDashboard**](docs/DashboardApi.md#getgolddashboard) | **GET** api/dashboard/gold |  |
 | *GoldApi* | [**createGold**](docs/GoldApi.md#creategold) | **POST** api/gold |  |
 | *GoldApi* | [**createGoldTaxPreference**](docs/GoldApi.md#creategoldtaxpreference) | **POST** api/gold/tax |  |

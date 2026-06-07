@@ -65,29 +65,30 @@ private fun SummaryCard(
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Icon(
                     icon,
                     null,
-                    tint = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(16.dp)
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp)
                 )
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
             Text(
                 text = value.toIndonesianCurrency(),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }

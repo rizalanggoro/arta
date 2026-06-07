@@ -23,7 +23,7 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
-import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
+import id.my.rizalanggoro.arta.openapi.models.DtoCategory
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
@@ -33,7 +33,7 @@ import kotlinx.serialization.Contextual
  * 
  *
  * @param currentBalance 
- * @param latestTransactions 
+ * @param latestCategories 
  * @param totalExpense 
  * @param totalIncome 
  */
@@ -44,8 +44,8 @@ data class DtoCashDashboard (
     @SerialName(value = "current_balance")
     val currentBalance: kotlin.Double,
 
-    @SerialName(value = "latest_transactions")
-    val latestTransactions: kotlin.collections.List<DtoTransaction>,
+    @SerialName(value = "latest_categories")
+    val latestCategories: kotlin.collections.List<DtoCategory>,
 
     @SerialName(value = "total_expense")
     val totalExpense: kotlin.Double,

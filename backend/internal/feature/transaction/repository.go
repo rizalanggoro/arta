@@ -1,6 +1,8 @@
 package transaction
 
 import (
+	"time"
+
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
 	"github.com/artafinance/backend/internal/model"
@@ -129,7 +131,9 @@ func (r *Repository) GetCurrentBalance(filter GetCurrentBalanceFilter) (*float64
 }
 
 type GetTotalIncomeExpenseFilter struct {
-	WalletId uint
+	WalletId  uint
+	StartDate time.Time
+	EndDate   time.Time
 }
 
 func (r *Repository) GetTotalIncomeExpense(filter GetTotalIncomeExpenseFilter) (*float64, *float64, error) {
@@ -159,6 +163,8 @@ func (r *Repository) GetTotalIncomeExpense(filter GetTotalIncomeExpenseFilter) (
 			) as expense
 		`).
 		Where("wallet_id = ?", filter.WalletId).
+		Where("transactions.date >= ?", filter.StartDate).
+		Where("transactions.date < ?", filter.EndDate).
 		Find(&result).Error; err != nil {
 		return nil, nil, err
 	} else {

@@ -52,3 +52,19 @@ fun String?.toFormattedDate(pattern: String? = null) = runCatching {
     throwable.printStackTrace()
     "-"
 }
+
+fun Long.toFormattedDate(pattern: String? = null) = runCatching {
+    Instant
+        .ofEpochMilli(this)
+        .atZone(ZoneId.systemDefault())
+        .format(
+            DateTimeFormatter.ofPattern(
+                pattern ?: "EEEE, d MMMM yyyy",
+                Locale.forLanguageTag("id-ID")
+            )
+        )
+        .replaceFirstChar { it.uppercase() }
+}.getOrElse { throwable ->
+    throwable.printStackTrace()
+    "-"
+}

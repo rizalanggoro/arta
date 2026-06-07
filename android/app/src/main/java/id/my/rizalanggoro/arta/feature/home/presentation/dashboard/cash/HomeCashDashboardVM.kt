@@ -12,11 +12,18 @@ import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
+import id.my.rizalanggoro.arta.core.extension.toApiFormat
+import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
+import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.CashDashboardUiState.TimeFilter
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,9 +36,64 @@ class HomeCashDashboardVM @Inject constructor(
     private val _uiState = MutableStateFlow(CashDashboardUiState())
     val uiState = _uiState.asStateFlow()
 
+    fun timeFilterChanged(timeFilter: TimeFilter) {
+        val current = _uiState.value
+        if (!current.isRefreshing && current.timeFilter != timeFilter) {
+            _uiState.update {
+                val now = LocalDate.now()
+                val (startDateMillis, endDateMillis, endDateStr) = when (timeFilter) {
+                    TimeFilter.Today -> {
+                        val start = now.atStartOfDay(ZoneId.systemDefault())
+                        val end = start.plusDays(1)
+
+                        Triple(
+                            start.toInstant().toEpochMilli(),
+                            end.toInstant().toEpochMilli(),
+                            ""
+                        )
+                    }
+
+                    TimeFilter.ThisWeek -> {
+                        val start = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                            .atStartOfDay(ZoneId.systemDefault())
+                        val end = start.plusWeeks(1)
+
+                        Triple(
+                            start.toInstant().toEpochMilli(),
+                            end.toInstant().toEpochMilli(),
+                            end.minusDays(1).toInstant().toEpochMilli().toIndonesianDate()
+                        )
+                    }
+
+                    TimeFilter.ThisMonth -> {
+                        val start = now.withDayOfMonth(1)
+                            .atStartOfDay(ZoneId.systemDefault())
+                        val end = start.plusMonths(1)
+
+                        Triple(
+                            start.toInstant().toEpochMilli(),
+                            end.toInstant().toEpochMilli(),
+                            ""
+                        )
+                    }
+                }
+
+                it.copy(
+                    timeFilter = timeFilter,
+                    startDateMillis = startDateMillis,
+                    endDateMillis = endDateMillis,
+                    endDateStr = endDateStr
+                )
+            }
+
+            loadDashboard(isRefresh = true)
+        }
+    }
+
     private fun loadDashboard(isRefresh: Boolean = false) =
         viewModelScope.launch {
-            val walletId = _uiState.value.selectedWallet?.id ?: return@launch
+            val current = _uiState.value
+            val walletId = current.selectedWallet?.id ?: return@launch
 
             _uiState.update {
                 it.copy(
@@ -49,7 +111,9 @@ class HomeCashDashboardVM @Inject constructor(
             runCatching {
                 val response = dashboardApi.getCashDashboard(
                     authPrefs.authorization(),
-                    walletId = walletId
+                    walletId = walletId,
+                    startDate = current.startDateMillis.toApiFormat(),
+                    endDate = current.endDateMillis.toApiFormat()
                 )
 
                 if (!response.isSuccessful) throw IllegalStateException(response.errorMessage())

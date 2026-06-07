@@ -32,13 +32,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.R
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.core.application.Routes
+import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
+import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.CashDashboardUiState.TimeFilter
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.component.IncomeExpenseSummary
-import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
+import id.my.rizalanggoro.arta.shared.component.DashboardCategoryListItem
+import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
-import id.my.rizalanggoro.arta.shared.component.TransactionListItem
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @Composable
@@ -48,13 +50,14 @@ fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
 
     Content(
         uiState = uiState,
-        onLongClickTransaction = {
-            backStack.add(
-                Routes.TransactionActionSheetRoute(
-                    transactionId = it.id
-                )
-            )
-        }
+        onChangeTimeFilter = vm::timeFilterChanged
+//        onLongClickTransaction = {
+//            backStack.add(
+//                Routes.TransactionActionSheetRoute(
+//                    transactionId = it.id
+//                )
+//            )
+//        }
     )
 }
 
@@ -62,8 +65,9 @@ fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 private fun Content(
     uiState: CashDashboardUiState = CashDashboardUiState(),
+    onChangeTimeFilter: (TimeFilter) -> Unit = {},
     onClickRetry: () -> Unit = {},
-    onLongClickTransaction: (DomainTransaction) -> Unit = {},
+//    onLongClickTransaction: (DomainTransaction) -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -117,28 +121,49 @@ private fun Content(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         listOf(
-                            "Hari ini",
-                            "Minggu ini",
-                            "Bulan ini"
-                        ).forEachIndexed { index, label ->
+                            mapOf(
+                                "title" to "Hari ini",
+                                "filter" to TimeFilter.Today
+                            ),
+                            mapOf(
+                                "title" to "Minggu ini",
+                                "filter" to TimeFilter.ThisWeek
+                            ),
+                            mapOf(
+                                "title" to "Bulan ini",
+                                "filter" to TimeFilter.ThisMonth
+                            ),
+                        ).forEachIndexed { index, item ->
                             ToggleButton(
                                 colors = ToggleButtonDefaults.toggleButtonColors(
                                     containerColor = MaterialTheme.colorScheme.background
                                 ),
-                                checked = index == 1,
-                                onCheckedChange = {},
+                                checked = item["filter"] == uiState.timeFilter,
+                                onCheckedChange = {
+                                    onChangeTimeFilter(item["filter"] as TimeFilter)
+                                },
                                 shapes = when (index) {
                                     0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
                                     2 -> ButtonGroupDefaults.connectedTrailingButtonShapes()
                                     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                                 }
                             ) {
-                                Text(label)
+                                Text(item["title"] as String)
                             }
                         }
                     }
                     Text(
-                        "Berikut ringkasan pemasukan, pengeluaran, dan transaksi terbaru Anda pada Senin, 12 Juni 2024",
+                        "Berikut ringkasan pemasukan, pengeluaran, dan transaksi terbaru Anda " +
+                                when (uiState.timeFilter) {
+                                    TimeFilter.Today -> "pada ${uiState.startDateMillis.toIndonesianDate()}"
+
+                                    TimeFilter.ThisWeek -> "selama satu minggu mulai " +
+                                            "${uiState.startDateMillis.toIndonesianDate()} " +
+                                            "hingga ${uiState.endDateStr}"
+
+                                    TimeFilter.ThisMonth -> "selama bulan " +
+                                            uiState.startDateMillis.toFormattedDate("MMMM yyyy")
+                                },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -178,8 +203,21 @@ private fun Content(
                 }
             }
 
-            itemsIndexed(uiState.data?.latestTransactions ?: emptyList()) { index, transaction ->
-                TransactionListItem(
+            if (uiState.data?.latestCategories?.isEmpty() ?: true) {
+                item {
+                    EmptyPlaceholder(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                horizontal = 16.dp,
+                                vertical = 32.dp
+                            )
+                    )
+                }
+            }
+
+            itemsIndexed(uiState.data?.latestCategories ?: emptyList()) { index, category ->
+                DashboardCategoryListItem(
                     modifier = Modifier
                         .padding(
                             top = when {
@@ -188,11 +226,9 @@ private fun Content(
                             },
                         )
                         .padding(horizontal = 16.dp),
-                    transaction = transaction,
+                    category = category,
                     index = index,
-                    size = uiState.data?.latestTransactions?.size ?: 0,
-                    onClick = {},
-                    onLongClick = onLongClickTransaction
+                    size = uiState.data?.latestCategories?.size ?: 0,
                 )
             }
 

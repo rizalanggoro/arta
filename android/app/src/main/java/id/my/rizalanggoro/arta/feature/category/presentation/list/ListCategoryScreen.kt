@@ -261,6 +261,8 @@ private fun ListCategoryDefaultPreview() {
                             updatedAt = "2026-05-23T10:00:00Z",
                             userId = null,
                         ),
+                        totalAmount = 0.0,
+                        transactionCount = 0
                     ),
                     DtoCategory(
                         data = DomainCategory(
@@ -271,6 +273,8 @@ private fun ListCategoryDefaultPreview() {
                             updatedAt = "2026-05-23T10:00:00Z",
                             userId = 123,
                         ),
+                        totalAmount = 0.0,
+                        transactionCount = 0
                     ),
                 ),
                 selectedType = "expense",

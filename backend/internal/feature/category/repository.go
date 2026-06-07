@@ -1,7 +1,10 @@
 package category
 
 import (
+	"time"
+
 	"github.com/artafinance/backend/internal/domain"
+	"github.com/artafinance/backend/internal/dto"
 	"github.com/artafinance/backend/internal/model"
 	"gorm.io/gorm"
 )
@@ -32,6 +35,62 @@ func (r *Repository) GetCategoryByID(id uint) (*domain.Category, error) {
 		return nil, err
 	}
 	return domain.FromCategoryModel(&m), nil
+}
+
+type GetAllCategoriesFilter struct {
+	UserId       uint
+	WalletId     uint
+	IncludeStats bool
+	StartDate    time.Time
+	EndDate      time.Time
+}
+
+func (r *Repository) GetAll(filter GetAllCategoriesFilter) ([]dto.Category, error) {
+	var categories []struct {
+		model.Category
+		TotalAmount      float64
+		TransactionCount int
+	}
+
+	query := r.db.Model(&model.Category{}).
+		Where("categories.user_id is null or categories.user_id = ?", filter.UserId)
+
+	if filter.IncludeStats && filter.WalletId != 0 {
+		query = query.Select(`
+				categories.*,
+				COALESCE(SUM(transactions.amount), 0) as total_amount, 
+				COUNT(transactions.*) as transaction_count
+			`).
+			Joins("join transactions on transactions.category_id = categories.id").
+			Joins("join wallets on wallets.id = transactions.wallet_id").
+			Group("categories.id").
+			Where("wallets.id = ?", filter.WalletId)
+	} else {
+		query = query.Select("categories.*")
+	}
+
+	if !filter.StartDate.IsZero() {
+		query = query.Where("transactions.date >= ?", filter.StartDate)
+	}
+
+	if !filter.EndDate.IsZero() {
+		query = query.Where("transactions.date < ?", filter.EndDate)
+	}
+
+	if err := query.Order("lower(categories.name) asc").Find(&categories).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]dto.Category, len(categories))
+	for index, category := range categories {
+		result[index] = dto.Category{
+			Data:             *domain.FromCategoryModel(&category.Category),
+			TotalAmount:      category.TotalAmount,
+			TransactionCount: category.TransactionCount,
+		}
+	}
+
+	return result, nil
 }
 
 // GetCategoriesByUserID returns default categories and those created by the user.

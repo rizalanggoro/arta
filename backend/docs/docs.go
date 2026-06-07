@@ -408,12 +408,6 @@ const docTemplate = `{
         },
         "/api/dashboard/cash": {
             "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Return the active cash wallet name, balance summary, today totals, and the latest 5 transactions.",
                 "consumes": [
                     "application/json"
                 ],
@@ -423,7 +417,6 @@ const docTemplate = `{
                 "tags": [
                     "dashboard"
                 ],
-                "summary": "Get cash dashboard overview",
                 "operationId": "GetCashDashboard",
                 "parameters": [
                     {
@@ -437,6 +430,20 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "wallet_id",
                         "name": "wallet_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "start_date",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "end_date",
+                        "name": "end_date",
                         "in": "query",
                         "required": true
                     }
@@ -1592,11 +1599,20 @@ const docTemplate = `{
         "CreateCategoryRes": {
             "type": "object",
             "required": [
-                "data"
+                "data",
+                "total_amount",
+                "transaction_count"
             ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
+                },
+                "total_amount": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "transaction_count": {
+                    "type": "integer"
                 }
             }
         },
@@ -1759,11 +1775,20 @@ const docTemplate = `{
         "GetCategoryRes": {
             "type": "object",
             "required": [
-                "data"
+                "data",
+                "total_amount",
+                "transaction_count"
             ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
+                },
+                "total_amount": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "transaction_count": {
+                    "type": "integer"
                 }
             }
         },
@@ -1973,11 +1998,20 @@ const docTemplate = `{
         "UpdateCategoryRes": {
             "type": "object",
             "required": [
-                "data"
+                "data",
+                "total_amount",
+                "transaction_count"
             ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
+                },
+                "total_amount": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "transaction_count": {
+                    "type": "integer"
                 }
             }
         },
@@ -2430,7 +2464,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "current_balance",
-                "latest_transactions",
+                "latest_categories",
                 "total_expense",
                 "total_income"
             ],
@@ -2439,10 +2473,10 @@ const docTemplate = `{
                     "type": "number",
                     "format": "double"
                 },
-                "latest_transactions": {
+                "latest_categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.Transaction"
+                        "$ref": "#/definitions/dto.Category"
                     }
                 },
                 "total_expense": {
@@ -2458,11 +2492,20 @@ const docTemplate = `{
         "dto.Category": {
             "type": "object",
             "required": [
-                "data"
+                "data",
+                "total_amount",
+                "transaction_count"
             ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/domain.Category"
+                },
+                "total_amount": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "transaction_count": {
+                    "type": "integer"
                 }
             }
         },

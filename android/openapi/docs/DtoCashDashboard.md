@@ -5,7 +5,7 @@
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
 | **currentBalance** | **kotlin.Double** |  |  |
-| **latestTransactions** | [**kotlin.collections.List&lt;DtoTransaction&gt;**](DtoTransaction.md) |  |  |
+| **latestCategories** | [**kotlin.collections.List&lt;DtoCategory&gt;**](DtoCategory.md) |  |  |
 | **totalExpense** | **kotlin.Double** |  |  |
 | **totalIncome** | **kotlin.Double** |  |  |
 
