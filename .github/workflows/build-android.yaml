@@ -62,7 +62,8 @@ jobs:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          TAG_NAME="build-${{ steps.date_and_hash.outputs.date }}-${{ steps.date_and_hash.outputs.hash }}"
+          # TAG_NAME="build-${{ steps.date_and_hash.outputs.date }}-${{ steps.date_and_hash.outputs.hash }}"
+          TAG_NAME="latest"
           RELEASE_NAME="Continuous Integration Build"
           VERSION_CODE=$(grep -m1 -E '^\s*versionCode\s*=' app/build.gradle.kts | sed -E 's/.*=\s*([0-9]+).*/\1/')
           APK_PATH=$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)
