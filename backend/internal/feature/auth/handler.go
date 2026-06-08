@@ -34,7 +34,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	group.Post("/register", h.register)
 	group.Post("/login", h.login)
 
-	protected := group.Use(middleware.AuthMiddleware(h.jwtManager, h.repo))
+	protected := group.Use(middleware.AuthMiddleware(h.jwtManager))
 	protected.Get("/me", h.me)
 	protected.Post("/logout", h.logout)
 }

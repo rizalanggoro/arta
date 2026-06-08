@@ -17,18 +17,17 @@ type Handler struct {
 	repo         *Repository
 	categoryRepo *categoryfeature.Repository
 	jwtMgr       *jwt.Manager
-	checker      middleware.TokenStatusChecker
 }
 
 // NewHandler creates a new transaction handler.
-func NewHandler(repo *Repository, categoryRepo *categoryfeature.Repository, jwtMgr *jwt.Manager, checker middleware.TokenStatusChecker) *Handler {
-	return &Handler{repo: repo, categoryRepo: categoryRepo, jwtMgr: jwtMgr, checker: checker}
+func NewHandler(repo *Repository, categoryRepo *categoryfeature.Repository, jwtMgr *jwt.Manager) *Handler {
+	return &Handler{repo: repo, categoryRepo: categoryRepo, jwtMgr: jwtMgr}
 }
 
 // RegisterRoutes registers transaction routes.
 func (h *Handler) RegisterRoutes(router fiber.Router) {
 	group := router.Group("/transaction")
-	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr, h.checker))
+	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr))
 	protected.Get("/", h.list)
 	protected.Post("/", h.create)
 	protected.Get("/:id", h.get)

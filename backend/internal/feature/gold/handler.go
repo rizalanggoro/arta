@@ -24,7 +24,6 @@ type Handler struct {
 	fxRepo        *fxrate.Repository
 	goldPriceRepo *goldprice.Repository
 	jwtMgr        *jwt.Manager
-	checker       middleware.TokenStatusChecker
 }
 
 // NewHandler creates a new gold handler.
@@ -33,21 +32,19 @@ func NewHandler(
 	fxRepo *fxrate.Repository,
 	goldPriceRepo *goldprice.Repository,
 	jwtMgr *jwt.Manager,
-	checker middleware.TokenStatusChecker,
 ) *Handler {
 	return &Handler{
 		repo:          repo,
 		fxRepo:        fxRepo,
 		goldPriceRepo: goldPriceRepo,
 		jwtMgr:        jwtMgr,
-		checker:       checker,
 	}
 }
 
 // RegisterRoutes registers gold routes.
 func (h *Handler) RegisterRoutes(router fiber.Router) {
 	group := router.Group("/gold")
-	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr, h.checker))
+	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr))
 	protected.Get("/", h.list)
 	protected.Post("/", h.create)
 	protected.Get("/tax", h.listTaxPreferences)

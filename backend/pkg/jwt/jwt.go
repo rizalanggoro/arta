@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/artafinance/backend/pkg/config"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // Manager handles JWT token operations
 type Manager struct {
-	secretKey string
+	cfg *config.Config
 }
 
 // Claims represents JWT token claims
@@ -20,9 +21,11 @@ type Claims struct {
 }
 
 // New creates a new JWT Manager
-func New(secretKey string, expiration int64) *Manager {
+func New(
+	cfg *config.Config,
+) *Manager {
 	return &Manager{
-		secretKey: secretKey,
+		cfg: cfg,
 	}
 }
 
@@ -39,7 +42,7 @@ func (m *Manager) GenerateToken(userID, email string) (string, time.Time, error)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(m.secretKey))
+	tokenString, err := token.SignedString([]byte(m.cfg.JWTSecret))
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("failed to sign token: %w", err)
 	}
@@ -55,7 +58,7 @@ func (m *Manager) ValidateToken(tokenString string) (*Claims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(m.secretKey), nil
+		return []byte(m.cfg.JWTSecret), nil
 	})
 
 	if err != nil {

@@ -27,7 +27,6 @@ type Handler struct {
 	transactionRepo   *transactionfeature.Repository
 	categoryRepo      *categoryfeature.Repository
 	jwtMgr            *jwt.Manager
-	checker           middleware.TokenStatusChecker
 	config            *config.Config
 	dashboardGoldRepo *DashboardGoldRepository
 	goldTaxRepo       *goldfeature.GoldTaxRepository
@@ -42,7 +41,6 @@ func NewHandler(
 	transactionRepo *transactionfeature.Repository,
 	categoryRepo *categoryfeature.Repository,
 	jwtMgr *jwt.Manager,
-	checker middleware.TokenStatusChecker,
 	config *config.Config,
 	dashboardGoldRepo *DashboardGoldRepository,
 	goldTaxRepo *goldfeature.GoldTaxRepository,
@@ -55,7 +53,6 @@ func NewHandler(
 		transactionRepo:   transactionRepo,
 		categoryRepo:      categoryRepo,
 		jwtMgr:            jwtMgr,
-		checker:           checker,
 		config:            config,
 		dashboardGoldRepo: dashboardGoldRepo,
 		goldTaxRepo:       goldTaxRepo,
@@ -65,7 +62,7 @@ func NewHandler(
 // RegisterRoutes registers dashboard routes.
 func (h *Handler) RegisterRoutes(router fiber.Router) {
 	group := router.Group("/dashboard")
-	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr, h.checker))
+	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr))
 	protected.Get("/cash", h.cash)
 	protected.Get("/gold", h.gold)
 }
@@ -268,7 +265,7 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 	}
 
 	totalIncome, totalExpense, err := h.transactionRepo.GetTotalIncomeExpense(transactionfeature.GetTotalIncomeExpenseFilter{
-		WalletId: uint(walletId),
+		WalletId:  uint(walletId),
 		StartDate: startDate,
 		EndDate:   endDate,
 	})

@@ -23,6 +23,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
+	"go.uber.org/dig"
 )
 
 // @title ARTA API
@@ -35,98 +36,99 @@ import (
 // @in header
 // @name Authorization
 // @description "Type 'Bearer TOKEN'"
-
 func main() {
-	// Load environment variables
+	// load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: .env file not found, using environment variables")
 	}
 
-	cfg := config.New()
-	if location, err := time.LoadLocation(cfg.AppTimeZone); err != nil {
-		log.Printf("Warning: failed to load timezone %q, using system local timezone: %v", cfg.AppTimeZone, err)
-	} else {
-		time.Local = location
-	}
+	container := dig.New()
 
-	db, err := database.Initialize(cfg)
+	// config
+	must(container.Provide(config.New))
+	must(container.Invoke(func(cfg *config.Config) {
+		if location, err := time.LoadLocation(cfg.AppTimeZone); err != nil {
+			log.Printf("Warning: failed to load timezone %q, using system local timezone: %v", cfg.AppTimeZone, err)
+		} else {
+			time.Local = location
+		}
+	}))
+
+	// database
+	must(container.Provide(database.Initialize))
+
+	// utils
+	must(container.Provide(jwt.New))
+
+	// repositories
+	must(container.Provide(goldprice.NewRepository))
+	must(container.Provide(fxrate.NewRepository))
+	must(container.Provide(auth.NewRepository))
+	must(container.Provide(wallet.NewRepository))
+	must(container.Provide(category.NewRepository))
+	must(container.Provide(gold.NewRepository))
+	must(container.Provide(gold.NewGoldTaxRepository))
+	must(container.Provide(release.NewRepository))
+	must(container.Provide(transaction.NewRepository))
+	must(container.Provide(dashboard.NewDashboardGoldRepository))
+
+	// handlers
+	must(container.Provide(auth.NewHandler))
+	must(container.Provide(wallet.NewHandler))
+	must(container.Provide(category.NewHandler))
+	must(container.Provide(gold.NewHandler))
+	must(container.Provide(release.NewHandler))
+	must(container.Provide(transaction.NewHandler))
+	must(container.Provide(dashboard.NewHandler))
+
+	// cron jobs
+	must(container.Provide(log.Default))
+	must(container.Provide(goldprice.NewClient))
+	must(container.Provide(fxrate.NewClient))
+	must(container.Provide(goldprice.NewScheduler))
+	must(container.Provide(fxrate.NewScheduler))
+	must(container.Invoke(func(
+		job1 *goldprice.Scheduler,
+		job2 *fxrate.Scheduler,
+	) {
+		go job1.Start(context.Background())
+		go job2.Start(context.Background())
+	}))
+
+	// fiber app
+	must(container.Provide(fiber.New))
+	must(container.Invoke(func(
+		app *fiber.App,
+		cfg *config.Config,
+		authHandler *auth.Handler,
+		walletHandler *wallet.Handler,
+		categoryHandler *category.Handler,
+		goldHandler *gold.Handler,
+		releaseHandler *release.Handler,
+		transactionHandler *transaction.Handler,
+		dashboardHandler *dashboard.Handler,
+	) {
+		app.Use(logger.New())
+		app.Get("/swagger/*", fiberSwagger.WrapHandler)
+
+		api := app.Group("/api")
+		authHandler.RegisterRoutes(api)
+		walletHandler.RegisterRoutes(api)
+		categoryHandler.RegisterRoutes(api)
+		goldHandler.RegisterRoutes(api)
+		releaseHandler.RegisterRoutes(api)
+		transactionHandler.RegisterRoutes(api)
+		dashboardHandler.RegisterRoutes(api)
+
+		fmt.Printf("ARTA Backend Server starting on port %s\n", cfg.ServerPort)
+		if err := app.Listen(":" + cfg.ServerPort); err != nil {
+			log.Fatal(err)
+		}
+	}))
+}
+
+func must(err error) {
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	goldPriceRepo := goldprice.NewRepository(db)
-	goldPriceClient := goldprice.NewClient()
-	goldPriceJob := goldprice.NewScheduler(goldPriceRepo, goldPriceClient, log.Default())
-	go goldPriceJob.Start(context.Background())
-
-	fxRateRepo := fxrate.NewRepository(db)
-	fxRateClient := fxrate.NewClient()
-	fxRateJob := fxrate.NewScheduler(fxRateRepo, fxRateClient, log.Default())
-	go fxRateJob.Start(context.Background())
-
-	jwtManager := jwt.New(cfg.JWTSecret, cfg.JWTExpiration)
-	authRepo := auth.NewRepository(db)
-	authHandler := auth.NewHandler(authRepo, jwtManager)
-
-	walletRepo := wallet.NewRepository(db)
-	walletHandler := wallet.NewHandler(walletRepo, jwtManager, authRepo)
-
-	categoryRepo := category.NewRepository(db)
-	categoryHandler := category.NewHandler(categoryRepo, jwtManager, authRepo)
-
-	goldRepo := gold.NewRepository(db, cfg)
-	goldTaxRepo := gold.NewGoldTaxRepository(db, cfg)
-	goldHandler := gold.NewHandler(
-		goldRepo,
-		fxRateRepo,
-		goldPriceRepo,
-		jwtManager,
-		authRepo,
-	)
-
-	releaseRepo := release.NewRepository(db)
-	releaseHandler := release.NewHandler(releaseRepo)
-
-	transactionRepo := transaction.NewRepository(db)
-	transactionHandler := transaction.NewHandler(transactionRepo, categoryRepo, jwtManager, authRepo)
-
-	dashboardGoldRepo := dashboard.NewDashboardGoldRepository(db, cfg)
-	dashboardHandler := dashboard.NewHandler(walletRepo, goldRepo, goldPriceRepo, fxRateRepo,
-		transactionRepo, categoryRepo, jwtManager, authRepo, cfg, dashboardGoldRepo, goldTaxRepo)
-
-	app := fiber.New()
-	app.Use(logger.New())
-
-	app.Get("/swagger/*", fiberSwagger.WrapHandler)
-
-	api := app.Group("/api")
-	authHandler.RegisterRoutes(api)
-	walletHandler.RegisterRoutes(api)
-	categoryHandler.RegisterRoutes(api)
-	goldHandler.RegisterRoutes(api)
-	releaseHandler.RegisterRoutes(api)
-	transactionHandler.RegisterRoutes(api)
-	dashboardHandler.RegisterRoutes(api)
-
-	latestFxRate, err := fxRateRepo.GetLatest()
-	if err != nil {
-		log.Printf("Error fetching latest FX rate: %v", err)
-	}
-	latestGoldPrice, err := goldPriceRepo.GetLatest()
-	if err != nil {
-		log.Printf("Error fetching latest gold price: %v", err)
-	}
-
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"status":     "ok",
-			"gold_price": latestGoldPrice,
-			"fx_rate":    latestFxRate,
-		})
-	})
-
-	fmt.Printf("ARTA Backend Server starting on port %s\n", cfg.ServerPort)
-	if err := app.Listen(":" + cfg.ServerPort); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }

@@ -13,20 +13,19 @@ import (
 
 // Handler exposes category HTTP endpoints.
 type Handler struct {
-	repo    *Repository
-	jwtMgr  *jwt.Manager
-	checker middleware.TokenStatusChecker
+	repo   *Repository
+	jwtMgr *jwt.Manager
 }
 
 // NewHandler creates a new category handler.
-func NewHandler(repo *Repository, jwtMgr *jwt.Manager, checker middleware.TokenStatusChecker) *Handler {
-	return &Handler{repo: repo, jwtMgr: jwtMgr, checker: checker}
+func NewHandler(repo *Repository, jwtMgr *jwt.Manager) *Handler {
+	return &Handler{repo: repo, jwtMgr: jwtMgr}
 }
 
 // RegisterRoutes registers category routes.
 func (h *Handler) RegisterRoutes(router fiber.Router) {
 	group := router.Group("/category")
-	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr, h.checker))
+	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr))
 	protected.Get("/", h.list)
 	protected.Post("/", h.create)
 	protected.Get("/:id", h.get)

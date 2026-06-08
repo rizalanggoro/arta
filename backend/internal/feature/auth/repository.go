@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/artafinance/backend/internal/domain"
@@ -81,17 +80,4 @@ func (r *Repository) DeleteSessionByToken(token string) error {
 	}
 
 	return nil
-}
-
-// IsTokenActive checks whether a token session exists.
-func (r *Repository) IsTokenActive(token string) (bool, error) {
-	session, err := r.GetSessionByToken(token)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return session != nil, nil
 }

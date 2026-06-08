@@ -7,13 +7,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// TokenStatusChecker validates whether a token is still active in storage.
-type TokenStatusChecker interface {
-	IsTokenActive(token string) (bool, error)
-}
-
 // AuthMiddleware is a Fiber middleware for JWT authentication
-func AuthMiddleware(jwtManager *jwt.Manager, checker TokenStatusChecker) fiber.Handler {
+func AuthMiddleware(
+	jwtManager *jwt.Manager,
+	// checker TokenStatusChecker,
+) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Get Authorization header
 		authHeader := c.Get("Authorization")
@@ -41,14 +39,14 @@ func AuthMiddleware(jwtManager *jwt.Manager, checker TokenStatusChecker) fiber.H
 			})
 		}
 
-		if checker != nil {
-			isActive, err := checker.IsTokenActive(tokenString)
-			if err != nil || !isActive {
-				return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-					"error": "token has been revoked",
-				})
-			}
-		}
+		// if checker != nil {
+		// 	isActive, err := checker.IsTokenActive(tokenString)
+		// 	if err != nil || !isActive {
+		// 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		// 			"error": "token has been revoked",
+		// 		})
+		// 	}
+		// }
 
 		// Store claims in context for later use
 		c.Locals("user_id", claims.UserID)
@@ -70,13 +68,13 @@ func GetUserID(c *fiber.Ctx) string {
 }
 
 // GetClaims extracts JWT claims from context
-func GetClaims(c *fiber.Ctx) *jwt.Claims {
-	claims, ok := c.Locals("claims").(*jwt.Claims)
-	if !ok {
-		return nil
-	}
-	return claims
-}
+// func GetClaims(c *fiber.Ctx) *jwt.Claims {
+// 	claims, ok := c.Locals("claims").(*jwt.Claims)
+// 	if !ok {
+// 		return nil
+// 	}
+// 	return claims
+// }
 
 // GetToken extracts the bearer token from context.
 func GetToken(c *fiber.Ctx) string {
