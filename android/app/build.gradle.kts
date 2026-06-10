@@ -107,5 +107,6 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    implementation("androidx.compose.material3.adaptive:adaptive:1.3.0-beta02")
+    implementation(libs.androidx.compose.adaptive)
+    implementation(libs.compose.skeleton.shimmer)
 }

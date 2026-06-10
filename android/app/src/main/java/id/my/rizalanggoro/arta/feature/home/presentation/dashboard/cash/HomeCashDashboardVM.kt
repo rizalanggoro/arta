@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.R
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.data.BalanceVisibilityPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -14,7 +15,7 @@ import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.core.extension.toApiFormat
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
-import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.CashDashboardUiState.TimeFilter
+import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardUiState.TimeFilter
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,8 +33,9 @@ class HomeCashDashboardVM @Inject constructor(
     private val dashboardApi: DashboardApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
     private val authPrefs: AuthPrefs,
+    private val balanceVisibilityPrefs: BalanceVisibilityPrefs,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(CashDashboardUiState())
+    private val _uiState = MutableStateFlow(HomeCashDashboardUiState())
     val uiState = _uiState.asStateFlow()
 
     fun timeFilterChanged(timeFilter: TimeFilter) {
@@ -89,6 +91,10 @@ class HomeCashDashboardVM @Inject constructor(
             loadDashboard(isRefresh = true)
         }
     }
+
+    fun onBalanceVisibilityChanged(isVisible: Boolean) = balanceVisibilityPrefs.set(
+        isVisible = isVisible
+    )
 
     fun loadDashboard(isRefresh: Boolean = false) =
         viewModelScope.launch {
@@ -159,6 +165,14 @@ class HomeCashDashboardVM @Inject constructor(
                 }
 
                 loadDashboard()
+            }
+        }
+
+        viewModelScope.launch {
+            balanceVisibilityPrefs.isBalanceVisible.collect { isVisible ->
+                _uiState.update {
+                    it.copy(isBalanceVisible = isVisible)
+                }
             }
         }
 

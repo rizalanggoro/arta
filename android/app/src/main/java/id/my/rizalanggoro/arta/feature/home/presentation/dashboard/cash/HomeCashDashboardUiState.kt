@@ -7,6 +7,7 @@ import java.time.ZoneId
 
 data class HomeCashDashboardUiState(
     val selectedWallet: DomainWallet? = null,
+    val isBalanceVisible: Boolean = true,
     val data: DtoCashDashboard? = null,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
