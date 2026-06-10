@@ -5,7 +5,7 @@ import id.my.rizalanggoro.arta.openapi.models.DtoCashDashboard
 import java.time.LocalDate
 import java.time.ZoneId
 
-data class CashDashboardUiState(
+data class HomeCashDashboardUiState(
     val selectedWallet: DomainWallet? = null,
     val data: DtoCashDashboard? = null,
     val isLoading: Boolean = false,
