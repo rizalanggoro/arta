@@ -14,8 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.application.route.AuthRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.core.application.Routes
 import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
@@ -30,7 +30,7 @@ fun LogoutDialog(
             .filterIsInstance<LogoutUiState.Event.LogoutSucceeded>()
             .collect {
                 backStack.clear()
-                backStack.add(Routes.LoginRoute)
+                backStack.add(AuthRoute.Login)
             }
     }
 

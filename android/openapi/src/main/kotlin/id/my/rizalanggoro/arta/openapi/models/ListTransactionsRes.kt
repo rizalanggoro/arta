@@ -23,25 +23,22 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
-import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * 
  *
- * @param transactions 
+ * @param transactions
  */
 @Serializable
 
-data class ListTransactionsRes (
+data class ListTransactionsRes(
 
     @SerialName(value = "transactions")
-    val transactions: kotlin.collections.List<DtoTransaction>
+    val transactions: kotlin.collections.List<DtoTransaction>,
 
-) {
+    ) {
 
 
 }

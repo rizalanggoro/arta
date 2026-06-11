@@ -39,14 +39,10 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import id.my.rizalanggoro.arta.core.application.Routes.HomeCashDashboardRoute
-import id.my.rizalanggoro.arta.core.application.Routes.HomeGoldDashboardRoute
-import id.my.rizalanggoro.arta.core.application.Routes.HomeGoldRoute
-import id.my.rizalanggoro.arta.core.application.Routes.HomeSettingRoute
-import id.my.rizalanggoro.arta.core.application.Routes.HomeTransactionRoute
-import id.my.rizalanggoro.arta.core.application.Routes.SelectWalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.TransactionUpsertRoute
-import id.my.rizalanggoro.arta.core.application.Routes.UpsertGoldRoute
+import id.my.rizalanggoro.arta.core.application.route.GoldRoute
+import id.my.rizalanggoro.arta.core.application.route.HomeRoute
+import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
+import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
@@ -67,28 +63,28 @@ fun HomeScreen(
     val walletType = uiState.selectedWallet?.type
 
     val homeBackStack = when (walletType) {
-        "cash_savings" -> rememberNavBackStack(HomeCashDashboardRoute)
-        "gold_savings" -> rememberNavBackStack(HomeGoldDashboardRoute)
+        "cash_savings" -> rememberNavBackStack(HomeRoute.CashDashboard)
+        "gold_savings" -> rememberNavBackStack(HomeRoute.GoldDashboard)
         else -> null
     }
 
     Content(
         destinations = destinations,
         uiState = uiState,
-        onClickSelectWallet = { backStack.add(SelectWalletRoute) },
+        onClickSelectWallet = { backStack.add(WalletRoute.Select) },
         homeBackStack = homeBackStack,
         onClickFab = {
             when (walletType) {
-                "cash_savings" -> backStack.add(TransactionUpsertRoute())
-                "gold_savings" -> backStack.add(UpsertGoldRoute())
+                "cash_savings" -> backStack.add(TransactionRoute.Upsert())
+                "gold_savings" -> backStack.add(GoldRoute.Upsert())
             }
         },
         entryProvider = entryProvider {
-            entry<HomeCashDashboardRoute> { HomeCashDashboardScreen() }
-            entry<HomeGoldDashboardRoute> { HomeGoldDashboardScreen() }
-            entry<HomeTransactionRoute> { HomeTransactionScreen() }
-            entry<HomeGoldRoute> { HomeGoldScreen() }
-            entry<HomeSettingRoute> { HomeSettingScreen() }
+            entry<HomeRoute.CashDashboard> { HomeCashDashboardScreen() }
+            entry<HomeRoute.GoldDashboard> { HomeGoldDashboardScreen() }
+            entry<HomeRoute.ListTransaction> { HomeTransactionScreen() }
+            entry<HomeRoute.ListGold> { HomeGoldScreen() }
+            entry<HomeRoute.Setting> { HomeSettingScreen() }
         },
         hasUpdate = AppEventBus.updateEvent.collectAsState().value
     )
@@ -113,8 +109,8 @@ private fun Content(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = when {
                         lastDestination in listOf(
-                            HomeCashDashboardRoute,
-                            HomeGoldDashboardRoute,
+                            HomeRoute.CashDashboard,
+                            HomeRoute.GoldDashboard,
                         ) -> MaterialTheme.colorScheme.surfaceContainer
 
                         else -> Color.Unspecified
@@ -123,13 +119,13 @@ private fun Content(
                 title = {
                     Text(
                         text = uiState.selectedWallet?.name.let {
-                            if (it != null && lastDestination != HomeSettingRoute) it
+                            if (it != null && lastDestination != HomeRoute.Setting) it
                             else "Arta"
                         }
                     )
                 },
                 actions = {
-                    if (lastDestination != HomeSettingRoute)
+                    if (lastDestination != HomeRoute.Setting)
                         IconButton(onClick = onClickSelectWallet) {
                             Icon(
                                 Icons.Rounded.Wallet,
@@ -152,7 +148,7 @@ private fun Content(
                             icon = {
                                 BadgedBox(
                                     badge = {
-                                        if (destination.route == HomeSettingRoute && hasUpdate)
+                                        if (destination.route == HomeRoute.Setting && hasUpdate)
                                             Badge()
                                     }
                                 ) {
@@ -168,7 +164,7 @@ private fun Content(
                 }
         },
         floatingActionButton = {
-            if (lastDestination != HomeSettingRoute) {
+            if (lastDestination != HomeRoute.Setting) {
                 FloatingActionButton(onClick = onClickFab) {
                     Icon(
                         Icons.Rounded.Add,
@@ -210,27 +206,27 @@ private fun walletDestinations(type: String?): List<HomeDestination> {
             label = "Ringkasan",
             icon = Icons.Rounded.Dashboard,
             route = when (isCash) {
-                true -> HomeCashDashboardRoute
-                else -> HomeGoldDashboardRoute
+                true -> HomeRoute.CashDashboard
+                else -> HomeRoute.GoldDashboard
             }
         ),
         when (isCash) {
             true -> HomeDestination(
                 label = "Transaksi",
                 icon = Icons.Rounded.Payment,
-                route = HomeTransactionRoute
+                route = HomeRoute.ListTransaction
             )
 
             else -> HomeDestination(
                 label = "Emas",
                 icon = Icons.Rounded.Balance,
-                route = HomeGoldRoute
+                route = HomeRoute.GoldDashboard
             )
         },
         HomeDestination(
             label = "Pengaturan",
             icon = Icons.Rounded.Settings,
-            route = HomeSettingRoute
+            route = HomeRoute.Setting
         ),
     )
 }

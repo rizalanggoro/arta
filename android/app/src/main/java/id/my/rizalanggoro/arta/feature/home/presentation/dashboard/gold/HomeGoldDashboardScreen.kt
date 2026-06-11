@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.application.Routes
+import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.extension.toAmericanCurrency
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
@@ -60,7 +60,7 @@ fun HomeGoldDashboardScreen(
         onClickRetry = { vm.loadDashboard() },
         refreshState = rememberPullToRefreshState(),
         onRefresh = { vm.loadDashboard(isRefresh = true) },
-        onClickManageTax = { backStack.add(Routes.GoldTaxListRoute) },
+        onClickManageTax = { backStack.add(GoldRoute.ListTax) },
     )
 }
 

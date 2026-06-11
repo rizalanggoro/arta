@@ -37,11 +37,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.application.Routes
-import id.my.rizalanggoro.arta.core.application.Routes.CategoryRoute
-import id.my.rizalanggoro.arta.core.application.Routes.GoldTaxListRoute
-import id.my.rizalanggoro.arta.core.application.Routes.ListWalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.UpdateRoute
+import id.my.rizalanggoro.arta.core.application.route.AuthRoute
+import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
+import id.my.rizalanggoro.arta.core.application.route.GoldRoute
+import id.my.rizalanggoro.arta.core.application.route.OtherRoute
+import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
@@ -55,11 +55,11 @@ fun HomeSettingScreen(
     Content(
         uiState = uiState,
         onToggleTheme = vm::onToggleTheme,
-        onClickManageCategory = { backStack.add(CategoryRoute) },
-        onClickManageWallet = { backStack.add(ListWalletRoute) },
-        onClickManageGoldTax = { backStack.add(GoldTaxListRoute) },
-        onClickUpdate = { backStack.add(UpdateRoute) },
-        onClickLogout = { backStack.add(Routes.LogoutRoute) },
+        onClickManageCategory = { backStack.add(CategoryRoute.List) },
+        onClickManageWallet = { backStack.add(WalletRoute.List) },
+        onClickManageGoldTax = { backStack.add(GoldRoute.ListTax) },
+        onClickUpdate = { backStack.add(OtherRoute.CheckUpdate) },
+        onClickLogout = { backStack.add(AuthRoute.Logout) },
     )
 }
 

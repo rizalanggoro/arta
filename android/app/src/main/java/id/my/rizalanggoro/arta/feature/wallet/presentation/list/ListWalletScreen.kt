@@ -29,8 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.application.Routes
-import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
+import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.openapi.models.DtoWallet
@@ -46,10 +45,10 @@ fun ListWalletScreen(vm: ListWalletVM = hiltViewModel()) {
 
     Content(
         uiState = uiState,
-        onClickCreate = { backStack.add(UpsertWalletRoute()) },
+        onClickCreate = { backStack.add(WalletRoute.Upsert()) },
         onLongClickWallet = {
             backStack.add(
-                Routes.ActionSheetWalletRoute(
+                WalletRoute.ActionSheet(
                     walletId = it.id
                 )
             )

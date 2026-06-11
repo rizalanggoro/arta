@@ -23,25 +23,22 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
-import id.my.rizalanggoro.arta.openapi.models.DtoCategory
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * 
  *
- * @param categories 
+ * @param categories
  */
 @Serializable
 
-data class CategoryListCategoriesRes (
+data class CategoryListCategoriesRes(
 
     @SerialName(value = "categories")
-    val categories: kotlin.collections.List<DtoCategory>
+    val categories: kotlin.collections.List<DtoCategory>,
 
-) {
+    ) {
 
 
 }

@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.application.Routes
+import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.constant.toWalletName
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -62,7 +62,7 @@ fun SelectWalletScreen(
         onClickWallet = vm::onWalletSelected,
         onClickManageWallet = {
             backStack.removeLastOrNull()
-            backStack.add(Routes.ListWalletRoute)
+            backStack.add(WalletRoute.List)
         }
     )
 }

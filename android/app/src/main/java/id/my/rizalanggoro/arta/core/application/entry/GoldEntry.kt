@@ -5,11 +5,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
-import id.my.rizalanggoro.arta.core.application.Routes
-import id.my.rizalanggoro.arta.core.application.Routes.GoldDetailRoute
-import id.my.rizalanggoro.arta.core.application.Routes.GoldTaxListRoute
-import id.my.rizalanggoro.arta.core.application.Routes.UpsertGoldRoute
-import id.my.rizalanggoro.arta.core.application.Routes.UpsertGoldTaxRoute
+import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.feature.gold.presentation.action.GoldActionSheet
 import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldDialog
 import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldVM
@@ -21,17 +17,17 @@ import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun EntryProviderScope<NavKey>.goldEntry() {
-    entry<UpsertGoldRoute> {
+    entry<GoldRoute.Upsert> {
         UpsertGoldScreen(
             goldId = it.goldId
         )
     }
 
-    entry<GoldTaxListRoute> {
+    entry<GoldRoute.ListTax> {
         ListGoldTaxScreen()
     }
 
-    entry<UpsertGoldTaxRoute>(
+    entry<GoldRoute.UpsertTax>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
         UpsertGoldTaxScreen(
@@ -39,13 +35,13 @@ fun EntryProviderScope<NavKey>.goldEntry() {
         )
     }
 
-    entry<GoldDetailRoute> {
+    entry<GoldRoute.Detail> {
         GoldDetailScreen(
             goldId = it.id
         )
     }
 
-    entry<Routes.GoldActionSheetRoute>(
+    entry<GoldRoute.ActionSheet>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
         GoldActionSheet(
@@ -53,7 +49,7 @@ fun EntryProviderScope<NavKey>.goldEntry() {
         )
     }
 
-    entry<Routes.DeleteGoldRoute>(
+    entry<GoldRoute.Delete>(
         metadata = DialogSceneStrategy.dialog()
     ) { navKey ->
         DeleteGoldDialog(

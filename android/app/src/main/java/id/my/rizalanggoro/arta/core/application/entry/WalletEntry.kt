@@ -5,12 +5,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
-import id.my.rizalanggoro.arta.core.application.Routes
-import id.my.rizalanggoro.arta.core.application.Routes.ActionSheetWalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.CreateFirstWalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.ListWalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.SelectWalletRoute
-import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
+import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.feature.wallet.presentation.action.ActionSheetWallet
 import id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst.CreateFirstWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.delete.DeleteWalletDialog
@@ -22,17 +17,17 @@ import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun EntryProviderScope<NavKey>.walletEntry() {
-    entry<ListWalletRoute> {
+    entry<WalletRoute.List> {
         ListWalletScreen()
     }
 
-    entry<SelectWalletRoute>(
+    entry<WalletRoute.Select>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
         SelectWalletScreen()
     }
 
-    entry<UpsertWalletRoute>(
+    entry<WalletRoute.Upsert>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
         UpsertWalletScreen(
@@ -40,11 +35,11 @@ fun EntryProviderScope<NavKey>.walletEntry() {
         )
     }
 
-    entry<CreateFirstWalletRoute> {
+    entry<WalletRoute.CreateFirst> {
         CreateFirstWalletScreen()
     }
 
-    entry<ActionSheetWalletRoute>(
+    entry<WalletRoute.ActionSheet>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
         ActionSheetWallet(
@@ -52,7 +47,7 @@ fun EntryProviderScope<NavKey>.walletEntry() {
         )
     }
 
-    entry<Routes.DeleteWalletRoute>(
+    entry<WalletRoute.Delete>(
         metadata = DialogSceneStrategy.dialog()
     ) { navKey ->
         DeleteWalletDialog(

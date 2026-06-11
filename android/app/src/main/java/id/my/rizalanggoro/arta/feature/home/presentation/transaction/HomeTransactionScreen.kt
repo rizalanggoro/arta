@@ -25,11 +25,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.R
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.core.application.Routes
-import id.my.rizalanggoro.arta.core.application.Routes.TransactionUpsertRoute
+import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
@@ -52,7 +51,7 @@ fun HomeTransactionScreen(vm: TransactionListVM = hiltViewModel()) {
             .filterIsInstance<AppEvent.TransactionActionSheet.OnEditClicked>()
             .collect {
                 backStack.add(
-                    TransactionUpsertRoute(
+                    TransactionRoute.Upsert(
                         transactionId = it.transactionId
                     )
                 )
@@ -65,7 +64,7 @@ fun HomeTransactionScreen(vm: TransactionListVM = hiltViewModel()) {
         onRefresh = { vm.loadTransactions(isRefresh = true) },
         onLongClickItem = {
             backStack.add(
-                Routes.TransactionActionSheetRoute(
+                TransactionRoute.ActionSheet(
                     transactionId = it.id
                 )
             )

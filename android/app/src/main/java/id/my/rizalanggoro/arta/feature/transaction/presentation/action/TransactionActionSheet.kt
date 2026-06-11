@@ -22,8 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.core.application.Routes
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +38,7 @@ fun TransactionActionSheet(
             backStack.apply {
                 removeLastOrNull()
                 add(
-                    Routes.TransactionUpsertRoute(
+                    TransactionRoute.Upsert(
                         transactionId = transactionId
                     )
                 )
@@ -48,7 +48,7 @@ fun TransactionActionSheet(
             backStack.apply {
                 removeLastOrNull()
                 add(
-                    Routes.DeleteTransactionRoute(
+                    TransactionRoute.Delete(
                         transactionId = transactionId
                     )
                 )

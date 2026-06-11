@@ -40,9 +40,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.core.application.Routes.CategoryUpsertRoute
+import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.core.constant.categoryTypes
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.feature.category.presentation.list.component.CategoryActionSheet
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DtoCategory
@@ -58,7 +58,7 @@ fun ListCategoryScreen(vm: ListCategoryVM = hiltViewModel()) {
 
     Content(
         uiState = uiState,
-        onClickCreate = { backStack.add(CategoryUpsertRoute()) },
+        onClickCreate = { backStack.add(CategoryRoute.Upsert()) },
         onClickType = vm::onCategoryTypeSelected,
         onClickCategory = vm::onCategoryClicked,
         onClickBack = { backStack.removeLastOrNull() },
@@ -70,7 +70,7 @@ fun ListCategoryScreen(vm: ListCategoryVM = hiltViewModel()) {
             category = uiState.actionTarget!!,
             onClickEdit = {
                 backStack.add(
-                    CategoryUpsertRoute(
+                    CategoryRoute.Upsert(
                         categoryId = uiState.actionTarget!!.id
                     )
                 )

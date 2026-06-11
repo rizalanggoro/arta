@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.application.Routes
+import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
@@ -46,7 +46,7 @@ fun HomeGoldScreen(
         uiState = uiState,
         onClickGold = {
             backStack.add(
-                Routes.GoldActionSheetRoute(
+                GoldRoute.ActionSheet(
                     goldId = it.id
                 )
             )

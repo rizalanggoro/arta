@@ -23,32 +23,26 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
-import id.my.rizalanggoro.arta.openapi.models.DomainFxRate
-import id.my.rizalanggoro.arta.openapi.models.DomainGoldPrice
-import id.my.rizalanggoro.arta.openapi.models.DtoGold
-import id.my.rizalanggoro.arta.openapi.models.DtoGoldTax
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * 
  *
- * @param fxRate 
- * @param goldPrice 
- * @param goldTaxes 
- * @param latestGolds 
- * @param profit 
- * @param retailPrice 
- * @param totalAsset 
- * @param totalBuyPrice 
- * @param totalGoldItems 
- * @param totalWeight 
+ * @param fxRate
+ * @param goldPrice
+ * @param goldTaxes
+ * @param latestGolds
+ * @param profit
+ * @param retailPrice
+ * @param totalAsset
+ * @param totalBuyPrice
+ * @param totalGoldItems
+ * @param totalWeight
  */
 @Serializable
 
-data class DtoGoldDashboard (
+data class DtoGoldDashboard(
 
     @SerialName(value = "fx_rate")
     val fxRate: DomainFxRate,
@@ -78,9 +72,9 @@ data class DtoGoldDashboard (
     val totalGoldItems: kotlin.Int,
 
     @SerialName(value = "total_weight")
-    val totalWeight: kotlin.Double
+    val totalWeight: kotlin.Double,
 
-) {
+    ) {
 
 
 }

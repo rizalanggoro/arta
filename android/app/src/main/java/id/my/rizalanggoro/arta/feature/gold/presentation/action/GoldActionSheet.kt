@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.core.application.Routes
 
 @Composable
 fun GoldActionSheet(
@@ -37,7 +37,7 @@ fun GoldActionSheet(
         onClickDelete = {
             backStack.removeLastOrNull()
             backStack.add(
-                Routes.DeleteGoldRoute(
+                GoldRoute.Delete(
                     goldId = goldId
                 )
             )

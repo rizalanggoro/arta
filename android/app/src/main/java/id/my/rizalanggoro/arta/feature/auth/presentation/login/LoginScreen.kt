@@ -29,10 +29,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.application.route.AuthRoute
+import id.my.rizalanggoro.arta.core.application.route.HomeRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.core.application.Routes
-import id.my.rizalanggoro.arta.core.application.Routes.ForgotPasswordRoute
-import id.my.rizalanggoro.arta.core.application.Routes.RegisterRoute
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
 
@@ -55,7 +54,7 @@ fun LoginScreen(vm: LoginVM = hiltViewModel()) {
         vm.event
             .filterIsInstance<LoginUiState.Event.LoginSucceeded>()
             .collect {
-                backStack.add(Routes.HomeRoute)
+                backStack.add(HomeRoute.Index)
                 backStack.removeFirstOrNull()
             }
     }
@@ -66,8 +65,8 @@ fun LoginScreen(vm: LoginVM = hiltViewModel()) {
         onChangeEmail = vm::onEmailChanged,
         onChangePassword = vm::onPasswordChanged,
         onClickSubmit = vm::onLoginClicked,
-        onClickRegister = { backStack.add(RegisterRoute) },
-        onClickForgotPassword = { backStack.add(ForgotPasswordRoute) },
+        onClickRegister = { backStack.add(AuthRoute.Register) },
+        onClickForgotPassword = { backStack.add(AuthRoute.ForgotPassword) },
     )
 }
 

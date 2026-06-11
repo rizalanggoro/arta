@@ -9,7 +9,7 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.R
-import id.my.rizalanggoro.arta.core.application.Routes.TransactionUpsertRoute
+import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
@@ -32,14 +32,14 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = UpsertTransactionVM.Factory::class)
 class UpsertTransactionVM @AssistedInject constructor(
     @param:ApplicationContext private val context: Context,
-    @Assisted private val navKey: TransactionUpsertRoute,
+    @Assisted private val navKey: TransactionRoute.Upsert,
     private val transactionApi: TransactionApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
     private val authPrefs: AuthPrefs,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
-        fun create(navKey: TransactionUpsertRoute): UpsertTransactionVM
+        fun create(navKey: TransactionRoute.Upsert): UpsertTransactionVM
     }
 
     private val _uiState = MutableStateFlow(UpsertTransactionUiState())

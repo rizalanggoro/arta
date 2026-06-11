@@ -41,7 +41,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.application.Routes.CategorySelectRoute
+import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.isValidInputNumber
@@ -78,7 +78,7 @@ fun UpsertTransactionScreen(
         onDescriptionChanged = vm::onDescriptionChanged,
         onClickSelectCategory = {
             backStack.add(
-                CategorySelectRoute(
+                CategoryRoute.Select(
                     categoryId = uiState.selectedCategory?.id
                 )
             )

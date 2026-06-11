@@ -23,25 +23,22 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
-import id.my.rizalanggoro.arta.openapi.models.DomainWallet
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * 
  *
- * @param createdAt 
- * @param email 
- * @param id 
- * @param name 
- * @param updatedAt 
- * @param wallets 
+ * @param createdAt
+ * @param email
+ * @param id
+ * @param name
+ * @param updatedAt
+ * @param wallets
  */
 @Serializable
 
-data class DomainUser (
+data class DomainUser(
 
     @SerialName(value = "created_at")
     val createdAt: kotlin.String,
@@ -59,9 +56,9 @@ data class DomainUser (
     val updatedAt: kotlin.String,
 
     @SerialName(value = "wallets")
-    val wallets: kotlin.collections.List<DomainWallet>? = null
+    val wallets: kotlin.collections.List<DomainWallet>? = null,
 
-) {
+    ) {
 
 
 }

@@ -23,25 +23,22 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
-import id.my.rizalanggoro.arta.openapi.models.DtoGold
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * 
  *
- * @param golds 
+ * @param golds
  */
 @Serializable
 
-data class GoldListGoldsRes (
+data class GoldListGoldsRes(
 
     @SerialName(value = "golds")
-    val golds: kotlin.collections.List<DtoGold>
+    val golds: kotlin.collections.List<DtoGold>,
 
-) {
+    ) {
 
 
 }

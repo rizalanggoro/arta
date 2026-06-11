@@ -23,25 +23,22 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
-import id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * 
  *
- * @param preferences 
+ * @param preferences
  */
 @Serializable
 
-data class ListGoldTaxPreferencesRes (
+data class ListGoldTaxPreferencesRes(
 
     @SerialName(value = "preferences")
-    val preferences: kotlin.collections.List<DtoGoldTaxPreference>
+    val preferences: kotlin.collections.List<DtoGoldTaxPreference>,
 
-) {
+    ) {
 
 
 }

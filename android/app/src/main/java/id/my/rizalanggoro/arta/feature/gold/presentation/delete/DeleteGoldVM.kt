@@ -9,7 +9,7 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.R
-import id.my.rizalanggoro.arta.core.application.Routes
+import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -23,14 +23,14 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = DeleteGoldVM.Factory::class)
 class DeleteGoldVM @AssistedInject constructor(
-    @Assisted private val navKey: Routes.DeleteGoldRoute,
+    @Assisted private val navKey: GoldRoute.Delete,
     @param:ApplicationContext private val context: Context,
     private val authPrefs: AuthPrefs,
     private val goldApi: GoldApi,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
-        fun create(navKey: Routes.DeleteGoldRoute): DeleteGoldVM
+        fun create(navKey: GoldRoute.Delete): DeleteGoldVM
     }
 
     private var _uiState = MutableStateFlow(DeleteGoldUiState())

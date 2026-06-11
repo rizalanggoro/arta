@@ -7,20 +7,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import id.my.rizalanggoro.arta.core.application.Routes.TransactionUpsertRoute
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
-import androidx.compose.material3.ExperimentalMaterial3Api
 
 @Composable
 fun TransactionDetailScreen(
@@ -34,7 +34,13 @@ fun TransactionDetailScreen(
 
     Content(
         tx = tx,
-        onEdit = { t -> backStack.add(TransactionUpsertRoute(transactionId = t.id)) }
+        onEdit = { t ->
+            backStack.add(
+                TransactionRoute.Upsert(
+                    transactionId = t.id
+                )
+            )
+        }
     )
 }
 
@@ -44,10 +50,20 @@ private fun Content(tx: DomainTransaction?, onEdit: (DomainTransaction) -> Unit 
     androidx.compose.material3.Scaffold(
         topBar = { androidx.compose.material3.TopAppBar(title = { Text("Detail Transaksi") }) }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
-            Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
                 Column(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     if (tx == null) {

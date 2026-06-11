@@ -4,9 +4,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import id.my.rizalanggoro.arta.core.application.Routes.CategoryRoute
-import id.my.rizalanggoro.arta.core.application.Routes.CategorySelectRoute
-import id.my.rizalanggoro.arta.core.application.Routes.CategoryUpsertRoute
+import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryVM
@@ -16,11 +14,11 @@ import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun EntryProviderScope<NavKey>.categoryEntry() {
-    entry<CategoryRoute> {
+    entry<CategoryRoute.List> {
         ListCategoryScreen()
     }
 
-    entry<CategorySelectRoute>(
+    entry<CategoryRoute.Select>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) { navKey ->
         SelectCategoryScreen(
@@ -35,7 +33,7 @@ fun EntryProviderScope<NavKey>.categoryEntry() {
         )
     }
 
-    entry<CategoryUpsertRoute>(
+    entry<CategoryRoute.Upsert>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) { navKey ->
         UpsertCategoryScreen(

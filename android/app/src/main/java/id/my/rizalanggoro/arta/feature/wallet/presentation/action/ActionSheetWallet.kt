@@ -1,8 +1,7 @@
 package id.my.rizalanggoro.arta.feature.wallet.presentation.action
 
 import androidx.compose.runtime.Composable
-import id.my.rizalanggoro.arta.core.application.Routes
-import id.my.rizalanggoro.arta.core.application.Routes.UpsertWalletRoute
+import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.shared.component.ActionSheet
 
@@ -17,7 +16,7 @@ fun ActionSheetWallet(
             backStack.apply {
                 removeLastOrNull()
                 add(
-                    UpsertWalletRoute(
+                    WalletRoute.Upsert(
                         walletId = walletId
                     )
                 )
@@ -27,7 +26,7 @@ fun ActionSheetWallet(
             backStack.apply {
                 removeLastOrNull()
                 add(
-                    Routes.DeleteWalletRoute(
+                    WalletRoute.Delete(
                         walletId = walletId
                     )
                 )

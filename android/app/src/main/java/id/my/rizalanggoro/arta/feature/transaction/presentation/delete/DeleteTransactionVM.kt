@@ -9,7 +9,7 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.R
-import id.my.rizalanggoro.arta.core.application.Routes
+import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -23,14 +23,14 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = DeleteTransactionVM.Factory::class)
 class DeleteTransactionVM @AssistedInject constructor(
-    @Assisted private val navKey: Routes.DeleteTransactionRoute,
+    @Assisted private val navKey: TransactionRoute.Delete,
     @param:ApplicationContext private val context: Context,
     private val authPrefs: AuthPrefs,
     private val transactionApi: TransactionApi,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
-        fun create(navKey: Routes.DeleteTransactionRoute): DeleteTransactionVM
+        fun create(navKey: TransactionRoute.Delete): DeleteTransactionVM
     }
 
     private var _uiState = MutableStateFlow(DeleteTransactionUiState())

@@ -5,9 +5,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
-import id.my.rizalanggoro.arta.core.application.Routes
-import id.my.rizalanggoro.arta.core.application.Routes.TransactionDetailRoute
-import id.my.rizalanggoro.arta.core.application.Routes.TransactionUpsertRoute
+import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.feature.transaction.presentation.action.TransactionActionSheet
 import id.my.rizalanggoro.arta.feature.transaction.presentation.delete.DeleteTransactionDialog
 import id.my.rizalanggoro.arta.feature.transaction.presentation.delete.DeleteTransactionVM
@@ -18,7 +16,7 @@ import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun EntryProviderScope<NavKey>.transactionEntry() {
-    entry<TransactionUpsertRoute> { navKey ->
+    entry<TransactionRoute.Upsert> { navKey ->
         UpsertTransactionScreen(
             vm = hiltViewModel<UpsertTransactionVM, UpsertTransactionVM.Factory>(
                 creationCallback = {
@@ -30,13 +28,13 @@ fun EntryProviderScope<NavKey>.transactionEntry() {
         )
     }
 
-    entry<TransactionDetailRoute> {
+    entry<TransactionRoute.Detail> {
         TransactionDetailScreen(
-            transactionId = it.id
+            transactionId = it.transactionId
         )
     }
 
-    entry<Routes.TransactionActionSheetRoute>(
+    entry<TransactionRoute.ActionSheet>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
         TransactionActionSheet(
@@ -44,7 +42,7 @@ fun EntryProviderScope<NavKey>.transactionEntry() {
         )
     }
 
-    entry<Routes.DeleteTransactionRoute>(
+    entry<TransactionRoute.Delete>(
         metadata = DialogSceneStrategy.dialog()
     ) { navKey ->
         DeleteTransactionDialog(

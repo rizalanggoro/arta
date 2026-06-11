@@ -9,7 +9,7 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.R
-import id.my.rizalanggoro.arta.core.application.Routes
+import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -23,14 +23,14 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = DeleteWalletVM.Factory::class)
 class DeleteWalletVM @AssistedInject constructor(
-    @Assisted private val navKey: Routes.DeleteWalletRoute,
+    @Assisted private val navKey: WalletRoute.Delete,
     @param:ApplicationContext private val context: Context,
     private val authPrefs: AuthPrefs,
     private val walletApi: WalletApi,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
-        fun create(navKey: Routes.DeleteWalletRoute): DeleteWalletVM
+        fun create(navKey: WalletRoute.Delete): DeleteWalletVM
     }
 
     private var _uiState = MutableStateFlow(DeleteWalletUiState())
