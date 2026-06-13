@@ -3,6 +3,7 @@ package category
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
@@ -28,7 +29,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr))
 	protected.Get("/", h.list)
 	protected.Post("/", h.create)
-	protected.Get("/:id", h.get)
+	protected.Get("/:category_id", h.get)
 	protected.Put("/:id", h.update)
 	protected.Delete("/:id", h.delete)
 }
@@ -112,34 +113,78 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(CreateCategoryRes{dto.Category{Data: *created}})
 }
 
-// @id                   GetCategory
-// @tags                 category
-// @accept               json
-// @produce              json
-// @param                Authorization header string true "Bearer token"
-// @param                id path int true "category id"
-// @success              200 {object} GetCategoryRes
-// @router               /api/category/{id} [get]
+// @id          GetCategory
+// @tags        category
+// @accept      json
+// @produce     json
+// @param       Authorization header string true "Bearer token"
+// @param       category_id path int true "category id"
+// @param 			include_total_amount query bool false "include_total_amount"
+// @param 			include_transactions query bool false "include_transactions"
+// @param 			start_date query string false "start_date"
+// @param 			end_date query string false "end_date"
+// @success     200 {object} GetCategoryRes
+// @router      /api/category/{category_id} [get]
 func (h *Handler) get(c *fiber.Ctx) error {
-	id := c.Params("id")
-	parsedID, err := strconv.ParseUint(id, 10, 64)
+	userId, err := strconv.Atoi(middleware.GetUserID(c))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})
-	}
-	cat, err := h.repo.GetCategoryByID(uint(parsedID))
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
 	}
 
-	userID := middleware.GetUserID(c)
-	// allow access if category is default (UserID nil) or owned by user
-	if cat.UserID != nil {
-		if strconv.FormatUint(uint64(*cat.UserID), 10) != userID {
-			return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	categoryId, err := c.ParamsInt("category_id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
+	includeTotalAmount := c.QueryBool("include_total_amount", false)
+	includeTransactions := c.QueryBool("include_transactions", false)
+	startDateStr := c.Query("start_date")
+	endDateStr := c.Query("end_date")
+
+	var startDate, endDate time.Time
+	if startDateStr != "" {
+		startDate, err = time.Parse("2006-01-02", startDateStr)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+				Code:    fiber.StatusBadRequest,
+				Message: err.Error(),
+			})
+		}
+	}
+	if endDateStr != "" {
+		endDate, err = time.Parse("2006-01-02", endDateStr)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+				Code:    fiber.StatusBadRequest,
+				Message: err.Error(),
+			})
 		}
 	}
 
-	return c.Status(fiber.StatusOK).JSON(GetCategoryRes{dto.Category{Data: *cat}})
+	res, err := h.repo.Get(GetCategoryFilterFilter{
+		CategoryId:          uint(categoryId),
+		UserId:              uint(userId),
+		IncludeTotalAmount:  includeTotalAmount,
+		IncludeTransactions: includeTransactions,
+		StartDate:           startDate,
+		EndDate:             endDate,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(GetCategoryRes{
+		*res,
+	})
 }
 
 // @id                   UpdateCategory

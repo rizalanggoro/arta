@@ -21,9 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.utils.getBottomRadius
@@ -40,6 +42,7 @@ fun TransactionListItem(
     size: Int = 1,
     onClick: (DomainTransaction) -> Unit = {},
     onLongClick: (DomainTransaction) -> Unit = {},
+    isLoading: Boolean = false,
 ) {
     Row(
         modifier = modifier
@@ -57,7 +60,13 @@ fun TransactionListItem(
                 onClick = { onClick(transaction.data) },
                 onLongClick = { onLongClick(transaction.data) }
             )
-            .padding(16.dp),
+            .padding(16.dp)
+            .then(
+                when {
+                    isLoading -> Modifier.shimmer()
+                    else -> Modifier
+                }
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -67,41 +76,93 @@ fun TransactionListItem(
                 .size(40.dp)
                 .background(
                     when {
-                        transaction.category.type == "income" -> MaterialTheme.colorScheme.primaryContainer
-                        else -> MaterialTheme.colorScheme.errorContainer
+                        isLoading -> MaterialTheme.colorScheme.outlineVariant
+                        else -> when {
+                            transaction.category.type == "income" -> MaterialTheme.colorScheme.primaryContainer
+                            else -> MaterialTheme.colorScheme.errorContainer
+                        }
                     }
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
+            if (!isLoading)
+                Icon(
+                    when {
+                        transaction.category.type == "income" -> Icons.AutoMirrored.Rounded.CallReceived
+                        else -> Icons.AutoMirrored.Rounded.CallMade
+                    },
+                    null,
+                    tint = when {
+                        transaction.category.type == "income" -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.error
+                    }
+                )
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(
                 when {
-                    transaction.category.type == "income" -> Icons.AutoMirrored.Rounded.CallReceived
-                    else -> Icons.AutoMirrored.Rounded.CallMade
-                },
-                null,
-                tint = when {
-                    transaction.category.type == "income" -> MaterialTheme.colorScheme.primary
-                    else -> MaterialTheme.colorScheme.error
+                    isLoading -> 4.dp
+                    else -> 0.dp
                 }
             )
-        }
-        Column(modifier = Modifier.weight(1f)) {
+        ) {
             Text(
                 transaction.data.amount.toIndonesianCurrency(),
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.then(
+                    when {
+                        isLoading -> Modifier
+                            .shimmer()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+
+                        else -> Modifier
+                    }
+                ),
+                color = when {
+                    isLoading -> Color.Transparent
+                    else -> Color.Unspecified
+                }
             )
             Text(
                 transaction.category.name,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
+                color = when {
+                    isLoading -> Color.Transparent
+                    else -> MaterialTheme.colorScheme.outline
+                },
+                modifier = Modifier.then(
+                    when {
+                        isLoading -> Modifier
+                            .shimmer()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+
+                        else -> Modifier
+                    }
+                )
             )
         }
         Text(
             transaction.data.date.toFormattedDate("E, dd/M/yy"),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.outline,
-            fontWeight = FontWeight.Normal
+            color = when {
+                isLoading -> Color.Transparent
+                else -> MaterialTheme.colorScheme.outline
+            },
+            fontWeight = FontWeight.Normal,
+            modifier = Modifier.then(
+                when {
+                    isLoading -> Modifier
+                        .shimmer()
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.outlineVariant)
+
+                    else -> Modifier
+                }
+            )
         )
     }
 }
@@ -129,6 +190,7 @@ private fun IncomePreview() {
                 updatedAt = "",
                 userId = 1
             )
-        )
+        ),
+        isLoading = true
     )
 }

@@ -5,6 +5,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
+import id.my.rizalanggoro.arta.feature.category.presentation.detail.DetailCategoryScreen
+import id.my.rizalanggoro.arta.feature.category.presentation.detail.DetailCategoryVM
 import id.my.rizalanggoro.arta.feature.category.presentation.list.ListCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryScreen
 import id.my.rizalanggoro.arta.feature.category.presentation.select.SelectCategoryVM
@@ -16,6 +18,18 @@ import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 fun EntryProviderScope<NavKey>.categoryEntry() {
     entry<CategoryRoute.List> {
         ListCategoryScreen()
+    }
+
+    entry<CategoryRoute.Detail> { navKey ->
+        DetailCategoryScreen(
+            vm = hiltViewModel<DetailCategoryVM, DetailCategoryVM.Factory>(
+                creationCallback = {
+                    it.create(
+                        navKey = navKey
+                    )
+                }
+            )
+        )
     }
 
     entry<CategoryRoute.Select>(

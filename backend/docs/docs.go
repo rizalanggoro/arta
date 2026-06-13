@@ -287,7 +287,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/category/{id}": {
+        "/api/category/{category_id}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -310,9 +310,33 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "category id",
-                        "name": "id",
+                        "name": "category_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "include_total_amount",
+                        "name": "include_total_amount",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "include_transactions",
+                        "name": "include_transactions",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "start_date",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "end_date",
+                        "name": "end_date",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -323,7 +347,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/api/category/{id}": {
             "put": {
                 "consumes": [
                     "application/json"
@@ -1601,7 +1627,8 @@ const docTemplate = `{
             "required": [
                 "data",
                 "total_amount",
-                "transaction_count"
+                "transaction_count",
+                "transactions"
             ],
             "properties": {
                 "data": {
@@ -1613,6 +1640,12 @@ const docTemplate = `{
                 },
                 "transaction_count": {
                     "type": "integer"
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.Transaction"
+                    }
                 }
             }
         },
@@ -1777,7 +1810,8 @@ const docTemplate = `{
             "required": [
                 "data",
                 "total_amount",
-                "transaction_count"
+                "transaction_count",
+                "transactions"
             ],
             "properties": {
                 "data": {
@@ -1789,6 +1823,12 @@ const docTemplate = `{
                 },
                 "transaction_count": {
                     "type": "integer"
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.Transaction"
+                    }
                 }
             }
         },
@@ -2000,7 +2040,8 @@ const docTemplate = `{
             "required": [
                 "data",
                 "total_amount",
-                "transaction_count"
+                "transaction_count",
+                "transactions"
             ],
             "properties": {
                 "data": {
@@ -2012,6 +2053,12 @@ const docTemplate = `{
                 },
                 "transaction_count": {
                     "type": "integer"
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.Transaction"
+                    }
                 }
             }
         },
@@ -2494,7 +2541,8 @@ const docTemplate = `{
             "required": [
                 "data",
                 "total_amount",
-                "transaction_count"
+                "transaction_count",
+                "transactions"
             ],
             "properties": {
                 "data": {
@@ -2506,6 +2554,12 @@ const docTemplate = `{
                 },
                 "transaction_count": {
                     "type": "integer"
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.Transaction"
+                    }
                 }
             }
         },

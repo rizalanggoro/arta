@@ -18,35 +18,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 
 @Composable
 fun IncomeExpenseSummary(
+    modifier: Modifier = Modifier,
     totalIncome: Double = 0.0,
     totalExpense: Double = 0.0,
+    isLoading: Boolean = false,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(horizontal = 16.dp)
-            .padding(top = 8.dp)
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         SummaryCard(
             modifier = Modifier.weight(1f),
             title = "Pemasukan",
             value = totalIncome,
-            icon = Icons.AutoMirrored.Rounded.CallReceived
+            icon = Icons.AutoMirrored.Rounded.CallReceived,
+            isLoading = isLoading
         )
-        SummaryCard(modifier = Modifier.weight(1f),
+        SummaryCard(
+            modifier = Modifier.weight(1f),
             title = "Pengeluaran",
             value = totalExpense,
-            icon = Icons.AutoMirrored.Rounded.CallMade
+            icon = Icons.AutoMirrored.Rounded.CallMade,
+            isLoading = isLoading
         )
     }
 }
@@ -57,11 +60,18 @@ private fun SummaryCard(
     title: String = "Pemasukan",
     value: Double = 0.0,
     icon: ImageVector = Icons.AutoMirrored.Rounded.CallReceived,
+    isLoading: Boolean = false,
 ) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer),
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .then(
+                when {
+                    isLoading -> Modifier.shimmer()
+                    else -> Modifier
+                }
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -74,21 +84,72 @@ private fun SummaryCard(
                 Icon(
                     icon,
                     null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(14.dp)
+                    tint = when {
+                        isLoading -> Color.Transparent
+                        else -> MaterialTheme.colorScheme.primary
+                    },
+                    modifier = Modifier
+                        .size(16.dp)
+                        .then(
+                            when {
+                                isLoading -> Modifier.clip(RoundedCornerShape(4.dp))
+                                else -> Modifier
+                            }
+                        )
+                        .background(
+                            when {
+                                isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                else -> Color.Unspecified
+                            }
+                        )
                 )
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
+                    color = when {
+                        isLoading -> Color.Transparent
+                        else -> MaterialTheme.colorScheme.primary
+                    },
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .then(
+                            when {
+                                isLoading -> Modifier.clip(RoundedCornerShape(4.dp))
+                                else -> Modifier
+                            }
+                        )
+                        .background(
+                            when {
+                                isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                else -> Color.Unspecified
+                            }
+                        )
                 )
             }
             Text(
                 text = value.toIndonesianCurrency(),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                color = when {
+                    isLoading -> Color.Transparent
+                    else -> MaterialTheme.colorScheme.onSecondaryContainer
+                },
+                modifier = Modifier
+                    .then(
+                        when {
+                            isLoading -> Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(4.dp))
+
+                            else -> Modifier
+                        }
+                    )
+                    .background(
+                        when {
+                            isLoading -> MaterialTheme.colorScheme.outlineVariant
+                            else -> Color.Unspecified
+                        }
+                    )
             )
         }
     }

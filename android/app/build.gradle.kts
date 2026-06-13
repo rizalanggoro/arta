@@ -108,5 +108,5 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(libs.androidx.compose.adaptive)
-    implementation(libs.compose.skeleton.shimmer)
+    implementation(libs.compose.shimmer)
 }

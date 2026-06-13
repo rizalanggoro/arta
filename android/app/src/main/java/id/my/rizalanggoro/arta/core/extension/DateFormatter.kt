@@ -22,6 +22,11 @@ fun Long.toIndonesianDate() = Instant
     .format(formatter)
     .replaceFirstChar { it.uppercase() }
 
+fun Long.toLocalDate() = Instant
+    .ofEpochMilli(this)
+    .atZone(ZoneId.systemDefault())
+    .toLocalDateTime()
+
 fun Long.toApiFormat(): String = Instant
     .ofEpochMilli(this)
     .atZone(ZoneId.systemDefault())

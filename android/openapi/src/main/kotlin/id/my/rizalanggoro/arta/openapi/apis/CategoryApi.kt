@@ -45,18 +45,22 @@ interface CategoryApi {
     suspend fun deleteCategory(@Header("Authorization") authorization: kotlin.String, @Path("id") id: kotlin.Int): Response<DeleteCategoryRes>
 
     /**
-     * GET api/category/{id}
+     * GET api/category/{category_id}
      * 
      * 
      * Responses:
      *  - 200: OK
      *
      * @param authorization Bearer token
-     * @param id category id
+     * @param categoryId category id
+     * @param includeTotalAmount include_total_amount (optional)
+     * @param includeTransactions include_transactions (optional)
+     * @param startDate start_date (optional)
+     * @param endDate end_date (optional)
      * @return [GetCategoryRes]
      */
-    @GET("api/category/{id}")
-    suspend fun getCategory(@Header("Authorization") authorization: kotlin.String, @Path("id") id: kotlin.Int): Response<GetCategoryRes>
+    @GET("api/category/{category_id}")
+    suspend fun getCategory(@Header("Authorization") authorization: kotlin.String, @Path("category_id") categoryId: kotlin.Int, @Query("include_total_amount") includeTotalAmount: kotlin.Boolean? = null, @Query("include_transactions") includeTransactions: kotlin.Boolean? = null, @Query("start_date") startDate: kotlin.String? = null, @Query("end_date") endDate: kotlin.String? = null): Response<GetCategoryRes>
 
     /**
      * GET api/category

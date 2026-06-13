@@ -9,6 +9,13 @@ object CategoryRoute {
     data object List : NavKey
 
     @Serializable
+    data class Detail(
+        val categoryId: Int,
+        val transactionStartDateMillis: Long,
+        val transactionEndDateMillis: Long,
+    ) : NavKey
+
+    @Serializable
     data class Select(
         val categoryId: Int? = null,
     ) : NavKey

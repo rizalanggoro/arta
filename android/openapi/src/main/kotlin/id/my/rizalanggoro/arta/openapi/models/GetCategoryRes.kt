@@ -24,6 +24,7 @@
 package id.my.rizalanggoro.arta.openapi.models
 
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
+import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
@@ -35,6 +36,7 @@ import kotlinx.serialization.Contextual
  * @param `data` 
  * @param totalAmount 
  * @param transactionCount 
+ * @param transactions 
  */
 @Serializable
 
@@ -47,7 +49,10 @@ data class GetCategoryRes (
     val totalAmount: kotlin.Double,
 
     @SerialName(value = "transaction_count")
-    val transactionCount: kotlin.Int
+    val transactionCount: kotlin.Int,
+
+    @SerialName(value = "transactions")
+    val transactions: kotlin.collections.List<DomainTransaction>
 
 ) {
 

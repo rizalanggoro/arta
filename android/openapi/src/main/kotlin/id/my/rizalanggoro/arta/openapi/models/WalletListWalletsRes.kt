@@ -23,22 +23,25 @@
 
 package id.my.rizalanggoro.arta.openapi.models
 
-import kotlinx.serialization.SerialName
+import id.my.rizalanggoro.arta.openapi.models.DtoWallet
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Contextual
 
 /**
  * 
  *
- * @param wallets
+ * @param wallets 
  */
 @Serializable
 
-data class WalletListWalletsRes(
+data class WalletListWalletsRes (
 
     @SerialName(value = "wallets")
-    val wallets: kotlin.collections.List<DtoWallet>,
+    val wallets: kotlin.collections.List<DtoWallet>
 
-    ) {
+) {
 
 
 }

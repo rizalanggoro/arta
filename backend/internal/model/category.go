@@ -11,7 +11,8 @@ type Category struct {
 	// Use UserID==NULL to indicate system default categories.
 
 	// Foreign key
-	User *User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE"`
+	User         *User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE"`
+	Transactions []Transaction
 }
 
 // TableName specifies the table name for Category model.

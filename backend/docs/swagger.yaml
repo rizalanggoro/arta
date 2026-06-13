@@ -16,10 +16,15 @@ definitions:
         type: number
       transaction_count:
         type: integer
+      transactions:
+        items:
+          $ref: '#/definitions/domain.Transaction'
+        type: array
     required:
     - data
     - total_amount
     - transaction_count
+    - transactions
     type: object
   CreateGoldRes:
     properties:
@@ -134,10 +139,15 @@ definitions:
         type: number
       transaction_count:
         type: integer
+      transactions:
+        items:
+          $ref: '#/definitions/domain.Transaction'
+        type: array
     required:
     - data
     - total_amount
     - transaction_count
+    - transactions
     type: object
   GetGoldRes:
     properties:
@@ -284,10 +294,15 @@ definitions:
         type: number
       transaction_count:
         type: integer
+      transactions:
+        items:
+          $ref: '#/definitions/domain.Transaction'
+        type: array
     required:
     - data
     - total_amount
     - transaction_count
+    - transactions
     type: object
   UpdateGoldRes:
     properties:
@@ -634,10 +649,15 @@ definitions:
         type: number
       transaction_count:
         type: integer
+      transactions:
+        items:
+          $ref: '#/definitions/domain.Transaction'
+        type: array
     required:
     - data
     - total_amount
     - transaction_count
+    - transactions
     type: object
   dto.Error:
     properties:
@@ -1031,6 +1051,47 @@ paths:
             $ref: '#/definitions/CreateCategoryRes'
       tags:
       - category
+  /api/category/{category_id}:
+    get:
+      consumes:
+      - application/json
+      operationId: GetCategory
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: category id
+        in: path
+        name: category_id
+        required: true
+        type: integer
+      - description: include_total_amount
+        in: query
+        name: include_total_amount
+        type: boolean
+      - description: include_transactions
+        in: query
+        name: include_transactions
+        type: boolean
+      - description: start_date
+        in: query
+        name: start_date
+        type: string
+      - description: end_date
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GetCategoryRes'
+      tags:
+      - category
   /api/category/{id}:
     delete:
       consumes:
@@ -1054,30 +1115,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/DeleteCategoryRes'
-      tags:
-      - category
-    get:
-      consumes:
-      - application/json
-      operationId: GetCategory
-      parameters:
-      - description: Bearer token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: category id
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/GetCategoryRes'
       tags:
       - category
     put:

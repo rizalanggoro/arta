@@ -51,7 +51,7 @@ All URIs are relative to *http://localhost:8080*
 | *AuthApi* | [**logout**](docs/AuthApi.md#logout) | **POST** api/auth/logout | Logout current session |
 | *CategoryApi* | [**createCategory**](docs/CategoryApi.md#createcategory) | **POST** api/category |  |
 | *CategoryApi* | [**deleteCategory**](docs/CategoryApi.md#deletecategory) | **DELETE** api/category/{id} |  |
-| *CategoryApi* | [**getCategory**](docs/CategoryApi.md#getcategory) | **GET** api/category/{id} |  |
+| *CategoryApi* | [**getCategory**](docs/CategoryApi.md#getcategory) | **GET** api/category/{category_id} |  |
 | *CategoryApi* | [**listCategories**](docs/CategoryApi.md#listcategories) | **GET** api/category |  |
 | *CategoryApi* | [**updateCategory**](docs/CategoryApi.md#updatecategory) | **PUT** api/category/{id} |  |
 | *DashboardApi* | [**getCashDashboard**](docs/DashboardApi.md#getcashdashboard) | **GET** api/dashboard/cash |  |

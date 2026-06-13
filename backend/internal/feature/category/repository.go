@@ -37,6 +37,67 @@ func (r *Repository) GetCategoryByID(id uint) (*domain.Category, error) {
 	return domain.FromCategoryModel(&m), nil
 }
 
+type GetCategoryFilterFilter struct {
+	CategoryId          uint
+	UserId              uint
+	IncludeTotalAmount  bool
+	IncludeTransactions bool
+	StartDate           time.Time
+	EndDate             time.Time
+}
+
+func (r *Repository) Get(filter GetCategoryFilterFilter) (*dto.Category, error) {
+	var category model.Category
+
+	query := r.db.Model(&model.Category{}).
+		Where("categories.id = ?", filter.CategoryId).
+		Where("categories.user_id is null or categories.user_id = ?", filter.UserId)
+
+	if filter.IncludeTotalAmount || filter.IncludeTransactions {
+		query = query.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+			tx := db
+			if !filter.StartDate.IsZero() {
+				tx = tx.Where("transactions.date >= ?", filter.StartDate)
+			}
+
+			if !filter.EndDate.IsZero() {
+				tx = tx.Where("transactions.date < ?", filter.EndDate)
+			}
+
+			return tx
+		})
+	}
+
+	if err := query.First(&category).Error; err != nil {
+		return nil, err
+	}
+
+	totalAmount := 0.0
+	transactions := make([]domain.Transaction, 0)
+
+	if filter.IncludeTransactions {
+		transactions = make([]domain.Transaction, len(category.Transactions))
+	}
+
+	if filter.IncludeTotalAmount || filter.IncludeTransactions {
+		for index, transaction := range category.Transactions {
+			if filter.IncludeTotalAmount {
+				totalAmount += transaction.Amount
+			}
+
+			if filter.IncludeTransactions {
+				transactions[index] = *domain.FromTransactionModel(&transaction)
+			}
+		}
+	}
+
+	return &dto.Category{
+		Data:         *domain.FromCategoryModel(&category),
+		TotalAmount:  totalAmount,
+		Transactions: transactions,
+	}, nil
+}
+
 type GetAllCategoriesFilter struct {
 	UserId       uint
 	WalletId     uint
@@ -94,6 +155,7 @@ func (r *Repository) GetAll(filter GetAllCategoriesFilter) ([]dto.Category, erro
 }
 
 // GetCategoriesByUserID returns default categories and those created by the user.
+// @deprecated
 func (r *Repository) GetCategoriesByUserID(userID uint, categoryType string) ([]domain.Category, error) {
 	var m []model.Category
 	query := r.db.Where("(user_id IS NULL OR user_id = ?)", userID)

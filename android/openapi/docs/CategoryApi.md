@@ -6,7 +6,7 @@ All URIs are relative to *http://localhost:8080*
 | ------------- | ------------- | ------------- |
 | [**createCategory**](CategoryApi.md#createCategory) | **POST** api/category |  |
 | [**deleteCategory**](CategoryApi.md#deleteCategory) | **DELETE** api/category/{id} |  |
-| [**getCategory**](CategoryApi.md#getCategory) | **GET** api/category/{id} |  |
+| [**getCategory**](CategoryApi.md#getCategory) | **GET** api/category/{category_id} |  |
 | [**listCategories**](CategoryApi.md#listCategories) | **GET** api/category |  |
 | [**updateCategory**](CategoryApi.md#updateCategory) | **PUT** api/category/{id} |  |
 
@@ -102,18 +102,26 @@ No authorization required
 val apiClient = ApiClient()
 val webService = apiClient.createWebservice(CategoryApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
-val id : kotlin.Int = 56 // kotlin.Int | category id
+val categoryId : kotlin.Int = 56 // kotlin.Int | category id
+val includeTotalAmount : kotlin.Boolean = true // kotlin.Boolean | include_total_amount
+val includeTransactions : kotlin.Boolean = true // kotlin.Boolean | include_transactions
+val startDate : kotlin.String = startDate_example // kotlin.String | start_date
+val endDate : kotlin.String = endDate_example // kotlin.String | end_date
 
 launch(Dispatchers.IO) {
-    val result : GetCategoryRes = webService.getCategory(authorization, id)
+    val result : GetCategoryRes = webService.getCategory(authorization, categoryId, includeTotalAmount, includeTransactions, startDate, endDate)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
+| **categoryId** | **kotlin.Int**| category id | |
+| **includeTotalAmount** | **kotlin.Boolean**| include_total_amount | [optional] |
+| **includeTransactions** | **kotlin.Boolean**| include_transactions | [optional] |
+| **startDate** | **kotlin.String**| start_date | [optional] |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **id** | **kotlin.Int**| category id | |
+| **endDate** | **kotlin.String**| end_date | [optional] |
 
 ### Return type
 
