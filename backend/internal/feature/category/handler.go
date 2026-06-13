@@ -183,7 +183,7 @@ func (h *Handler) get(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(GetCategoryRes{
-		*res,
+		Item: *res,
 	})
 }
 

@@ -132,22 +132,10 @@ definitions:
     type: object
   GetCategoryRes:
     properties:
-      data:
-        $ref: '#/definitions/domain.Category'
-      total_amount:
-        format: double
-        type: number
-      transaction_count:
-        type: integer
-      transactions:
-        items:
-          $ref: '#/definitions/domain.Transaction'
-        type: array
+      item:
+        $ref: '#/definitions/dto.Category'
     required:
-    - data
-    - total_amount
-    - transaction_count
-    - transactions
+    - item
     type: object
   GetGoldRes:
     properties:

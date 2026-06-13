@@ -1806,27 +1806,11 @@
         "GetCategoryRes": {
             "type": "object",
             "required": [
-                "data",
-                "total_amount",
-                "transaction_count",
-                "transactions"
+                "item"
             ],
             "properties": {
-                "data": {
-                    "$ref": "#/definitions/domain.Category"
-                },
-                "total_amount": {
-                    "type": "number",
-                    "format": "double"
-                },
-                "transaction_count": {
-                    "type": "integer"
-                },
-                "transactions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/domain.Transaction"
-                    }
+                "item": {
+                    "$ref": "#/definitions/dto.Category"
                 }
             }
         },

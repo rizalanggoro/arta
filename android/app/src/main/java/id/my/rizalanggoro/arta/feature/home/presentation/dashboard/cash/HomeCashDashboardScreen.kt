@@ -42,12 +42,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.R
+import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardUiState.TimeFilter
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.component.IncomeExpenseSummary
+import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.shared.component.DashboardCategoryListItem
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -62,10 +64,17 @@ fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
         uiState = uiState,
         pullToRefreshState = pullToRefreshState,
         onChangeTimeFilter = vm::timeFilterChanged,
-        onRefresh = {
-            vm.loadDashboard(isRefresh = true)
-        },
-        onClickBalanceVisibility = vm::onBalanceVisibilityChanged
+        onRefresh = { vm.loadDashboard(isRefresh = true) },
+        onClickBalanceVisibility = vm::onBalanceVisibilityChanged,
+        onClickCategory = {
+            backStack.add(
+                CategoryRoute.Detail(
+                    categoryId = it.id,
+                    transactionStartDateMillis = uiState.startDateMillis,
+                    transactionEndDateMillis = uiState.endDateMillis
+                )
+            )
+        }
     )
 }
 
@@ -77,6 +86,7 @@ private fun Content(
     onChangeTimeFilter: (TimeFilter) -> Unit = {},
     onRefresh: () -> Unit = {},
     onClickBalanceVisibility: (Boolean) -> Unit = {},
+    onClickCategory: (DomainCategory) -> Unit = {},
 ) {
     PullToRefreshBox(
         modifier = Modifier.fillMaxSize(),
@@ -272,6 +282,7 @@ private fun Content(
                     category = category,
                     index = index,
                     size = uiState.data?.latestCategories?.size ?: 0,
+                    onClick = onClickCategory,
                 )
             }
 

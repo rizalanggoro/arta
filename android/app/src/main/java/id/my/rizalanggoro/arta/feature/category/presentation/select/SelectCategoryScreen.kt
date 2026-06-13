@@ -208,7 +208,8 @@ private fun SelectCategoryItemsPreview() {
                             userId = null,
                         ),
                         totalAmount = 0.0,
-                        transactionCount = 0
+                        transactionCount = 0,
+                        transactions = emptyList()
                     ),
                     DtoCategory(
                         data = DomainCategory(
@@ -220,7 +221,8 @@ private fun SelectCategoryItemsPreview() {
                             userId = 10,
                         ),
                         totalAmount = 0.0,
-                        transactionCount = 0
+                        transactionCount = 0,
+                        transactions = emptyList()
                     ),
                 ),
                 selectedType = "expense",

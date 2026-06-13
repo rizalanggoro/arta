@@ -1,6 +1,7 @@
 package id.my.rizalanggoro.arta.shared.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ fun DashboardCategoryListItem(
     category: DtoCategory,
     index: Int = 0,
     size: Int = 1,
+    onClick: (DomainCategory) -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -48,6 +50,7 @@ fun DashboardCategoryListItem(
                 )
             )
             .background(MaterialTheme.colorScheme.surfaceContainer)
+            .clickable { onClick(category.data) }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -113,7 +116,8 @@ private fun Preview() {
                 userId = 1
             ),
             totalAmount = 125500.0,
-            transactionCount = 3
+            transactionCount = 3,
+            transactions = emptyList()
         )
     )
 }
