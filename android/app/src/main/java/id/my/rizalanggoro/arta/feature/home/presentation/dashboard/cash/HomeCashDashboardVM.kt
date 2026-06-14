@@ -15,6 +15,7 @@ import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.core.extension.toApiFormat
+import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardUiState.TimeFilter
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,16 +41,17 @@ class HomeCashDashboardVM @Inject constructor(
     private val _uiState = MutableStateFlow(HomeCashDashboardUiState())
     val uiState = _uiState.asStateFlow()
 
-    private fun getDateRangeByFilter(timeFilter: TimeFilter): Pair<Long, Long> {
+    private fun getDateRangeByFilter(timeFilter: TimeFilter): Triple<Long, Long, String> {
         val now = LocalDate.now()
         return when (timeFilter) {
             TimeFilter.Today -> {
                 val start = now.atStartOfDay(ZoneId.systemDefault())
                 val end = start.plusDays(1)
 
-                Pair(
+                Triple(
                     start.toInstant().toEpochMilli(),
                     end.toInstant().toEpochMilli(),
+                    ""
                 )
             }
 
@@ -57,10 +59,12 @@ class HomeCashDashboardVM @Inject constructor(
                 val start = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                     .atStartOfDay(ZoneId.systemDefault())
                 val end = start.plusWeeks(1)
+                val endStr = end.minusDays(1).toInstant().toEpochMilli().toIndonesianDate()
 
-                Pair(
+                Triple(
                     start.toInstant().toEpochMilli(),
                     end.toInstant().toEpochMilli(),
+                    endStr
                 )
             }
 
@@ -69,9 +73,10 @@ class HomeCashDashboardVM @Inject constructor(
                     .atStartOfDay(ZoneId.systemDefault())
                 val end = start.plusMonths(1)
 
-                Pair(
+                Triple(
                     start.toInstant().toEpochMilli(),
                     end.toInstant().toEpochMilli(),
+                    ""
                 )
             }
         }
@@ -81,12 +86,13 @@ class HomeCashDashboardVM @Inject constructor(
         val current = _uiState.value
         if (!current.isRefreshing && current.timeFilter != timeFilter) {
             _uiState.update {
-                val (startDateMillis, endDateMillis) = getDateRangeByFilter(timeFilter)
+                val (startDateMillis, endDateMillis, endStr) = getDateRangeByFilter(timeFilter)
 
                 it.copy(
                     timeFilter = timeFilter,
                     startDateMillis = startDateMillis,
                     endDateMillis = endDateMillis,
+                    endDateStr = endStr
                 )
             }
 
@@ -172,13 +178,14 @@ class HomeCashDashboardVM @Inject constructor(
                 )
             }.collect { state ->
                 _uiState.update {
-                    val (startDateMillis, endDateMillis) = getDateRangeByFilter(state.timeFilter)
+                    val (startDateMillis, endDateMillis, endStr) = getDateRangeByFilter(state.timeFilter)
 
                     it.copy(
                         selectedWallet = state.selectedWallet,
                         timeFilter = state.timeFilter,
                         startDateMillis = startDateMillis,
                         endDateMillis = endDateMillis,
+                        endDateStr = endStr
                     )
                 }
 
