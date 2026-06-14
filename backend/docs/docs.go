@@ -315,6 +315,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "integer",
+                        "description": "wallet_id",
+                        "name": "wallet_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "boolean",
                         "description": "include_total_amount",
                         "name": "include_total_amount",
@@ -343,7 +349,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/GetCategoryRes"
+                            "$ref": "#/definitions/dto.Category"
                         }
                     }
                 }
@@ -1817,17 +1823,6 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
-                }
-            }
-        },
-        "GetCategoryRes": {
-            "type": "object",
-            "required": [
-                "item"
-            ],
-            "properties": {
-                "item": {
-                    "$ref": "#/definitions/dto.Category"
                 }
             }
         },

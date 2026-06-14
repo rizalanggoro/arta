@@ -40,6 +40,7 @@ func (r *Repository) GetCategoryByID(id uint) (*domain.Category, error) {
 type GetCategoryFilterFilter struct {
 	CategoryId          uint
 	UserId              uint
+	WalletId            uint
 	IncludeTotalAmount  bool
 	IncludeTransactions bool
 	StartDate           time.Time
@@ -55,16 +56,19 @@ func (r *Repository) Get(filter GetCategoryFilterFilter) (*dto.Category, error) 
 
 	if filter.IncludeTotalAmount || filter.IncludeTransactions {
 		query = query.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
-			tx := db
+			if filter.WalletId != 0 {
+				db = db.Where("transactions.wallet_id = ?", filter.WalletId)
+			}
+
 			if !filter.StartDate.IsZero() {
-				tx = tx.Where("transactions.date >= ?", filter.StartDate)
+				db = db.Where("transactions.date >= ?", filter.StartDate)
 			}
 
 			if !filter.EndDate.IsZero() {
-				tx = tx.Where("transactions.date < ?", filter.EndDate)
+				db = db.Where("transactions.date < ?", filter.EndDate)
 			}
 
-			return tx
+			return db
 		})
 	}
 
@@ -124,7 +128,8 @@ func (r *Repository) GetAll(filter GetAllCategoriesFilter) ([]dto.Category, erro
 			`).
 			Joins("join transactions on transactions.category_id = categories.id").
 			Group("categories.id").
-			Where("transactions.wallet_id = ?", filter.WalletId)
+			Where("transactions.wallet_id = ?", filter.WalletId).
+			Where("transactions.deleted_at is null")
 	} else {
 		query = query.Select("categories.*")
 	}

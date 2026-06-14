@@ -119,11 +119,12 @@ func (h *Handler) create(c *fiber.Ctx) error {
 // @produce     json
 // @param       Authorization header string true "Bearer token"
 // @param       category_id path int true "category id"
+// @param 			wallet_id query int false "wallet_id"
 // @param 			include_total_amount query bool false "include_total_amount"
 // @param 			include_transactions query bool false "include_transactions"
 // @param 			start_date query string false "start_date"
 // @param 			end_date query string false "end_date"
-// @success     200 {object} GetCategoryRes
+// @success     200 {object} dto.Category
 // @router      /api/category/{category_id} [get]
 func (h *Handler) get(c *fiber.Ctx) error {
 	userId, err := strconv.Atoi(middleware.GetUserID(c))
@@ -142,6 +143,7 @@ func (h *Handler) get(c *fiber.Ctx) error {
 		})
 	}
 
+	walletId := c.QueryInt("wallet_id", 0)
 	includeTotalAmount := c.QueryBool("include_total_amount", false)
 	includeTransactions := c.QueryBool("include_transactions", false)
 	startDateStr := c.Query("start_date")
@@ -170,6 +172,7 @@ func (h *Handler) get(c *fiber.Ctx) error {
 	res, err := h.repo.Get(GetCategoryFilterFilter{
 		CategoryId:          uint(categoryId),
 		UserId:              uint(userId),
+		WalletId:            uint(walletId),
 		IncludeTotalAmount:  includeTotalAmount,
 		IncludeTransactions: includeTransactions,
 		StartDate:           startDate,
@@ -182,9 +185,7 @@ func (h *Handler) get(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(GetCategoryRes{
-		Item: *res,
-	})
+	return c.Status(fiber.StatusOK).JSON(res)
 }
 
 // @id                   UpdateCategory

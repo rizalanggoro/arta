@@ -37,7 +37,6 @@ docs/DtoGoldTax.md
 docs/DtoGoldTaxPreference.md
 docs/DtoTransaction.md
 docs/DtoWallet.md
-docs/GetCategoryRes.md
 docs/GetGoldRes.md
 docs/GetTransactionRes.md
 docs/GetWalletRes.md
@@ -131,7 +130,6 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGoldTax.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGoldTaxPreference.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoTransaction.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoWallet.kt
-src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GetCategoryRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GetGoldRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GetTransactionRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GetWalletRes.kt

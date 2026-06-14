@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -34,9 +35,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.valentinilk.shimmer.shimmer
+import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.utils.Samples
+import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.shared.component.TransactionListItem
 
 @Composable
@@ -49,7 +52,14 @@ fun DetailCategoryScreen(
     Content(
         uiState = uiState,
         onClickBack = backStack::removeLastOrNull,
-        onRefresh = { vm.getCategory(isRefresh = true) }
+        onRefresh = { vm.getCategory() },
+        onLongClickTransaction = {
+            backStack.add(
+                TransactionRoute.ActionSheet(
+                    transactionId = it.id
+                )
+            )
+        }
     )
 }
 
@@ -59,248 +69,274 @@ private fun Content(
     pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     onClickBack: () -> Unit = {},
     onRefresh: () -> Unit = {},
+    onLongClickTransaction: (DomainTransaction) -> Unit = {},
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = onClickBack) {
-                        Icon(
-                            Icons.AutoMirrored.Rounded.ArrowBack,
-                            null
-                        )
+    with(uiState) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    navigationIcon = {
+                        IconButton(onClick = onClickBack) {
+                            Icon(
+                                Icons.AutoMirrored.Rounded.ArrowBack,
+                                null
+                            )
+                        }
+                    },
+                    title = {
+                        Text("Detail Kategori")
                     }
-                },
-                title = {
-                    Text("Detail Kategori")
-                }
-            )
-        }
-    ) {
-        PullToRefreshBox(
-            modifier = Modifier.padding(it),
-            isRefreshing = uiState.isRefreshing,
-            onRefresh = onRefresh,
-            state = pullToRefreshState,
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    state = pullToRefreshState,
-                    isRefreshing = uiState.isRefreshing,
-                    modifier = Modifier.align(Alignment.TopCenter)
                 )
             }
         ) {
-            LazyColumn {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(
-                            when {
-                                uiState.isLoading -> 4.dp
-                                else -> 2.dp
-                            }
-                        )
-                    ) {
-                        Text(
-                            uiState.category?.data?.name ?: "Loading category",
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.then(
+            PullToRefreshBox(
+                modifier = Modifier.padding(it),
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                state = pullToRefreshState,
+                indicator = {
+                    PullToRefreshDefaults.LoadingIndicator(
+                        state = pullToRefreshState,
+                        isRefreshing = isRefreshing,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
+            ) {
+                LazyColumn {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(
                                 when {
-                                    uiState.isLoading -> Modifier
-                                        .shimmer()
-                                        .clip(RoundedCornerShape(4.dp))
-                                        .background(MaterialTheme.colorScheme.outlineVariant)
-
-                                    else -> Modifier
+                                    uiState.isLoading -> 4.dp
+                                    else -> 2.dp
                                 }
-                            ),
+                            )
+                        ) {
+                            Text(
+                                uiState.category?.data?.name ?: "Loading category",
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier.then(
+                                    when {
+                                        uiState.isLoading -> Modifier
+                                            .shimmer()
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(MaterialTheme.colorScheme.outlineVariant)
+
+                                        else -> Modifier
+                                    }
+                                ),
+                                color = when {
+                                    uiState.isLoading -> Color.Transparent
+                                    else -> Color.Unspecified
+                                }
+                            )
+                            Text(
+                                "Berikut total pemasukan dan daftar transaksi yang dilakukan selama " +
+                                        "satu hari, yaitu Senin, 12 Juni 2024",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = when {
+                                    uiState.isLoading -> Color.Transparent
+                                    else -> MaterialTheme.colorScheme.outline
+                                },
+                                modifier = Modifier.then(
+                                    when {
+                                        uiState.isLoading -> Modifier
+                                            .shimmer()
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(MaterialTheme.colorScheme.outlineVariant)
+
+                                        else -> Modifier
+                                    }
+                                ),
+                                maxLines = when {
+                                    uiState.isLoading -> 1
+                                    else -> Int.MAX_VALUE
+                                }
+                            )
+                        }
+                    }
+
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .then(
+                                    when {
+                                        uiState.isLoading -> Modifier.shimmer()
+                                        else -> Modifier
+                                    }
+                                ),
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    val isIncome = uiState.category?.data?.type == "income"
+
+                                    Icon(
+                                        when (isIncome) {
+                                            true -> Icons.AutoMirrored.Rounded.CallReceived
+                                            else -> Icons.AutoMirrored.Rounded.CallMade
+                                        },
+                                        null,
+                                        tint = when {
+                                            uiState.isLoading -> Color.Transparent
+                                            else -> MaterialTheme.colorScheme.primary
+                                        },
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .then(
+                                                when {
+                                                    uiState.isLoading -> Modifier.clip(
+                                                        RoundedCornerShape(4.dp)
+                                                    )
+
+                                                    else -> Modifier
+                                                }
+                                            )
+                                            .background(
+                                                when {
+                                                    uiState.isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                                    else -> Color.Unspecified
+                                                }
+                                            )
+                                    )
+                                    Text(
+                                        text = when (isIncome) {
+                                            true -> "Pemasukan"
+                                            else -> "Pengeluaran"
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = when {
+                                            uiState.isLoading -> Color.Transparent
+                                            else -> MaterialTheme.colorScheme.primary
+                                        },
+                                        fontWeight = FontWeight.SemiBold,
+                                        modifier = Modifier
+                                            .then(
+                                                when {
+                                                    uiState.isLoading -> Modifier.clip(
+                                                        RoundedCornerShape(4.dp)
+                                                    )
+
+                                                    else -> Modifier
+                                                }
+                                            )
+                                            .background(
+                                                when {
+                                                    uiState.isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                                    else -> Color.Unspecified
+                                                }
+                                            )
+                                    )
+                                }
+                                Text(
+                                    text = (uiState.category?.totalAmount
+                                        ?: 0.0).toIndonesianCurrency(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = when {
+                                        uiState.isLoading -> Color.Transparent
+                                        else -> MaterialTheme.colorScheme.onSecondaryContainer
+                                    },
+                                    modifier = Modifier
+                                        .then(
+                                            when {
+                                                uiState.isLoading -> Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(4.dp))
+
+                                                else -> Modifier
+                                            }
+                                        )
+                                        .background(
+                                            when {
+                                                uiState.isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                                else -> Color.Unspecified
+                                            }
+                                        )
+                                )
+                            }
+                        }
+                    }
+
+                    item {
+                        Text(
+                            "Daftar transaksi",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 24.dp)
+                                .then(
+                                    when {
+                                        uiState.isLoading -> Modifier
+                                            .shimmer()
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(MaterialTheme.colorScheme.outlineVariant)
+
+                                        else -> Modifier
+                                    }
+                                ),
                             color = when {
                                 uiState.isLoading -> Color.Transparent
                                 else -> Color.Unspecified
                             }
                         )
-                        Text(
-                            "Berikut total pemasukan dan daftar transaksi yang dilakukan selama " +
-                                    "satu hari, yaitu Senin, 12 Juni 2024",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = when {
-                                uiState.isLoading -> Color.Transparent
-                                else -> MaterialTheme.colorScheme.outline
-                            },
-                            modifier = Modifier.then(
-                                when {
-                                    uiState.isLoading -> Modifier
-                                        .shimmer()
-                                        .clip(RoundedCornerShape(4.dp))
-                                        .background(MaterialTheme.colorScheme.outlineVariant)
-
-                                    else -> Modifier
-                                }
-                            ),
-                            maxLines = when {
-                                uiState.isLoading -> 1
-                                else -> Int.MAX_VALUE
-                            }
-                        )
                     }
-                }
 
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 16.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                            .then(
-                                when {
-                                    uiState.isLoading -> Modifier.shimmer()
-                                    else -> Modifier
-                                }
-                            ),
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                                val isIncome = uiState.category?.data?.type == "income"
-
-                                Icon(
-                                    when (isIncome) {
-                                        true -> Icons.AutoMirrored.Rounded.CallReceived
-                                        else -> Icons.AutoMirrored.Rounded.CallMade
-                                    },
-                                    null,
-                                    tint = when {
-                                        uiState.isLoading -> Color.Transparent
-                                        else -> MaterialTheme.colorScheme.primary
-                                    },
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .then(
-                                            when {
-                                                uiState.isLoading -> Modifier.clip(
-                                                    RoundedCornerShape(4.dp)
-                                                )
-
-                                                else -> Modifier
-                                            }
-                                        )
-                                        .background(
-                                            when {
-                                                uiState.isLoading -> MaterialTheme.colorScheme.outlineVariant
-                                                else -> Color.Unspecified
-                                            }
-                                        )
-                                )
-                                Text(
-                                    text = when (isIncome) {
-                                        true -> "Pemasukan"
-                                        else -> "Pengeluaran"
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = when {
-                                        uiState.isLoading -> Color.Transparent
-                                        else -> MaterialTheme.colorScheme.primary
-                                    },
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier
-                                        .then(
-                                            when {
-                                                uiState.isLoading -> Modifier.clip(
-                                                    RoundedCornerShape(4.dp)
-                                                )
-
-                                                else -> Modifier
-                                            }
-                                        )
-                                        .background(
-                                            when {
-                                                uiState.isLoading -> MaterialTheme.colorScheme.outlineVariant
-                                                else -> Color.Unspecified
-                                            }
-                                        )
-                                )
-                            }
-                            Text(
-                                text = (uiState.category?.totalAmount
-                                    ?: 0.0).toIndonesianCurrency(),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = when {
-                                    uiState.isLoading -> Color.Transparent
-                                    else -> MaterialTheme.colorScheme.onSecondaryContainer
-                                },
+                    when {
+                        uiState.isLoading -> items(3) { index ->
+                            TransactionListItem(
+                                isLoading = true,
+                                index = index,
+                                size = 3,
                                 modifier = Modifier
-                                    .then(
-                                        when {
-                                            uiState.isLoading -> Modifier
-                                                .fillMaxWidth()
-                                                .clip(RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 16.dp)
+                                    .padding(
+                                        top = when {
+                                            index == 0 -> 16.dp
+                                            else -> 2.dp
+                                        }
+                                    ),
+                                transaction = Samples.domainTransactions.first(),
+                                category = Samples.domainCategories.first()
+                            )
+                        }
 
-                                            else -> Modifier
+                        category != null -> itemsIndexed(
+                            category.transactions ?: emptyList()
+                        ) { index, transaction ->
+                            TransactionListItem(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .padding(
+                                        top = when {
+                                            index == 0 -> 16.dp
+                                            else -> 2.dp
                                         }
-                                    )
-                                    .background(
-                                        when {
-                                            uiState.isLoading -> MaterialTheme.colorScheme.outlineVariant
-                                            else -> Color.Unspecified
-                                        }
-                                    )
+                                    ),
+                                transaction = transaction,
+                                category = category.data,
+                                index = index,
+                                size = category.transactions?.size ?: 0,
+                                onLongClick = {
+                                    onLongClickTransaction(transaction)
+                                },
                             )
                         }
                     }
-                }
-
-                item {
-                    Text(
-                        "Daftar transaksi",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 24.dp)
-                            .then(
-                                when {
-                                    uiState.isLoading -> Modifier
-                                        .shimmer()
-                                        .clip(RoundedCornerShape(4.dp))
-                                        .background(MaterialTheme.colorScheme.outlineVariant)
-
-                                    else -> Modifier
-                                }
-                            ),
-                        color = when {
-                            uiState.isLoading -> Color.Transparent
-                            else -> Color.Unspecified
-                        }
-                    )
-                }
-
-                when {
-                    uiState.isLoading -> items(3) { index ->
-                        TransactionListItem(
-                            isLoading = true,
-                            index = index,
-                            size = 3,
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(
-                                    top = when {
-                                        index == 0 -> 16.dp
-                                        else -> 2.dp
-                                    }
-                                ),
-                            transaction = Samples.dtoTransactions[index]
-                        )
-                    }
-
                 }
             }
         }

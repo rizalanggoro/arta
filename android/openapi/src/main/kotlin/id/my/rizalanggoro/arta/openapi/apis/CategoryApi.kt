@@ -12,7 +12,7 @@ import id.my.rizalanggoro.arta.openapi.models.CategoryListCategoriesRes
 import id.my.rizalanggoro.arta.openapi.models.CategoryUpdateCategoryReq
 import id.my.rizalanggoro.arta.openapi.models.CreateCategoryRes
 import id.my.rizalanggoro.arta.openapi.models.DeleteCategoryRes
-import id.my.rizalanggoro.arta.openapi.models.GetCategoryRes
+import id.my.rizalanggoro.arta.openapi.models.DtoCategory
 import id.my.rizalanggoro.arta.openapi.models.UpdateCategoryRes
 
 interface CategoryApi {
@@ -53,14 +53,15 @@ interface CategoryApi {
      *
      * @param authorization Bearer token
      * @param categoryId category id
+     * @param walletId wallet_id (optional)
      * @param includeTotalAmount include_total_amount (optional)
      * @param includeTransactions include_transactions (optional)
      * @param startDate start_date (optional)
      * @param endDate end_date (optional)
-     * @return [GetCategoryRes]
+     * @return [DtoCategory]
      */
     @GET("api/category/{category_id}")
-    suspend fun getCategory(@Header("Authorization") authorization: kotlin.String, @Path("category_id") categoryId: kotlin.Int, @Query("include_total_amount") includeTotalAmount: kotlin.Boolean? = null, @Query("include_transactions") includeTransactions: kotlin.Boolean? = null, @Query("start_date") startDate: kotlin.String? = null, @Query("end_date") endDate: kotlin.String? = null): Response<GetCategoryRes>
+    suspend fun getCategory(@Header("Authorization") authorization: kotlin.String, @Path("category_id") categoryId: kotlin.Int, @Query("wallet_id") walletId: kotlin.Int? = null, @Query("include_total_amount") includeTotalAmount: kotlin.Boolean? = null, @Query("include_transactions") includeTransactions: kotlin.Boolean? = null, @Query("start_date") startDate: kotlin.String? = null, @Query("end_date") endDate: kotlin.String? = null): Response<DtoCategory>
 
     /**
      * GET api/category

@@ -133,7 +133,8 @@ private fun Content(
             ) {
                 itemsIndexed(uiState.transactions) { index, transaction ->
                     TransactionListItem(
-                        transaction = transaction,
+                        transaction = transaction.data,
+                        category = transaction.category,
                         index = index,
                         size = uiState.transactions.size,
                         onLongClick = {

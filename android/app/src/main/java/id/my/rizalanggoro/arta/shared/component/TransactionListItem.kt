@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
+import id.my.rizalanggoro.arta.core.utils.Samples
 import id.my.rizalanggoro.arta.core.utils.getBottomRadius
 import id.my.rizalanggoro.arta.core.utils.getTopRadius
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
@@ -37,7 +38,8 @@ import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
 @Composable
 fun TransactionListItem(
     modifier: Modifier = Modifier,
-    transaction: DtoTransaction,
+    transaction: DomainTransaction,
+    category: DomainCategory,
     index: Int = 0,
     size: Int = 1,
     onClick: (DomainTransaction) -> Unit = {},
@@ -57,8 +59,8 @@ fun TransactionListItem(
             )
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .combinedClickable(
-                onClick = { onClick(transaction.data) },
-                onLongClick = { onLongClick(transaction.data) }
+                onClick = { onClick(transaction) },
+                onLongClick = { onLongClick(transaction) }
             )
             .padding(16.dp)
             .then(
@@ -78,7 +80,7 @@ fun TransactionListItem(
                     when {
                         isLoading -> MaterialTheme.colorScheme.outlineVariant
                         else -> when {
-                            transaction.category.type == "income" -> MaterialTheme.colorScheme.primaryContainer
+                            category.type == "income" -> MaterialTheme.colorScheme.primaryContainer
                             else -> MaterialTheme.colorScheme.errorContainer
                         }
                     }
@@ -88,12 +90,12 @@ fun TransactionListItem(
             if (!isLoading)
                 Icon(
                     when {
-                        transaction.category.type == "income" -> Icons.AutoMirrored.Rounded.CallReceived
+                        category.type == "income" -> Icons.AutoMirrored.Rounded.CallReceived
                         else -> Icons.AutoMirrored.Rounded.CallMade
                     },
                     null,
                     tint = when {
-                        transaction.category.type == "income" -> MaterialTheme.colorScheme.primary
+                        category.type == "income" -> MaterialTheme.colorScheme.primary
                         else -> MaterialTheme.colorScheme.error
                     }
                 )
@@ -108,7 +110,7 @@ fun TransactionListItem(
             )
         ) {
             Text(
-                transaction.data.amount.toIndonesianCurrency(),
+                transaction.amount.toIndonesianCurrency(),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.then(
@@ -127,7 +129,7 @@ fun TransactionListItem(
                 }
             )
             Text(
-                transaction.category.name,
+                category.name,
                 style = MaterialTheme.typography.bodyMedium,
                 color = when {
                     isLoading -> Color.Transparent
@@ -146,7 +148,7 @@ fun TransactionListItem(
             )
         }
         Text(
-            transaction.data.date.toFormattedDate("E, dd/M/yy"),
+            transaction.date.toFormattedDate("E, dd/M/yy"),
             style = MaterialTheme.typography.labelSmall,
             color = when {
                 isLoading -> Color.Transparent
@@ -171,26 +173,8 @@ fun TransactionListItem(
 @Preview
 private fun IncomePreview() {
     TransactionListItem(
-        transaction = DtoTransaction(
-            data = DomainTransaction(
-                amount = 1500000.0,
-                categoryId = 1,
-                createdAt = "",
-                date = "2024-05-28T14:30:00+05:30",
-                description = "",
-                id = 1,
-                updatedAt = "",
-                walletId = 1
-            ),
-            category = DomainCategory(
-                createdAt = "",
-                id = 1,
-                name = "Uang saku bulanan",
-                type = "income",
-                updatedAt = "",
-                userId = 1
-            )
-        ),
+        transaction = Samples.domainTransactions.first(),
+        category = Samples.domainCategories.first(),
         isLoading = true
     )
 }

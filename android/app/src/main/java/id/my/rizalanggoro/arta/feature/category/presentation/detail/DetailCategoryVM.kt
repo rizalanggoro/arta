@@ -11,11 +11,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.R
 import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.toApiFormat
 import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -23,6 +27,7 @@ import kotlinx.coroutines.launch
 class DetailCategoryVM @AssistedInject constructor(
     @Assisted private val navKey: CategoryRoute.Detail,
     @param:ApplicationContext private val context: Context,
+    private val selectedWalletPrefs: SelectedWalletPrefs,
     private val authPrefs: AuthPrefs,
     private val categoryApi: CategoryApi,
 ) : ViewModel() {
@@ -35,23 +40,27 @@ class DetailCategoryVM @AssistedInject constructor(
     val uiState = _uiState.asStateFlow()
 
     fun getCategory(isRefresh: Boolean = false) = viewModelScope.launch {
-        runCatching {
-            _uiState.update {
-                it.copy(
-                    isLoading = when (isRefresh) {
-                        true -> it.isLoading
-                        else -> true
-                    },
-                    isRefreshing = when (isRefresh) {
-                        true -> true
-                        else -> it.isRefreshing
-                    }
-                )
-            }
+        val current = _uiState.value
+        val walletId = current.selectedWallet?.id ?: return@launch
 
+        _uiState.update {
+            it.copy(
+                isLoading = when (isRefresh) {
+                    true -> it.isLoading
+                    else -> true
+                },
+                isRefreshing = when (isRefresh) {
+                    true -> true
+                    else -> it.isRefreshing
+                }
+            )
+        }
+
+        runCatching {
             val response = categoryApi.getCategory(
                 authorization = authPrefs.authorization(),
                 categoryId = navKey.categoryId,
+                walletId = walletId,
                 includeTotalAmount = true,
                 includeTransactions = true,
                 startDate = navKey.transactionStartDateMillis.toApiFormat(),
@@ -70,7 +79,7 @@ class DetailCategoryVM @AssistedInject constructor(
                 )
             )
         }.onSuccess { body ->
-            _uiState.update { it.copy(category = body.item) }
+            _uiState.update { it.copy(category = body) }
         }.also {
             _uiState.update {
                 it.copy(
@@ -87,8 +96,18 @@ class DetailCategoryVM @AssistedInject constructor(
         }
     }
 
-
     init {
-        getCategory()
+        viewModelScope.launch {
+            selectedWalletPrefs.selectedWallet.collect { wallet ->
+                _uiState.update { it.copy(selectedWallet = wallet) }
+                getCategory()
+            }
+        }
+
+        viewModelScope.launch {
+            AppEventBus.event.filterIsInstance<AppEvent.TransactionChanged>().collect {
+                getCategory(isRefresh = true)
+            }
+        }
     }
 }

@@ -141,13 +141,6 @@ definitions:
     required:
     - message
     type: object
-  GetCategoryRes:
-    properties:
-      item:
-        $ref: '#/definitions/dto.Category'
-    required:
-    - item
-    type: object
   GetGoldRes:
     properties:
       data:
@@ -1039,6 +1032,10 @@ paths:
         name: category_id
         required: true
         type: integer
+      - description: wallet_id
+        in: query
+        name: wallet_id
+        type: integer
       - description: include_total_amount
         in: query
         name: include_total_amount
@@ -1061,7 +1058,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/GetCategoryRes'
+            $ref: '#/definitions/dto.Category'
       tags:
       - category
   /api/category/{id}:

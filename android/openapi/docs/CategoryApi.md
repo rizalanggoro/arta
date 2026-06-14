@@ -103,19 +103,21 @@ val apiClient = ApiClient()
 val webService = apiClient.createWebservice(CategoryApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val categoryId : kotlin.Int = 56 // kotlin.Int | category id
+val walletId : kotlin.Int = 56 // kotlin.Int | wallet_id
 val includeTotalAmount : kotlin.Boolean = true // kotlin.Boolean | include_total_amount
 val includeTransactions : kotlin.Boolean = true // kotlin.Boolean | include_transactions
 val startDate : kotlin.String = startDate_example // kotlin.String | start_date
 val endDate : kotlin.String = endDate_example // kotlin.String | end_date
 
 launch(Dispatchers.IO) {
-    val result : GetCategoryRes = webService.getCategory(authorization, categoryId, includeTotalAmount, includeTransactions, startDate, endDate)
+    val result : DtoCategory = webService.getCategory(authorization, categoryId, walletId, includeTotalAmount, includeTransactions, startDate, endDate)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
 | **categoryId** | **kotlin.Int**| category id | |
+| **walletId** | **kotlin.Int**| wallet_id | [optional] |
 | **includeTotalAmount** | **kotlin.Boolean**| include_total_amount | [optional] |
 | **includeTransactions** | **kotlin.Boolean**| include_transactions | [optional] |
 | **startDate** | **kotlin.String**| start_date | [optional] |
@@ -125,7 +127,7 @@ launch(Dispatchers.IO) {
 
 ### Return type
 
-[**GetCategoryRes**](GetCategoryRes.md)
+[**DtoCategory**](DtoCategory.md)
 
 ### Authorization
 

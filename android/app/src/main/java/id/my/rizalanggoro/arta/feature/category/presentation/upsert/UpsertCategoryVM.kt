@@ -52,7 +52,7 @@ class UpsertCategoryVM @AssistedInject constructor(
 
                 response.body() ?: throw IllegalStateException("Respons server kosong")
             }.onSuccess { response ->
-                val category = response.item.data
+                val category = response.data
                 _uiState.update {
                     it.copy(
                         isLoading = false,

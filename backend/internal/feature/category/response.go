@@ -8,9 +8,9 @@ type CreateCategoryRes struct {
 } // @name CreateCategoryRes
 
 // GetCategoryRes response for get
-type GetCategoryRes struct {
-	Item dto.Category `json:"item"`
-} // @name GetCategoryRes
+// type GetCategoryRes struct {
+// 	dto.Category
+// } // @name GetCategoryRes
 
 // UpdateCategoryRes response for update
 type UpdateCategoryRes struct {
