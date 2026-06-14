@@ -69,6 +69,8 @@ jobs:
           APK_PATH=$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)
           APK_NAME=$(basename "$APK_PATH")
 
+          gh release delete "$TAG_NAME" --cleanup-tag --yes || true
+
           gh release create "$TAG_NAME" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$RELEASE_NAME" \
