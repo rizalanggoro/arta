@@ -4,7 +4,10 @@
 ## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-| **&#x60;data&#x60;** | [**DtoCashDashboard**](DtoCashDashboard.md) |  |  |
+| **currentBalance** | **kotlin.Double** |  |  |
+| **latestCategories** | [**kotlin.collections.List&lt;DtoCategory&gt;**](DtoCategory.md) |  |  |
+| **totalExpense** | **kotlin.Double** |  |  |
+| **totalIncome** | **kotlin.Double** |  |  |
 
 
 

@@ -107,7 +107,6 @@ All URIs are relative to *http://localhost:8080*
  - [id.my.rizalanggoro.arta.openapi.models.DomainTransaction](docs/DomainTransaction.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainUser](docs/DomainUser.md)
  - [id.my.rizalanggoro.arta.openapi.models.DomainWallet](docs/DomainWallet.md)
- - [id.my.rizalanggoro.arta.openapi.models.DtoCashDashboard](docs/DtoCashDashboard.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoCategory](docs/DtoCategory.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoError](docs/DtoError.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGold](docs/DtoGold.md)

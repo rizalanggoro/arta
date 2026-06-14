@@ -123,9 +123,8 @@ func (r *Repository) GetAll(filter GetAllCategoriesFilter) ([]dto.Category, erro
 				COUNT(transactions.*) as transaction_count
 			`).
 			Joins("join transactions on transactions.category_id = categories.id").
-			Joins("join wallets on wallets.id = transactions.wallet_id").
 			Group("categories.id").
-			Where("wallets.id = ?", filter.WalletId)
+			Where("transactions.wallet_id = ?", filter.WalletId)
 	} else {
 		query = query.Select("categories.*")
 	}

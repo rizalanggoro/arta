@@ -29,7 +29,6 @@ docs/DomainRelease.md
 docs/DomainTransaction.md
 docs/DomainUser.md
 docs/DomainWallet.md
-docs/DtoCashDashboard.md
 docs/DtoCategory.md
 docs/DtoError.md
 docs/DtoGold.md
@@ -124,7 +123,6 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainRelease.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainTransaction.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainUser.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DomainWallet.kt
-src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoCashDashboard.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoCategory.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoError.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGold.kt

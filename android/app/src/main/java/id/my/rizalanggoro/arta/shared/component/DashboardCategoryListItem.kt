@@ -21,9 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.utils.getBottomRadius
 import id.my.rizalanggoro.arta.core.utils.getTopRadius
@@ -37,9 +39,16 @@ fun DashboardCategoryListItem(
     index: Int = 0,
     size: Int = 1,
     onClick: (DomainCategory) -> Unit = {},
+    isLoading: Boolean = false,
 ) {
     Row(
         modifier = modifier
+            .then(
+                when {
+                    isLoading -> Modifier.shimmer()
+                    else -> Modifier
+                }
+            )
             .fillMaxWidth()
             .clip(
                 RoundedCornerShape(
@@ -59,45 +68,96 @@ fun DashboardCategoryListItem(
             modifier = Modifier
                 .clip(CircleShape)
                 .background(
-                    when (category.data.type) {
-                        "income" -> MaterialTheme.colorScheme.primaryContainer
-                        else -> MaterialTheme.colorScheme.errorContainer
+                    when {
+                        isLoading -> MaterialTheme.colorScheme.outlineVariant
+                        else -> when (category.data.type) {
+                            "income" -> MaterialTheme.colorScheme.primaryContainer
+                            else -> MaterialTheme.colorScheme.errorContainer
+                        }
                     }
                 )
                 .size(40.dp),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                when (category.data.type) {
-                    "income" -> Icons.AutoMirrored.Rounded.CallReceived
-                    else -> Icons.AutoMirrored.Rounded.CallMade
-                },
-                null,
-                tint = when (category.data.type) {
-                    "income" -> MaterialTheme.colorScheme.primary
-                    else -> MaterialTheme.colorScheme.error
-                }
-            )
+            if (!isLoading)
+                Icon(
+                    when (category.data.type) {
+                        "income" -> Icons.AutoMirrored.Rounded.CallReceived
+                        else -> Icons.AutoMirrored.Rounded.CallMade
+                    },
+                    null,
+                    tint = when (category.data.type) {
+                        "income" -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.error
+                    }
+                )
         }
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(
+                when {
+                    isLoading -> 2.dp
+                    else -> 0.dp
+                }
+            )
         ) {
             Text(
-                category.totalAmount.toIndonesianCurrency(),
-                style = MaterialTheme.typography.titleMedium
+                (category.totalAmount ?: 0.0).toIndonesianCurrency(),
+                style = MaterialTheme.typography.titleMedium,
+                color = when {
+                    isLoading -> Color.Transparent
+                    else -> Color.Unspecified
+                },
+                modifier = Modifier.then(
+                    when {
+                        isLoading -> Modifier
+                            .shimmer()
+                            .fillMaxWidth(.5f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+
+                        else -> Modifier
+                    }
+                )
             )
             Text(
                 category.data.name,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
+                color = when {
+                    isLoading -> Color.Transparent
+                    else -> MaterialTheme.colorScheme.outline
+                },
+                modifier = Modifier.then(
+                    when {
+                        isLoading -> Modifier
+                            .shimmer()
+                            .fillMaxWidth(.8f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+
+                        else -> Modifier
+                    }
+                )
             )
         }
         Text(
-            "${category.transactionCount} trx",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.SemiBold
+            "${category.transactionCount ?: 0} trx",
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold, 
+            color = when {
+                isLoading -> Color.Transparent
+                else -> MaterialTheme.colorScheme.primary
+            },
+            modifier = Modifier.then(
+                when {
+                    isLoading -> Modifier
+                        .shimmer()
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.outlineVariant)
+
+                    else -> Modifier
+                }
+            )
         )
     }
 }

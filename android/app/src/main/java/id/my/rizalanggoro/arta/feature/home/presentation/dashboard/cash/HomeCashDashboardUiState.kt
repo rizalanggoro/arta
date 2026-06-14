@@ -1,14 +1,14 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash
 
+import id.my.rizalanggoro.arta.openapi.models.CashDashboardRes
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
-import id.my.rizalanggoro.arta.openapi.models.DtoCashDashboard
 import java.time.LocalDate
 import java.time.ZoneId
 
 data class HomeCashDashboardUiState(
     val selectedWallet: DomainWallet? = null,
     val isBalanceVisible: Boolean = true,
-    val data: DtoCashDashboard? = null,
+    val data: CashDashboardRes? = null,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val errorMessage: String? = null,

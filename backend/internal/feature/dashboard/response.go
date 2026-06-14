@@ -4,7 +4,7 @@ import "github.com/artafinance/backend/internal/dto"
 
 // CashDashboardRes response for cash dashboard.
 type CashDashboardRes struct {
-	Data dto.CashDashboard `json:"data"`
+	dto.CashDashboard
 } // @name CashDashboardRes
 
 // GoldDashboardRes response for gold dashboard.

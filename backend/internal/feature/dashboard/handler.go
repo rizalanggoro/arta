@@ -285,7 +285,7 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 	})
 
 	return c.Status(fiber.StatusOK).JSON(CashDashboardRes{
-		Data: dto.CashDashboard{
+		dto.CashDashboard{
 			CurrentBalance:   *currentBalance,
 			TotalIncome:      *totalIncome,
 			TotalExpense:     *totalExpense,

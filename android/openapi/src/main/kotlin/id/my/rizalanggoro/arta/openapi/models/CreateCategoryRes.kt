@@ -46,13 +46,13 @@ data class CreateCategoryRes (
     val `data`: DomainCategory,
 
     @SerialName(value = "total_amount")
-    val totalAmount: kotlin.Double,
+    val totalAmount: kotlin.Double? = null,
 
     @SerialName(value = "transaction_count")
-    val transactionCount: kotlin.Int,
+    val transactionCount: kotlin.Int? = null,
 
     @SerialName(value = "transactions")
-    val transactions: kotlin.collections.List<DomainTransaction>
+    val transactions: kotlin.collections.List<DomainTransaction>? = null
 
 ) {
 

@@ -14,30 +14,30 @@ class CashDashboardTimeFilterPrefs @Inject constructor(
     @ApplicationContext context: Context,
 ) {
     private val prefs = context.getSharedPreferences(
-        "balance_visibility_prefs",
+        "cash_dashboard_time_filter_prefs",
         Context.MODE_PRIVATE
     )
 
-    private val _isBalanceVisible = MutableStateFlow(get())
-    val isBalanceVisible = _isBalanceVisible.asStateFlow()
+    private val _timeFilterIndex = MutableStateFlow(get())
+    val timeFilterIndex = _timeFilterIndex.asStateFlow()
 
-    fun set(isVisible: Boolean) = prefs.edit {
-        putBoolean(
-            KEY_IS_BALANCE_VISIBLE,
-            isVisible
+    fun set(index: Int) = prefs.edit {
+        putInt(
+            KEY_TIME_FILTER_INDEX,
+            index
         )
     }.also {
-        _isBalanceVisible.update {
-            isVisible
+        _timeFilterIndex.update {
+            index
         }
     }
 
-    private fun get(): Boolean = prefs.getBoolean(
-        KEY_IS_BALANCE_VISIBLE,
-        true
+    private fun get(): Int = prefs.getInt(
+        KEY_TIME_FILTER_INDEX,
+        0
     )
 
     companion object {
-        private const val KEY_IS_BALANCE_VISIBLE = "is_balance_visible"
+        private const val KEY_TIME_FILTER_INDEX = "time_filter_index"
     }
 }

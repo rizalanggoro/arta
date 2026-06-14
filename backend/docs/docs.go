@@ -1614,21 +1614,36 @@ const docTemplate = `{
         "CashDashboardRes": {
             "type": "object",
             "required": [
-                "data"
+                "current_balance",
+                "latest_categories",
+                "total_expense",
+                "total_income"
             ],
             "properties": {
-                "data": {
-                    "$ref": "#/definitions/dto.CashDashboard"
+                "current_balance": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "latest_categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Category"
+                    }
+                },
+                "total_expense": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "total_income": {
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
         "CreateCategoryRes": {
             "type": "object",
             "required": [
-                "data",
-                "total_amount",
-                "transaction_count",
-                "transactions"
+                "data"
             ],
             "properties": {
                 "data": {
@@ -2022,10 +2037,7 @@ const docTemplate = `{
         "UpdateCategoryRes": {
             "type": "object",
             "required": [
-                "data",
-                "total_amount",
-                "transaction_count",
-                "transactions"
+                "data"
             ],
             "properties": {
                 "data": {
@@ -2491,42 +2503,10 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CashDashboard": {
-            "type": "object",
-            "required": [
-                "current_balance",
-                "latest_categories",
-                "total_expense",
-                "total_income"
-            ],
-            "properties": {
-                "current_balance": {
-                    "type": "number",
-                    "format": "double"
-                },
-                "latest_categories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.Category"
-                    }
-                },
-                "total_expense": {
-                    "type": "number",
-                    "format": "double"
-                },
-                "total_income": {
-                    "type": "number",
-                    "format": "double"
-                }
-            }
-        },
         "dto.Category": {
             "type": "object",
             "required": [
-                "data",
-                "total_amount",
-                "transaction_count",
-                "transactions"
+                "data"
             ],
             "properties": {
                 "data": {
