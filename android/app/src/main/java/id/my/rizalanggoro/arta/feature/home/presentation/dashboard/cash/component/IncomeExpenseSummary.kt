@@ -2,6 +2,7 @@ package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.compone
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.CallMade
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
+import androidx.compose.material.icons.automirrored.rounded.TrendingDown
+import androidx.compose.material.icons.automirrored.rounded.TrendingFlat
+import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,24 +38,115 @@ fun IncomeExpenseSummary(
     totalExpense: Double = 0.0,
     isLoading: Boolean = false,
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        SummaryCard(
-            modifier = Modifier.weight(1f),
-            title = "Pemasukan",
-            value = totalIncome,
-            icon = Icons.AutoMirrored.Rounded.CallReceived,
-            isLoading = isLoading,
-        )
-        SummaryCard(
-            modifier = Modifier.weight(1f),
-            title = "Pengeluaran",
-            value = totalExpense,
-            icon = Icons.AutoMirrored.Rounded.CallMade,
-            isLoading = isLoading,
-        )
+    val totalDifference = totalIncome - totalExpense
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+
+            ) {
+            SummaryCard(
+                modifier = Modifier.weight(1f),
+                title = "Pemasukan",
+                value = totalIncome,
+                icon = Icons.AutoMirrored.Rounded.CallReceived,
+                isLoading = isLoading,
+            )
+            SummaryCard(
+                modifier = Modifier.weight(1f),
+                title = "Pengeluaran",
+                value = totalExpense,
+                icon = Icons.AutoMirrored.Rounded.CallMade,
+                isLoading = isLoading,
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .then(
+                    when {
+                        isLoading -> Modifier.shimmer()
+                        else -> Modifier
+                    }
+                )
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(
+                        when {
+                            isLoading -> MaterialTheme.colorScheme.outlineVariant
+                            else -> MaterialTheme.colorScheme.primary
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (!isLoading)
+                    Icon(
+                        when {
+                            totalDifference == 0.0 -> Icons.AutoMirrored.Rounded.TrendingFlat
+                            totalDifference > 0 -> Icons.AutoMirrored.Rounded.TrendingUp
+                            else -> Icons.AutoMirrored.Rounded.TrendingDown
+                        },
+                        null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(
+                    when {
+                        isLoading -> 2.dp
+                        else -> 0.dp
+                    }
+                )
+            ) {
+                Text(
+                    totalDifference.toIndonesianCurrency(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = when {
+                        isLoading -> Color.Transparent
+                        else -> Color.Unspecified
+                    },
+                    modifier = Modifier.then(
+                        when {
+                            isLoading -> Modifier
+                                .fillMaxWidth(.5f)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.outlineVariant)
+
+                            else -> Modifier
+                        }
+                    )
+                )
+                Text(
+                    "+12% dari bulan lalu",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = when {
+                        isLoading -> Color.Transparent
+                        else -> MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = .8f)
+                    },
+                    modifier = Modifier.then(
+                        when {
+                            isLoading -> Modifier
+                                .fillMaxWidth(.8f)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.outlineVariant)
+
+                            else -> Modifier
+                        }
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -122,7 +217,7 @@ private fun SummaryCard(
             }
             Text(
                 text = value.toIndonesianCurrency(),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = when {
                     isLoading -> Color.Transparent
