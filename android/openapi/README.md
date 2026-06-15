@@ -124,7 +124,6 @@ All URIs are relative to *http://localhost:8080*
  - [id.my.rizalanggoro.arta.openapi.models.GoldListGoldsRes](docs/GoldListGoldsRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.GoldUpdateGoldReq](docs/GoldUpdateGoldReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.ListGoldTaxPreferencesRes](docs/ListGoldTaxPreferencesRes.md)
- - [id.my.rizalanggoro.arta.openapi.models.ListTransactionsRes](docs/ListTransactionsRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.LoginReq](docs/LoginReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.LoginRes](docs/LoginRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.LogoutRes](docs/LogoutRes.md)

@@ -96,7 +96,6 @@ definitions:
       data:
         $ref: '#/definitions/domain.Transaction'
     required:
-    - category
     - data
     type: object
   CreateWalletRes:
@@ -163,7 +162,6 @@ definitions:
       data:
         $ref: '#/definitions/domain.Transaction'
     required:
-    - category
     - data
     type: object
   GetWalletRes:
@@ -188,15 +186,6 @@ definitions:
         type: array
     required:
     - preferences
-    type: object
-  ListTransactionsRes:
-    properties:
-      transactions:
-        items:
-          $ref: '#/definitions/dto.Transaction'
-        type: array
-    required:
-    - transactions
     type: object
   LoginReq:
     properties:
@@ -342,7 +331,6 @@ definitions:
       data:
         $ref: '#/definitions/domain.Transaction'
     required:
-    - category
     - data
     type: object
   UpdateWalletRes:
@@ -732,7 +720,6 @@ definitions:
       data:
         $ref: '#/definitions/domain.Transaction'
     required:
-    - category
     - data
     type: object
   dto.Wallet:
@@ -1501,13 +1488,23 @@ paths:
         in: query
         name: include_category
         type: boolean
+      - description: start_date
+        in: query
+        name: start_date
+        type: string
+      - description: end_date
+        in: query
+        name: end_date
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ListTransactionsRes'
+            items:
+              $ref: '#/definitions/dto.Transaction'
+            type: array
         "400":
           description: Bad Request
           schema:

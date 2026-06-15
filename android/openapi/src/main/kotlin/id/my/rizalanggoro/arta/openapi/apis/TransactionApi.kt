@@ -11,8 +11,8 @@ import id.my.rizalanggoro.arta.openapi.models.CreateTransactionReq
 import id.my.rizalanggoro.arta.openapi.models.CreateTransactionRes
 import id.my.rizalanggoro.arta.openapi.models.DeleteTransactionRes
 import id.my.rizalanggoro.arta.openapi.models.DtoError
+import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
 import id.my.rizalanggoro.arta.openapi.models.GetTransactionRes
-import id.my.rizalanggoro.arta.openapi.models.ListTransactionsRes
 import id.my.rizalanggoro.arta.openapi.models.UpdateTransactionReq
 import id.my.rizalanggoro.arta.openapi.models.UpdateTransactionRes
 
@@ -83,10 +83,12 @@ interface TransactionApi {
      * @param authorization Bearer token
      * @param walletId wallet id
      * @param includeCategory include_category (optional)
-     * @return [ListTransactionsRes]
+     * @param startDate start_date (optional)
+     * @param endDate end_date (optional)
+     * @return [kotlin.collections.List<DtoTransaction>]
      */
     @GET("api/transaction")
-    suspend fun listTransactions(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int, @Query("include_category") includeCategory: kotlin.Boolean? = null): Response<ListTransactionsRes>
+    suspend fun listTransactions(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int, @Query("include_category") includeCategory: kotlin.Boolean? = null, @Query("start_date") startDate: kotlin.String? = null, @Query("end_date") endDate: kotlin.String? = null): Response<kotlin.collections.List<DtoTransaction>>
 
     /**
      * PUT api/transaction/{id}

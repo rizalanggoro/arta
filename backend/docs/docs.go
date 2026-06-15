@@ -1023,13 +1023,28 @@ const docTemplate = `{
                         "description": "include_category",
                         "name": "include_category",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "start_date",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "end_date",
+                        "name": "end_date",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ListTransactionsRes"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.Transaction"
+                            }
                         }
                     },
                     "400": {
@@ -1748,7 +1763,6 @@ const docTemplate = `{
         "CreateTransactionRes": {
             "type": "object",
             "required": [
-                "category",
                 "data"
             ],
             "properties": {
@@ -1850,7 +1864,6 @@ const docTemplate = `{
         "GetTransactionRes": {
             "type": "object",
             "required": [
-                "category",
                 "data"
             ],
             "properties": {
@@ -1894,20 +1907,6 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.GoldTaxPreference"
-                    }
-                }
-            }
-        },
-        "ListTransactionsRes": {
-            "type": "object",
-            "required": [
-                "transactions"
-            ],
-            "properties": {
-                "transactions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.Transaction"
                     }
                 }
             }
@@ -2116,7 +2115,6 @@ const docTemplate = `{
         "UpdateTransactionRes": {
             "type": "object",
             "required": [
-                "category",
                 "data"
             ],
             "properties": {
@@ -2666,7 +2664,6 @@ const docTemplate = `{
         "dto.Transaction": {
             "type": "object",
             "required": [
-                "category",
                 "data"
             ],
             "properties": {

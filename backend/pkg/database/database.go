@@ -21,7 +21,8 @@ func Initialize(cfg *config.Config) (*gorm.DB, error) {
 
 	logLevel := logger.Silent
 	if cfg.IsDevelopment() {
-		logLevel = logger.Info
+		// logLevel = logger.Info
+		logLevel = logger.Error
 	}
 
 	var err error

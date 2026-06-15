@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/artafinance/backend/pkg/jwt"
@@ -65,6 +66,20 @@ func GetUserID(c *fiber.Ctx) string {
 		return ""
 	}
 	return userID
+}
+
+func GetUserId(c *fiber.Ctx) (uint, error) {
+	userIdStr, ok := c.Locals("user_id").(string)
+	if !ok {
+		return 0, fiber.ErrUnauthorized
+	}
+
+	userId, err := strconv.ParseUint(userIdStr, 10, 64)
+	if err != nil {
+		return 0, fiber.ErrUnauthorized
+	}
+
+	return uint(userId), nil
 }
 
 // GetClaims extracts JWT claims from context

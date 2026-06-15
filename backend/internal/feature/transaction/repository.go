@@ -46,7 +46,7 @@ func (r *Repository) Get(filter GetFilter) (*dto.Transaction, error) {
 	} else {
 		return &dto.Transaction{
 			Data:     *domain.FromTransactionModel(&transaction),
-			Category: *domain.FromCategoryModel(&transaction.Category),
+			Category: domain.FromCategoryModel(&transaction.Category),
 		}, nil
 	}
 }
@@ -62,18 +62,34 @@ func (r *Repository) GetTransactionByID(id uint) (*domain.Transaction, error) {
 }
 
 // GetAll returns transactions for a wallet.
-type GetAllFilter struct {
+type GetAllTransactionsFilter struct {
 	WalletId        uint
 	IncludeCategory bool
+	StartDate       time.Time
+	EndDate         time.Time
 	Limit           int
 	OrderBy         string
 	OrderDirection  string
 }
 
-func (r *Repository) GetAll(filter *GetAllFilter) ([]dto.Transaction, error) {
+func (r *Repository) GetAll(filter *GetAllTransactionsFilter) ([]dto.Transaction, error) {
 	var transactions []model.Transaction
 
-	query := r.db.Where("wallet_id = ?", filter.WalletId)
+	query := r.db.Model(&model.Transaction{}).
+		Where("wallet_id = ?", filter.WalletId)
+
+	if filter.IncludeCategory {
+		query = query.Preload("Category")
+	}
+
+	if !filter.StartDate.IsZero() {
+		query = query.Where("date >= ?", filter.StartDate)
+	}
+
+	if !filter.EndDate.IsZero() {
+		query = query.Where("date < ?", filter.EndDate)
+	}
+
 	if filter.Limit > 0 {
 		query = query.Limit(filter.Limit)
 	}
@@ -85,9 +101,6 @@ func (r *Repository) GetAll(filter *GetAllFilter) ([]dto.Transaction, error) {
 		query = query.Order(filter.OrderBy + " " + orderDir).
 			Order("created_at desc")
 	}
-	if filter.IncludeCategory {
-		query = query.Preload("Category")
-	}
 
 	if err := query.Find(&transactions).Error; err != nil {
 		return nil, err
@@ -96,7 +109,7 @@ func (r *Repository) GetAll(filter *GetAllFilter) ([]dto.Transaction, error) {
 		for index, transaction := range transactions {
 			result[index] = dto.Transaction{
 				Data:     *domain.FromTransactionModel(&transaction),
-				Category: *domain.FromCategoryModel(&transaction.Category),
+				Category: domain.FromCategoryModel(&transaction.Category),
 			}
 		}
 		return result, nil
@@ -117,7 +130,7 @@ func (r *Repository) GetCurrentBalance(filter GetCurrentBalanceFilter) (*float64
 					CASE
 						WHEN categories.type = 'income' THEN transactions.amount
 						WHEN categories.type = 'expense' THEN -transactions.amount
-						ELSE 0 
+						ELSE 0
 					END
 				), 0
 			)
@@ -149,15 +162,15 @@ func (r *Repository) GetTotalIncomeExpense(filter GetTotalIncomeExpenseFilter) (
 				SUM(
 					CASE
 						WHEN categories.type = 'income' THEN transactions.amount
-						ELSE 0 
+						ELSE 0
 					END
 				), 0
-			) as income, 
+			) as income,
 			COALESCE(
 				SUM(
 					CASE
 						WHEN categories.type = 'expense' THEN transactions.amount
-						ELSE 0 
+						ELSE 0
 					END
 				), 0
 			) as expense

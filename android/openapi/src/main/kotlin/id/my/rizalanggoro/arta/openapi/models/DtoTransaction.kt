@@ -33,18 +33,18 @@ import kotlinx.serialization.Contextual
 /**
  * 
  *
- * @param category 
  * @param `data` 
+ * @param category 
  */
 @Serializable
 
 data class DtoTransaction (
 
-    @SerialName(value = "category")
-    val category: DomainCategory,
-
     @SerialName(value = "data")
-    val `data`: DomainTransaction
+    val `data`: DomainTransaction,
+
+    @SerialName(value = "category")
+    val category: DomainCategory? = null
 
 ) {
 

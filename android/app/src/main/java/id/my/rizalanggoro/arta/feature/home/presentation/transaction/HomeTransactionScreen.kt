@@ -30,9 +30,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
+import id.my.rizalanggoro.arta.core.constant.TransactionTimeRangeType
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.core.utils.Samples
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
@@ -43,7 +46,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun HomeTransactionScreen(vm: TransactionListVM = hiltViewModel()) {
+fun HomeTransactionScreen(vm: HomeTransactionVM = hiltViewModel()) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
 
@@ -61,37 +64,37 @@ fun HomeTransactionScreen(vm: TransactionListVM = hiltViewModel()) {
 
     Content(
         uiState = uiState,
-        onClickRetry = vm::loadTransactions,
-        onRefresh = { vm.loadTransactions(isRefresh = true) },
+        onRefresh = vm::loadTransactions,
         onLongClickItem = {
             backStack.add(
                 TransactionRoute.ActionSheet(
                     transactionId = it.id
                 )
             )
-        }
+        },
+        onClickNextTimeRange = vm::onNextTimeRangeClicked,
+        onClickPrevTimeRange = vm::onPrevTimeRangeClicked
     )
 }
 
 @Composable
 private fun Content(
     pullToRefreshState: PullToRefreshState = PullToRefreshState(),
-    uiState: TransactionListUiState = TransactionListUiState(),
-    onClickRetry: () -> Unit = {},
+    uiState: HomeTransactionUiState = HomeTransactionUiState(),
     onRefresh: () -> Unit = {},
     onLongClickItem: (DomainTransaction) -> Unit = {},
-    onClickNext: () -> Unit = {},
-    onClickPrevious: () -> Unit = {},
+    onClickNextTimeRange: () -> Unit = {},
+    onClickPrevTimeRange: () -> Unit = {},
 ) {
     with(uiState) {
         PullToRefreshBox(
             state = pullToRefreshState,
-            isRefreshing = uiState.isRefreshing,
+            isRefreshing = uiState.isLoading && uiState.transactions.isNotEmpty(),
             onRefresh = onRefresh,
             indicator = {
                 PullToRefreshDefaults.LoadingIndicator(
                     state = pullToRefreshState,
-                    isRefreshing = uiState.isRefreshing,
+                    isRefreshing = uiState.isLoading && uiState.transactions.isNotEmpty(),
                     modifier = Modifier.align(Alignment.TopCenter)
                 )
             }
@@ -106,7 +109,7 @@ private fun Content(
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        FilledTonalIconButton(onClick = onClickPrevious) {
+                        FilledTonalIconButton(onClick = onClickPrevTimeRange) {
                             Icon(
                                 Icons.Rounded.ChevronLeft,
                                 null,
@@ -119,24 +122,48 @@ private fun Content(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                "Tahunan",
+                                when (timeRange) {
+                                    TransactionTimeRangeType.DAILY -> "Harian"
+                                    TransactionTimeRangeType.WEEKLY -> "Mingguan"
+                                    TransactionTimeRangeType.MONTHLY -> "Bulanan"
+                                },
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                "2026",
+                                "${startDateMillis.toIndonesianDate()} - ${endDateMillis.toIndonesianDate()}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.outline
                             )
                         }
-                        FilledTonalIconButton(onClick = onClickNext) {
+                        FilledTonalIconButton(onClick = onClickNextTimeRange) {
                             Icon(
                                 Icons.Rounded.ChevronRight,
                                 null,
                                 tint = MaterialTheme.colorScheme.onSecondaryContainer
                             )
                         }
+                    }
+                }
+
+                if (isLoading) {
+                    items(3) {
+                        TransactionListItem(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(
+                                    top = when {
+                                        it == 0 -> 16.dp
+                                        else -> 2.dp
+                                    }
+                                ),
+                            index = it,
+                            size = 3,
+                            transaction = Samples.domainTransactions.first(),
+                            category = Samples.domainCategories.first(),
+                            isLoading = true
+                        )
                     }
                 }
 
@@ -151,7 +178,7 @@ private fun Content(
                                 }
                             ),
                         transaction = transaction.data,
-                        category = transaction.category,
+                        category = transaction.category!!,
                         index = index,
                         size = uiState.transactions.size,
                         onLongClick = {
@@ -159,17 +186,19 @@ private fun Content(
                         }
                     )
                 }
-                item {
-                    Text(
-                        "Tekan dan tahan untuk melihat opsi lainnya",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    )
-                }
+
+                if (!isLoading)
+                    item {
+                        Text(
+                            "Tekan dan tahan untuk melihat opsi lainnya",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    }
             }
         }
     }
@@ -180,7 +209,7 @@ private fun Content(
 private fun Preview() {
     ArtaTheme {
         Content(
-            uiState = TransactionListUiState(
+            uiState = HomeTransactionUiState(
                 transactions = List(5) {
                     DtoTransaction(
                         data = DomainTransaction(

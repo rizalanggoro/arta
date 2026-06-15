@@ -143,22 +143,26 @@ val webService = apiClient.createWebservice(TransactionApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val walletId : kotlin.Int = 56 // kotlin.Int | wallet id
 val includeCategory : kotlin.Boolean = true // kotlin.Boolean | include_category
+val startDate : kotlin.String = startDate_example // kotlin.String | start_date
+val endDate : kotlin.String = endDate_example // kotlin.String | end_date
 
 launch(Dispatchers.IO) {
-    val result : ListTransactionsRes = webService.listTransactions(authorization, walletId, includeCategory)
+    val result : kotlin.collections.List<DtoTransaction> = webService.listTransactions(authorization, walletId, includeCategory, startDate, endDate)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
 | **walletId** | **kotlin.Int**| wallet id | |
+| **includeCategory** | **kotlin.Boolean**| include_category | [optional] |
+| **startDate** | **kotlin.String**| start_date | [optional] |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **includeCategory** | **kotlin.Boolean**| include_category | [optional] |
+| **endDate** | **kotlin.String**| end_date | [optional] |
 
 ### Return type
 
-[**ListTransactionsRes**](ListTransactionsRes.md)
+[**kotlin.collections.List&lt;DtoTransaction&gt;**](DtoTransaction.md)
 
 ### Authorization
 
