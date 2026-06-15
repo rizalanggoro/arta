@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Balance
 import androidx.compose.material.icons.rounded.Dashboard
+import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Payment
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Wallet
@@ -79,6 +80,9 @@ fun HomeScreen(
                 "gold_savings" -> backStack.add(GoldRoute.Upsert())
             }
         },
+        onClickFilter = {
+            backStack.add(TransactionRoute.Filter)
+        },
         entryProvider = entryProvider {
             entry<HomeRoute.CashDashboard> { HomeCashDashboardScreen() }
             entry<HomeRoute.GoldDashboard> { HomeGoldDashboardScreen() }
@@ -100,6 +104,7 @@ private fun Content(
     entryProvider: ((NavKey) -> NavEntry<NavKey>)? = null,
     onClickFab: () -> Unit = {},
     hasUpdate: Boolean = false,
+    onClickFilter: () -> Unit = {},
 ) {
     val lastDestination = homeBackStack?.lastOrNull()
 
@@ -125,6 +130,14 @@ private fun Content(
                     )
                 },
                 actions = {
+                    if (lastDestination == HomeRoute.ListTransaction)
+                        IconButton(onClick = onClickFilter) {
+                            Icon(
+                                Icons.Rounded.FilterList,
+                                null
+                            )
+                        }
+
                     if (lastDestination != HomeRoute.Setting)
                         IconButton(onClick = onClickSelectWallet) {
                             Icon(

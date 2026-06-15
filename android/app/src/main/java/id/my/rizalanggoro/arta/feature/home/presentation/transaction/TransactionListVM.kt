@@ -24,7 +24,7 @@ class TransactionListVM @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val transactionApi: TransactionApi,
     private val authPrefs: AuthPrefs,
-    private val selectedWalletPrefs: SelectedWalletPrefs
+    private val selectedWalletPrefs: SelectedWalletPrefs,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TransactionListUiState())
     val uiState = _uiState.asStateFlow()
@@ -93,57 +93,6 @@ class TransactionListVM @Inject constructor(
         }
     }
 
-    fun onDeleteTransactionDialogDismissed() = _uiState.update {
-        it.copy(targetDeleteTransactionId = null)
-    }
-
-    fun onDeleteTransactionDialogClicked() = viewModelScope.launch {
-        val transactionId = _uiState.value.targetDeleteTransactionId ?: return@launch
-
-        _uiState.update {
-            it.copy(isDeleting = true)
-        }
-
-        runCatching {
-            val authorization = authorizationHeader()
-                ?: throw IllegalStateException("Sesi login tidak ditemukan")
-
-            val response = transactionApi.deleteTransaction(
-                authorization = authorization,
-                id = transactionId
-            )
-            if (!response.isSuccessful) throw IllegalStateException(response.errorMessage())
-
-            response.body() ?: throw IllegalStateException(
-                context.getString(
-                    R.string.server_empty_error
-                )
-            )
-        }.onSuccess {
-            AppEventBus.emit(AppEvent.TransactionChanged)
-            _uiState.update {
-                it.copy(
-                    isDeleting = false,
-                    targetDeleteTransactionId = null
-                )
-            }
-        }.onFailure { throwable ->
-            _uiState.update {
-                it.copy(
-                    isDeleting = false,
-                    targetDeleteTransactionId = null,
-                    errorMessage = throwable.message ?: context.getString(
-                        R.string.client_error
-                    )
-                )
-            }
-        }
-    }
-
-    private fun authorizationHeader(): String? {
-        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
-    }
-
     init {
         viewModelScope.launch {
             selectedWalletPrefs.selectedWallet.collect { wallet ->
@@ -160,13 +109,9 @@ class TransactionListVM @Inject constructor(
                     in listOf(
                         AppEvent.TransactionChanged,
                         AppEvent.CategoryChanged
-                    ) -> loadTransactions(isRefresh = true)
+                    ),
+                        -> loadTransactions(isRefresh = true)
 
-                    is AppEvent.TransactionActionSheet.OnDeleteClicked -> _uiState.update {
-                        it.copy(
-                            targetDeleteTransactionId = event.transactionId,
-                        )
-                    }
 
                     else -> {}
                 }

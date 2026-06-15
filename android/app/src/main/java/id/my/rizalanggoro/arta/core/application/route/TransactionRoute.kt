@@ -24,4 +24,7 @@ object TransactionRoute {
     data class ActionSheet(
         val transactionId: Int,
     ) : NavKey
+
+    @Serializable
+    data object Filter : NavKey
 }

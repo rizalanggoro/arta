@@ -9,7 +9,4 @@ data class TransactionListUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
-
-    val targetDeleteTransactionId: Int? = null,
-    val isDeleting: Boolean = false,
 )
