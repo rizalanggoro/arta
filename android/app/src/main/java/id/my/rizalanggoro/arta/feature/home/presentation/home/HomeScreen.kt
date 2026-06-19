@@ -233,7 +233,7 @@ private fun walletDestinations(type: String?): List<HomeDestination> {
             else -> HomeDestination(
                 label = "Emas",
                 icon = Icons.Rounded.Balance,
-                route = HomeRoute.GoldDashboard
+                route = HomeRoute.ListGold
             )
         },
         HomeDestination(
@@ -244,7 +244,7 @@ private fun walletDestinations(type: String?): List<HomeDestination> {
     )
 }
 
-@Preview(showBackground = true, name = "Cash Wallet Home")
+@Preview(showBackground = true)
 @Composable
 private fun HomeCashPreview() {
     ArtaTheme {
@@ -255,7 +255,7 @@ private fun HomeCashPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Gold Wallet Home")
+@Preview(showBackground = true)
 @Composable
 private fun HomeGoldPreview() {
     ArtaTheme {

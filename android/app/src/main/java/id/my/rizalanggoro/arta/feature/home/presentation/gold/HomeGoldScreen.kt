@@ -44,7 +44,7 @@ fun HomeGoldScreen(
 
     Content(
         uiState = uiState,
-        onClickGold = {
+        onLongClickGold = {
             backStack.add(
                 GoldRoute.ActionSheet(
                     goldId = it.id
@@ -58,7 +58,7 @@ fun HomeGoldScreen(
 private fun Content(
     uiState: HomeGoldUiState = HomeGoldUiState(),
     onClickRetry: () -> Unit = {},
-    onClickGold: (DomainGold) -> Unit = {},
+    onLongClickGold: (DomainGold) -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -88,7 +88,7 @@ private fun Content(
             itemsIndexed(uiState.golds) { index, gold ->
                 GoldListItem(
                     gold = gold,
-                    onClick = onClickGold,
+                    onLongClick = onLongClickGold,
                     index = index,
                     size = uiState.golds.size
                 )

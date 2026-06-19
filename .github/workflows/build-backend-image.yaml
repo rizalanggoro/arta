@@ -40,3 +40,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Trigger Komodo Deploy
+        run: |
+          curl -X POST https://demo.komo.do/listener/github/stack/6a156ad5d9fc83cf452a9c9c/deploy

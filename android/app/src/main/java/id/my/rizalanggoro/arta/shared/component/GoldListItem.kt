@@ -1,7 +1,7 @@
 package id.my.rizalanggoro.arta.shared.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +38,7 @@ fun GoldListItem(
     size: Int = 1,
     gold: DtoGold,
     onClick: (DomainGold) -> Unit = {},
+    onLongClick: (DomainGold) -> Unit = {},
 ) {
     val status = when {
         gold.profit > 0 -> 1
@@ -62,9 +63,12 @@ fun GoldListItem(
                 )
             )
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clickable { onClick(gold.data) }
+            .combinedClickable(
+                onClick = { onClick(gold.data) },
+                onLongClick = { onLongClick(gold.data) }
+            )
             .padding(16.dp),
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
             modifier = Modifier.weight(1f),
@@ -99,24 +103,32 @@ fun GoldListItem(
                 Text(
                     text = gold.data.date.toIndonesianDate(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = gold.sellPrice.toIndonesianCurrency(),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-                if (status != 0)
+                Column {
                     Text(
-                        text = "${
-                            when {
-                                status == 1 -> "Keuntungan"
-                                else -> "Kerugian"
-                            }
-                        } ${gold.profit.toIndonesianCurrency()}",
+                        text = "Harga beli ${gold.data.price.toIndonesianCurrency()}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.outline,
                     )
+                    if (status != 0)
+                        Text(
+                            text = "${
+                                when {
+                                    status == 1 -> "Keuntungan"
+                                    else -> "Kerugian"
+                                }
+                            } ${gold.profit.toIndonesianCurrency()}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                }
             }
         }
         Column(
@@ -130,7 +142,7 @@ fun GoldListItem(
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "${gold.data.grams.toFloat()} gr",
+                text = "${gold.data.grams.toFloat()}gr",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.outline
             )
