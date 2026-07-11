@@ -42,20 +42,20 @@ import kotlinx.serialization.Contextual
 
 data class GoldUpdateGoldReq (
 
-    @Contextual @SerialName(value = "carat")
-    val carat: java.math.BigDecimal? = null,
+    @SerialName(value = "carat")
+    val carat: kotlin.Double? = null,
 
     @SerialName(value = "date")
     val date: kotlin.String? = null,
 
-    @Contextual @SerialName(value = "grams")
-    val grams: java.math.BigDecimal? = null,
+    @SerialName(value = "grams")
+    val grams: kotlin.Double? = null,
 
     @SerialName(value = "notes")
     val notes: kotlin.String? = null,
 
-    @Contextual @SerialName(value = "price")
-    val price: java.math.BigDecimal? = null,
+    @SerialName(value = "price")
+    val price: kotlin.Double? = null,
 
     @SerialName(value = "type")
     val type: kotlin.String? = null

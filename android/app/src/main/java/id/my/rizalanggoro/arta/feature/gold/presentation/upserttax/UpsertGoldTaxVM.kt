@@ -130,8 +130,8 @@ class UpsertGoldTaxVM @Inject constructor(
                         "Bearer $token",
                         taxPreferenceId,
                         GoldGoldTaxPreferenceReq(
-                            carat = java.math.BigDecimal.valueOf(carat!!),
-                            taxRate = java.math.BigDecimal.valueOf(taxRate!!),
+                            carat = carat!!,
+                            taxRate = taxRate!!,
                         ),
                     )
                     if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
@@ -142,8 +142,8 @@ class UpsertGoldTaxVM @Inject constructor(
                     val response = goldApi.createGoldTaxPreference(
                         "Bearer $token",
                         GoldGoldTaxPreferenceReq(
-                            carat = java.math.BigDecimal.valueOf(carat!!),
-                            taxRate = java.math.BigDecimal.valueOf(taxRate!!),
+                            carat = carat!!,
+                            taxRate = taxRate!!,
                         ),
                     )
                     if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")

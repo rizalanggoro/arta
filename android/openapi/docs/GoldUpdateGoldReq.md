@@ -4,11 +4,11 @@
 ## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-| **carat** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional] |
+| **carat** | **kotlin.Double** |  |  [optional] |
 | **date** | **kotlin.String** |  |  [optional] |
-| **grams** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional] |
+| **grams** | **kotlin.Double** |  |  [optional] |
 | **notes** | **kotlin.String** |  |  [optional] |
-| **price** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional] |
+| **price** | **kotlin.Double** |  |  [optional] |
 | **type** | **kotlin.String** |  |  [optional] |
 
 

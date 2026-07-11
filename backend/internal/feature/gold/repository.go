@@ -126,14 +126,14 @@ func (r *Repository) GetGoldsByUserID(userID uint) ([]domain.Gold, error) {
 	return out, nil
 }
 
-// UpdateGold updates an existing gold entry.
-func (r *Repository) UpdateGold(g *domain.Gold) (*domain.Gold, error) {
+// UpdateGold updates an existing gold entry by ID.
+func (r *Repository) UpdateGold(id uint, g *domain.Gold) (*domain.Gold, error) {
 	m := g.ToModel()
-	if err := r.db.Model(&model.Gold{}).Where("id = ?", m.ID).Updates(m).Error; err != nil {
+	if err := r.db.Model(&model.Gold{}).Where("id = ?", id).Updates(m).Error; err != nil {
 		return nil, err
 	}
 	var updated model.Gold
-	if err := r.db.First(&updated, m.ID).Error; err != nil {
+	if err := r.db.First(&updated, id).Error; err != nil {
 		return nil, err
 	}
 	return domain.FromGoldModel(&updated), nil

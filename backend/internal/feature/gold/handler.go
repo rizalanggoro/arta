@@ -484,7 +484,7 @@ func (h *Handler) update(c *fiber.Ctx) error {
 		g.Notes = *req.Notes
 	}
 
-	updated, err := h.repo.UpdateGold(g)
+	updated, err := h.repo.UpdateGold(uint(parsedID), g)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}

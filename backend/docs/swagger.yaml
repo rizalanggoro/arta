@@ -760,8 +760,10 @@ definitions:
   gold.GoldTaxPreferenceReq:
     properties:
       carat:
+        format: double
         type: number
       tax_rate:
+        format: double
         type: number
     required:
     - carat
@@ -779,14 +781,17 @@ definitions:
   gold.UpdateGoldReq:
     properties:
       carat:
+        format: double
         type: number
       date:
         type: string
       grams:
+        format: double
         type: number
       notes:
         type: string
       price:
+        format: double
         type: number
       type:
         type: string

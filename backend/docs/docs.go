@@ -2732,10 +2732,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "carat": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "tax_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 }
             }
         },
@@ -2757,19 +2759,22 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "carat": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "date": {
                     "type": "string"
                 },
                 "grams": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "notes": {
                     "type": "string"
                 },
                 "price": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "type": {
                     "type": "string"

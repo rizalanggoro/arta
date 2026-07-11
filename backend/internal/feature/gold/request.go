@@ -14,9 +14,9 @@ type CreateGoldReq struct {
 // UpdateGoldReq defines payload for updating a gold entry.
 type UpdateGoldReq struct {
 	Date  *string  `json:"date,omitempty"`
-	Grams *float64 `json:"grams,omitempty"`
-	Price *float64 `json:"price,omitempty"`
+	Grams *float64 `json:"grams,omitempty" format:"double"`
+	Price *float64 `json:"price,omitempty" format:"double"`
 	Type  *string  `json:"type,omitempty"`
-	Carat *float64 `json:"carat,omitempty"`
+	Carat *float64 `json:"carat,omitempty" format:"double"`
 	Notes *string  `json:"notes,omitempty"`
 }

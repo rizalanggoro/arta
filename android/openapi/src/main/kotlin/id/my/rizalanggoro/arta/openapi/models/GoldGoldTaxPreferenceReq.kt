@@ -38,11 +38,11 @@ import kotlinx.serialization.Contextual
 
 data class GoldGoldTaxPreferenceReq (
 
-    @Contextual @SerialName(value = "carat")
-    val carat: java.math.BigDecimal,
+    @SerialName(value = "carat")
+    val carat: kotlin.Double,
 
-    @Contextual @SerialName(value = "tax_rate")
-    val taxRate: java.math.BigDecimal
+    @SerialName(value = "tax_rate")
+    val taxRate: kotlin.Double
 
 ) {
 

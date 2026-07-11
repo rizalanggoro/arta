@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 
 @HiltViewModel(assistedFactory = UpsertGoldVM.Factory::class)
 class UpsertGoldVM @AssistedInject constructor(
@@ -119,10 +118,10 @@ class UpsertGoldVM @AssistedInject constructor(
                         id = navKey.goldId,
                         body = GoldUpdateGoldReq(
                             date = current.date.toApiFormat(),
-                            grams = BigDecimal.valueOf(grams!!),
-                            price = BigDecimal.valueOf(price!!),
+                            grams = grams!!,
+                            price = price!!,
                             type = current.type,
-                            carat = BigDecimal.valueOf(carat!!),
+                            carat = carat!!,
                             notes = current.notes.ifBlank { null },
                         ),
                     )
@@ -197,8 +196,13 @@ class UpsertGoldVM @AssistedInject constructor(
                     notes = gold.notes,
                 )
             }
-        }.onFailure {
+        }.onFailure { throwable ->
             _uiState.update { it.copy(isLoading = false) }
+            _event.emit(
+                UpsertGoldUiState.Event.ShowMessage(
+                    throwable.message ?: context.getString(R.string.client_error)
+                )
+            )
         }
     }
 
