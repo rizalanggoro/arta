@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,6 +47,8 @@ fun HomeGoldScreen(
 
     Content(
         uiState = uiState,
+        onRefresh = vm::loadGolds,
+        onClickRetry = vm::loadGolds,
         onLongClickGold = {
             backStack.add(
                 GoldRoute.ActionSheet(
@@ -56,19 +61,21 @@ fun HomeGoldScreen(
 
 @Composable
 private fun Content(
+    pullToRefreshState: PullToRefreshState = PullToRefreshState(),
     uiState: HomeGoldUiState = HomeGoldUiState(),
+    onRefresh: () -> Unit = {},
     onClickRetry: () -> Unit = {},
     onLongClickGold: (DomainGold) -> Unit = {},
 ) {
     when {
-        uiState.isLoading -> Box(
+        uiState.isLoading && uiState.golds.isEmpty() -> Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize(),
         ) {
             LoadingIndicator()
         }
 
-        uiState.errorMessage != null -> ErrorPlaceholder(
+        uiState.errorMessage != null && uiState.golds.isEmpty() -> ErrorPlaceholder(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
@@ -81,21 +88,34 @@ private fun Content(
                 .padding(16.dp)
         )
 
-        else -> LazyColumn(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            itemsIndexed(uiState.golds) { index, gold ->
-                GoldListItem(
-                    gold = gold,
-                    onLongClick = onLongClickGold,
-                    index = index,
-                    size = uiState.golds.size
+        else -> PullToRefreshBox(
+            state = pullToRefreshState,
+            isRefreshing = uiState.isLoading && uiState.golds.isNotEmpty(),
+            onRefresh = onRefresh,
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = pullToRefreshState,
+                    isRefreshing = uiState.isLoading && uiState.golds.isNotEmpty(),
+                    modifier = Modifier.align(Alignment.TopCenter)
                 )
             }
+        ) {
+            LazyColumn(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                itemsIndexed(uiState.golds) { index, gold ->
+                    GoldListItem(
+                        gold = gold,
+                        onLongClick = onLongClickGold,
+                        index = index,
+                        size = uiState.golds.size
+                    )
+                }
 
-            item {
-                Box(modifier = Modifier.height((56 + 32).dp))
+                item {
+                    Box(modifier = Modifier.height((56 + 32).dp))
+                }
             }
         }
     }
