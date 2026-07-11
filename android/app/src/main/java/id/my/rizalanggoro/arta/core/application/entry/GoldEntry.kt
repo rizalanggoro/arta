@@ -12,14 +12,21 @@ import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.tax.ListGoldTaxScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.upsert.UpsertGoldScreen
+import id.my.rizalanggoro.arta.feature.gold.presentation.upsert.UpsertGoldVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.upserttax.UpsertGoldTaxScreen
 import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun EntryProviderScope<NavKey>.goldEntry() {
-    entry<GoldRoute.Upsert> {
+    entry<GoldRoute.Upsert> { navKey ->
         UpsertGoldScreen(
-            goldId = it.goldId
+            vm = hiltViewModel<UpsertGoldVM, UpsertGoldVM.Factory>(
+                creationCallback = {
+                    it.create(
+                        navKey = navKey
+                    )
+                }
+            )
         )
     }
 

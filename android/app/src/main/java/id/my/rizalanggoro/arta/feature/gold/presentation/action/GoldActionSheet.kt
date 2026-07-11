@@ -32,7 +32,12 @@ fun GoldActionSheet(
 
     Content(
         onClickEdit = {
-
+            backStack.removeLastOrNull()
+            backStack.add(
+                GoldRoute.Upsert(
+                    goldId = goldId
+                )
+            )
         },
         onClickDelete = {
             backStack.removeLastOrNull()

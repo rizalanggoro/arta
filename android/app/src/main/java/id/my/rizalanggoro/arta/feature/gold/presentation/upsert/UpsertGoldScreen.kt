@@ -61,16 +61,11 @@ import kotlinx.coroutines.flow.filterIsInstance
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpsertGoldScreen(
-    goldId: Int = 0,
     vm: UpsertGoldVM = hiltViewModel(),
 ) {
     val uiState by vm.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val backStack = LocalBackStack.current
-
-    LaunchedEffect(goldId) {
-        vm.setGoldId(goldId)
-    }
 
     LaunchedEffect(Unit) {
         AppEventBus.event.filterIsInstance<AppEvent.GoldChanged>()

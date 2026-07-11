@@ -24,6 +24,7 @@ import id.my.rizalanggoro.arta.shared.component.GoldListItem
 @Composable
 fun LatestGold(
     golds: List<DtoGold> = emptyList(),
+    onLongClickGold: (DomainGold) -> Unit = {},
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
@@ -61,7 +62,7 @@ fun LatestGold(
                         golds.forEachIndexed { index, gold ->
                             GoldListItem(
                                 gold = gold,
-                                onClick = {},
+                                onLongClick = onLongClickGold,
                                 index = index,
                                 size = golds.size
                             )

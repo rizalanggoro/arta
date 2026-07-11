@@ -44,6 +44,7 @@ import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component.LatestGold
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component.PriceSummary
+import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
@@ -61,6 +62,11 @@ fun HomeGoldDashboardScreen(
         refreshState = rememberPullToRefreshState(),
         onRefresh = { vm.loadDashboard(isRefresh = true) },
         onClickManageTax = { backStack.add(GoldRoute.ListTax) },
+        onLongClickGold = {
+            backStack.add(
+                GoldRoute.ActionSheet(goldId = it.id)
+            )
+        },
     )
 }
 
@@ -72,6 +78,7 @@ private fun Content(
     onClickRetry: () -> Unit = {},
     onClickManageTax: () -> Unit = {},
     onRefresh: () -> Unit = {},
+    onLongClickGold: (DomainGold) -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -282,6 +289,7 @@ private fun Content(
                     item {
                         LatestGold(
                             golds = data?.latestGolds ?: emptyList(),
+                            onLongClickGold = onLongClickGold,
                         )
                     }
                 }
