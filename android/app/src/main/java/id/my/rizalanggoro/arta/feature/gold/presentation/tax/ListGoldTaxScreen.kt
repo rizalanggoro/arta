@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
@@ -16,7 +17,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -26,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -147,7 +151,13 @@ private fun Content(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                items(uiState.preferences) { preference ->
+                itemsIndexed(uiState.preferences) { index, preference ->
+                    val shape = RoundedCornerShape(
+                        topStart = if (index == 0) 16.dp else 4.dp,
+                        topEnd = if (index == 0) 16.dp else 4.dp,
+                        bottomStart = if (index == uiState.preferences.lastIndex) 16.dp else 4.dp,
+                        bottomEnd = if (index == uiState.preferences.lastIndex) 16.dp else 4.dp,
+                    )
                     ListItem(
                         headlineContent = {
                             Text("Karat ${preference.carat}")
@@ -170,7 +180,14 @@ private fun Content(
                                     )
                                 }
                             }
-                        }
+                        },
+                        colors = ListItemDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        ),
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(top = if (index == 0) 0.dp else 2.dp)
+                            .clip(shape)
                     )
 //                    Card(modifier = Modifier.fillMaxWidth()) {
 //                        Column(
