@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.Button
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.extension.isValidInputNumber
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -84,8 +87,14 @@ private fun Content(
         ) {
             TextField(
                 value = carat,
-                onValueChange = { onChangeCarat(it) },
+                onValueChange = {
+                    if (it.isValidInputNumber())
+                        onChangeCarat(it)
+                },
                 modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
                 supportingText = when {
                     caratError != null -> {
                         { Text(caratError) }
@@ -96,11 +105,18 @@ private fun Content(
                 isError = caratError != null,
                 label = { Text("Karat") },
                 enabled = !isLoading,
+                singleLine = true,
             )
             TextField(
                 value = taxRate,
-                onValueChange = { onChangeTaxRate(it) },
+                onValueChange = {
+                    if (it.isValidInputNumber())
+                        onChangeTaxRate(it)
+                },
                 modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
                 supportingText = when {
                     taxRateError != null -> {
                         { Text(taxRateError) }
@@ -111,6 +127,7 @@ private fun Content(
                 isError = taxRateError != null,
                 label = { Text("Rasio pajak (%)") },
                 enabled = !isLoading,
+                singleLine = true,
             )
             if (errorMessage != null) {
                 Text(
