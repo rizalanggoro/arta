@@ -41,6 +41,13 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_ID }}
+          oauth-secret: ${{ secrets.TS_SECRET }}
+          tags: tag:github
+
       - name: Trigger Komodo Deploy
         run: |
-          curl -X POST https://demo.komo.do/listener/github/stack/6a156ad5d9fc83cf452a9c9c/deploy
+          curl -X POST http://stb:9000/listener/github/stack/6a156ad5d9fc83cf452a9c9c/deploy
