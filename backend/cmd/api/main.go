@@ -13,6 +13,7 @@ import (
 	"github.com/artafinance/backend/internal/feature/category"
 	"github.com/artafinance/backend/internal/feature/dashboard"
 	"github.com/artafinance/backend/internal/feature/gold"
+	"github.com/artafinance/backend/internal/feature/health"
 	"github.com/artafinance/backend/internal/feature/release"
 	"github.com/artafinance/backend/internal/feature/transaction"
 	"github.com/artafinance/backend/internal/feature/wallet"
@@ -73,6 +74,7 @@ func main() {
 	must(container.Provide(dashboard.NewDashboardGoldRepository))
 
 	// handlers
+	must(container.Provide(health.NewHandler))
 	must(container.Provide(auth.NewHandler))
 	must(container.Provide(wallet.NewHandler))
 	must(container.Provide(category.NewHandler))
@@ -100,6 +102,7 @@ func main() {
 	must(container.Invoke(func(
 		app *fiber.App,
 		cfg *config.Config,
+		healthHandler *health.Handler,
 		authHandler *auth.Handler,
 		walletHandler *wallet.Handler,
 		categoryHandler *category.Handler,
@@ -112,6 +115,7 @@ func main() {
 		app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
 		api := app.Group("/api")
+		healthHandler.RegisterRoutes(api)
 		authHandler.RegisterRoutes(api)
 		walletHandler.RegisterRoutes(api)
 		categoryHandler.RegisterRoutes(api)
