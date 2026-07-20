@@ -456,6 +456,7 @@ definitions:
       currency_symbol:
         type: string
       exchange_rate:
+        format: double
         type: number
       id:
         type: integer
@@ -694,12 +695,14 @@ definitions:
   dto.GoldTaxPreference:
     properties:
       carat:
+        format: double
         type: number
       created_at:
         type: string
       id:
         type: integer
       tax_rate:
+        format: double
         type: number
       updated_at:
         type: string

@@ -27,7 +27,7 @@ func NewClient() *Client {
 }
 
 type apiResponse struct {
-	Amount float64          `json:"amount"`
+	Amount float64          `json:"amount" format:"double"`
 	Base   string           `json:"base"`
 	Date   string           `json:"date"`
 	Rates  map[string]int64 `json:"rates"`

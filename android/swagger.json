@@ -2310,7 +2310,8 @@
                     "type": "string"
                 },
                 "exchange_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "id": {
                     "type": "integer"
@@ -2640,7 +2641,8 @@
             ],
             "properties": {
                 "carat": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "created_at": {
                     "type": "string"
@@ -2649,7 +2651,8 @@
                     "type": "integer"
                 },
                 "tax_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "updated_at": {
                     "type": "string"

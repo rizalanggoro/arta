@@ -2312,7 +2312,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "exchange_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "id": {
                     "type": "integer"
@@ -2642,7 +2643,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "carat": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "created_at": {
                     "type": "string"
@@ -2651,7 +2653,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "tax_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "double"
                 },
                 "updated_at": {
                     "type": "string"

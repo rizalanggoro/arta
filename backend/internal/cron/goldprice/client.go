@@ -29,9 +29,9 @@ func NewClient() *Client {
 type apiResponse struct {
 	Currency          string  `json:"currency"`
 	CurrencySymbol    string  `json:"currencySymbol"`
-	ExchangeRate      float64 `json:"exchangeRate"`
+	ExchangeRate      float64 `json:"exchangeRate" format:"double"`
 	Name              string  `json:"name"`
-	Price             float64 `json:"price"`
+	Price             float64 `json:"price" format:"double"`
 	Symbol            string  `json:"symbol"`
 	UpdatedAt         string  `json:"updatedAt"`
 	UpdatedAtReadable string  `json:"updatedAtReadable"`

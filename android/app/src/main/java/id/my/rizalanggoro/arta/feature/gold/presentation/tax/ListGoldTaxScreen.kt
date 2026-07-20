@@ -40,7 +40,6 @@ import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import java.math.BigDecimal
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -226,16 +225,16 @@ private fun Preview() {
                     DtoGoldTaxPreference(
                         id = 1,
                         userId = 1,
-                        carat = BigDecimal.valueOf(24.0),
-                        taxRate = BigDecimal.valueOf(5.0),
+                        carat = 24.0,
+                        taxRate = 5.0,
                         createdAt = "",
                         updatedAt = ""
                     ),
                     DtoGoldTaxPreference(
                         id = 2,
                         userId = 1,
-                        carat = BigDecimal.valueOf(18.0),
-                        taxRate = BigDecimal.valueOf(3.5),
+                        carat = 18.0,
+                        taxRate = 3.5,
                         createdAt = "",
                         updatedAt = ""
                     ),

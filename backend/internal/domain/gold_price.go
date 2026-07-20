@@ -14,7 +14,7 @@ type GoldPrice struct {
 	Symbol            string    `json:"symbol"`
 	Currency          string    `json:"currency"`
 	CurrencySymbol    string    `json:"currency_symbol"`
-	ExchangeRate      float64   `json:"exchange_rate"`
+	ExchangeRate      float64   `json:"exchange_rate" format:"double"`
 	PricePerOunceUSD  float64   `json:"price_per_ounce_usd" format:"double"`
 	SourceUpdatedAt   time.Time `json:"source_updated_at"`
 	SourceReadableAge string    `json:"source_readable_age"`

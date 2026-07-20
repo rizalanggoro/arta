@@ -54,8 +54,8 @@ data class DomainGoldPrice (
     @SerialName(value = "currency_symbol")
     val currencySymbol: kotlin.String,
 
-    @Contextual @SerialName(value = "exchange_rate")
-    val exchangeRate: java.math.BigDecimal,
+    @SerialName(value = "exchange_rate")
+    val exchangeRate: kotlin.Double,
 
     @SerialName(value = "id")
     val id: kotlin.Int,
