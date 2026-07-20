@@ -10,7 +10,6 @@ import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -100,8 +99,10 @@ class GoldDashboardVM @Inject constructor(
         }
 
         viewModelScope.launch {
-            AppEventBus.event.filterIsInstance<AppEvent.GoldChanged>()
-                .collect { loadDashboard(isRefresh = true) }
+            AppEventBus.event.collect { event ->
+                if (event is AppEvent.GoldChanged || event is AppEvent.GoldTaxChanged)
+                    loadDashboard(isRefresh = true)
+            }
         }
     }
 }

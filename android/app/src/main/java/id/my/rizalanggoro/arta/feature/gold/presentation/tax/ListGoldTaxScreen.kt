@@ -24,7 +24,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,15 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.dropUnlessResumed
 import id.my.rizalanggoro.arta.core.application.route.GoldRoute
-import id.my.rizalanggoro.arta.core.event.AppEvent
-import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference
 import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
-import kotlinx.coroutines.flow.filterIsInstance
 import java.math.BigDecimal
 
 @Composable
@@ -53,12 +49,6 @@ fun ListGoldTaxScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
-
-    LaunchedEffect(Unit) {
-        AppEventBus.event
-            .filterIsInstance<AppEvent.GoldTaxChanged>()
-            .collect { vm.loadTaxPreferences() }
-    }
 
     Content(
         uiState = uiState,

@@ -11,6 +11,7 @@ import id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -107,5 +108,10 @@ class ListGoldTaxVM @Inject constructor(
 
     init {
         loadTaxPreferences()
+        viewModelScope.launch {
+            AppEventBus.event
+                .filterIsInstance<AppEvent.GoldTaxChanged>()
+                .collect { loadTaxPreferences() }
+        }
     }
 }
