@@ -47,5 +47,5 @@ fun Double.toAmericanCurrency(): String = NumberFormat
     .format(this)
 
 fun String.isValidInputNumber() = matches(
-    Regex("^\\d*\\.?\\d*$")
+    Regex("^-?\\d*\\.?\\d*$")
 )

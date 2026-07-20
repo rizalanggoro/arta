@@ -254,9 +254,6 @@ func (h *Handler) createTaxPreference(c *fiber.Ctx) error {
 	if req.Carat <= 0 || req.Carat > 24 {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "carat must be between 0 and 24"})
 	}
-	if req.TaxRate < 0 || req.TaxRate > 100 {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "tax rate must be between 0 and 100"})
-	}
 
 	existing, err := h.repo.GetTaxPreferencesByUserID(uint(parsedUserID))
 	if err != nil {
@@ -318,9 +315,6 @@ func (h *Handler) updateTaxPreference(c *fiber.Ctx) error {
 
 	if req.Carat <= 0 || req.Carat > 24 {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "carat must be between 0 and 24"})
-	}
-	if req.TaxRate < 0 || req.TaxRate > 100 {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "tax rate must be between 0 and 100"})
 	}
 
 	existing, err := h.repo.GetTaxPreferencesByUserID(uint(parsedUserID))

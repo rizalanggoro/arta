@@ -107,7 +107,7 @@ class UpsertGoldTaxVM @Inject constructor(
             else -> null
         }
         val taxRateError = when {
-            taxRate == null || taxRate < 0 || taxRate > 100 -> "Rasio pajak harus antara 0 dan 100"
+            taxRate == null -> "Rasio pajak harus diisi"
             else -> null
         }
 
