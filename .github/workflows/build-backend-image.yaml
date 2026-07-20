@@ -50,4 +50,4 @@ jobs:
 
       - name: Trigger Komodo Deploy
         run: |
-          curl -X POST http://stb:9000/listener/github/stack/6a156ad5d9fc83cf452a9c9c/deploy
+          curl -X POST http://stb:9120/listener/github/stack/6a156ad5d9fc83cf452a9c9c/deploy
