@@ -4,9 +4,9 @@ on:
   # push:
   #   paths:
   #     - "android/**"
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
