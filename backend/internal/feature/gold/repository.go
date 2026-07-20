@@ -252,7 +252,7 @@ func (r *Repository) UpdateTaxPreference(userID uint, preference *domain.GoldTax
 
 // DeleteTaxPreference deletes an existing gold tax preference for a user.
 func (r *Repository) DeleteTaxPreference(userID, id uint) error {
-	result := r.db.Where("id = ? AND user_id = ?", id, userID).Delete(&model.GoldTaxPreference{})
+	result := r.db.Unscoped().Where("id = ? AND user_id = ?", id, userID).Delete(&model.GoldTaxPreference{})
 	if result.Error != nil {
 		return result.Error
 	}

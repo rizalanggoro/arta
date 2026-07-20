@@ -68,6 +68,9 @@ func runMigrations(database *gorm.DB) error {
 	if err := backfillGoldCarat(database); err != nil {
 		return err
 	}
+	if err := purgeSoftDeletedGoldTaxPreferences(database); err != nil {
+		return err
+	}
 
 	return seedDefaultCategoriesIfMissing(database)
 }
@@ -104,6 +107,10 @@ func backfillGoldCarat(database *gorm.DB) error {
 		SET carat = COALESCE(carat, purity_percent)
 		WHERE carat IS NULL OR carat = 0
 	`).Error
+}
+
+func purgeSoftDeletedGoldTaxPreferences(database *gorm.DB) error {
+	return database.Unscoped().Where("deleted_at IS NOT NULL").Delete(&model.GoldTaxPreference{}).Error
 }
 
 func seedDefaultCategoriesIfMissing(database *gorm.DB) error {
