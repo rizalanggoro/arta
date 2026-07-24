@@ -105,6 +105,7 @@ func (r *Repository) Get(filter GetCategoryFilterFilter) (*dto.Category, error) 
 type GetAllCategoriesFilter struct {
 	UserId       uint
 	WalletId     uint
+	Type         string
 	IncludeStats bool
 	StartDate    time.Time
 	EndDate      time.Time
@@ -119,6 +120,10 @@ func (r *Repository) GetAll(filter GetAllCategoriesFilter) ([]dto.Category, erro
 
 	query := r.db.Model(&model.Category{}).
 		Where("categories.user_id is null or categories.user_id = ?", filter.UserId)
+
+	if filter.Type != "" {
+		query = query.Where("categories.type = ?", filter.Type)
+	}
 
 	if filter.IncludeStats && filter.WalletId != 0 {
 		query = query.Select(`
@@ -156,27 +161,6 @@ func (r *Repository) GetAll(filter GetAllCategoriesFilter) ([]dto.Category, erro
 	}
 
 	return result, nil
-}
-
-// GetCategoriesByUserID returns default categories and those created by the user.
-// @deprecated
-func (r *Repository) GetCategoriesByUserID(userID uint, categoryType string) ([]domain.Category, error) {
-	var m []model.Category
-	query := r.db.Where("(user_id IS NULL OR user_id = ?)", userID)
-	if categoryType != "" {
-		query = query.Where("type = ?", categoryType)
-	} else {
-		query = query.Where("type IN ?", []string{"income", "expense"})
-	}
-	if err := query.Find(&m).Error; err != nil {
-		return nil, err
-	}
-
-	out := make([]domain.Category, 0, len(m))
-	for i := range m {
-		out = append(out, *domain.FromCategoryModel(&m[i]))
-	}
-	return out, nil
 }
 
 // UpdateCategory updates an existing category.

@@ -39,6 +39,11 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 // @accept               json
 // @produce              json
 // @param                Authorization header string true "Bearer token"
+// @param                type query string false "income or expense"
+// @param                wallet_id query int false "wallet_id"
+// @param                include_stats query bool false "include transaction stats"
+// @param                start_date query string false "start_date (2006-01-02)"
+// @param                end_date query string false "end_date (2006-01-02)"
 // @success              200 {object} ListCategoriesRes
 // @router               /api/category [get]
 func (h *Handler) list(c *fiber.Ctx) error {
@@ -47,27 +52,46 @@ func (h *Handler) list(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
-	categoryType := strings.TrimSpace(strings.ToLower(c.Query("type")))
-	if categoryType != "" && !isAllowedCategoryType(categoryType) {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "type must be income or expense"})
-	}
-
 	parsedUserID, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	cats, err := h.repo.GetCategoriesByUserID(uint(parsedUserID), categoryType)
+	categoryType := strings.TrimSpace(strings.ToLower(c.Query("type")))
+	if categoryType != "" && !isAllowedCategoryType(categoryType) {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "type must be income or expense"})
+	}
+
+	walletId := c.QueryInt("wallet_id", 0)
+	includeStats := c.QueryBool("include_stats", false)
+
+	var startDate, endDate time.Time
+	if v := c.Query("start_date"); v != "" {
+		startDate, err = time.Parse("2006-01-02", v)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid start_date format, use 2006-01-02"})
+		}
+	}
+	if v := c.Query("end_date"); v != "" {
+		endDate, err = time.Parse("2006-01-02", v)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "invalid end_date format, use 2006-01-02"})
+		}
+	}
+
+	cats, err := h.repo.GetAll(GetAllCategoriesFilter{
+		UserId:       uint(parsedUserID),
+		WalletId:     uint(walletId),
+		Type:         categoryType,
+		IncludeStats: includeStats,
+		StartDate:    startDate,
+		EndDate:      endDate,
+	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	res := ListCategoriesRes{Categories: make([]dto.Category, 0, len(cats))}
-	for _, v := range cats {
-		res.Categories = append(res.Categories, dto.Category{Data: v})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(res)
+	return c.Status(fiber.StatusOK).JSON(ListCategoriesRes{Categories: cats})
 }
 
 // @id                   CreateCategory

@@ -237,6 +237,36 @@ const docTemplate = `{
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "income or expense",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "wallet_id",
+                        "name": "wallet_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "include transaction stats",
+                        "name": "include_stats",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "start_date (2006-01-02)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "end_date (2006-01-02)",
+                        "name": "end_date",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -905,6 +935,26 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/DeleteGoldRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/health": {
+            "get": {
+                "description": "Return server health status and app version.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/health.HealthRes"
                         }
                     }
                 }
@@ -2780,6 +2830,25 @@ const docTemplate = `{
                     "format": "double"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "health.HealthRes": {
+            "type": "object",
+            "required": [
+                "app_version",
+                "app_version_code",
+                "status"
+            ],
+            "properties": {
+                "app_version": {
+                    "type": "string"
+                },
+                "app_version_code": {
+                    "type": "integer"
+                },
+                "status": {
                     "type": "string"
                 }
             }

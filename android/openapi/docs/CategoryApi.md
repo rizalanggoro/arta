@@ -151,16 +151,26 @@ No authorization required
 val apiClient = ApiClient()
 val webService = apiClient.createWebservice(CategoryApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
+val type : kotlin.String = type_example // kotlin.String | income or expense
+val walletId : kotlin.Int = 56 // kotlin.Int | wallet_id
+val includeStats : kotlin.Boolean = true // kotlin.Boolean | include transaction stats
+val startDate : kotlin.String = startDate_example // kotlin.String | start_date (2006-01-02)
+val endDate : kotlin.String = endDate_example // kotlin.String | end_date (2006-01-02)
 
 launch(Dispatchers.IO) {
-    val result : CategoryListCategoriesRes = webService.listCategories(authorization)
+    val result : CategoryListCategoriesRes = webService.listCategories(authorization, type, walletId, includeStats, startDate, endDate)
 }
 ```
 
 ### Parameters
+| **authorization** | **kotlin.String**| Bearer token | |
+| **type** | **kotlin.String**| income or expense | [optional] |
+| **walletId** | **kotlin.Int**| wallet_id | [optional] |
+| **includeStats** | **kotlin.Boolean**| include transaction stats | [optional] |
+| **startDate** | **kotlin.String**| start_date (2006-01-02) | [optional] |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **authorization** | **kotlin.String**| Bearer token | |
+| **endDate** | **kotlin.String**| end_date (2006-01-02) | [optional] |
 
 ### Return type
 

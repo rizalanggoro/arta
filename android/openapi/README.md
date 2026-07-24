@@ -65,6 +65,7 @@ All URIs are relative to *http://localhost:8080*
 | *GoldApi* | [**listGolds**](docs/GoldApi.md#listgolds) | **GET** api/gold |  |
 | *GoldApi* | [**updateGold**](docs/GoldApi.md#updategold) | **PUT** api/gold/{id} |  |
 | *GoldApi* | [**updateGoldTaxPreference**](docs/GoldApi.md#updategoldtaxpreference) | **PUT** api/gold/tax/{id} |  |
+| *HealthApi* | [**apiHealthGet**](docs/HealthApi.md#apihealthget) | **GET** api/health | Health check |
 | *ReleaseApi* | [**apiReleaseLatestGet**](docs/ReleaseApi.md#apireleaselatestget) | **GET** api/release/latest | Get latest release |
 | *ReleaseApi* | [**apiReleasePost**](docs/ReleaseApi.md#apireleasepost) | **POST** api/release | Create a new release |
 | *TransactionApi* | [**createTransaction**](docs/TransactionApi.md#createtransaction) | **POST** api/transaction |  |
@@ -123,6 +124,7 @@ All URIs are relative to *http://localhost:8080*
  - [id.my.rizalanggoro.arta.openapi.models.GoldGoldTaxPreferenceReq](docs/GoldGoldTaxPreferenceReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.GoldListGoldsRes](docs/GoldListGoldsRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.GoldUpdateGoldReq](docs/GoldUpdateGoldReq.md)
+ - [id.my.rizalanggoro.arta.openapi.models.HealthHealthRes](docs/HealthHealthRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.ListGoldTaxPreferencesRes](docs/ListGoldTaxPreferencesRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.LoginReq](docs/LoginReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.LoginRes](docs/LoginRes.md)

@@ -29,7 +29,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
+import id.my.rizalanggoro.arta.core.constant.TransactionGroupType
 import id.my.rizalanggoro.arta.core.constant.TransactionTimeRangeType
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
@@ -38,12 +40,11 @@ import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.utils.Samples
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
-import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
+import id.my.rizalanggoro.arta.shared.component.DashboardCategoryListItem
+import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.TransactionListItem
 import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun HomeTransactionScreen(vm: HomeTransactionVM = hiltViewModel()) {
@@ -65,11 +66,18 @@ fun HomeTransactionScreen(vm: HomeTransactionVM = hiltViewModel()) {
     Content(
         uiState = uiState,
         onRefresh = vm::loadTransactions,
+        onClickCategory = {
+            backStack.add(
+                CategoryRoute.Detail(
+                    categoryId = it.id,
+                    transactionStartDateMillis = uiState.startDateMillis,
+                    transactionEndDateMillis = uiState.endDateMillis
+                )
+            )
+        },
         onLongClickItem = {
             backStack.add(
-                TransactionRoute.ActionSheet(
-                    transactionId = it.id
-                )
+                TransactionRoute.ActionSheet(transactionId = it.id)
             )
         },
         onClickNextTimeRange = vm::onNextTimeRangeClicked,
@@ -82,19 +90,25 @@ private fun Content(
     pullToRefreshState: PullToRefreshState = PullToRefreshState(),
     uiState: HomeTransactionUiState = HomeTransactionUiState(),
     onRefresh: () -> Unit = {},
+    onClickCategory: (DomainCategory) -> Unit = {},
     onLongClickItem: (DomainTransaction) -> Unit = {},
     onClickNextTimeRange: () -> Unit = {},
     onClickPrevTimeRange: () -> Unit = {},
 ) {
     with(uiState) {
+        val hasData = when (groupBy) {
+            TransactionGroupType.CATEGORY -> categories.isNotEmpty()
+            TransactionGroupType.TRANSACTION -> transactions.isNotEmpty()
+        }
+
         PullToRefreshBox(
             state = pullToRefreshState,
-            isRefreshing = uiState.isLoading && uiState.transactions.isNotEmpty(),
+            isRefreshing = uiState.isLoading && hasData,
             onRefresh = onRefresh,
             indicator = {
                 PullToRefreshDefaults.LoadingIndicator(
                     state = pullToRefreshState,
-                    isRefreshing = uiState.isLoading && uiState.transactions.isNotEmpty(),
+                    isRefreshing = uiState.isLoading && hasData,
                     modifier = Modifier.align(Alignment.TopCenter)
                 )
             }
@@ -148,60 +162,105 @@ private fun Content(
                 }
 
                 if (isLoading) {
-                    items(3) {
-                        TransactionListItem(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(
-                                    top = when {
-                                        it == 0 -> 16.dp
-                                        else -> 2.dp
-                                    }
-                                ),
-                            index = it,
-                            size = 3,
-                            transaction = Samples.domainTransactions.first(),
-                            category = Samples.domainCategories.first(),
-                            isLoading = true
-                        )
+                    val skeletonSize = when (groupBy) {
+                        TransactionGroupType.CATEGORY -> 3
+                        TransactionGroupType.TRANSACTION -> 5
+                    }
+                    items(skeletonSize) {
+                        when (groupBy) {
+                            TransactionGroupType.CATEGORY -> {
+                                DashboardCategoryListItem(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .padding(top = if (it == 0) 16.dp else 2.dp),
+                                    category = Samples.dtoCategories[it],
+                                    isLoading = true
+                                )
+                            }
+                            TransactionGroupType.TRANSACTION -> {
+                                TransactionListItem(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .padding(top = if (it == 0) 16.dp else 2.dp),
+                                    index = it,
+                                    size = skeletonSize,
+                                    transaction = Samples.domainTransactions.first(),
+                                    category = Samples.domainCategories.first(),
+                                    isLoading = true
+                                )
+                            }
+                        }
                     }
                 }
 
-                itemsIndexed(uiState.transactions) { index, transaction ->
-                    TransactionListItem(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(
-                                top = when {
-                                    index == 0 -> 16.dp
-                                    else -> 2.dp
-                                }
-                            ),
-                        transaction = transaction.data,
-                        category = transaction.category!!,
-                        index = index,
-                        size = uiState.transactions.size,
-                        onLongClick = {
-                            onLongClickItem(transaction.data)
-                        }
-                    )
-                }
-
-                if (!isLoading)
+                if (!isLoading && !hasData) {
                     item {
-                        Text(
-                            "Tekan dan tahan untuk melihat opsi lainnya",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.outline,
-                            textAlign = TextAlign.Center,
+                        EmptyPlaceholder(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
+                                .padding(horizontal = 16.dp, vertical = 32.dp)
                         )
                     }
+                }
+
+                when (groupBy) {
+                    TransactionGroupType.CATEGORY -> {
+                        itemsIndexed(uiState.categories) { index, category ->
+                            DashboardCategoryListItem(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .padding(top = if (index == 0) 16.dp else 2.dp),
+                                category = category,
+                                index = index,
+                                size = uiState.categories.size,
+                                onClick = onClickCategory,
+                            )
+                        }
+
+                        if (!isLoading && categories.isNotEmpty()) {
+                            item {
+                                FooterText("Tekan untuk melihat transaksi")
+                            }
+                        }
+                    }
+
+                    TransactionGroupType.TRANSACTION -> {
+                        itemsIndexed(uiState.transactions) { index, transaction ->
+                            TransactionListItem(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .padding(top = if (index == 0) 16.dp else 2.dp),
+                                transaction = transaction.data,
+                                category = transaction.category!!,
+                                index = index,
+                                size = uiState.transactions.size,
+                                onLongClick = { onLongClickItem(transaction.data) }
+                            )
+                        }
+
+                        if (!isLoading && transactions.isNotEmpty()) {
+                            item {
+                                FooterText("Tekan dan tahan untuk melihat opsi lainnya")
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+private fun FooterText(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.outline,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    )
 }
 
 @Preview(showBackground = true)
@@ -210,33 +269,19 @@ private fun Preview() {
     ArtaTheme {
         Content(
             uiState = HomeTransactionUiState(
-                transactions = List(5) {
-                    DtoTransaction(
-                        data = DomainTransaction(
-                            amount = (it + 1) * 10000.0,
-                            categoryId = 1,
-                            createdAt = OffsetDateTime.now()
-                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                            date = OffsetDateTime.now()
-                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                            description = "",
-                            id = it + 1,
-                            updatedAt = OffsetDateTime.now()
-                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                            walletId = it + 1
-                        ),
-                        category = DomainCategory(
-                            createdAt = OffsetDateTime.now()
-                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                            id = it + 1,
-                            name = "Makanan dan minuman",
-                            type = "expense",
-                            updatedAt = OffsetDateTime.now()
-                                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                            userId = 1
-                        )
-                    )
-                }
+                categories = Samples.dtoCategories.take(3)
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionPreview() {
+    ArtaTheme {
+        Content(
+            uiState = HomeTransactionUiState(
+                groupBy = TransactionGroupType.TRANSACTION
             )
         )
     }

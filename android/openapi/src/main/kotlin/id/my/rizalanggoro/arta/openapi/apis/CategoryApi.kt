@@ -71,10 +71,15 @@ interface CategoryApi {
      *  - 200: OK
      *
      * @param authorization Bearer token
+     * @param type income or expense (optional)
+     * @param walletId wallet_id (optional)
+     * @param includeStats include transaction stats (optional)
+     * @param startDate start_date (2006-01-02) (optional)
+     * @param endDate end_date (2006-01-02) (optional)
      * @return [CategoryListCategoriesRes]
      */
     @GET("api/category")
-    suspend fun listCategories(@Header("Authorization") authorization: kotlin.String): Response<CategoryListCategoriesRes>
+    suspend fun listCategories(@Header("Authorization") authorization: kotlin.String, @Query("type") type: kotlin.String? = null, @Query("wallet_id") walletId: kotlin.Int? = null, @Query("include_stats") includeStats: kotlin.Boolean? = null, @Query("start_date") startDate: kotlin.String? = null, @Query("end_date") endDate: kotlin.String? = null): Response<CategoryListCategoriesRes>
 
     /**
      * PUT api/category/{id}

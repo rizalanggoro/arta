@@ -799,6 +799,19 @@ definitions:
       type:
         type: string
     type: object
+  health.HealthRes:
+    properties:
+      app_version:
+        type: string
+      app_version_code:
+        type: integer
+      status:
+        type: string
+    required:
+    - app_version
+    - app_version_code
+    - status
+    type: object
   wallet.CreateWalletReq:
     properties:
       name:
@@ -976,6 +989,26 @@ paths:
         in: header
         name: Authorization
         required: true
+        type: string
+      - description: income or expense
+        in: query
+        name: type
+        type: string
+      - description: wallet_id
+        in: query
+        name: wallet_id
+        type: integer
+      - description: include transaction stats
+        in: query
+        name: include_stats
+        type: boolean
+      - description: start_date (2006-01-02)
+        in: query
+        name: start_date
+        type: string
+      - description: end_date (2006-01-02)
+        in: query
+        name: end_date
         type: string
       produces:
       - application/json
@@ -1423,6 +1456,19 @@ paths:
             $ref: '#/definitions/UpdateGoldTaxPreferenceRes'
       tags:
       - gold
+  /api/health:
+    get:
+      description: Return server health status and app version.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/health.HealthRes'
+      summary: Health check
+      tags:
+      - health
   /api/release:
     post:
       consumes:
