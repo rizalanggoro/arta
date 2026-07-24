@@ -35,6 +35,7 @@ import id.my.rizalanggoro.arta.core.constant.TransactionGroupType
 import id.my.rizalanggoro.arta.core.constant.TransactionTimeRangeType
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.utils.Samples
@@ -152,7 +153,20 @@ private fun Content(
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                "${startDateMillis.toIndonesianDate()} - ${endDateMillis.toIndonesianDate()}",
+                                when (timeRange) {
+                                    TransactionTimeRangeType.DAILY -> startDateMillis.toIndonesianDate()
+                                    TransactionTimeRangeType.WEEKLY -> {
+                                        val endMillis = endDateMillis - 86400000
+                                        val startMonth = startDateMillis.toFormattedDate("MMMM yyyy")
+                                        val endMonth = endMillis.toFormattedDate("MMMM yyyy")
+                                        if (startMonth == endMonth) {
+                                            "${startDateMillis.toFormattedDate("d")} - ${endMillis.toFormattedDate("d MMMM yyyy")}"
+                                        } else {
+                                            "${startDateMillis.toFormattedDate("d MMMM")} - ${endMillis.toFormattedDate("d MMMM yyyy")}"
+                                        }
+                                    }
+                                    TransactionTimeRangeType.MONTHLY -> startDateMillis.toFormattedDate("MMMM yyyy")
+                                },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.outline
                             )
