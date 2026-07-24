@@ -3,13 +3,10 @@ package id.my.rizalanggoro.arta.feature.auth.presentation.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.extension.errorMessage
-import id.my.rizalanggoro.arta.domain.AuthSession
-import id.my.rizalanggoro.arta.openapi.apis.AuthApi
+import id.my.rizalanggoro.arta.feature.auth.domain.usecase.LoginUseCase
 import id.my.rizalanggoro.arta.openapi.apis.WalletApi
-import id.my.rizalanggoro.arta.openapi.models.LoginReq
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,8 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginVM @Inject constructor(
-    private val authApi: AuthApi,
-    private val authPrefs: AuthPrefs,
+    private val loginUseCase: LoginUseCase,
     private val walletApi: WalletApi,
     private val selectedWalletPrefs: SelectedWalletPrefs,
 ) : ViewModel() {
@@ -60,50 +56,21 @@ class LoginVM @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
 
             runCatching {
-                val response = authApi.apiAuthLoginPost(
-                    LoginReq(
-                        email = current.email,
-                        password = current.password,
-                    ),
-                )
-
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(response.errorMessage())
+                val session = loginUseCase(email = current.email, password = current.password)
+                val authorization = "Bearer ${session.token}"
+                val walletResponse = walletApi.listWallets(authorization)
+                if (!walletResponse.isSuccessful) {
+                    throw IllegalStateException(walletResponse.errorMessage())
                 }
 
-                response.body() ?: throw IllegalStateException("Respons server kosong")
-            }.onSuccess { loginResponse ->
-                runCatching {
-                    val authorization = "Bearer ${loginResponse.token}"
-                    val walletResponse = walletApi.listWallets(authorization)
-                    if (!walletResponse.isSuccessful) {
-                        throw IllegalStateException(walletResponse.errorMessage())
-                    }
-
-                    walletResponse.body() ?: throw IllegalStateException("Respons server kosong")
-                }.onSuccess { walletListResponse ->
-                    walletListResponse.wallets.firstOrNull()?.let { firstWallet ->
-                        selectedWalletPrefs.saveSelectedWallet(firstWallet.data)
-                    }
-
-                    authPrefs.setSession(
-                        session = AuthSession(
-                            userId = requireNotNull(loginResponse.userId) { "Login response missing user id" },
-                            email = requireNotNull(loginResponse.email) { "Login response missing email" },
-                            name = requireNotNull(loginResponse.name) { "Login response missing name" },
-                            token = requireNotNull(loginResponse.token) { "Login response missing token" },
-                        )
-                    )
-                    _event.emit(LoginUiState.Event.LoginSucceeded)
-                }.onFailure { throwable ->
-                    throwable.printStackTrace()
-                    _event.emit(
-                        LoginUiState.Event.ShowMessage(
-                            message = throwable.message ?: "Terjadi kesalahan tak terduga"
-                        )
-                    )
+                walletResponse.body() ?: throw IllegalStateException("Respons server kosong")
+            }.onSuccess { walletListResponse ->
+                walletListResponse.wallets.firstOrNull()?.let { firstWallet ->
+                    selectedWalletPrefs.saveSelectedWallet(firstWallet.data)
                 }
+                _event.emit(LoginUiState.Event.LoginSucceeded)
             }.onFailure { throwable ->
+                throwable.printStackTrace()
                 _event.emit(
                     LoginUiState.Event.ShowMessage(
                         message = throwable.message ?: "Terjadi kesalahan tak terduga"

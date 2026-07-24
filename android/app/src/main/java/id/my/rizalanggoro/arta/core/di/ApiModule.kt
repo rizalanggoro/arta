@@ -4,7 +4,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.network.RetrofitProvider
+import id.my.rizalanggoro.arta.feature.auth.data.datasource.RemoteAuthDataSource
+import id.my.rizalanggoro.arta.feature.auth.data.repository.AuthRepositoryImpl
+import id.my.rizalanggoro.arta.feature.auth.domain.repository.AuthRepository
 import id.my.rizalanggoro.arta.openapi.apis.AuthApi
 import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
 import id.my.rizalanggoro.arta.openapi.apis.DashboardApi
@@ -21,6 +25,18 @@ object ApiModule {
     @Singleton
     fun provideAuthApi(): AuthApi =
         RetrofitProvider.create(AuthApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideRemoteAuthDataSource(authApi: AuthApi): RemoteAuthDataSource =
+        RemoteAuthDataSource(authApi)
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        remoteAuthDataSource: RemoteAuthDataSource,
+        authPrefs: AuthPrefs,
+    ): AuthRepository = AuthRepositoryImpl(remoteAuthDataSource, authPrefs)
 
     @Provides
     @Singleton

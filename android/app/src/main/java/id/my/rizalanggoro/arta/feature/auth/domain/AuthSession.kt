@@ -1,4 +1,4 @@
-package id.my.rizalanggoro.arta.domain
+package id.my.rizalanggoro.arta.feature.auth.domain
 
 import kotlinx.serialization.Serializable
 

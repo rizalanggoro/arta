@@ -2,11 +2,8 @@ package id.my.rizalanggoro.arta.feature.auth.presentation.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.my.rizalanggoro.arta.core.data.AuthPrefs
-import id.my.rizalanggoro.arta.domain.AuthSession
-import id.my.rizalanggoro.arta.openapi.apis.AuthApi
-import id.my.rizalanggoro.arta.openapi.models.RegisterReq
 import dagger.hilt.android.lifecycle.HiltViewModel
+import id.my.rizalanggoro.arta.feature.auth.domain.usecase.RegisterUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisterVM @Inject constructor(
-    private val authApi: AuthApi,
-    private val authPrefs: AuthPrefs,
+    private val registerUseCase: RegisterUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
@@ -77,29 +73,12 @@ class RegisterVM @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             runCatching {
-                val response = authApi.apiAuthRegisterPost(
-                    RegisterReq(
-                        name = current.name,
-                        email = current.email,
-                        password = current.password,
-                    ),
+                registerUseCase(
+                    name = current.name,
+                    email = current.email,
+                    password = current.password,
                 )
-
-                if (!response.isSuccessful) {
-                    throw IllegalStateException("Registrasi gagal")
-                }
-
-                response.body() ?: throw IllegalStateException("Respons server kosong")
-            }.onSuccess { body ->
-                authPrefs.setSession(
-                    AuthSession(
-                        userId = requireNotNull(body.userId) { "Register response missing user id" },
-                        email = requireNotNull(body.email) { "Register response missing email" },
-                        name = requireNotNull(body.name) { "Register response missing name" },
-                        token = requireNotNull(body.token) { "Register response missing token" },
-                    )
-                )
-
+            }.onSuccess {
                 _event.emit(RegisterUiState.Event.RegisterSucceeded)
             }.onFailure { throwable ->
                 _event.emit(
