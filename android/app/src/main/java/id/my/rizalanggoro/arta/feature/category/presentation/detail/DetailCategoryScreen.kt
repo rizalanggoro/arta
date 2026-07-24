@@ -53,6 +53,11 @@ fun DetailCategoryScreen(
         uiState = uiState,
         onClickBack = backStack::removeLastOrNull,
         onRefresh = { vm.getCategory() },
+        onClickTransaction = {
+            backStack.add(
+                TransactionRoute.Detail(transactionId = it.id)
+            )
+        },
         onLongClickTransaction = {
             backStack.add(
                 TransactionRoute.ActionSheet(
@@ -69,6 +74,7 @@ private fun Content(
     pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     onClickBack: () -> Unit = {},
     onRefresh: () -> Unit = {},
+    onClickTransaction: (DomainTransaction) -> Unit = {},
     onLongClickTransaction: (DomainTransaction) -> Unit = {},
 ) {
     with(uiState) {
@@ -331,6 +337,7 @@ private fun Content(
                                 category = category.data,
                                 index = index,
                                 size = category.transactions?.size ?: 0,
+                                onClick = onClickTransaction,
                                 onLongClick = {
                                     onLongClickTransaction(transaction)
                                 },

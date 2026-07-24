@@ -75,6 +75,11 @@ fun HomeTransactionScreen(vm: HomeTransactionVM = hiltViewModel()) {
                 )
             )
         },
+        onClickItem = {
+            backStack.add(
+                TransactionRoute.Detail(transactionId = it.id)
+            )
+        },
         onLongClickItem = {
             backStack.add(
                 TransactionRoute.ActionSheet(transactionId = it.id)
@@ -91,6 +96,7 @@ private fun Content(
     uiState: HomeTransactionUiState = HomeTransactionUiState(),
     onRefresh: () -> Unit = {},
     onClickCategory: (DomainCategory) -> Unit = {},
+    onClickItem: (DomainTransaction) -> Unit = {},
     onLongClickItem: (DomainTransaction) -> Unit = {},
     onClickNextTimeRange: () -> Unit = {},
     onClickPrevTimeRange: () -> Unit = {},
@@ -234,6 +240,7 @@ private fun Content(
                                 category = transaction.category!!,
                                 index = index,
                                 size = uiState.transactions.size,
+                                onClick = onClickItem,
                                 onLongClick = { onLongClickItem(transaction.data) }
                             )
                         }

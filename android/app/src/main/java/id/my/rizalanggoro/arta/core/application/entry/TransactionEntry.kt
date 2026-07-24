@@ -11,6 +11,7 @@ import id.my.rizalanggoro.arta.feature.transaction.presentation.action.Transacti
 import id.my.rizalanggoro.arta.feature.transaction.presentation.delete.DeleteTransactionDialog
 import id.my.rizalanggoro.arta.feature.transaction.presentation.delete.DeleteTransactionVM
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
+import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailVM
 import id.my.rizalanggoro.arta.feature.transaction.presentation.upsert.UpsertTransactionScreen
 import id.my.rizalanggoro.arta.feature.transaction.presentation.upsert.UpsertTransactionVM
 import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
@@ -29,9 +30,12 @@ fun EntryProviderScope<NavKey>.transactionEntry() {
         )
     }
 
-    entry<TransactionRoute.Detail> {
+    entry<TransactionRoute.Detail> { navKey ->
         TransactionDetailScreen(
-            transactionId = it.transactionId
+            transactionId = navKey.transactionId,
+            vm = hiltViewModel<TransactionDetailVM, TransactionDetailVM.Factory>(
+                creationCallback = { it.create(transactionId = navKey.transactionId) }
+            )
         )
     }
 
