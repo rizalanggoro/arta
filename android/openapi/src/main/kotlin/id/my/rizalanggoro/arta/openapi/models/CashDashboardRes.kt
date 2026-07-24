@@ -34,6 +34,8 @@ import kotlinx.serialization.Contextual
  *
  * @param currentBalance 
  * @param latestCategories 
+ * @param prevPeriodExpense 
+ * @param prevPeriodIncome 
  * @param totalExpense 
  * @param totalIncome 
  */
@@ -46,6 +48,12 @@ data class CashDashboardRes (
 
     @SerialName(value = "latest_categories")
     val latestCategories: kotlin.collections.List<DtoCategory>,
+
+    @SerialName(value = "prev_period_expense")
+    val prevPeriodExpense: kotlin.Double,
+
+    @SerialName(value = "prev_period_income")
+    val prevPeriodIncome: kotlin.Double,
 
     @SerialName(value = "total_expense")
     val totalExpense: kotlin.Double,

@@ -276,6 +276,23 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 		})
 	}
 
+	// Previous period: same duration, ending at startDate
+	duration := endDate.Sub(startDate)
+	prevStart := startDate.Add(-duration)
+	prevEnd := startDate
+
+	prevIncome, prevExpense, err := h.transactionRepo.GetTotalIncomeExpense(transactionfeature.GetTotalIncomeExpenseFilter{
+		WalletId:  uint(walletId),
+		StartDate: prevStart,
+		EndDate:   prevEnd,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+			Code:    fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
 	categories, err := h.categoryRepo.GetAll(categoryfeature.GetAllCategoriesFilter{
 		UserId:       uint(userId),
 		IncludeStats: true,
@@ -286,10 +303,12 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(CashDashboardRes{
 		dto.CashDashboard{
-			CurrentBalance:   *currentBalance,
-			TotalIncome:      *totalIncome,
-			TotalExpense:     *totalExpense,
-			LatestCategories: categories,
+			CurrentBalance:    *currentBalance,
+			TotalIncome:       *totalIncome,
+			TotalExpense:      *totalExpense,
+			PrevPeriodIncome:  *prevIncome,
+			PrevPeriodExpense: *prevExpense,
+			LatestCategories:  categories,
 		},
 	})
 }

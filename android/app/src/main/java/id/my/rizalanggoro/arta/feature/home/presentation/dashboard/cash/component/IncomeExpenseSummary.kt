@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,9 +37,17 @@ fun IncomeExpenseSummary(
     modifier: Modifier = Modifier,
     totalIncome: Double = 0.0,
     totalExpense: Double = 0.0,
+    prevPeriodIncome: Double = 0.0,
+    prevPeriodExpense: Double = 0.0,
     isLoading: Boolean = false,
 ) {
     val totalDifference = totalIncome - totalExpense
+    val prevNet = prevPeriodIncome - prevPeriodExpense
+    val changePercent = remember(totalDifference, prevNet) {
+        if (prevNet != 0.0) {
+            ((totalDifference - prevNet) / kotlin.math.abs(prevNet) * 100).toInt()
+        } else null
+    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -92,8 +101,8 @@ fun IncomeExpenseSummary(
                 if (!isLoading)
                     Icon(
                         when {
-                            totalDifference == 0.0 -> Icons.AutoMirrored.Rounded.TrendingFlat
-                            totalDifference > 0 -> Icons.AutoMirrored.Rounded.TrendingUp
+                            changePercent == null || changePercent == 0 -> Icons.AutoMirrored.Rounded.TrendingFlat
+                            changePercent > 0 -> Icons.AutoMirrored.Rounded.TrendingUp
                             else -> Icons.AutoMirrored.Rounded.TrendingDown
                         },
                         null,
@@ -128,7 +137,13 @@ fun IncomeExpenseSummary(
                     )
                 )
                 Text(
-                    "+12% dari bulan lalu",
+                    when {
+                        isLoading -> ""
+                        changePercent == null -> "-"
+                        changePercent > 0 -> "+$changePercent% dari periode sebelumnya"
+                        changePercent < 0 -> "$changePercent% dari periode sebelumnya"
+                        else -> "Tidak ada perubahan"
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = when {
                         isLoading -> Color.Transparent

@@ -1687,6 +1687,8 @@ const docTemplate = `{
             "required": [
                 "current_balance",
                 "latest_categories",
+                "prev_period_expense",
+                "prev_period_income",
                 "total_expense",
                 "total_income"
             ],
@@ -1700,6 +1702,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.Category"
                     }
+                },
+                "prev_period_expense": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "prev_period_income": {
+                    "type": "number",
+                    "format": "double"
                 },
                 "total_expense": {
                     "type": "number",

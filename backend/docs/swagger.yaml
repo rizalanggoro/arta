@@ -9,6 +9,12 @@ definitions:
         items:
           $ref: '#/definitions/dto.Category'
         type: array
+      prev_period_expense:
+        format: double
+        type: number
+      prev_period_income:
+        format: double
+        type: number
       total_expense:
         format: double
         type: number
@@ -18,6 +24,8 @@ definitions:
     required:
     - current_balance
     - latest_categories
+    - prev_period_expense
+    - prev_period_income
     - total_expense
     - total_income
     type: object

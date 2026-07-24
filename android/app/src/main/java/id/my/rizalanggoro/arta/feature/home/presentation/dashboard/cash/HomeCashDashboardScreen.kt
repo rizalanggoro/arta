@@ -325,6 +325,8 @@ private fun Content(
                             .padding(horizontal = 16.dp),
                         totalIncome = uiState.data?.totalIncome ?: 0.0,
                         totalExpense = uiState.data?.totalExpense ?: 0.0,
+                        prevPeriodIncome = uiState.data?.prevPeriodIncome ?: 0.0,
+                        prevPeriodExpense = uiState.data?.prevPeriodExpense ?: 0.0,
                         isLoading = isLoading
                     )
                 }

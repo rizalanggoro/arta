@@ -7,10 +7,12 @@ import (
 // CashDashboard represents the cash home dashboard response DTO.
 // @name CashDashboard
 type CashDashboard struct {
-	CurrentBalance   float64    `json:"current_balance" format:"double"`
-	TotalIncome      float64    `json:"total_income" format:"double"`
-	TotalExpense     float64    `json:"total_expense" format:"double"`
-	LatestCategories []Category `json:"latest_categories"`
+	CurrentBalance    float64    `json:"current_balance" format:"double"`
+	TotalIncome       float64    `json:"total_income" format:"double"`
+	TotalExpense      float64    `json:"total_expense" format:"double"`
+	PrevPeriodIncome  float64    `json:"prev_period_income" format:"double"`
+	PrevPeriodExpense float64    `json:"prev_period_expense" format:"double"`
+	LatestCategories  []Category `json:"latest_categories"`
 }
 
 // GoldDashboard represents the gold home dashboard response DTO.
