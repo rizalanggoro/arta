@@ -67,7 +67,17 @@ class HomeTransactionVM @Inject constructor(
                     val body = response.body() ?: throw IllegalStateException(
                         context.getString(R.string.server_empty_error)
                     )
-                    _uiState.update { it.copy(categories = body.categories) }
+                    _uiState.update {
+                        it.copy(
+                            categories = body.categories,
+                            totalIncome = body.categories.sumOf { category ->
+                                if (category.data.type == "income") category.totalAmount ?: 0.0 else 0.0
+                            },
+                            totalExpense = body.categories.sumOf { category ->
+                                if (category.data.type == "income") 0.0 else category.totalAmount ?: 0.0
+                            }
+                        )
+                    }
                 }
 
                 TransactionGroupType.TRANSACTION -> {
@@ -82,7 +92,17 @@ class HomeTransactionVM @Inject constructor(
                     val body = response.body() ?: throw IllegalStateException(
                         context.getString(R.string.server_empty_error)
                     )
-                    _uiState.update { it.copy(transactions = body) }
+                    _uiState.update {
+                        it.copy(
+                            transactions = body,
+                            totalIncome = body.sumOf { transaction ->
+                                if (transaction.category?.type == "income") transaction.data.amount else 0.0
+                            },
+                            totalExpense = body.sumOf { transaction ->
+                                if (transaction.category?.type == "income") 0.0 else transaction.data.amount
+                            }
+                        )
+                    }
                 }
             }
         }.onFailure { throwable ->

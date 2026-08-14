@@ -23,8 +23,8 @@ android {
         applicationId = "id.my.rizalanggoro.arta"
         minSdk = 29
         targetSdk = 36
-        versionCode = 22
-        versionName = "1.1.0"
+        versionCode = 23
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -39,6 +39,7 @@ import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.utils.Samples
+import id.my.rizalanggoro.arta.feature.category.presentation.detail.component.IncomeExpenseSummary
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.shared.component.DashboardCategoryListItem
@@ -179,6 +180,17 @@ private fun Content(
                             )
                         }
                     }
+                }
+
+                item {
+                    IncomeExpenseSummary(
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .padding(horizontal = 16.dp),
+                        totalIncome = totalIncome,
+                        totalExpense = totalExpense,
+                        isLoading = isLoading
+                    )
                 }
 
                 if (isLoading) {
