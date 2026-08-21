@@ -65,6 +65,7 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 	protected := group.Use(middleware.AuthMiddleware(h.jwtMgr))
 	protected.Get("/cash", h.cash)
 	protected.Get("/gold", h.gold)
+	protected.Get("/price-history", h.priceHistory)
 }
 
 // @ID 					GetGoldDashboard
@@ -194,6 +195,79 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 			GoldTaxes:      goldTaxes,
 		},
 	})
+}
+
+// @ID 					GetPriceHistory
+// @Tags 				dashboard
+// @Accept 			json
+// @Produce 		json
+// @Param 			Authorization header string true "Bearer token"
+// @Param 			type query string true "price type: gold or fx"
+// @Param 			days query int false "number of days of history (default 7)"
+// @Success 		200 {object} PriceHistoryRes
+// @Failure 		400 {object} dto.Error
+// @Failure 		401 {object} dto.Error
+// @Failure 		500 {object} dto.Error
+// @Router 			/api/dashboard/price-history [get]
+func (h *Handler) priceHistory(c *fiber.Ctx) error {
+	if userIdStr := middleware.GetUserID(c); userIdStr == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{
+			Code:    fiber.StatusUnauthorized,
+			Message: "unauthorized",
+		})
+	}
+
+	priceType := c.Query("type")
+	if priceType != "gold" && priceType != "fx" {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "type must be either 'gold' or 'fx'",
+		})
+	}
+
+	days := c.QueryInt("days", 7)
+	if days <= 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "days must be a positive number",
+		})
+	}
+
+	var points []dto.PricePoint
+	switch priceType {
+	case "gold":
+		prices, err := h.goldPriceRepo.GetHistory(days)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+				Code:    fiber.StatusInternalServerError,
+				Message: err.Error(),
+			})
+		}
+		points = make([]dto.PricePoint, 0, len(prices))
+		for _, price := range prices {
+			points = append(points, dto.PricePoint{
+				Timestamp: price.CreatedAt,
+				Value:     price.PricePerOunceUSD,
+			})
+		}
+	default:
+		rates, err := h.fxRateRepo.GetHistory(days)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
+				Code:    fiber.StatusInternalServerError,
+				Message: err.Error(),
+			})
+		}
+		points = make([]dto.PricePoint, 0, len(rates))
+		for _, rate := range rates {
+			points = append(points, dto.PricePoint{
+				Timestamp: rate.CreatedAt,
+				Value:     float64(rate.Rate),
+			})
+		}
+	}
+
+	return c.Status(fiber.StatusOK).JSON(PriceHistoryRes{Data: points})
 }
 
 // @ID 					GetCashDashboard

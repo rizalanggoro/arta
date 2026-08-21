@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"time"
+
 	"github.com/artafinance/backend/internal/domain"
 )
 
@@ -28,4 +30,11 @@ type GoldDashboard struct {
 	RetailPrice    float64          `json:"retail_price" format:"double"`
 	LatestGolds    []Gold           `json:"latest_golds"`
 	GoldTaxes      []GoldTax        `json:"gold_taxes"`
+}
+
+// PricePoint represents a single price snapshot point for a chart.
+// @name PricePoint
+type PricePoint struct {
+	Timestamp time.Time `json:"timestamp"`
+	Value     float64   `json:"value" format:"double"`
 }

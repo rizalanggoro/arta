@@ -1,6 +1,8 @@
 package goldprice
 
 import (
+	"time"
+
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/model"
 	"gorm.io/gorm"
@@ -32,4 +34,21 @@ func (r *Repository) GetLatest() (*domain.GoldPrice, error) {
 		return nil, err
 	}
 	return domain.FromGoldPriceModel(&m), nil
+}
+
+// GetHistory returns gold price snapshots stored within the given number of days, oldest first.
+func (r *Repository) GetHistory(days int) ([]*domain.GoldPrice, error) {
+	var ms []model.GoldPrice
+	if err := r.db.
+		Where("created_at >= ?", time.Now().AddDate(0, 0, -days)).
+		Order("created_at asc").
+		Find(&ms).Error; err != nil {
+		return nil, err
+	}
+
+	prices := make([]*domain.GoldPrice, 0, len(ms))
+	for i := range ms {
+		prices = append(prices, domain.FromGoldPriceModel(&ms[i]))
+	}
+	return prices, nil
 }

@@ -11,3 +11,8 @@ type CashDashboardRes struct {
 type GoldDashboardRes struct {
 	Data dto.GoldDashboard `json:"data"`
 } // @name GoldDashboardRes
+
+// PriceHistoryRes response for price history.
+type PriceHistoryRes struct {
+	Data []dto.PricePoint `json:"data"`
+} // @name PriceHistoryRes
