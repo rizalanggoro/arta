@@ -25,17 +25,19 @@ val apiClient = ApiClient()
 val webService = apiClient.createWebservice(WalletApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val body : WalletCreateWalletReq =  // WalletCreateWalletReq | body
+val idempotencyKey : kotlin.String = idempotencyKey_example // kotlin.String | Unique key per submission attempt for safe retry (UUID recommended)
 
 launch(Dispatchers.IO) {
-    val result : CreateWalletRes = webService.createWallet(authorization, body)
+    val result : CreateWalletRes = webService.createWallet(authorization, body, idempotencyKey)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
+| **body** | [**WalletCreateWalletReq**](WalletCreateWalletReq.md)| body | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **body** | [**WalletCreateWalletReq**](WalletCreateWalletReq.md)| body | |
+| **idempotencyKey** | **kotlin.String**| Unique key per submission attempt for safe retry (UUID recommended) | [optional] |
 
 ### Return type
 

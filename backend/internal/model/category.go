@@ -5,9 +5,10 @@ import "gorm.io/gorm"
 // Category represents transaction categories.
 type Category struct {
 	gorm.Model
-	UserID *uint  `gorm:"index"` // NULL for default categories
-	Name   string `gorm:"not null;type:varchar(255)"`
-	Type   string `gorm:"not null;type:varchar(50)"` // income, expense
+	UserID         *uint   `gorm:"index"` // NULL for default categories
+	Name           string  `gorm:"not null;type:varchar(255)"`
+	Type           string  `gorm:"not null;type:varchar(50)"` // income, expense
+	IdempotencyKey *string `gorm:"size:64;uniqueIndex"`
 	// Use UserID==NULL to indicate system default categories.
 
 	// Foreign key

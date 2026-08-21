@@ -2,6 +2,7 @@ package gold
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/artafinance/backend/internal/cron/fxrate"
@@ -136,6 +137,7 @@ func (h *Handler) list(c *fiber.Ctx) error {
 // @accept               json
 // @produce              json
 // @param                Authorization header string true "Bearer token"
+// @param                Idempotency-Key header string false "Unique key per submission attempt for safe retry (UUID recommended)"
 // @param                body body CreateGoldReq true "body"
 // @success              201 {object} CreateGoldRes
 // @router               /api/gold [post]
@@ -164,6 +166,11 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
+	idempotencyKey := strings.TrimSpace(c.Get("Idempotency-Key"))
+	if len(idempotencyKey) > 64 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "Idempotency-Key must be at most 64 characters"})
+	}
+
 	// verify wallet ownership
 	ownerID, err := h.repo.GetWalletOwnerID(req.WalletID)
 	if err != nil {
@@ -181,7 +188,7 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		Type:     req.Type,
 		Carat:    req.Carat,
 		Notes:    req.Notes,
-	})
+	}, idempotencyKey)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -232,6 +239,7 @@ func (h *Handler) listTaxPreferences(c *fiber.Ctx) error {
 // @accept               json
 // @produce              json
 // @param                Authorization header string true "Bearer token"
+// @param                Idempotency-Key header string false "Unique key per submission attempt for safe retry (UUID recommended)"
 // @param                body body GoldTaxPreferenceReq true "body"
 // @success              201 {object} CreateGoldTaxPreferenceRes
 // @router               /api/gold/tax [post]
@@ -251,6 +259,11 @@ func (h *Handler) createTaxPreference(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
+	idempotencyKey := strings.TrimSpace(c.Get("Idempotency-Key"))
+	if len(idempotencyKey) > 64 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "Idempotency-Key must be at most 64 characters"})
+	}
+
 	if req.Carat <= 0 || req.Carat > 24 {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "carat must be between 0 and 24"})
 	}
@@ -268,7 +281,7 @@ func (h *Handler) createTaxPreference(c *fiber.Ctx) error {
 	created, err := h.repo.CreateTaxPreference(uint(parsedUserID), &domain.GoldTaxPreference{
 		Carat:   req.Carat,
 		TaxRate: req.TaxRate,
-	})
+	}, idempotencyKey)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}

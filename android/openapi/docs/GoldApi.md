@@ -29,17 +29,19 @@ val apiClient = ApiClient()
 val webService = apiClient.createWebservice(GoldApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val body : GoldCreateGoldReq =  // GoldCreateGoldReq | body
+val idempotencyKey : kotlin.String = idempotencyKey_example // kotlin.String | Unique key per submission attempt for safe retry (UUID recommended)
 
 launch(Dispatchers.IO) {
-    val result : CreateGoldRes = webService.createGold(authorization, body)
+    val result : CreateGoldRes = webService.createGold(authorization, body, idempotencyKey)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
+| **body** | [**GoldCreateGoldReq**](GoldCreateGoldReq.md)| body | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **body** | [**GoldCreateGoldReq**](GoldCreateGoldReq.md)| body | |
+| **idempotencyKey** | **kotlin.String**| Unique key per submission attempt for safe retry (UUID recommended) | [optional] |
 
 ### Return type
 
@@ -68,17 +70,19 @@ val apiClient = ApiClient()
 val webService = apiClient.createWebservice(GoldApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val body : GoldGoldTaxPreferenceReq =  // GoldGoldTaxPreferenceReq | body
+val idempotencyKey : kotlin.String = idempotencyKey_example // kotlin.String | Unique key per submission attempt for safe retry (UUID recommended)
 
 launch(Dispatchers.IO) {
-    val result : CreateGoldTaxPreferenceRes = webService.createGoldTaxPreference(authorization, body)
+    val result : CreateGoldTaxPreferenceRes = webService.createGoldTaxPreference(authorization, body, idempotencyKey)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
+| **body** | [**GoldGoldTaxPreferenceReq**](GoldGoldTaxPreferenceReq.md)| body | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **body** | [**GoldGoldTaxPreferenceReq**](GoldGoldTaxPreferenceReq.md)| body | |
+| **idempotencyKey** | **kotlin.String**| Unique key per submission attempt for safe retry (UUID recommended) | [optional] |
 
 ### Return type
 

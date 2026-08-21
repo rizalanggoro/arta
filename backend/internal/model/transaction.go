@@ -16,6 +16,7 @@ type Transaction struct {
 	Category    Category `gorm:"constraint:OnUpdate:CASCADE;OnDelete:RESTRICT"`
 	Description string
 	Date        time.Time
+	IdempotencyKey *string `gorm:"size:64;uniqueIndex"`
 
 	// Foreign keys
 }

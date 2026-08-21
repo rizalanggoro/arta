@@ -1057,6 +1057,10 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: Unique key per submission attempt for safe retry (UUID recommended)
+        in: header
+        name: Idempotency-Key
+        type: string
       - description: body
         in: body
         name: body
@@ -1331,6 +1335,10 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: Unique key per submission attempt for safe retry (UUID recommended)
+        in: header
+        name: Idempotency-Key
+        type: string
       - description: body
         in: body
         name: body
@@ -1454,6 +1462,10 @@ paths:
         in: header
         name: Authorization
         required: true
+        type: string
+      - description: Unique key per submission attempt for safe retry (UUID recommended)
+        in: header
+        name: Idempotency-Key
         type: string
       - description: body
         in: body
@@ -1652,6 +1664,10 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: Unique key per submission attempt for safe retry (UUID recommended)
+        in: header
+        name: Idempotency-Key
+        type: string
       - description: body
         in: body
         name: body
@@ -1845,6 +1861,10 @@ paths:
         in: header
         name: Authorization
         required: true
+        type: string
+      - description: Unique key per submission attempt for safe retry (UUID recommended)
+        in: header
+        name: Idempotency-Key
         type: string
       - description: body
         in: body

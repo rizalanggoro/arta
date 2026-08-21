@@ -7,6 +7,7 @@ import (
 	"github.com/artafinance/backend/internal/dto"
 	"github.com/artafinance/backend/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Repository handles transaction DB operations.
@@ -19,11 +20,24 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-// CreateTransaction inserts a new transaction.
-func (r *Repository) CreateTransaction(t *domain.Transaction) (*domain.Transaction, error) {
+// CreateTransaction inserts a new transaction. If idempotencyKey is non-empty and already
+// exists, the previously created transaction is returned instead of inserting a duplicate.
+func (r *Repository) CreateTransaction(t *domain.Transaction, idempotencyKey string) (*domain.Transaction, error) {
 	m := t.ToModel()
-	if err := r.db.Create(m).Error; err != nil {
-		return nil, err
+	if idempotencyKey != "" {
+		m.IdempotencyKey = &idempotencyKey
+	}
+	result := r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "idempotency_key"}},
+		DoNothing: true,
+	}).Create(m)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		if err := r.db.Where("idempotency_key = ?", idempotencyKey).First(m).Error; err != nil {
+			return nil, err
+		}
 	}
 	return domain.FromTransactionModel(m), nil
 }

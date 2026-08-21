@@ -8,6 +8,8 @@ type GoldTaxPreference struct {
 	UserID  uint    `gorm:"not null;index:idx_gold_tax_preferences_user_carat,unique"`
 	Carat   float64 `gorm:"not null;type:numeric(5,2);index:idx_gold_tax_preferences_user_carat,unique"`
 	TaxRate float64 `gorm:"not null;type:numeric(5,2)"`
+
+	IdempotencyKey *string `gorm:"size:64;uniqueIndex"`
 }
 
 // TableName specifies the table name for GoldTaxPreference model.

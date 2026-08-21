@@ -30,10 +30,11 @@ interface GoldApi {
      *
      * @param authorization Bearer token
      * @param body body
+     * @param idempotencyKey Unique key per submission attempt for safe retry (UUID recommended) (optional)
      * @return [CreateGoldRes]
      */
     @POST("api/gold")
-    suspend fun createGold(@Header("Authorization") authorization: kotlin.String, @Body body: GoldCreateGoldReq): Response<CreateGoldRes>
+    suspend fun createGold(@Header("Authorization") authorization: kotlin.String, @Body body: GoldCreateGoldReq, @Header("Idempotency-Key") idempotencyKey: kotlin.String? = null): Response<CreateGoldRes>
 
     /**
      * POST api/gold/tax
@@ -44,10 +45,11 @@ interface GoldApi {
      *
      * @param authorization Bearer token
      * @param body body
+     * @param idempotencyKey Unique key per submission attempt for safe retry (UUID recommended) (optional)
      * @return [CreateGoldTaxPreferenceRes]
      */
     @POST("api/gold/tax")
-    suspend fun createGoldTaxPreference(@Header("Authorization") authorization: kotlin.String, @Body body: GoldGoldTaxPreferenceReq): Response<CreateGoldTaxPreferenceRes>
+    suspend fun createGoldTaxPreference(@Header("Authorization") authorization: kotlin.String, @Body body: GoldGoldTaxPreferenceReq, @Header("Idempotency-Key") idempotencyKey: kotlin.String? = null): Response<CreateGoldTaxPreferenceRes>
 
     /**
      * DELETE api/gold/{id}

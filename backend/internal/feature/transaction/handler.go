@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/artafinance/backend/internal/domain"
@@ -107,6 +108,7 @@ func (h *Handler) list(c *fiber.Ctx) error {
 // @accept               json
 // @produce              json
 // @param                Authorization header string true "Bearer token"
+// @param                Idempotency-Key header string false "Unique key per submission attempt for safe retry (UUID recommended)"
 // @param                body body CreateTransactionReq true "body"
 // @success              201 {object} CreateTransactionRes
 // @failure              400 {object} dto.Error
@@ -122,6 +124,11 @@ func (h *Handler) create(c *fiber.Ctx) error {
 	userID := middleware.GetUserID(c)
 	if userID == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	idempotencyKey := strings.TrimSpace(c.Get("Idempotency-Key"))
+	if len(idempotencyKey) > 64 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "Idempotency-Key must be at most 64 characters"})
 	}
 
 	ownerID, err := h.repo.GetWalletOwnerID(req.WalletID)
@@ -155,7 +162,7 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		CategoryID:  req.CategoryID,
 		Description: req.Description,
 		Date:        parsedDate,
-	})
+	}, idempotencyKey)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}

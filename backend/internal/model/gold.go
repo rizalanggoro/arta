@@ -15,8 +15,9 @@ type Gold struct {
 	Grams    float64   `gorm:"not null"`
 	Price    float64   `gorm:"not null"`
 	Type     string    `gorm:"not null;type:varchar(100)"` // pure_gold or jewelry
-	Carat    float64   `gorm:"type:numeric(5,2)"`
-	Notes    string    `gorm:"type:text"`
+	Carat          float64   `gorm:"type:numeric(5,2)"`
+	Notes          string    `gorm:"type:text"`
+	IdempotencyKey *string   `gorm:"size:64;uniqueIndex"`
 
 	// Foreign key
 	Wallet *Wallet `gorm:"foreignKey:WalletID;references:ID;constraint:OnDelete:CASCADE"`

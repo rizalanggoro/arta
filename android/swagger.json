@@ -296,6 +296,12 @@
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
+                    },
+                    {
                         "description": "body",
                         "name": "body",
                         "in": "body",
@@ -710,6 +716,12 @@
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
+                    },
+                    {
                         "description": "body",
                         "name": "body",
                         "in": "body",
@@ -777,6 +789,12 @@
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
                     },
                     {
                         "description": "body",
@@ -1197,6 +1215,12 @@
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
+                    },
+                    {
                         "description": "body",
                         "name": "body",
                         "in": "body",
@@ -1495,6 +1519,12 @@
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
                     },
                     {
                         "description": "body",

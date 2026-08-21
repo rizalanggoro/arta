@@ -29,10 +29,11 @@ interface TransactionApi {
      *
      * @param authorization Bearer token
      * @param body body
+     * @param idempotencyKey Unique key per submission attempt for safe retry (UUID recommended) (optional)
      * @return [CreateTransactionRes]
      */
     @POST("api/transaction")
-    suspend fun createTransaction(@Header("Authorization") authorization: kotlin.String, @Body body: CreateTransactionReq): Response<CreateTransactionRes>
+    suspend fun createTransaction(@Header("Authorization") authorization: kotlin.String, @Body body: CreateTransactionReq, @Header("Idempotency-Key") idempotencyKey: kotlin.String? = null): Response<CreateTransactionRes>
 
     /**
      * DELETE api/transaction/{id}

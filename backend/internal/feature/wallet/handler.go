@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
@@ -77,6 +78,7 @@ func (h *Handler) list(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param Authorization header string true "Bearer token"
+// @Param Idempotency-Key header string false "Unique key per submission attempt for safe retry (UUID recommended)"
 // @Param body body CreateWalletReq true "body"
 // @Success 201 {object} CreateWalletRes
 // @Failure 400 {object} dto.Error
@@ -107,11 +109,16 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
+	idempotencyKey := strings.TrimSpace(c.Get("Idempotency-Key"))
+	if len(idempotencyKey) > 64 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "Idempotency-Key must be at most 64 characters"})
+	}
+
 	created, err := h.repo.CreateWallet(&domain.Wallet{
 		UserID: uint(parsedUserID),
 		Name:   req.Name,
 		Type:   req.Type,
-	})
+	}, idempotencyKey)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}

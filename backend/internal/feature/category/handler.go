@@ -99,6 +99,7 @@ func (h *Handler) list(c *fiber.Ctx) error {
 // @accept               json
 // @produce              json
 // @param                Authorization header string true "Bearer token"
+// @param                Idempotency-Key header string false "Unique key per submission attempt for safe retry (UUID recommended)"
 // @param                body body CreateCategoryReq true "body"
 // @success              201 {object} CreateCategoryRes
 // @router               /api/category [post]
@@ -125,11 +126,16 @@ func (h *Handler) create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
+	idempotencyKey := strings.TrimSpace(c.Get("Idempotency-Key"))
+	if len(idempotencyKey) > 64 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: "Idempotency-Key must be at most 64 characters"})
+	}
+
 	created, err := h.repo.CreateCategory(&domain.Category{
 		UserID: func() *uint { u := uint(parsedUserID); return &u }(),
 		Name:   req.Name,
 		Type:   req.Type,
-	})
+	}, idempotencyKey)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}

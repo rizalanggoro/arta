@@ -25,17 +25,19 @@ val apiClient = ApiClient()
 val webService = apiClient.createWebservice(TransactionApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val body : CreateTransactionReq =  // CreateTransactionReq | body
+val idempotencyKey : kotlin.String = idempotencyKey_example // kotlin.String | Unique key per submission attempt for safe retry (UUID recommended)
 
 launch(Dispatchers.IO) {
-    val result : CreateTransactionRes = webService.createTransaction(authorization, body)
+    val result : CreateTransactionRes = webService.createTransaction(authorization, body, idempotencyKey)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
+| **body** | [**CreateTransactionReq**](CreateTransactionReq.md)| body | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **body** | [**CreateTransactionReq**](CreateTransactionReq.md)| body | |
+| **idempotencyKey** | **kotlin.String**| Unique key per submission attempt for safe retry (UUID recommended) | [optional] |
 
 ### Return type
 

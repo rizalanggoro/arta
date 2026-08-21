@@ -29,10 +29,11 @@ interface WalletApi {
      *
      * @param authorization Bearer token
      * @param body body
+     * @param idempotencyKey Unique key per submission attempt for safe retry (UUID recommended) (optional)
      * @return [CreateWalletRes]
      */
     @POST("api/wallet")
-    suspend fun createWallet(@Header("Authorization") authorization: kotlin.String, @Body body: WalletCreateWalletReq): Response<CreateWalletRes>
+    suspend fun createWallet(@Header("Authorization") authorization: kotlin.String, @Body body: WalletCreateWalletReq, @Header("Idempotency-Key") idempotencyKey: kotlin.String? = null): Response<CreateWalletRes>
 
     /**
      * DELETE api/wallet/{id}

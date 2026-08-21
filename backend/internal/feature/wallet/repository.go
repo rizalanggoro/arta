@@ -4,6 +4,7 @@ import (
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Repository handles wallet DB operations.
@@ -16,11 +17,24 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-// CreateWallet inserts a new wallet.
-func (r *Repository) CreateWallet(w *domain.Wallet) (*domain.Wallet, error) {
+// CreateWallet inserts a new wallet. If idempotencyKey is non-empty and already
+// exists, the previously created wallet is returned instead of inserting a duplicate.
+func (r *Repository) CreateWallet(w *domain.Wallet, idempotencyKey string) (*domain.Wallet, error) {
 	m := w.ToModel()
-	if err := r.db.Create(m).Error; err != nil {
-		return nil, err
+	if idempotencyKey != "" {
+		m.IdempotencyKey = &idempotencyKey
+	}
+	result := r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "idempotency_key"}},
+		DoNothing: true,
+	}).Create(m)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		if err := r.db.Where("idempotency_key = ?", idempotencyKey).First(m).Error; err != nil {
+			return nil, err
+		}
 	}
 	return domain.FromWalletModel(m), nil
 }

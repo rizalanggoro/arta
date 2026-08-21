@@ -298,6 +298,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
+                    },
+                    {
                         "description": "body",
                         "name": "body",
                         "in": "body",
@@ -712,6 +718,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
+                    },
+                    {
                         "description": "body",
                         "name": "body",
                         "in": "body",
@@ -779,6 +791,12 @@ const docTemplate = `{
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
                     },
                     {
                         "description": "body",
@@ -1199,6 +1217,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
+                    },
+                    {
                         "description": "body",
                         "name": "body",
                         "in": "body",
@@ -1497,6 +1521,12 @@ const docTemplate = `{
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Unique key per submission attempt for safe retry (UUID recommended)",
+                        "name": "Idempotency-Key",
+                        "in": "header"
                     },
                     {
                         "description": "body",

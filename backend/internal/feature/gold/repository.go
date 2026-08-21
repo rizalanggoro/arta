@@ -7,6 +7,7 @@ import (
 	"github.com/artafinance/backend/pkg/config"
 	"github.com/artafinance/backend/pkg/constant"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Repository handles gold DB operations.
@@ -26,11 +27,24 @@ func NewRepository(
 	}
 }
 
-// CreateGold inserts a new gold entry.
-func (r *Repository) CreateGold(g *domain.Gold) (*domain.Gold, error) {
+// CreateGold inserts a new gold entry. If idempotencyKey is non-empty and already
+// exists, the previously created entry is returned instead of inserting a duplicate.
+func (r *Repository) CreateGold(g *domain.Gold, idempotencyKey string) (*domain.Gold, error) {
 	m := g.ToModel()
-	if err := r.db.Create(m).Error; err != nil {
-		return nil, err
+	if idempotencyKey != "" {
+		m.IdempotencyKey = &idempotencyKey
+	}
+	result := r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "idempotency_key"}},
+		DoNothing: true,
+	}).Create(m)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		if err := r.db.Where("idempotency_key = ?", idempotencyKey).First(m).Error; err != nil {
+			return nil, err
+		}
 	}
 	return domain.FromGoldModel(m), nil
 }
@@ -201,15 +215,29 @@ func (r *Repository) GetTaxPreferencesByUserID(userID uint) ([]domain.GoldTaxPre
 }
 
 // CreateTaxPreference inserts a new gold tax preference for a user.
-func (r *Repository) CreateTaxPreference(userID uint, preference *domain.GoldTaxPreference) (*domain.GoldTaxPreference, error) {
+func (r *Repository) CreateTaxPreference(userID uint, preference *domain.GoldTaxPreference, idempotencyKey string) (*domain.GoldTaxPreference, error) {
 	if preference == nil {
 		return nil, gorm.ErrInvalidData
 	}
 
 	preference.UserID = userID
 	modelValue := preference.ToModel()
-	if err := r.db.Create(modelValue).Error; err != nil {
-		return nil, err
+	if idempotencyKey != "" {
+		modelValue.IdempotencyKey = &idempotencyKey
+	}
+	result := r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "idempotency_key"}},
+		DoNothing: true,
+	}).Create(modelValue)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		var existing model.GoldTaxPreference
+		if err := r.db.Where("idempotency_key = ?", idempotencyKey).First(&existing).Error; err != nil {
+			return nil, err
+		}
+		return domain.FromGoldTaxPreferenceModel(&existing), nil
 	}
 
 	return r.GetTaxPreferenceByID(userID, modelValue.ID)

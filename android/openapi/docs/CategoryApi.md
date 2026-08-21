@@ -25,17 +25,19 @@ val apiClient = ApiClient()
 val webService = apiClient.createWebservice(CategoryApi::class.java)
 val authorization : kotlin.String = authorization_example // kotlin.String | Bearer token
 val body : CategoryCreateCategoryReq =  // CategoryCreateCategoryReq | body
+val idempotencyKey : kotlin.String = idempotencyKey_example // kotlin.String | Unique key per submission attempt for safe retry (UUID recommended)
 
 launch(Dispatchers.IO) {
-    val result : CreateCategoryRes = webService.createCategory(authorization, body)
+    val result : CreateCategoryRes = webService.createCategory(authorization, body, idempotencyKey)
 }
 ```
 
 ### Parameters
 | **authorization** | **kotlin.String**| Bearer token | |
+| **body** | [**CategoryCreateCategoryReq**](CategoryCreateCategoryReq.md)| body | |
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **body** | [**CategoryCreateCategoryReq**](CategoryCreateCategoryReq.md)| body | |
+| **idempotencyKey** | **kotlin.String**| Unique key per submission attempt for safe retry (UUID recommended) | [optional] |
 
 ### Return type
 

@@ -25,10 +25,11 @@ interface CategoryApi {
      *
      * @param authorization Bearer token
      * @param body body
+     * @param idempotencyKey Unique key per submission attempt for safe retry (UUID recommended) (optional)
      * @return [CreateCategoryRes]
      */
     @POST("api/category")
-    suspend fun createCategory(@Header("Authorization") authorization: kotlin.String, @Body body: CategoryCreateCategoryReq): Response<CreateCategoryRes>
+    suspend fun createCategory(@Header("Authorization") authorization: kotlin.String, @Body body: CategoryCreateCategoryReq, @Header("Idempotency-Key") idempotencyKey: kotlin.String? = null): Response<CreateCategoryRes>
 
     /**
      * DELETE api/category/{id}
