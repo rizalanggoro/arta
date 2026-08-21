@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @HiltViewModel(assistedFactory = UpsertGoldVM.Factory::class)
 class UpsertGoldVM @AssistedInject constructor(
@@ -46,6 +47,10 @@ class UpsertGoldVM @AssistedInject constructor(
 
     private val _event = MutableSharedFlow<UpsertGoldUiState.Event>()
     val event = _event.asSharedFlow()
+
+    // Reused across retries so the server can dedupe; rotated only when the
+    // server definitively rejected a submission (see onFailure in onSubmitClicked).
+    private var idempotencyKey: String = UUID.randomUUID().toString()
 
     fun onSelectDateClicked() = _uiState.update {
         it.copy(isDatePickerOpen = true)
@@ -143,6 +148,7 @@ class UpsertGoldVM @AssistedInject constructor(
                             carat = carat!!,
                             notes = current.notes,
                         ),
+                        idempotencyKey = idempotencyKey,
                     )
 
                     if (!response.isSuccessful) throw IllegalStateException(response.errorMessage())
@@ -154,6 +160,9 @@ class UpsertGoldVM @AssistedInject constructor(
             }.onSuccess {
                 AppEventBus.emit(AppEvent.GoldChanged)
             }.onFailure { throwable ->
+                if (throwable is IllegalStateException) {
+                    idempotencyKey = UUID.randomUUID().toString()
+                }
                 _event.emit(
                     UpsertGoldUiState.Event.ShowMessage(
                         throwable.message ?: context.getString(R.string.client_error)

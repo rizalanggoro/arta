@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @HiltViewModel(assistedFactory = UpsertTransactionVM.Factory::class)
 class UpsertTransactionVM @AssistedInject constructor(
@@ -47,6 +48,10 @@ class UpsertTransactionVM @AssistedInject constructor(
 
     private val _event = MutableSharedFlow<UpsertTransactionUiState.Event>()
     val event = _event.asSharedFlow()
+
+    // Reused across retries so the server can dedupe; rotated only when the
+    // server definitively rejected a submission (see onFailure in onSubmitClicked).
+    private var idempotencyKey: String = UUID.randomUUID().toString()
 
     fun onAmountChanged(value: String) {
         _uiState.update {
@@ -127,6 +132,7 @@ class UpsertTransactionVM @AssistedInject constructor(
                             walletId = walletId,
                             description = current.description,
                         ),
+                        idempotencyKey = idempotencyKey,
                     )
 
                     if (!response.isSuccessful) {
@@ -140,6 +146,9 @@ class UpsertTransactionVM @AssistedInject constructor(
             }.onSuccess {
                 AppEventBus.emit(AppEvent.TransactionChanged)
             }.onFailure { throwable ->
+                if (throwable is IllegalStateException) {
+                    idempotencyKey = UUID.randomUUID().toString()
+                }
                 _event.emit(
                     UpsertTransactionUiState.Event.ShowMessage(
                         throwable.message ?: context.getString(R.string.client_error)

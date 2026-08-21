@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,6 +24,10 @@ class UpsertWalletVM @Inject constructor(
     private val authPrefs: AuthPrefs,
 ) : ViewModel() {
     private var walletId: Int = 0
+
+    // Reused across retries so the server can dedupe; rotated only when the
+    // server definitively rejected a submission.
+    private var idempotencyKey: String = UUID.randomUUID().toString()
 
     private val _uiState = MutableStateFlow(UpsertWalletUiState())
     val uiState: StateFlow<UpsertWalletUiState> = _uiState.asStateFlow()
@@ -134,6 +139,7 @@ class UpsertWalletVM @Inject constructor(
                             name = current.name,
                             type = current.type,
                         ),
+                        idempotencyKey = idempotencyKey,
                     )
 
                     if (!response.isSuccessful) {
@@ -146,6 +152,10 @@ class UpsertWalletVM @Inject constructor(
 
             result.onSuccess {
                 AppEventBus.emit(AppEvent.WalletChanged)
+            }.onFailure { throwable ->
+                if (throwable is IllegalStateException) {
+                    idempotencyKey = UUID.randomUUID().toString()
+                }
             }
 
             _uiState.update { it.copy(isLoading = false) }

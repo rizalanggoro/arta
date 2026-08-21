@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,6 +21,10 @@ class UpsertGoldTaxVM @Inject constructor(
     private val authPrefs: AuthPrefs,
 ) : ViewModel() {
     private var taxPreferenceId: Int = 0
+
+    // Reused across retries so the server can dedupe; rotated only when the
+    // server definitively rejected a submission.
+    private var idempotencyKey: String = UUID.randomUUID().toString()
 
     private val _uiState = MutableStateFlow(UpsertGoldTaxUiState(isUpdate = false))
     val uiState = _uiState.asStateFlow()
@@ -145,12 +150,16 @@ class UpsertGoldTaxVM @Inject constructor(
                             carat = carat!!,
                             taxRate = taxRate!!,
                         ),
+                        idempotencyKey = idempotencyKey,
                     )
                     if (!response.isSuccessful) throw IllegalStateException(response.errorBody()?.string() ?: "Request failed")
                 }
             }.onSuccess {
                 AppEventBus.emit(AppEvent.GoldTaxChanged)
             }.onFailure { throwable ->
+                if (throwable is IllegalStateException) {
+                    idempotencyKey = UUID.randomUUID().toString()
+                }
                 _uiState.update {
                     it.copy(
                         isLoading = false,

@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @HiltViewModel(assistedFactory = UpsertCategoryVM.Factory::class)
 class UpsertCategoryVM @AssistedInject constructor(
@@ -32,6 +33,10 @@ class UpsertCategoryVM @AssistedInject constructor(
 
     private val _uiState = MutableStateFlow(UpsertCategoryUiState())
     val uiState = _uiState.asStateFlow()
+
+    // Reused across retries so the server can dedupe; rotated only when the
+    // server definitively rejected a submission.
+    private var idempotencyKey: String = UUID.randomUUID().toString()
 
     fun loadCategory() {
         if (navKey.categoryId == 0) {
@@ -125,6 +130,7 @@ class UpsertCategoryVM @AssistedInject constructor(
                                 name = current.name,
                                 type = current.type,
                             ),
+                            idempotencyKey = idempotencyKey,
                         )
 
                         if (!response.isSuccessful) {
@@ -137,6 +143,9 @@ class UpsertCategoryVM @AssistedInject constructor(
             }.onSuccess {
                 AppEventBus.emit(AppEvent.CategoryChanged)
             }.onFailure { throwable ->
+                if (throwable is IllegalStateException) {
+                    idempotencyKey = UUID.randomUUID().toString()
+                }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
