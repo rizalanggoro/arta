@@ -35,6 +35,7 @@ docs/DtoGold.md
 docs/DtoGoldDashboard.md
 docs/DtoGoldTax.md
 docs/DtoGoldTaxPreference.md
+docs/DtoPricePoint.md
 docs/DtoTransaction.md
 docs/DtoWallet.md
 docs/GetGoldRes.md
@@ -53,6 +54,7 @@ docs/LoginReq.md
 docs/LoginRes.md
 docs/LogoutRes.md
 docs/MeRes.md
+docs/PriceHistoryRes.md
 docs/RegisterReq.md
 docs/RegisterRes.md
 docs/ReleaseApi.md
@@ -130,6 +132,7 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGold.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGoldDashboard.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGoldTax.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoGoldTaxPreference.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoPricePoint.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoTransaction.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/DtoWallet.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/GetGoldRes.kt
@@ -146,6 +149,7 @@ src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/LoginReq.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/LoginRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/LogoutRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/MeRes.kt
+src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/PriceHistoryRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/RegisterReq.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/RegisterRes.kt
 src/main/kotlin/id/my/rizalanggoro/arta/openapi/models/ReleaseRes.kt

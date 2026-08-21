@@ -10,6 +10,8 @@ import id.my.rizalanggoro.arta.feature.gold.presentation.action.GoldActionSheet
 import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldDialog
 import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
+import id.my.rizalanggoro.arta.feature.gold.presentation.pricehistory.PriceHistoryScreen
+import id.my.rizalanggoro.arta.feature.gold.presentation.pricehistory.PriceHistoryVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.tax.ListGoldTaxScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.upsert.UpsertGoldScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.upsert.UpsertGoldVM
@@ -32,6 +34,18 @@ fun EntryProviderScope<NavKey>.goldEntry() {
 
     entry<GoldRoute.ListTax> {
         ListGoldTaxScreen()
+    }
+
+    entry<GoldRoute.PriceHistory> { navKey ->
+        PriceHistoryScreen(
+            vm = hiltViewModel<PriceHistoryVM, PriceHistoryVM.Factory>(
+                creationCallback = {
+                    it.create(
+                        navKey = navKey
+                    )
+                }
+            )
+        )
     }
 
     entry<GoldRoute.UpsertTax>(

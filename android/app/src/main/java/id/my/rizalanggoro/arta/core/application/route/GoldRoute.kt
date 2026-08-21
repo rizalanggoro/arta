@@ -6,6 +6,22 @@ import kotlinx.serialization.Serializable
 @Serializable
 object GoldRoute {
     @Serializable
+    enum class PriceHistoryType {
+        GOLD, FX;
+
+        val queryValue: String
+            get() = when (this) {
+                GOLD -> "gold"
+                FX -> "fx"
+            }
+    }
+
+    @Serializable
+    data class PriceHistory(
+        val type: PriceHistoryType,
+    ) : NavKey
+
+    @Serializable
     data object ListTax : NavKey
 
     @Serializable

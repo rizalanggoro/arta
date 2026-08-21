@@ -62,6 +62,11 @@ fun HomeGoldDashboardScreen(
         refreshState = rememberPullToRefreshState(),
         onRefresh = { vm.loadDashboard(isRefresh = true) },
         onClickManageTax = { backStack.add(GoldRoute.ListTax) },
+        onClickPriceHistory = { type ->
+            backStack.add(
+                GoldRoute.PriceHistory(type = type)
+            )
+        },
         onLongClickGold = {
             backStack.add(
                 GoldRoute.ActionSheet(goldId = it.id)
@@ -77,6 +82,7 @@ private fun Content(
     uiState: GoldDashboardUiState = GoldDashboardUiState(),
     onClickRetry: () -> Unit = {},
     onClickManageTax: () -> Unit = {},
+    onClickPriceHistory: (GoldRoute.PriceHistoryType) -> Unit = {},
     onRefresh: () -> Unit = {},
     onLongClickGold: (DomainGold) -> Unit = {},
 ) {
@@ -227,15 +233,22 @@ private fun Content(
                                     "title" to "Emas dunia",
                                     "value" to (data?.goldPrice?.pricePerOunceUsd
                                         ?: 0.0).toAmericanCurrency(),
-                                    "date" to data?.goldPrice?.createdAt
+                                    "date" to data?.goldPrice?.createdAt,
+                                    "type" to GoldRoute.PriceHistoryType.GOLD
                                 ),
                                 mapOf(
                                     "title" to "Nilai dollar",
                                     "value" to (data?.fxRate?.rate ?: 0).toIndonesianCurrency(),
-                                    "date" to data?.fxRate?.createdAt
+                                    "date" to data?.fxRate?.createdAt,
+                                    "type" to GoldRoute.PriceHistoryType.FX
                                 )
                             ).forEach {
                                 Card(
+                                    onClick = {
+                                        onClickPriceHistory(
+                                            it["type"] as GoldRoute.PriceHistoryType
+                                        )
+                                    },
                                     modifier = Modifier.weight(1f),
                                     colors = CardDefaults.cardColors(
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer
@@ -267,7 +280,8 @@ private fun Content(
                                                 tint = MaterialTheme.colorScheme.outline
                                             )
                                             Text(
-                                                text = it["date"].toFormattedDate("dd/MM/yyyy HH:mm"),
+                                                text = (it["date"] as String?)
+                                                    .toFormattedDate("dd/MM/yyyy HH:mm"),
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.outline,
                                             )

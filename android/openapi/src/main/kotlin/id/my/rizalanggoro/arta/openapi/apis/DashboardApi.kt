@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 import id.my.rizalanggoro.arta.openapi.models.CashDashboardRes
 import id.my.rizalanggoro.arta.openapi.models.DtoError
 import id.my.rizalanggoro.arta.openapi.models.GoldDashboardRes
+import id.my.rizalanggoro.arta.openapi.models.PriceHistoryRes
 
 interface DashboardApi {
     /**
@@ -48,5 +49,23 @@ interface DashboardApi {
      */
     @GET("api/dashboard/gold")
     suspend fun getGoldDashboard(@Header("Authorization") authorization: kotlin.String, @Query("wallet_id") walletId: kotlin.Int): Response<GoldDashboardRes>
+
+    /**
+     * GET api/dashboard/price-history
+     * 
+     * 
+     * Responses:
+     *  - 200: OK
+     *  - 400: Bad Request
+     *  - 401: Unauthorized
+     *  - 500: Internal Server Error
+     *
+     * @param authorization Bearer token
+     * @param type price type: gold or fx
+     * @param days number of days of history (default 7) (optional)
+     * @return [PriceHistoryRes]
+     */
+    @GET("api/dashboard/price-history")
+    suspend fun getPriceHistory(@Header("Authorization") authorization: kotlin.String, @Query("type") type: kotlin.String, @Query("days") days: kotlin.Int? = null): Response<PriceHistoryRes>
 
 }

@@ -56,6 +56,7 @@ All URIs are relative to *http://localhost:8080*
 | *CategoryApi* | [**updateCategory**](docs/CategoryApi.md#updatecategory) | **PUT** api/category/{id} |  |
 | *DashboardApi* | [**getCashDashboard**](docs/DashboardApi.md#getcashdashboard) | **GET** api/dashboard/cash |  |
 | *DashboardApi* | [**getGoldDashboard**](docs/DashboardApi.md#getgolddashboard) | **GET** api/dashboard/gold |  |
+| *DashboardApi* | [**getPriceHistory**](docs/DashboardApi.md#getpricehistory) | **GET** api/dashboard/price-history |  |
 | *GoldApi* | [**createGold**](docs/GoldApi.md#creategold) | **POST** api/gold |  |
 | *GoldApi* | [**createGoldTaxPreference**](docs/GoldApi.md#creategoldtaxpreference) | **POST** api/gold/tax |  |
 | *GoldApi* | [**deleteGold**](docs/GoldApi.md#deletegold) | **DELETE** api/gold/{id} |  |
@@ -114,6 +115,7 @@ All URIs are relative to *http://localhost:8080*
  - [id.my.rizalanggoro.arta.openapi.models.DtoGoldDashboard](docs/DtoGoldDashboard.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGoldTax](docs/DtoGoldTax.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference](docs/DtoGoldTaxPreference.md)
+ - [id.my.rizalanggoro.arta.openapi.models.DtoPricePoint](docs/DtoPricePoint.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoTransaction](docs/DtoTransaction.md)
  - [id.my.rizalanggoro.arta.openapi.models.DtoWallet](docs/DtoWallet.md)
  - [id.my.rizalanggoro.arta.openapi.models.GetGoldRes](docs/GetGoldRes.md)
@@ -130,6 +132,7 @@ All URIs are relative to *http://localhost:8080*
  - [id.my.rizalanggoro.arta.openapi.models.LoginRes](docs/LoginRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.LogoutRes](docs/LogoutRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.MeRes](docs/MeRes.md)
+ - [id.my.rizalanggoro.arta.openapi.models.PriceHistoryRes](docs/PriceHistoryRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.RegisterReq](docs/RegisterReq.md)
  - [id.my.rizalanggoro.arta.openapi.models.RegisterRes](docs/RegisterRes.md)
  - [id.my.rizalanggoro.arta.openapi.models.ReleaseRes](docs/ReleaseRes.md)
