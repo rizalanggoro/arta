@@ -1,6 +1,7 @@
 package fxrate
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/artafinance/backend/internal/domain"
@@ -37,12 +38,34 @@ func (r *Repository) GetLatest() (*domain.FxRate, error) {
 }
 
 // GetHistory returns FX rate snapshots stored within the given number of days, oldest first.
+// Ranges shorter than a week return raw snapshots; longer ranges are downsampled to the last
+// snapshot per hour (under a month) or per day.
 func (r *Repository) GetHistory(days int) ([]*domain.FxRate, error) {
 	var ms []model.FxRate
-	if err := r.db.
-		Where("created_at >= ?", time.Now().AddDate(0, 0, -days)).
-		Order("created_at asc").
-		Find(&ms).Error; err != nil {
+	since := time.Now().AddDate(0, 0, -days)
+
+	var err error
+	if days < 7 {
+		err = r.db.
+			Where("created_at >= ?", since).
+			Order("created_at asc").
+			Find(&ms).Error
+	} else {
+		bucket := "hour"
+		if days >= 30 {
+			bucket = "day"
+		}
+		err = r.db.Raw(fmt.Sprintf(`
+			SELECT * FROM (
+				SELECT DISTINCT ON (DATE_TRUNC('%s', created_at)) *
+				FROM fx_rates
+				WHERE created_at >= ?
+				ORDER BY DATE_TRUNC('%s', created_at), created_at DESC
+			) recent
+			ORDER BY created_at ASC`, bucket, bucket), since).
+			Scan(&ms).Error
+	}
+	if err != nil {
 		return nil, err
 	}
 
