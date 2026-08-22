@@ -21,6 +21,7 @@ import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy.Companion.bottomSheet
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
+import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
@@ -43,20 +44,21 @@ internal data class BottomSheetScene<T : Any>(
         val lifecycleOwner = rememberLifecycleOwner()
         var visible by remember { mutableStateOf(true) }
         val sheetTitle = remember { mutableStateOf<String?>(null) }
-        MiuixTheme(
-            colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-        ) {
-            WindowBottomSheet(
-                show = visible,
-                title = sheetTitle.value,
-                onDismissRequest = { visible = false },
-                onDismissFinished = onBack,
-            ) {
-                CompositionLocalProvider(
-                    LocalBottomSheetTitle provides sheetTitle,
-                    LocalLifecycleOwner provides lifecycleOwner,
+        val colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+        MiuixTheme(colors = colors) {
+            CompositionLocalProvider(LocalContentColor provides colors.onBackground) {
+                WindowBottomSheet(
+                    show = visible,
+                    title = sheetTitle.value,
+                    onDismissRequest = { visible = false },
+                    onDismissFinished = onBack,
                 ) {
-                    entry.Content()
+                    CompositionLocalProvider(
+                        LocalBottomSheetTitle provides sheetTitle,
+                        LocalLifecycleOwner provides lifecycleOwner,
+                    ) {
+                        entry.Content()
+                    }
                 }
             }
         }
