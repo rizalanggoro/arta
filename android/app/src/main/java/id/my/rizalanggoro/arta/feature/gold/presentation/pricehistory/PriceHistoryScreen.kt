@@ -16,6 +16,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
@@ -38,23 +39,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelComponent
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
+import com.patrykandpatrick.vico.compose.common.component.shapeComponent
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.core.cartesian.marker.LineCartesianLayerMarkerTarget
+import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
+import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.extension.toAmericanCurrency
@@ -154,12 +165,30 @@ private fun PriceChart(
 ) {
     val lineColor = MaterialTheme.colorScheme.primary
     var sampledPoints by remember { mutableStateOf(emptyList<DtoPricePoint>()) }
-    val xAxisFormatter = remember {
+    val xAxisFormatter = remember(uiState.range) {
         CartesianValueFormatter { _, value, _ ->
             val index = value.toInt().coerceIn(0, sampledPoints.lastIndex.coerceAtLeast(0))
-            sampledPoints.getOrNull(index)?.timestamp?.toFormattedDate("dd/MM HH:mm") ?: " "
+            val pattern = if (uiState.range == PriceRange.ONE_DAY) "HH:mm" else "dd/MM"
+            sampledPoints.getOrNull(index)?.timestamp?.toFormattedDate(pattern) ?: " "
         }
     }
+    val marker = rememberDefaultCartesianMarker(
+        label = rememberTextComponent(
+            color = MaterialTheme.colorScheme.onPrimary,
+            textSize = 9.sp,
+            background = shapeComponent(fill = fill(lineColor), shape = CorneredShape.Pill),
+            padding = Insets(allDp = 6f),
+            margins = Insets(allDp = 4f),
+        ),
+        valueFormatter = DefaultCartesianMarker.ValueFormatter { _, targets ->
+            (targets.firstOrNull() as? LineCartesianLayerMarkerTarget)?.points
+                ?.firstOrNull()?.entry?.y?.formatValue(uiState.type) ?: ""
+        },
+        guideline = rememberLineComponent(
+            fill = fill(lineColor.copy(alpha = 0.5f)),
+            thickness = 1.dp,
+        ),
+    )
     val chart = rememberCartesianChart(
         rememberLineCartesianLayer(
             lineProvider = LineCartesianLayer.LineProvider.series(
@@ -189,11 +218,15 @@ private fun PriceChart(
             },
         ),
         startAxis = VerticalAxis.rememberStart(
-            valueFormatter = CartesianValueFormatter.decimal(DecimalFormat("#,##0.##"))
+            label = rememberAxisLabelComponent(textSize = 9.sp),
+            valueFormatter = CartesianValueFormatter.decimal(DecimalFormat("#,##0.##")),
+            itemPlacer = VerticalAxis.ItemPlacer.count(count = { 8 }),
         ),
         bottomAxis = HorizontalAxis.rememberBottom(
+            label = rememberAxisLabelComponent(textSize = 9.sp),
             valueFormatter = xAxisFormatter
         ),
+        marker = marker,
     )
     val modelProducer = remember { CartesianChartModelProducer() }
 
@@ -270,6 +303,11 @@ private fun PriceChart(
                     label = { Text(text = range.label.replaceFirstChar { it.uppercase() }) },
                 )
             }
+        }
+        if (uiState.isLoading) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
         CartesianChartHost(
             chart = chart,
