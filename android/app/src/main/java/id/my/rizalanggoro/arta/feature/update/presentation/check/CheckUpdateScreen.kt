@@ -94,7 +94,10 @@ private fun Content(
                         BasicComponent(
                             title = "Pembaruan tersedia!",
                             startAction = {
-                                Icon(MiuixIcons.Info, null)
+                                Icon(
+                                    MiuixIcons.Info, null,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
                             },
                         )
                 }
