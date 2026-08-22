@@ -7,12 +7,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.R
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
+import id.my.rizalanggoro.arta.core.event.AppEvent
+import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.authorization
 import id.my.rizalanggoro.arta.core.extension.errorMessage
 import id.my.rizalanggoro.arta.openapi.apis.CategoryApi
-import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -54,8 +56,6 @@ class ListCategoryVM @Inject constructor(
                         expenseCategories = response.categories.filter { it.data.type == "expense" },
                         isLoading = false,
                         errorMessage = null,
-                        actionTarget = null,
-                        deleteTarget = null,
                     )
                 }
             }.onFailure { throwable ->
@@ -77,78 +77,13 @@ class ListCategoryVM @Inject constructor(
         loadCategories(type)
     }
 
-    fun onCategoryClicked(category: DomainCategory) {
-        if (category.userId == null) return
-
-        _uiState.update {
-            it.copy(
-                actionTarget = category,
-                deleteTarget = null
-            )
-        }
-    }
-
-    fun onActionDismissed() = _uiState.update {
-        it.copy(
-            actionTarget = null
-        )
-    }
-
-    fun onDeleteActionClicked() =
-        _uiState.update {
-            it.copy(
-                deleteTarget = it.actionTarget,
-                actionTarget = null
-            )
-        }
-
-    fun onDeleteDialogDismissed() = _uiState.update {
-        it.copy(deleteTarget = null)
-    }
-
-    fun onDeleteClicked() = viewModelScope.launch {
-        val category = _uiState.value.deleteTarget ?: return@launch
-
-        _uiState.update {
-            it.copy(
-                isDeleting = true,
-                errorMessage = null
-            )
-        }
-
-        runCatching {
-            val authorization = authorizationHeader()
-                ?: throw IllegalStateException("Sesi login tidak ditemukan")
-
-            val response = categoryApi.deleteCategory(authorization, category.id)
-            if (!response.isSuccessful) {
-                throw IllegalStateException(response.errorMessage())
-            }
-
-            response.body() ?: throw IllegalStateException("Respons server kosong")
-        }.onSuccess {
-            _uiState.update {
-                it.copy(
-                    isDeleting = false,
-                    deleteTarget = null
-                )
-            }
-            loadCategories()
-        }.onFailure { throwable ->
-            _uiState.update {
-                it.copy(
-                    isDeleting = false,
-                    errorMessage = throwable.message ?: "Gagal menghapus kategori",
-                )
-            }
-        }
-    }
-
-    private fun authorizationHeader(): String? {
-        return authPrefs.currentSession.value?.token?.let { "Bearer $it" }
-    }
-
     init {
         loadCategories()
+
+        viewModelScope.launch {
+            AppEventBus.event
+                .filterIsInstance<AppEvent.CategoryChanged>()
+                .collect { loadCategories() }
+        }
     }
 }

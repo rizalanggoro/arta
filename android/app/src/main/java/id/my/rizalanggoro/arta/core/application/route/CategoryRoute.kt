@@ -24,4 +24,14 @@ object CategoryRoute {
     data class Upsert(
         val categoryId: Int = 0,
     ) : NavKey
+
+    @Serializable
+    data class ActionSheet(
+        val categoryId: Int,
+    ) : NavKey
+
+    @Serializable
+    data class Delete(
+        val categoryId: Int,
+    ) : NavKey
 }
