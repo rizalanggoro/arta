@@ -169,7 +169,7 @@ private fun PriceChart(
         CartesianValueFormatter { _, value, _ ->
             val index = value.toInt().coerceIn(0, sampledPoints.lastIndex.coerceAtLeast(0))
             val pattern = if (uiState.range == PriceRange.ONE_DAY) "HH:mm" else "dd/MM"
-            sampledPoints.getOrNull(index)?.timestamp?.toFormattedDate(pattern) ?: " "
+            sampledPoints.getOrNull(index)?.timestamp?.toFormattedDate(pattern) ?: "-"
         }
     }
     val marker = rememberDefaultCartesianMarker(

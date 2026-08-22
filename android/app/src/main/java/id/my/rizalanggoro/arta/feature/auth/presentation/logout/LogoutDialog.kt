@@ -1,21 +1,14 @@
 package id.my.rizalanggoro.arta.feature.auth.presentation.logout
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.AuthRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
@@ -47,39 +40,13 @@ private fun Content(
     onClickCancel: () -> Unit = {},
     onClickLogout: () -> Unit = {},
 ) {
-    AlertDialog(
-        onDismissRequest = {
-            if (!uiState.isLoading) onClickCancel()
-        },
-        title = {
-            Text("Keluar")
-        },
-        text = {
-            when {
-                uiState.isLoading -> Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    LoadingIndicator()
-                }
-
-                else -> Text(
-                    "Apakah Anda yakin akan keluar dari akun ini?"
-                )
-            }
-        },
-        dismissButton = {
-            if (!uiState.isLoading)
-                TextButton(onClick = onClickCancel) {
-                    Text("Batal")
-                }
-        },
-        confirmButton = {
-            if (!uiState.isLoading)
-                TextButton(onClick = onClickLogout) {
-                    Text("Keluar")
-                }
-        }
+    ConfirmDialog(
+        title = "Keluar",
+        description = "Apakah Anda yakin akan keluar dari akun ini?",
+        onDismissRequest = { if (!uiState.isLoading) onClickCancel() },
+        onConfirmRequest = onClickLogout,
+        isLoading = uiState.isLoading,
+        confirmText = "Keluar",
     )
 }
 

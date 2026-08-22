@@ -1,9 +1,9 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.upsert
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,24 +16,6 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material.icons.rounded.Wallet
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,9 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.constant.goldTypes
 import id.my.rizalanggoro.arta.core.constant.toWalletName
@@ -54,11 +38,26 @@ import id.my.rizalanggoro.arta.core.extension.isValidInputNumber
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.TabRowWithContour
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val ErrorColor = Color(0xFFE53935)
+
 @Composable
 fun UpsertGoldScreen(
     vm: UpsertGoldVM = hiltViewModel(),
@@ -97,10 +96,9 @@ fun UpsertGoldScreen(
         )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun Content(
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     uiState: UpsertGoldUiState = UpsertGoldUiState(),
     onClickSelectDate: () -> Unit = {},
     onGramsChanged: (String) -> Unit = {},
@@ -113,14 +111,10 @@ private fun Content(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        when {
-                            uiState.isUpdate -> "Ubah Emas"
-                            else -> "Tambah Emas"
-                        },
-                    )
+            SmallTopAppBar(
+                title = when {
+                    uiState.isUpdate -> "Ubah Emas"
+                    else -> "Tambah Emas"
                 },
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
@@ -132,7 +126,7 @@ private fun Content(
                 },
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { SnackbarHost(state = snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -144,149 +138,119 @@ private fun Content(
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier.clip(RoundedCornerShape(16.dp))
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MiuixTheme.colorScheme.surfaceContainer)
             ) {
-                ListItem(
-                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    leadingContent = {
+                BasicComponent(
+                    title = uiState.selectedWallet?.name ?: "Tidak ada dompet",
+                    summary = uiState.selectedWallet?.type?.toWalletName()
+                        ?: "Tidak ada jenis dompet",
+                    startAction = {
                         Icon(
                             Icons.Rounded.Wallet,
                             null
                         )
                     },
-                    headlineContent = {
-                        Text(uiState.selectedWallet?.name ?: "Tidak ada dompet")
-                    },
-                    supportingContent = {
-                        Text(
-                            uiState.selectedWallet?.type?.toWalletName()
-                                ?: "Tidak ada jenis dompet"
-                        )
-                    },
                 )
 
-                ListItem(
-                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    leadingContent = {
+                BasicComponent(
+                    title = "Tanggal",
+                    summary = uiState.date.toIndonesianDate(),
+                    startAction = {
                         Icon(
                             Icons.Rounded.Today,
                             null
                         )
                     },
-                    headlineContent = {
-                        Text("Tanggal")
-                    },
-                    supportingContent = {
-                        Text(uiState.date.toIndonesianDate())
-                    },
-                    trailingContent = {
+                    endActions = {
                         Icon(
                             Icons.Rounded.ChevronRight,
                             null
                         )
                     },
-                    modifier = Modifier.clickable(enabled = !uiState.isLoading) {
-                        onClickSelectDate()
-                    },
+                    onClick = if (uiState.isLoading) ({}) else onClickSelectDate,
                 )
             }
 
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                goldTypes.mapIndexed { index, option ->
-                    SegmentedButton(
-                        colors = SegmentedButtonDefaults.colors(
-                            activeBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                            inactiveBorderColor = MaterialTheme.colorScheme.outlineVariant
-                        ),
-                        selected = uiState.type == option.value,
-                        onClick = { onTypeChanged(option.value) },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = goldTypes.size,
-                        ),
-                        enabled = !uiState.isLoading,
-                    ) {
-                        Text(option.name)
-                    }
-                }
-            }
+            TabRowWithContour(
+                tabs = goldTypes.map { it.name },
+                selectedTabIndex = goldTypes.indexOfFirst { it.value == uiState.type },
+                onTabSelected = { index -> onTypeChanged(goldTypes[index].value) },
+                modifier = Modifier.fillMaxWidth(),
+            )
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                TextField(
-                    value = uiState.grams,
-                    onValueChange = {
-                        if (it.isValidInputNumber())
-                            onGramsChanged(it)
-                    },
-                    label = { Text("Berat (gram)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal
-                    ),
-                    isError = uiState.gramsError != null,
-                    supportingText = when {
-                        uiState.gramsError != null -> {
-                            { Text(uiState.gramsError) }
-                        }
+                Column {
+                    TextField(
+                        value = uiState.grams,
+                        onValueChange = {
+                            if (it.isValidInputNumber())
+                                onGramsChanged(it)
+                        },
+                        label = "Berat (gram)",
+                        useLabelAsPlaceholder = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal
+                        ),
+                        enabled = !uiState.isLoading,
+                        singleLine = true,
+                    )
+                    uiState.gramsError?.let {
+                        Text(it, fontSize = 13.sp, color = ErrorColor)
+                    }
+                }
 
-                        else -> null
-                    },
-                    enabled = !uiState.isLoading,
-                    singleLine = true,
-                )
+                Column {
+                    TextField(
+                        value = uiState.price,
+                        onValueChange = {
+                            if (it.isValidInputNumber())
+                                onPriceChanged(it)
+                        },
+                        label = "Harga beli",
+                        useLabelAsPlaceholder = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal
+                        ),
+                        enabled = !uiState.isLoading,
+                        singleLine = true,
+                    )
+                    uiState.priceError?.let {
+                        Text(it, fontSize = 13.sp, color = ErrorColor)
+                    }
+                }
 
-                TextField(
-                    value = uiState.price,
-                    onValueChange = {
-                        if (it.isValidInputNumber())
-                            onPriceChanged(it)
-                    },
-                    label = { Text("Harga beli") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal
-                    ),
-                    isError = uiState.priceError != null,
-                    supportingText = when {
-                        uiState.priceError != null -> {
-                            { Text(uiState.priceError) }
-                        }
-
-                        else -> null
-                    },
-                    enabled = !uiState.isLoading,
-                    singleLine = true,
-                )
-
-                TextField(
-                    value = uiState.carat,
-                    onValueChange = {
-                        if (it.isValidInputNumber())
-                            onCaratChanged(it)
-                    },
-                    label = { Text("Karat") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal
-                    ),
-                    isError = uiState.caratError != null,
-                    supportingText = when {
-                        uiState.caratError != null -> {
-                            { Text(uiState.caratError) }
-                        }
-
-                        else -> null
-                    },
-                    enabled = !uiState.isLoading,
-                    singleLine = true,
-                )
+                Column {
+                    TextField(
+                        value = uiState.carat,
+                        onValueChange = {
+                            if (it.isValidInputNumber())
+                                onCaratChanged(it)
+                        },
+                        label = "Karat",
+                        useLabelAsPlaceholder = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal
+                        ),
+                        enabled = !uiState.isLoading,
+                        singleLine = true,
+                    )
+                    uiState.caratError?.let {
+                        Text(it, fontSize = 13.sp, color = ErrorColor)
+                    }
+                }
 
                 TextField(
                     value = uiState.notes,
                     onValueChange = onNotesChanged,
-                    label = { Text("Catatan (opsional)") },
+                    label = "Catatan (opsional)",
+                    useLabelAsPlaceholder = true,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading,
                     minLines = 3,
@@ -298,12 +262,14 @@ private fun Content(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    LoadingIndicator()
+                    InfiniteProgressIndicator()
                 }
 
                 else -> Button(
                     onClick = onClickSubmit,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColorsPrimary(),
+                    enabled = !uiState.isLoading
                 ) {
                     Text("Simpan")
                 }
@@ -315,7 +281,7 @@ private fun Content(
 @Preview(showBackground = true)
 @Composable
 private fun CreatePreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = UpsertGoldUiState(
                 selectedWallet = DomainWallet(
@@ -334,7 +300,7 @@ private fun CreatePreview() {
 @Preview(showBackground = true)
 @Composable
 private fun UpdatePreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = UpsertGoldUiState(
                 goldId = 10,
@@ -353,7 +319,7 @@ private fun UpdatePreview() {
 @Preview(showBackground = true)
 @Composable
 private fun LoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = UpsertGoldUiState(
                 goldId = 10,
@@ -373,7 +339,7 @@ private fun LoadingPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun ErrorPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = UpsertGoldUiState(
                 selectedWallet = DomainWallet(

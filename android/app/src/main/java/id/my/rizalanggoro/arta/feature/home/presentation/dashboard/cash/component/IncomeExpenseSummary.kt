@@ -16,9 +16,6 @@ import androidx.compose.material.icons.automirrored.rounded.CallReceived
 import androidx.compose.material.icons.automirrored.rounded.TrendingDown
 import androidx.compose.material.icons.automirrored.rounded.TrendingFlat
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,8 +26,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun IncomeExpenseSummary(
@@ -75,7 +77,7 @@ fun IncomeExpenseSummary(
                 .padding(top = 8.dp)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .background(MiuixTheme.colorScheme.secondaryContainer)
                 .then(
                     when {
                         isLoading -> Modifier.shimmer()
@@ -92,8 +94,8 @@ fun IncomeExpenseSummary(
                     .clip(CircleShape)
                     .background(
                         when {
-                            isLoading -> MaterialTheme.colorScheme.outlineVariant
-                            else -> MaterialTheme.colorScheme.primary
+                            isLoading -> MiuixTheme.colorScheme.outline
+                            else -> MiuixTheme.colorScheme.primary
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -106,7 +108,7 @@ fun IncomeExpenseSummary(
                             else -> Icons.AutoMirrored.Rounded.TrendingDown
                         },
                         null,
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = MiuixTheme.colorScheme.onPrimary
                     )
             }
             Column(
@@ -119,7 +121,7 @@ fun IncomeExpenseSummary(
             ) {
                 Text(
                     totalDifference.toIndonesianCurrency(),
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = when {
                         isLoading -> Color.Transparent
@@ -130,7 +132,7 @@ fun IncomeExpenseSummary(
                             isLoading -> Modifier
                                 .fillMaxWidth(.5f)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(MaterialTheme.colorScheme.outlineVariant)
+                                .background(MiuixTheme.colorScheme.outline)
 
                             else -> Modifier
                         }
@@ -144,17 +146,17 @@ fun IncomeExpenseSummary(
                         changePercent < 0 -> "$changePercent% dari periode sebelumnya"
                         else -> "Tidak ada perubahan"
                     },
-                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = 14.sp,
                     color = when {
                         isLoading -> Color.Transparent
-                        else -> MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = .8f)
+                        else -> MiuixTheme.colorScheme.onSecondaryContainer.copy(alpha = .8f)
                     },
                     modifier = Modifier.then(
                         when {
                             isLoading -> Modifier
                                 .fillMaxWidth(.8f)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(MaterialTheme.colorScheme.outlineVariant)
+                                .background(MiuixTheme.colorScheme.outline)
 
                             else -> Modifier
                         }
@@ -176,7 +178,7 @@ private fun SummaryCard(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MiuixTheme.colorScheme.secondaryContainer)
             .then(
                 when {
                     isLoading -> Modifier.shimmer()
@@ -197,7 +199,7 @@ private fun SummaryCard(
                     null,
                     tint = when {
                         isLoading -> Color.Transparent
-                        else -> MaterialTheme.colorScheme.primary
+                        else -> MiuixTheme.colorScheme.primary
                     },
                     modifier = Modifier
                         .size(14.dp)
@@ -205,7 +207,7 @@ private fun SummaryCard(
                             when {
                                 isLoading -> Modifier
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.outlineVariant)
+                                    .background(MiuixTheme.colorScheme.outline)
 
                                 else -> Modifier
                             }
@@ -213,17 +215,17 @@ private fun SummaryCard(
                 )
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 12.sp,
                     color = when {
                         isLoading -> Color.Transparent
-                        else -> MaterialTheme.colorScheme.primary
+                        else -> MiuixTheme.colorScheme.primary
                     },
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.then(
                         when {
                             isLoading -> Modifier
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(MaterialTheme.colorScheme.outlineVariant)
+                                .background(MiuixTheme.colorScheme.outline)
 
                             else -> Modifier
                         }
@@ -232,18 +234,18 @@ private fun SummaryCard(
             }
             Text(
                 text = value.toIndonesianCurrency(),
-                style = MaterialTheme.typography.titleSmall,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = when {
                     isLoading -> Color.Transparent
-                    else -> MaterialTheme.colorScheme.onSecondaryContainer
+                    else -> MiuixTheme.colorScheme.onSecondaryContainer
                 },
                 modifier = Modifier.then(
                     when {
                         isLoading -> Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.outlineVariant)
+                            .background(MiuixTheme.colorScheme.outline)
 
                         else -> Modifier
                     }
@@ -256,5 +258,7 @@ private fun SummaryCard(
 @Composable
 @Preview
 private fun Preview() {
-    IncomeExpenseSummary()
+    ArtaMiuixTheme {
+        IncomeExpenseSummary()
+    }
 }

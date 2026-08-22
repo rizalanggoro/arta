@@ -1,6 +1,5 @@
 package id.my.rizalanggoro.arta.core.application.entry
 
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
@@ -15,7 +14,6 @@ import id.my.rizalanggoro.arta.feature.wallet.presentation.select.SelectWalletSc
 import id.my.rizalanggoro.arta.feature.wallet.presentation.upsert.UpsertWalletScreen
 import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
 
-@OptIn(ExperimentalMaterial3Api::class)
 fun EntryProviderScope<NavKey>.walletEntry() {
     entry<WalletRoute.List> {
         ListWalletScreen()

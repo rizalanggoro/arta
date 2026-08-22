@@ -5,8 +5,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -33,10 +31,11 @@ import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.data.ThemePrefs
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.BottomSheetSceneStrategy
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.shared.component.LocalIsDarkTheme
+import top.yukonga.miuix.kmp.basic.Surface
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComposeApp(
     authPrefs: AuthPrefs,
@@ -57,50 +56,52 @@ fun ComposeApp(
     val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
     val dialogStrategy = remember { DialogSceneStrategy<NavKey>() }
 
-    ArtaTheme(darkTheme = isDarkTheme) {
-        CompositionLocalProvider(LocalBackStack provides backStack) {
-            Surface {
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = { backStack.removeLastOrNull() },
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
-                    ),
-                    sceneStrategies = listOf(
-                        bottomSheetStrategy,
-                        dialogStrategy
-                    ),
-                    transitionSpec = {
-                        slideInHorizontally(
-                            initialOffsetX = { it },
-                        ) + fadeIn() togetherWith slideOutHorizontally(
-                            targetOffsetX = { -it },
-                        ) + fadeOut()
-                    },
-                    popTransitionSpec = {
-                        slideInHorizontally(
-                            initialOffsetX = { -it },
-                        ) + fadeIn() togetherWith slideOutHorizontally(
-                            targetOffsetX = { it },
-                        ) + fadeOut()
-                    },
-                    predictivePopTransitionSpec = {
-                        slideInHorizontally(initialOffsetX = { -it }
-                        ) + fadeIn() togetherWith slideOutHorizontally(
-                            targetOffsetX = { it },
-                        ) + fadeOut()
-                    },
-                    entryProvider = entryProvider {
-                        authEntry()
-                        walletEntry()
-                        categoryEntry()
-                        transactionEntry()
-                        goldEntry()
-                        homeEntry()
-                        otherEntry()
-                    },
-                )
+    CompositionLocalProvider(LocalIsDarkTheme provides isDarkTheme) {
+        ArtaMiuixTheme {
+            CompositionLocalProvider(LocalBackStack provides backStack) {
+                Surface {
+                    NavDisplay(
+                        backStack = backStack,
+                        onBack = { backStack.removeLastOrNull() },
+                        entryDecorators = listOf(
+                            rememberSaveableStateHolderNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator(),
+                        ),
+                        sceneStrategies = listOf(
+                            bottomSheetStrategy,
+                            dialogStrategy
+                        ),
+                        transitionSpec = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                            ) + fadeIn() togetherWith slideOutHorizontally(
+                                targetOffsetX = { -it },
+                            ) + fadeOut()
+                        },
+                        popTransitionSpec = {
+                            slideInHorizontally(
+                                initialOffsetX = { -it },
+                            ) + fadeIn() togetherWith slideOutHorizontally(
+                                targetOffsetX = { it },
+                            ) + fadeOut()
+                        },
+                        predictivePopTransitionSpec = {
+                            slideInHorizontally(initialOffsetX = { -it }
+                            ) + fadeIn() togetherWith slideOutHorizontally(
+                                targetOffsetX = { it },
+                            ) + fadeOut()
+                        },
+                        entryProvider = entryProvider {
+                            authEntry()
+                            walletEntry()
+                            categoryEntry()
+                            transactionEntry()
+                            goldEntry()
+                            homeEntry()
+                            otherEntry()
+                        },
+                    )
+                }
             }
         }
     }

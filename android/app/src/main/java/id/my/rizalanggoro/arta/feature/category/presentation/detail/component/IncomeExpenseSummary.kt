@@ -11,9 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.CallMade
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,8 +20,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun IncomeExpenseSummary(
@@ -65,7 +66,7 @@ private fun SummaryCard(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MiuixTheme.colorScheme.secondaryContainer)
             .then(
                 when {
                     isLoading -> Modifier.shimmer()
@@ -86,7 +87,7 @@ private fun SummaryCard(
                     null,
                     tint = when {
                         isLoading -> Color.Transparent
-                        else -> MaterialTheme.colorScheme.primary
+                        else -> MiuixTheme.colorScheme.primary
                     },
                     modifier = Modifier
                         .size(16.dp)
@@ -98,17 +99,17 @@ private fun SummaryCard(
                         )
                         .background(
                             when {
-                                isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                isLoading -> MiuixTheme.colorScheme.outline
                                 else -> Color.Unspecified
                             }
                         )
                 )
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 12.sp,
                     color = when {
                         isLoading -> Color.Transparent
-                        else -> MaterialTheme.colorScheme.primary
+                        else -> MiuixTheme.colorScheme.primary
                     },
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
@@ -120,7 +121,7 @@ private fun SummaryCard(
                         )
                         .background(
                             when {
-                                isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                isLoading -> MiuixTheme.colorScheme.outline
                                 else -> Color.Unspecified
                             }
                         )
@@ -128,11 +129,11 @@ private fun SummaryCard(
             }
             Text(
                 text = value.toIndonesianCurrency(),
-                style = MaterialTheme.typography.titleMedium,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = when {
                     isLoading -> Color.Transparent
-                    else -> MaterialTheme.colorScheme.onSecondaryContainer
+                    else -> MiuixTheme.colorScheme.onSecondaryContainer
                 },
                 modifier = Modifier
                     .then(
@@ -146,7 +147,7 @@ private fun SummaryCard(
                     )
                     .background(
                         when {
-                            isLoading -> MaterialTheme.colorScheme.outlineVariant
+                            isLoading -> MiuixTheme.colorScheme.outline
                             else -> Color.Unspecified
                         }
                     )

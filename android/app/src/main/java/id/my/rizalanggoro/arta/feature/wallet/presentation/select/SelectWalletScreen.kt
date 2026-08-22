@@ -11,24 +11,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.constant.toWalletName
@@ -37,13 +29,18 @@ import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.openapi.models.DtoWallet
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.RadioButton
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun SelectWalletScreen(
     vm: SelectWalletVM = hiltViewModel(),
 ) {
@@ -68,7 +65,6 @@ fun SelectWalletScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
     uiState: SelectWalletUiState = SelectWalletUiState(),
     onClickRetry: () -> Unit = {},
@@ -87,9 +83,10 @@ private fun Content(
         ) {
             Text(
                 text = "Pilih Dompet",
-                style = MaterialTheme.typography.titleLarge,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold
             )
-            FilledTonalIconButton(onClick = onClickManageWallet) {
+            IconButton(onClick = onClickManageWallet) {
                 Icon(
                     Icons.Rounded.Settings,
                     null
@@ -105,7 +102,7 @@ private fun Content(
                         .padding(32.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    LoadingIndicator()
+                    InfiniteProgressIndicator(color = MiuixTheme.colorScheme.primary)
                 }
             }
 
@@ -128,26 +125,30 @@ private fun Content(
                         .padding(bottom = 16.dp)
                 ) {
                     items(uiState.wallets) { wallet ->
-                        ListItem(
-                            colors = ListItemDefaults.colors(
-                                containerColor = Color.Transparent
-                            ),
-                            leadingContent = {
-                                RadioButton(
-                                    selected = uiState.selectedWallet?.id == wallet.data.id,
-                                    onClick = { onClickWallet(wallet.data) },
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onClickWallet(wallet.data) }
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                        ) {
+                            RadioButton(
+                                selected = uiState.selectedWallet?.id == wallet.data.id,
+                                onClick = { onClickWallet(wallet.data) },
+                            )
+                            Column {
+                                Text(
+                                    wallet.data.name.orEmpty(),
+                                    fontSize = 16.sp
                                 )
-                            },
-                            headlineContent = {
-                                Text(wallet.data.name.orEmpty())
-                            },
-                            supportingContent = {
-                                Text(wallet.data.type.orEmpty().toWalletName())
-                            },
-                            modifier = Modifier.clickable {
-                                onClickWallet(wallet.data)
+                                Text(
+                                    wallet.data.type.orEmpty().toWalletName(),
+                                    fontSize = 14.sp,
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                )
                             }
-                        )
+                        }
                     }
                 }
             }
@@ -158,7 +159,7 @@ private fun Content(
 @Preview(showBackground = true, name = "Wallet Selector")
 @Composable
 private fun SelectWalletPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = SelectWalletUiState(
                 wallets = listOf(
@@ -201,7 +202,7 @@ private fun SelectWalletPreview() {
 @Preview(showBackground = true, name = "Wallet Selector - Loading")
 @Composable
 private fun SelectWalletLoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = SelectWalletUiState(
                 isLoading = true
@@ -213,7 +214,7 @@ private fun SelectWalletLoadingPreview() {
 @Preview(showBackground = true, name = "Wallet Selector - Error")
 @Composable
 private fun SelectWalletErrorPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = SelectWalletUiState(
                 errorMessage = "Gagal memuat data wallet"
@@ -225,7 +226,7 @@ private fun SelectWalletErrorPreview() {
 @Preview(showBackground = true, name = "Wallet Selector - Empty")
 @Composable
 private fun SelectWalletEmptyPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = SelectWalletUiState(
                 wallets = emptyList()

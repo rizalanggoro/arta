@@ -10,14 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.EditNote
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,11 +17,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.openapi.models.DomainGoldTaxPreference
 import id.my.rizalanggoro.arta.openapi.models.DtoGoldTax
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PriceSummary(
     retailPrice: Double = 0.0,
@@ -37,12 +36,12 @@ fun PriceSummary(
     onClickManageTax: () -> Unit = {},
 ) {
     Card(
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        cornerRadius = 24.dp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background
+        colors = CardDefaults.defaultColors(
+            color = MiuixTheme.colorScheme.background
         ),
     ) {
         Column(
@@ -56,19 +55,19 @@ fun PriceSummary(
             ) {
                 Text(
                     "Ringkasan Harga",
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
 
                 Button(onClick = onClickManageTax) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(ButtonDefaults.IconSpacing),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             Icons.Rounded.EditNote,
                             null,
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                            modifier = Modifier.size(18.dp)
                         )
                         Text("Atur pajak")
                     }
@@ -79,18 +78,18 @@ fun PriceSummary(
                 Column(
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .background(MiuixTheme.colorScheme.surfaceContainer)
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
                     Text(
                         retailPrice.toIndonesianCurrency(),
-                        style = MaterialTheme.typography.titleMedium
+                        fontSize = 16.sp
                     )
                     Text(
                         "Harga emas/gram (sebelum pajak)",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline
+                        fontSize = 12.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                     )
                 }
 
@@ -98,8 +97,8 @@ fun PriceSummary(
                 if (goldTaxes.isNotEmpty()) {
                     Text(
                         "Berikut harga emas/gram untuk setiap karat setelah perhitungan konfigurasi pajak",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline,
+                        fontSize = 12.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                         modifier = Modifier.padding(top = 8.dp),
                     )
                     Column(
@@ -115,7 +114,7 @@ fun PriceSummary(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(4.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                                    .background(MiuixTheme.colorScheme.surfaceContainer)
                                     .padding(16.dp)
                             ) {
                                 Column(
@@ -123,19 +122,19 @@ fun PriceSummary(
                                 ) {
                                     Text(
                                         it.sellPrice.toIndonesianCurrency(),
-                                        style = MaterialTheme.typography.titleMedium,
+                                        fontSize = 16.sp
                                     )
                                     Text(
                                         "Besaran pajak ${it.data.taxRate}%",
-                                        style = MaterialTheme.typography.labelSmall,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Normal,
-                                        color = MaterialTheme.colorScheme.outline
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                     )
                                 }
                                 Text(
                                     "${it.data.carat.toInt()}k",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    fontSize = 12.sp,
+                                    color = MiuixTheme.colorScheme.primary,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
@@ -150,26 +149,30 @@ fun PriceSummary(
 @Composable
 @Preview
 private fun Preview() {
-    PriceSummary(
-        retailPrice = 2800000.0,
-        goldTaxes = listOf(
-            DtoGoldTax(
-                data = DomainGoldTaxPreference(
-                    carat = 17.0,
-                    createdAt = "",
-                    id = 1,
-                    taxRate = 5.0,
-                    updatedAt = "",
-                    userId = 1,
+    ArtaMiuixTheme {
+        PriceSummary(
+            retailPrice = 2800000.0,
+            goldTaxes = listOf(
+                DtoGoldTax(
+                    data = DomainGoldTaxPreference(
+                        carat = 17.0,
+                        createdAt = "",
+                        id = 1,
+                        taxRate = 5.0,
+                        updatedAt = "",
+                        userId = 1,
+                    ),
+                    sellPrice = 1200000.0
                 ),
-                sellPrice = 1200000.0
-            ),
+            )
         )
-    )
+    }
 }
 
 @Composable
 @Preview
 private fun EmptyPreview() {
-    PriceSummary()
+    ArtaMiuixTheme {
+        PriceSummary()
+    }
 }

@@ -1,10 +1,13 @@
 package id.my.rizalanggoro.arta.shared.component
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,20 +18,24 @@ fun MyDatePickerDialog(
     onDismiss: () -> Unit = {},
     onDateSelected: (Long?) -> Unit = {}
 ) {
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = { onDateSelected(state.selectedDateMillis) }) {
-                Text("Selesai")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Batal")
-            }
-        }
+    MaterialTheme(
+        colorScheme = if (LocalIsDarkTheme.current) darkColorScheme() else lightColorScheme()
     ) {
-        DatePicker(state = state)
+        DatePickerDialog(
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(onClick = { onDateSelected(state.selectedDateMillis) }) {
+                    Text("Selesai")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Batal")
+                }
+            }
+        ) {
+            DatePicker(state = state)
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 package id.my.rizalanggoro.arta.feature.transaction.presentation.upsert
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,24 +10,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material.icons.rounded.Wallet
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,9 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.core.event.AppEvent
@@ -47,11 +36,25 @@ import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.extension.isValidInputNumber
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.MyDatePickerDialog
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val ErrorColor = Color(0xFFE53935)
+
 @Composable
 fun UpsertTransactionScreen(
     vm: UpsertTransactionVM = hiltViewModel(),
@@ -95,7 +98,6 @@ fun UpsertTransactionScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
@@ -109,14 +111,10 @@ private fun Content(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        when {
-                            uiState.isUpdate -> "Ubah Transaksi"
-                            else -> "Tambah Transaksi"
-                        }
-                    )
+            SmallTopAppBar(
+                title = when {
+                    uiState.isUpdate -> "Ubah Transaksi"
+                    else -> "Tambah Transaksi"
                 },
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
@@ -127,7 +125,7 @@ private fun Content(
                 },
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { SnackbarHost(state = snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -135,51 +133,46 @@ private fun Content(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
         ) {
-            ListItem(
-                modifier = Modifier.clip(RoundedCornerShape(16.dp)),
-                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                leadingContent = {
+            BasicComponent(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MiuixTheme.colorScheme.surfaceContainer),
+                title = "Dompet",
+                summary = uiState.selectedWallet?.name ?: "Tidak ada dompet",
+                startAction = {
                     Icon(
                         Icons.Rounded.Wallet, null
                     )
                 },
-                headlineContent = {
-                    Text("Dompet")
-                },
-                supportingContent = {
-                    Text(uiState.selectedWallet?.name ?: "Tidak ada dompet")
-                },
-                trailingContent = {
+                endActions = {
                     Icon(
                         Icons.Rounded.ChevronRight, null
                     )
                 })
 
-            TextField(
-                value = uiState.amount,
-                onValueChange = {
-                    if (it.isValidInputNumber()) onAmountChanged(it)
-                },
-                label = { Text("Jumlah") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                isError = uiState.amountError != null,
-                supportingText = when {
-                    uiState.amountError != null -> {
-                        { Text(uiState.amountError) }
-                    }
-
-                    else -> null
-                },
-                enabled = !uiState.isLoading,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number
+            Column {
+                TextField(
+                    value = uiState.amount,
+                    onValueChange = {
+                        if (it.isValidInputNumber()) onAmountChanged(it)
+                    },
+                    label = "Jumlah",
+                    useLabelAsPlaceholder = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    enabled = !uiState.isLoading,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    )
                 )
-            )
+                uiState.amountError?.let {
+                    Text(it, fontSize = 13.sp, color = ErrorColor)
+                }
+            }
 
-            ListItem(
+            BasicComponent(
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .clip(
@@ -187,26 +180,23 @@ private fun Content(
                             topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 4.dp
                         )
                     )
-                    .clickable {
-                        onClickSelectCategory()
-                    }, colors = ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ), leadingContent = {
+                    .background(MiuixTheme.colorScheme.surfaceContainer),
+                title = "Kategori",
+                summary = uiState.selectedCategory?.name ?: "Pilih kategori",
+                startAction = {
                     Icon(
                         Icons.Rounded.Category, null
                     )
-                }, headlineContent = {
-                    Text("Kategori")
-                }, supportingContent = {
-                    Text(uiState.selectedCategory?.name ?: "Pilih kategori")
-                }, trailingContent = {
+                },
+                endActions = {
                     Icon(
                         Icons.Rounded.ChevronRight, null
                     )
-                }
+                },
+                onClick = onClickSelectCategory,
             )
 
-            ListItem(
+            BasicComponent(
                 modifier = Modifier
                     .padding(top = 2.dp)
                     .clip(
@@ -214,34 +204,27 @@ private fun Content(
                             topStart = 4.dp, topEnd = 4.dp, bottomStart = 16.dp, bottomEnd = 16.dp
                         )
                     )
-                    .clickable {
-                        onClickSelectDate()
-                    },
-                colors = ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-                leadingContent = {
+                    .background(MiuixTheme.colorScheme.surfaceContainer),
+                title = "Tanggal",
+                summary = uiState.date.toIndonesianDate(),
+                startAction = {
                     Icon(
                         Icons.Rounded.Today, null
                     )
                 },
-                headlineContent = {
-                    Text("Tanggal")
-                },
-                supportingContent = {
-                    Text(uiState.date.toIndonesianDate())
-                },
-                trailingContent = {
+                endActions = {
                     Icon(
                         Icons.Rounded.ChevronRight, null
                     )
-                }
+                },
+                onClick = onClickSelectDate,
             )
 
             TextField(
                 value = uiState.description,
                 onValueChange = onDescriptionChanged,
-                label = { Text("Catatan (opsional)") },
+                label = "Catatan (opsional)",
+                useLabelAsPlaceholder = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
@@ -257,7 +240,7 @@ private fun Content(
                         .padding(top = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    LoadingIndicator()
+                    InfiniteProgressIndicator()
                 }
 
                 else -> Button(
@@ -265,6 +248,8 @@ private fun Content(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp),
+                    colors = ButtonDefaults.buttonColorsPrimary(),
+                    enabled = !uiState.isLoading
                 ) {
                     Text("Simpan")
                 }
@@ -273,11 +258,10 @@ private fun Content(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, name = "Create Transaction")
 @Composable
 private fun CreateTransactionPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = UpsertTransactionUiState(
                 amount = "50000",
@@ -286,11 +270,10 @@ private fun CreateTransactionPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, name = "Update Transaction")
 @Composable
 private fun UpdateTransactionPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = UpsertTransactionUiState(
                 transactionId = 10,
@@ -303,11 +286,10 @@ private fun UpdateTransactionPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, name = "Upsert Transaction - Loading")
 @Composable
 private fun UpsertTransactionLoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = UpsertTransactionUiState(
                 isLoading = true,
@@ -317,11 +299,10 @@ private fun UpsertTransactionLoadingPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, name = "Upsert Transaction - Error")
 @Composable
 private fun UpsertTransactionErrorPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = UpsertTransactionUiState(
                 amountError = "Jumlah tidak valid",

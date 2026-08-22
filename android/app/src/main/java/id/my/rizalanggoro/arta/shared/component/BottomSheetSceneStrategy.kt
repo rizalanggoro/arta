@@ -1,6 +1,5 @@
 package id.my.rizalanggoro.arta.shared.component
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
@@ -44,9 +43,8 @@ internal data class BottomSheetScene<T : Any>(
         val lifecycleOwner = rememberLifecycleOwner()
         var visible by remember { mutableStateOf(true) }
         val sheetTitle = remember { mutableStateOf<String?>(null) }
-        val colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-        MiuixTheme(colors = colors) {
-            CompositionLocalProvider(LocalContentColor provides colors.onBackground) {
+        ArtaMiuixTheme {
+            CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.onBackground) {
                 WindowBottomSheet(
                     show = visible,
                     title = sheetTitle.value,

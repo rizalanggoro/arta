@@ -11,13 +11,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
@@ -42,11 +36,18 @@ import id.my.rizalanggoro.arta.core.utils.Samples
 import id.my.rizalanggoro.arta.feature.category.presentation.detail.component.IncomeExpenseSummary
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.DashboardCategoryListItem
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.TransactionListItem
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.PullToRefresh
+import top.yukonga.miuix.kmp.basic.PullToRefreshState
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun HomeTransactionScreen(vm: HomeTransactionVM = hiltViewModel()) {
@@ -94,7 +95,7 @@ fun HomeTransactionScreen(vm: HomeTransactionVM = hiltViewModel()) {
 
 @Composable
 private fun Content(
-    pullToRefreshState: PullToRefreshState = PullToRefreshState(),
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     uiState: HomeTransactionUiState = HomeTransactionUiState(),
     onRefresh: () -> Unit = {},
     onClickCategory: (DomainCategory) -> Unit = {},
@@ -109,17 +110,11 @@ private fun Content(
             TransactionGroupType.TRANSACTION -> transactions.isNotEmpty()
         }
 
-        PullToRefreshBox(
-            state = pullToRefreshState,
+        PullToRefresh(
+            pullToRefreshState = pullToRefreshState,
             isRefreshing = uiState.isLoading && hasData,
             onRefresh = onRefresh,
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    state = pullToRefreshState,
-                    isRefreshing = uiState.isLoading && hasData,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-            }
+            modifier = Modifier.fillMaxSize()
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
@@ -131,11 +126,10 @@ private fun Content(
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        FilledTonalIconButton(onClick = onClickPrevTimeRange) {
+                        IconButton(onClick = onClickPrevTimeRange) {
                             Icon(
                                 Icons.Rounded.ChevronLeft,
-                                null,
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                null
                             )
                         }
                         Column(
@@ -149,8 +143,8 @@ private fun Content(
                                     TransactionTimeRangeType.WEEKLY -> "Mingguan"
                                     TransactionTimeRangeType.MONTHLY -> "Bulanan"
                                 },
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 14.sp,
+                                color = MiuixTheme.colorScheme.primary,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
@@ -168,15 +162,14 @@ private fun Content(
                                     }
                                     TransactionTimeRangeType.MONTHLY -> startDateMillis.toFormattedDate("MMMM yyyy")
                                 },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.outline
+                                fontSize = 12.sp,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                             )
                         }
-                        FilledTonalIconButton(onClick = onClickNextTimeRange) {
+                        IconButton(onClick = onClickNextTimeRange) {
                             Icon(
                                 Icons.Rounded.ChevronRight,
-                                null,
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                null
                             )
                         }
                     }
@@ -287,8 +280,8 @@ private fun Content(
 private fun FooterText(text: String) {
     Text(
         text,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.outline,
+        fontSize = 12.sp,
+        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         textAlign = TextAlign.Center,
         modifier = Modifier
             .fillMaxWidth()
@@ -299,7 +292,7 @@ private fun FooterText(text: String) {
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = HomeTransactionUiState(
                 categories = Samples.dtoCategories.take(3)
@@ -311,7 +304,7 @@ private fun Preview() {
 @Preview(showBackground = true)
 @Composable
 private fun TransactionPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = HomeTransactionUiState(
                 groupBy = TransactionGroupType.TRANSACTION

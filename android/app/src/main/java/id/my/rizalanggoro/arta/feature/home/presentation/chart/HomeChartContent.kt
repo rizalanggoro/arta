@@ -4,9 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,7 +11,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import androidx.compose.ui.unit.sp
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Text
 
 @Composable
 fun HomeChartScreen(vm: ChartVM = viewModel(factory = ChartVM.Factory)) {
@@ -40,7 +40,7 @@ private fun Content(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                fontSize = 16.sp,
             )
             Text(text = description)
         }
@@ -50,7 +50,7 @@ private fun Content(
 @Preview(showBackground = true, name = "Chart")
 @Composable
 private fun HomeChartPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             title = "Chart",
             description = "Visualisasi transaksi dan pola pengeluaran.",

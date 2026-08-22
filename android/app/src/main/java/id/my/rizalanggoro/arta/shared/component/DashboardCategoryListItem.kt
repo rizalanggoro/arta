@@ -14,9 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.CallMade
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,12 +22,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.utils.getBottomRadius
 import id.my.rizalanggoro.arta.core.utils.getTopRadius
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DtoCategory
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun DashboardCategoryListItem(
@@ -58,7 +59,7 @@ fun DashboardCategoryListItem(
                     bottomEnd = getBottomRadius(index, size),
                 )
             )
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .background(MiuixTheme.colorScheme.surfaceContainer)
             .clickable { onClick(category.data) }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -69,10 +70,10 @@ fun DashboardCategoryListItem(
                 .clip(CircleShape)
                 .background(
                     when {
-                        isLoading -> MaterialTheme.colorScheme.outlineVariant
+                        isLoading -> MiuixTheme.colorScheme.outline
                         else -> when (category.data.type) {
-                            "income" -> MaterialTheme.colorScheme.primaryContainer
-                            else -> MaterialTheme.colorScheme.errorContainer
+                            "income" -> MiuixTheme.colorScheme.primary
+                            else -> MiuixTheme.colorScheme.error
                         }
                     }
                 )
@@ -87,8 +88,8 @@ fun DashboardCategoryListItem(
                     },
                     null,
                     tint = when (category.data.type) {
-                        "income" -> MaterialTheme.colorScheme.primary
-                        else -> MaterialTheme.colorScheme.error
+                        "income" -> MiuixTheme.colorScheme.onPrimary
+                        else -> MiuixTheme.colorScheme.onError
                     }
                 )
         }
@@ -103,7 +104,7 @@ fun DashboardCategoryListItem(
         ) {
             Text(
                 (category.totalAmount ?: 0.0).toIndonesianCurrency(),
-                style = MaterialTheme.typography.titleMedium,
+                fontSize = 16.sp,
                 color = when {
                     isLoading -> Color.Transparent
                     else -> Color.Unspecified
@@ -114,7 +115,7 @@ fun DashboardCategoryListItem(
                             .shimmer()
                             .fillMaxWidth(.5f)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.outlineVariant)
+                            .background(MiuixTheme.colorScheme.outline)
 
                         else -> Modifier
                     }
@@ -122,10 +123,10 @@ fun DashboardCategoryListItem(
             )
             Text(
                 category.data.name,
-                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 14.sp,
                 color = when {
                     isLoading -> Color.Transparent
-                    else -> MaterialTheme.colorScheme.outline
+                    else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
                 },
                 modifier = Modifier.then(
                     when {
@@ -133,7 +134,7 @@ fun DashboardCategoryListItem(
                             .shimmer()
                             .fillMaxWidth(.8f)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.outlineVariant)
+                            .background(MiuixTheme.colorScheme.outline)
 
                         else -> Modifier
                     }
@@ -142,18 +143,18 @@ fun DashboardCategoryListItem(
         }
         Text(
             "${category.transactionCount ?: 0} trx",
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.SemiBold, 
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
             color = when {
                 isLoading -> Color.Transparent
-                else -> MaterialTheme.colorScheme.primary
+                else -> MiuixTheme.colorScheme.primary
             },
             modifier = Modifier.then(
                 when {
                     isLoading -> Modifier
                         .shimmer()
                         .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.outlineVariant)
+                        .background(MiuixTheme.colorScheme.outline)
 
                     else -> Modifier
                 }
@@ -165,19 +166,21 @@ fun DashboardCategoryListItem(
 @Composable
 @Preview(showBackground = true)
 private fun Preview() {
-    DashboardCategoryListItem(
-        category = DtoCategory(
-            data = DomainCategory(
-                createdAt = "2024-06-01T00:00:00Z",
-                id = 1,
-                name = "Makanan dan minuman",
-                type = "expense",
-                updatedAt = "2024-06-01T00:00:00Z",
-                userId = 1
-            ),
-            totalAmount = 125500.0,
-            transactionCount = 3,
-            transactions = emptyList()
+    ArtaMiuixTheme {
+        DashboardCategoryListItem(
+            category = DtoCategory(
+                data = DomainCategory(
+                    createdAt = "2024-06-01T00:00:00Z",
+                    id = 1,
+                    name = "Makanan dan minuman",
+                    type = "expense",
+                    updatedAt = "2024-06-01T00:00:00Z",
+                    userId = 1
+                ),
+                totalAmount = 125500.0,
+                transactionCount = 3,
+                transactions = emptyList()
+            )
         )
-    )
+    }
 }

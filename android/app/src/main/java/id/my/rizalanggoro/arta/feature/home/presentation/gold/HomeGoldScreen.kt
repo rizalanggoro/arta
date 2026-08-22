@@ -1,5 +1,6 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.gold
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,10 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,8 +26,14 @@ import id.my.rizalanggoro.arta.openapi.models.DtoGold
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.shared.component.GoldListItem
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.PullToRefresh
+import top.yukonga.miuix.kmp.basic.PullToRefreshState
+import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.darkColorScheme
+import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
 fun HomeGoldScreen(
@@ -61,60 +64,58 @@ fun HomeGoldScreen(
 
 @Composable
 private fun Content(
-    pullToRefreshState: PullToRefreshState = PullToRefreshState(),
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     uiState: HomeGoldUiState = HomeGoldUiState(),
     onRefresh: () -> Unit = {},
     onClickRetry: () -> Unit = {},
     onLongClickGold: (DomainGold) -> Unit = {},
 ) {
-    when {
-        uiState.isLoading && uiState.golds.isEmpty() -> Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            LoadingIndicator()
-        }
-
-        uiState.errorMessage != null && uiState.golds.isEmpty() -> ErrorPlaceholder(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            onClickRetry = onClickRetry
-        )
-
-        uiState.golds.isEmpty() -> EmptyPlaceholder(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        )
-
-        else -> PullToRefreshBox(
-            state = pullToRefreshState,
-            isRefreshing = uiState.isLoading && uiState.golds.isNotEmpty(),
-            onRefresh = onRefresh,
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    state = pullToRefreshState,
-                    isRefreshing = uiState.isLoading && uiState.golds.isNotEmpty(),
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-            }
-        ) {
-            LazyColumn(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+    MiuixTheme(
+        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+    ) {
+        when {
+            uiState.isLoading && uiState.golds.isEmpty() -> Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize(),
             ) {
-                itemsIndexed(uiState.golds) { index, gold ->
-                    GoldListItem(
-                        gold = gold,
-                        onLongClick = onLongClickGold,
-                        index = index,
-                        size = uiState.golds.size
-                    )
-                }
+                InfiniteProgressIndicator(color = MiuixTheme.colorScheme.primary)
+            }
 
-                item {
-                    Box(modifier = Modifier.height((56 + 32).dp))
+            uiState.errorMessage != null && uiState.golds.isEmpty() -> ErrorPlaceholder(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                onClickRetry = onClickRetry
+            )
+
+            uiState.golds.isEmpty() -> EmptyPlaceholder(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            )
+
+            else -> PullToRefresh(
+                isRefreshing = uiState.isLoading && uiState.golds.isNotEmpty(),
+                onRefresh = onRefresh,
+                modifier = Modifier.fillMaxSize(),
+                pullToRefreshState = pullToRefreshState,
+            ) {
+                LazyColumn(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    itemsIndexed(uiState.golds) { index, gold ->
+                        GoldListItem(
+                            gold = gold,
+                            onLongClick = onLongClickGold,
+                            index = index,
+                            size = uiState.golds.size
+                        )
+                    }
+
+                    item {
+                        Box(modifier = Modifier.height((56 + 32).dp))
+                    }
                 }
             }
         }
@@ -124,66 +125,58 @@ private fun Content(
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
-    ArtaTheme {
-        Content(
-            uiState = HomeGoldUiState(
-                golds = List(5) {
-                    DtoGold(
-                        data = DomainGold(
-                            carat = 24.0,
-                            createdAt = "2026-05-25T14:38:00.000+07:00",
-                            date = "2026-05-25T14:38:00.000+07:00",
-                            grams = 3.3,
-                            id = 1,
-                            notes = "",
-                            price = 1500000.0,
-                            type = "jewelry",
-                            updatedAt = "2026-05-25T14:38:00.000+07:00",
-                            walletId = 1
-                        ),
-                        profit = ((it - 1) * 500000.0),
-                        sellPrice = (1500000 + ((it - 1) * 500000.0)),
-                    )
-                },
-                isLoading = false,
-                errorMessage = null,
-            )
+    Content(
+        uiState = HomeGoldUiState(
+            golds = List(5) {
+                DtoGold(
+                    data = DomainGold(
+                        carat = 24.0,
+                        createdAt = "2026-05-25T14:38:00.000+07:00",
+                        date = "2026-05-25T14:38:00.000+07:00",
+                        grams = 3.3,
+                        id = 1,
+                        notes = "",
+                        price = 1500000.0,
+                        type = "jewelry",
+                        updatedAt = "2026-05-25T14:38:00.000+07:00",
+                        walletId = 1
+                    ),
+                    profit = ((it - 1) * 500000.0),
+                    sellPrice = (1500000 + ((it - 1) * 500000.0)),
+                )
+            },
+            isLoading = false,
+            errorMessage = null,
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LoadingPreview() {
-    ArtaTheme {
-        Content(
-            uiState = HomeGoldUiState(
-                isLoading = true
-            )
+    Content(
+        uiState = HomeGoldUiState(
+            isLoading = true
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun EmptyPreview() {
-    ArtaTheme {
-        Content(
-            uiState = HomeGoldUiState(
-                golds = emptyList()
-            )
+    Content(
+        uiState = HomeGoldUiState(
+            golds = emptyList()
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ErrorPreview() {
-    ArtaTheme {
-        Content(
-            uiState = HomeGoldUiState(
-                errorMessage = "Terjadi kesalahan tak terduga"
-            )
+    Content(
+        uiState = HomeGoldUiState(
+            errorMessage = "Terjadi kesalahan tak terduga"
         )
-    }
+    )
 }

@@ -14,9 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.CallMade
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
@@ -33,7 +31,9 @@ import id.my.rizalanggoro.arta.core.utils.getBottomRadius
 import id.my.rizalanggoro.arta.core.utils.getTopRadius
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
-import id.my.rizalanggoro.arta.openapi.models.DtoTransaction
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun TransactionListItem(
@@ -57,7 +57,7 @@ fun TransactionListItem(
                     bottomEnd = getBottomRadius(index, size),
                 )
             )
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .background(MiuixTheme.colorScheme.surfaceContainer)
             .combinedClickable(
                 onClick = { onClick(transaction) },
                 onLongClick = { onLongClick(transaction) }
@@ -78,10 +78,10 @@ fun TransactionListItem(
                 .size(40.dp)
                 .background(
                     when {
-                        isLoading -> MaterialTheme.colorScheme.outlineVariant
+                        isLoading -> MiuixTheme.colorScheme.outline
                         else -> when {
-                            category.type == "income" -> MaterialTheme.colorScheme.primaryContainer
-                            else -> MaterialTheme.colorScheme.errorContainer
+                            category.type == "income" -> MiuixTheme.colorScheme.primary
+                            else -> MiuixTheme.colorScheme.error
                         }
                     }
                 ),
@@ -95,8 +95,8 @@ fun TransactionListItem(
                     },
                     null,
                     tint = when {
-                        category.type == "income" -> MaterialTheme.colorScheme.primary
-                        else -> MaterialTheme.colorScheme.error
+                        category.type == "income" -> MiuixTheme.colorScheme.onPrimary
+                        else -> MiuixTheme.colorScheme.onError
                     }
                 )
         }
@@ -111,14 +111,14 @@ fun TransactionListItem(
         ) {
             Text(
                 transaction.amount.toIndonesianCurrency(),
-                style = MaterialTheme.typography.titleSmall,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.then(
                     when {
                         isLoading -> Modifier
                             .shimmer()
                             .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.outlineVariant)
+                            .background(MiuixTheme.colorScheme.outline)
 
                         else -> Modifier
                     }
@@ -130,17 +130,17 @@ fun TransactionListItem(
             )
             Text(
                 category.name,
-                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 14.sp,
                 color = when {
                     isLoading -> Color.Transparent
-                    else -> MaterialTheme.colorScheme.outline
+                    else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
                 },
                 modifier = Modifier.then(
                     when {
                         isLoading -> Modifier
                             .shimmer()
                             .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.outlineVariant)
+                            .background(MiuixTheme.colorScheme.outline)
 
                         else -> Modifier
                     }
@@ -149,10 +149,10 @@ fun TransactionListItem(
         }
         Text(
             transaction.date.toFormattedDate("E, dd/M/yy"),
-            style = MaterialTheme.typography.labelSmall,
+            fontSize = 11.sp,
             color = when {
                 isLoading -> Color.Transparent
-                else -> MaterialTheme.colorScheme.outline
+                else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
             },
             fontWeight = FontWeight.Normal,
             modifier = Modifier.then(
@@ -160,7 +160,7 @@ fun TransactionListItem(
                     isLoading -> Modifier
                         .shimmer()
                         .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.outlineVariant)
+                        .background(MiuixTheme.colorScheme.outline)
 
                     else -> Modifier
                 }
@@ -172,9 +172,11 @@ fun TransactionListItem(
 @Composable
 @Preview
 private fun IncomePreview() {
-    TransactionListItem(
-        transaction = Samples.domainTransactions.first(),
-        category = Samples.domainCategories.first(),
-        isLoading = true
-    )
+    ArtaMiuixTheme {
+        TransactionListItem(
+            transaction = Samples.domainTransactions.first(),
+            category = Samples.domainCategories.first(),
+            isLoading = true
+        )
+    }
 }

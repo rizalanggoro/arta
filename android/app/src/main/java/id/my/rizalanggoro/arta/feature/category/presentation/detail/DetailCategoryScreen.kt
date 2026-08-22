@@ -14,16 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.CallMade
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
@@ -41,6 +32,15 @@ import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.utils.Samples
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.shared.component.TransactionListItem
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.PullToRefresh
+import top.yukonga.miuix.kmp.basic.PullToRefreshState
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun DetailCategoryScreen(
@@ -80,7 +80,8 @@ private fun Content(
     with(uiState) {
         Scaffold(
             topBar = {
-                TopAppBar(
+                SmallTopAppBar(
+                    title = "Detail Kategori",
                     navigationIcon = {
                         IconButton(onClick = onClickBack) {
                             Icon(
@@ -88,25 +89,15 @@ private fun Content(
                                 null
                             )
                         }
-                    },
-                    title = {
-                        Text("Detail Kategori")
                     }
                 )
             }
         ) {
-            PullToRefreshBox(
+            PullToRefresh(
                 modifier = Modifier.padding(it),
                 isRefreshing = isRefreshing,
                 onRefresh = onRefresh,
-                state = pullToRefreshState,
-                indicator = {
-                    PullToRefreshDefaults.LoadingIndicator(
-                        state = pullToRefreshState,
-                        isRefreshing = isRefreshing,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
-                }
+                pullToRefreshState = pullToRefreshState
             ) {
                 LazyColumn {
                     item {
@@ -123,13 +114,13 @@ private fun Content(
                         ) {
                             Text(
                                 uiState.category?.data?.name ?: "Loading category",
-                                style = MaterialTheme.typography.headlineSmall,
+                                fontSize = 24.sp,
                                 modifier = Modifier.then(
                                     when {
                                         uiState.isLoading -> Modifier
                                             .shimmer()
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(MaterialTheme.colorScheme.outlineVariant)
+                                            .background(MiuixTheme.colorScheme.outline)
 
                                         else -> Modifier
                                     }
@@ -142,17 +133,17 @@ private fun Content(
                             Text(
                                 "Berikut total pemasukan dan daftar transaksi yang dilakukan selama " +
                                         "satu hari, yaitu Senin, 12 Juni 2024",
-                                style = MaterialTheme.typography.bodyMedium,
+                                fontSize = 14.sp,
                                 color = when {
                                     uiState.isLoading -> Color.Transparent
-                                    else -> MaterialTheme.colorScheme.outline
+                                    else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
                                 },
                                 modifier = Modifier.then(
                                     when {
                                         uiState.isLoading -> Modifier
                                             .shimmer()
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(MaterialTheme.colorScheme.outlineVariant)
+                                            .background(MiuixTheme.colorScheme.outline)
 
                                         else -> Modifier
                                     }
@@ -172,7 +163,7 @@ private fun Content(
                                 .padding(horizontal = 16.dp)
                                 .padding(top = 16.dp)
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .background(MiuixTheme.colorScheme.secondaryContainer)
                                 .then(
                                     when {
                                         uiState.isLoading -> Modifier.shimmer()
@@ -198,7 +189,7 @@ private fun Content(
                                         null,
                                         tint = when {
                                             uiState.isLoading -> Color.Transparent
-                                            else -> MaterialTheme.colorScheme.primary
+                                            else -> MiuixTheme.colorScheme.primary
                                         },
                                         modifier = Modifier
                                             .size(16.dp)
@@ -213,7 +204,7 @@ private fun Content(
                                             )
                                             .background(
                                                 when {
-                                                    uiState.isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                                    uiState.isLoading -> MiuixTheme.colorScheme.outline
                                                     else -> Color.Unspecified
                                                 }
                                             )
@@ -223,10 +214,10 @@ private fun Content(
                                             true -> "Pemasukan"
                                             else -> "Pengeluaran"
                                         },
-                                        style = MaterialTheme.typography.bodySmall,
+                                        fontSize = 12.sp,
                                         color = when {
                                             uiState.isLoading -> Color.Transparent
-                                            else -> MaterialTheme.colorScheme.primary
+                                            else -> MiuixTheme.colorScheme.primary
                                         },
                                         fontWeight = FontWeight.SemiBold,
                                         modifier = Modifier
@@ -241,7 +232,7 @@ private fun Content(
                                             )
                                             .background(
                                                 when {
-                                                    uiState.isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                                    uiState.isLoading -> MiuixTheme.colorScheme.outline
                                                     else -> Color.Unspecified
                                                 }
                                             )
@@ -250,11 +241,11 @@ private fun Content(
                                 Text(
                                     text = (uiState.category?.totalAmount
                                         ?: 0.0).toIndonesianCurrency(),
-                                    style = MaterialTheme.typography.titleMedium,
+                                    fontSize = 16.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = when {
                                         uiState.isLoading -> Color.Transparent
-                                        else -> MaterialTheme.colorScheme.onSecondaryContainer
+                                        else -> MiuixTheme.colorScheme.onSecondaryContainer
                                     },
                                     modifier = Modifier
                                         .then(
@@ -268,7 +259,7 @@ private fun Content(
                                         )
                                         .background(
                                             when {
-                                                uiState.isLoading -> MaterialTheme.colorScheme.outlineVariant
+                                                uiState.isLoading -> MiuixTheme.colorScheme.outline
                                                 else -> Color.Unspecified
                                             }
                                         )
@@ -280,7 +271,7 @@ private fun Content(
                     item {
                         Text(
                             "Daftar transaksi",
-                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
@@ -290,7 +281,7 @@ private fun Content(
                                         uiState.isLoading -> Modifier
                                             .shimmer()
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(MaterialTheme.colorScheme.outlineVariant)
+                                            .background(MiuixTheme.colorScheme.outline)
 
                                         else -> Modifier
                                     }

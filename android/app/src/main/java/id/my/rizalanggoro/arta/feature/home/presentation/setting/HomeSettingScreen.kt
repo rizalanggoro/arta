@@ -1,7 +1,6 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.setting
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,12 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Logout
-import androidx.compose.material.icons.rounded.Balance
-import androidx.compose.material.icons.rounded.Category
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,6 +24,7 @@ import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.application.route.OtherRoute
 import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.BadgedBox
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -40,11 +34,14 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.ArrowRight
+import top.yukonga.miuix.kmp.icon.extended.BankCards
+import top.yukonga.miuix.kmp.icon.extended.Close2
+import top.yukonga.miuix.kmp.icon.extended.Contacts
+import top.yukonga.miuix.kmp.icon.extended.GridView
+import top.yukonga.miuix.kmp.icon.extended.Layers
 import top.yukonga.miuix.kmp.icon.extended.Theme
 import top.yukonga.miuix.kmp.icon.extended.Update
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.darkColorScheme
-import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
 fun HomeSettingScreen(
@@ -75,9 +72,7 @@ private fun Content(
     onClickUpdate: () -> Unit = {},
     onClickLogout: () -> Unit = {},
 ) {
-    MiuixTheme(
-        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    ) {
+    ArtaMiuixTheme {
         LazyColumn(
             modifier = modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -104,7 +99,7 @@ private fun Content(
                                     .background(MiuixTheme.colorScheme.primaryContainer)
                             ) {
                                 Icon(
-                                    Icons.Rounded.Person,
+                                    MiuixIcons.Contacts,
                                     contentDescription = null,
                                     tint = MiuixTheme.colorScheme.primary,
                                 )
@@ -154,12 +149,12 @@ private fun Content(
                         summary = "Kelola dompet tabungan uang dan emas",
                         startAction = {
                             Icon(
-                                Icons.Rounded.Wallet, null,
+                                MiuixIcons.BankCards, null,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         },
                         endActions = {
-                            Icon(MiuixIcons.Basic.ArrowRight, null)
+                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
                         },
                         onClick = onClickManageWallet,
                     )
@@ -168,12 +163,12 @@ private fun Content(
                         summary = "Kelola kategori pengeluaran dan pemasukan transaksi",
                         startAction = {
                             Icon(
-                                Icons.Rounded.Category, null,
+                                MiuixIcons.GridView, null,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         },
                         endActions = {
-                            Icon(MiuixIcons.Basic.ArrowRight, null)
+                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
                         },
                         onClick = onClickManageCategory,
                     )
@@ -182,12 +177,12 @@ private fun Content(
                         summary = "Atur preferensi pajak jual emas berdasarkan ukuran karat",
                         startAction = {
                             Icon(
-                                Icons.Rounded.Balance, null,
+                                MiuixIcons.Layers, null,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         },
                         endActions = {
-                            Icon(MiuixIcons.Basic.ArrowRight, null)
+                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
                         },
                         onClick = onClickManageGoldTax,
                     )
@@ -215,7 +210,7 @@ private fun Content(
                                 Icon(MiuixIcons.Update, null)
                             }
                         },
-                        endActions = {                            Icon(MiuixIcons.Basic.ArrowRight, null)
+                        endActions = {                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
                         },
                         onClick = onClickUpdate,
                     )
@@ -223,12 +218,12 @@ private fun Content(
                         title = "Keluar",
                         startAction = {
                             Icon(
-                                Icons.AutoMirrored.Rounded.Logout, null,
+                                MiuixIcons.Close2, null,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         },
                         endActions = {
-                            Icon(MiuixIcons.Basic.ArrowRight, null)
+                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
                         },
                         onClick = onClickLogout,
                     )

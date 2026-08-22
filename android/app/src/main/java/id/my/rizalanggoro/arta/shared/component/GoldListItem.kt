@@ -15,9 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.TrendingDown
 import androidx.compose.material.icons.automirrored.rounded.TrendingFlat
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,12 +22,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.core.utils.getBottomRadius
 import id.my.rizalanggoro.arta.core.utils.getTopRadius
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun GoldListItem(
@@ -62,7 +63,7 @@ fun GoldListItem(
                     bottomEnd = getBottomRadius(index, size),
                 )
             )
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .background(MiuixTheme.colorScheme.surfaceContainer)
             .combinedClickable(
                 onClick = { onClick(gold.data) },
                 onLongClick = { onLongClick(gold.data) }
@@ -81,8 +82,8 @@ fun GoldListItem(
                     .clip(CircleShape)
                     .background(
                         when {
-                            status in 0..1 -> MaterialTheme.colorScheme.primaryContainer
-                            else -> MaterialTheme.colorScheme.errorContainer
+                            status in 0..1 -> MiuixTheme.colorScheme.primary
+                            else -> MiuixTheme.colorScheme.error
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -91,8 +92,8 @@ fun GoldListItem(
                     icons[status + 1],
                     null,
                     tint = when {
-                        status in 0..1 -> MaterialTheme.colorScheme.primary
-                        else -> MaterialTheme.colorScheme.error
+                        status in 0..1 -> MiuixTheme.colorScheme.onPrimary
+                        else -> MiuixTheme.colorScheme.onError
                     }
                 )
             }
@@ -102,20 +103,20 @@ fun GoldListItem(
             ) {
                 Text(
                     text = gold.data.date.toIndonesianDate(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
+                    color = MiuixTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = gold.sellPrice.toIndonesianCurrency(),
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Column {
                     Text(
                         text = "Harga beli ${gold.data.price.toIndonesianCurrency()}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline,
+                        fontSize = 12.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     )
                     if (status != 0)
                         Text(
@@ -125,8 +126,8 @@ fun GoldListItem(
                                     else -> "Kerugian"
                                 }
                             } ${gold.profit.toIndonesianCurrency()}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.outline,
+                            fontSize = 12.sp,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                         )
                 }
             }
@@ -137,14 +138,14 @@ fun GoldListItem(
         ) {
             Text(
                 text = "${gold.data.carat.toInt()}k",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
+                fontSize = 12.sp,
+                color = MiuixTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
                 text = "${gold.data.grams.toFloat()}gr",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline
+                fontSize = 12.sp,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
             )
         }
     }
@@ -172,23 +173,29 @@ private val golds = List(3) {
 @Composable
 @Preview
 private fun DownPreview() {
-    GoldListItem(
-        gold = golds[0]
-    )
+    MiuixTheme {
+        GoldListItem(
+            gold = golds[0]
+        )
+    }
 }
 
 @Composable
 @Preview
 private fun FlatPreview() {
-    GoldListItem(
-        gold = golds[1]
-    )
+    MiuixTheme {
+        GoldListItem(
+            gold = golds[1]
+        )
+    }
 }
 
 @Composable
 @Preview
 private fun UpPreview() {
-    GoldListItem(
-        gold = golds[2]
-    )
+    MiuixTheme {
+        GoldListItem(
+            gold = golds[2]
+        )
+    }
 }

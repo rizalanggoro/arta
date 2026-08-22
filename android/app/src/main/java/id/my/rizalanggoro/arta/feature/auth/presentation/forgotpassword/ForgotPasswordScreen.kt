@@ -5,19 +5,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun ForgotPasswordScreen(vm: ForgotPasswordVM = viewModel(factory = ForgotPasswordVM.Factory)) {
@@ -32,14 +35,13 @@ fun ForgotPasswordScreen(vm: ForgotPasswordVM = viewModel(factory = ForgotPasswo
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
     email: String,
     isLoading: Boolean,
     onClickBack: () -> Unit,
 ) {
-    androidx.compose.material3.Scaffold(
-        topBar = { androidx.compose.material3.TopAppBar(title = { Text("Pemulihan Akun") }) }
+    Scaffold(
+        topBar = { SmallTopAppBar(title = "Pemulihan Akun") }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -50,47 +52,49 @@ private fun Content(
         ) {
             Text(
                 text = "PEMULIHAN",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             )
             Text(
                 text = "Atur ulang akses akun dengan langkah yang jelas.",
-                style = MaterialTheme.typography.headlineMedium,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
             )
             Text(
                 text = "Masukkan email terdaftar, lalu lanjutkan ke alur reset saat backend siap.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 16.sp,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "Email terdaftar",
-                    style = MaterialTheme.typography.titleLarge,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.SemiBold,
                 )
                 Text(
                     text = "Gunakan email yang sama dengan akun Arta Anda.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 14.sp,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 )
 
                 Text(
                     text = "Email saat ini: ${if (email.isBlank()) "Belum diisi" else email}",
-                    style = MaterialTheme.typography.bodyLarge,
+                    fontSize = 16.sp,
                 )
                 Text(
                     text = "Setelah backend reset password siap, tautan atau kode verifikasi bisa dikirim dari sini.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 14.sp,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 )
 
                 TextButton(
+                    text = "Kembali ke login",
                     onClick = onClickBack,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading,
-                ) {
-                    Text("Kembali ke login")
-                }
+                )
             }
         }
     }
@@ -99,7 +103,7 @@ private fun Content(
 @Preview(showBackground = true, name = "Forgot Password - Empty")
 @Composable
 private fun ForgotPasswordEmptyPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             email = "",
             isLoading = false,
@@ -111,7 +115,7 @@ private fun ForgotPasswordEmptyPreview() {
 @Preview(showBackground = true, name = "Forgot Password - Filled")
 @Composable
 private fun ForgotPasswordFilledPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             email = "user@example.com",
             isLoading = false,
@@ -123,7 +127,7 @@ private fun ForgotPasswordFilledPreview() {
 @Preview(showBackground = true, name = "Forgot Password - Loading")
 @Composable
 private fun ForgotPasswordLoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             email = "user@example.com",
             isLoading = true,

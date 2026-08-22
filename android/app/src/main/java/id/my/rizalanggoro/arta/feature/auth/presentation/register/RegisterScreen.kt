@@ -6,18 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,18 +13,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+private val ErrorColor = Color(0xFFE53935)
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
@@ -73,7 +77,6 @@ fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun Content(
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
     uiState: RegisterUiState = RegisterUiState(),
@@ -86,9 +89,9 @@ private fun Content(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Registrasi") })
+            SmallTopAppBar(title = "Registrasi")
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { SnackbarHost(state = snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -100,121 +103,135 @@ private fun Content(
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = "Buat akun baru yang siap dipakai untuk uang dan emas.",
-                    style = MaterialTheme.typography.headlineMedium,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = "Registrasi dibentuk untuk cepat, jelas, dan tetap nyaman " +
                             "dipakai di layar mobile",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 16.sp,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 )
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(
-                    value = uiState.name,
-                    onValueChange = onChangeName,
-                    label = { Text("Nama lengkap") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = uiState.nameError != null,
-                    supportingText = when {
-                        uiState.nameError != null -> {
-                            { Text(uiState.nameError) }
-                        }
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextField(
+                        value = uiState.name,
+                        onValueChange = onChangeName,
+                        label = "Nama lengkap",
+                        useLabelAsPlaceholder = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !uiState.isLoading,
+                        singleLine = true,
+                        colors = if (uiState.nameError != null) {
+                            TextFieldDefaults.textFieldColors(borderColor = ErrorColor)
+                        } else {
+                            TextFieldDefaults.textFieldColors()
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next,
+                        ),
+                    )
+                    uiState.nameError?.let { error ->
+                        Text(error, fontSize = 13.sp, color = ErrorColor)
+                    }
+                }
 
-                        else -> null
-                    },
-                    enabled = !uiState.isLoading,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next,
-                    ),
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextField(
+                        value = uiState.email,
+                        onValueChange = onChangeEmail,
+                        label = "Alamat email",
+                        useLabelAsPlaceholder = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !uiState.isLoading,
+                        singleLine = true,
+                        colors = if (uiState.emailError != null) {
+                            TextFieldDefaults.textFieldColors(borderColor = ErrorColor)
+                        } else {
+                            TextFieldDefaults.textFieldColors()
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Next,
+                        ),
+                    )
+                    uiState.emailError?.let { error ->
+                        Text(error, fontSize = 13.sp, color = ErrorColor)
+                    }
+                }
 
-                TextField(
-                    value = uiState.email,
-                    onValueChange = onChangeEmail,
-                    label = { Text("Alamat email") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = uiState.emailError != null,
-                    supportingText = when {
-                        uiState.emailError != null -> {
-                            { Text(uiState.emailError) }
-                        }
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextField(
+                        value = uiState.password,
+                        onValueChange = onChangePassword,
+                        label = "Kata sandi",
+                        useLabelAsPlaceholder = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !uiState.isLoading,
+                        singleLine = true,
+                        colors = if (uiState.passwordError != null) {
+                            TextFieldDefaults.textFieldColors(borderColor = ErrorColor)
+                        } else {
+                            TextFieldDefaults.textFieldColors()
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Next,
+                        ),
+                    )
+                    uiState.passwordError?.let { error ->
+                        Text(error, fontSize = 13.sp, color = ErrorColor)
+                    }
+                }
 
-                        else -> null
-                    },
-                    enabled = !uiState.isLoading,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Next,
-                    ),
-                )
-
-                TextField(
-                    value = uiState.password,
-                    onValueChange = onChangePassword,
-                    label = { Text("Kata sandi") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = uiState.passwordError != null,
-                    supportingText = when {
-                        uiState.passwordError != null -> {
-                            { Text(uiState.passwordError) }
-                        }
-
-                        else -> null
-                    },
-                    enabled = !uiState.isLoading,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Next,
-                    ),
-                )
-
-                TextField(
-                    value = uiState.confirmPassword,
-                    onValueChange = onChangeConfirmPassword,
-                    label = { Text("Konfirmasi kata sandi") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = uiState.confirmPasswordError != null,
-                    supportingText = when {
-                        uiState.confirmPasswordError != null -> {
-                            { Text(uiState.confirmPasswordError) }
-                        }
-
-                        else -> null
-                    },
-                    enabled = !uiState.isLoading,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done,
-                    ),
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextField(
+                        value = uiState.confirmPassword,
+                        onValueChange = onChangeConfirmPassword,
+                        label = "Konfirmasi kata sandi",
+                        useLabelAsPlaceholder = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !uiState.isLoading,
+                        singleLine = true,
+                        colors = if (uiState.confirmPasswordError != null) {
+                            TextFieldDefaults.textFieldColors(borderColor = ErrorColor)
+                        } else {
+                            TextFieldDefaults.textFieldColors()
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done,
+                        ),
+                    )
+                    uiState.confirmPasswordError?.let { error ->
+                        Text(error, fontSize = 13.sp, color = ErrorColor)
+                    }
+                }
             }
 
             when (uiState.isLoading) {
-                true -> LoadingIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                true -> InfiniteProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = MiuixTheme.colorScheme.primary
                 )
 
                 else -> Column {
                     Button(
                         onClick = onClickSubmit,
                         modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColorsPrimary()
                     ) {
                         Text("Daftar")
                     }
 
                     TextButton(
+                        text = "Sudah punya akun? Masuk sekarang",
                         onClick = onClickLogin,
                         modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Sudah punya akun? Masuk sekarang")
-                    }
+                    )
                 }
             }
         }
@@ -224,7 +241,7 @@ private fun Content(
 @Preview(showBackground = true, group = "Register")
 @Composable
 private fun RegisterPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content()
     }
 }
@@ -232,7 +249,7 @@ private fun RegisterPreview() {
 @Preview(showBackground = true, group = "Register")
 @Composable
 private fun RegisterLoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = RegisterUiState(
                 isLoading = true
@@ -244,7 +261,7 @@ private fun RegisterLoadingPreview() {
 @Preview(showBackground = true, group = "Register")
 @Composable
 private fun RegisterErrorPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = RegisterUiState(
                 nameError = "Nama wajib diisi",

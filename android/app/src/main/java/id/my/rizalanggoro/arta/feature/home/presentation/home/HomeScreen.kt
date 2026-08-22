@@ -11,24 +11,10 @@ import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Payment
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Wallet
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,7 +37,16 @@ import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.HomeGold
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionScreen
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
+import top.yukonga.miuix.kmp.basic.Badge
+import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarItem
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun HomeScreen(
@@ -94,7 +89,6 @@ fun HomeScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
     destinations: List<HomeDestination>,
@@ -110,24 +104,18 @@ private fun Content(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = when {
-                        lastDestination in listOf(
-                            HomeRoute.CashDashboard,
-                            HomeRoute.GoldDashboard,
-                        ) -> MaterialTheme.colorScheme.surfaceContainer
+            SmallTopAppBar(
+                color = when {
+                    lastDestination in listOf(
+                        HomeRoute.CashDashboard,
+                        HomeRoute.GoldDashboard,
+                    ) -> MiuixTheme.colorScheme.surfaceContainer
 
-                        else -> Color.Unspecified
-                    }
-                ),
-                title = {
-                    Text(
-                        text = uiState.selectedWallet?.name.let {
-                            if (it != null && lastDestination != HomeRoute.Setting) it
-                            else "Arta"
-                        }
-                    )
+                    else -> MiuixTheme.colorScheme.surface
+                },
+                title = uiState.selectedWallet?.name.let {
+                    if (it != null && lastDestination != HomeRoute.Setting) it
+                    else "Arta"
                 },
                 actions = {
                     if (lastDestination == HomeRoute.ListTransaction)
@@ -158,20 +146,11 @@ private fun Content(
                                 homeBackStack.removeFirstOrNull()
                                 homeBackStack.add(destination.route)
                             },
-                            icon = {
-                                BadgedBox(
-                                    badge = {
-                                        if (destination.route == HomeRoute.Setting && hasUpdate)
-                                            Badge()
-                                    }
-                                ) {
-                                    Icon(
-                                        destination.icon,
-                                        contentDescription = null
-                                    )
-                                }
-                            },
-                            label = { Text(destination.label) },
+                            icon = destination.icon,
+                            label = destination.label,
+                            badge = if (destination.route == HomeRoute.Setting && hasUpdate) ({
+                                Badge()
+                            }) else null
                         )
                     }
                 }
@@ -247,7 +226,7 @@ private fun walletDestinations(type: String?): List<HomeDestination> {
 @Preview(showBackground = true)
 @Composable
 private fun HomeCashPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             destinations = walletDestinations("cash_savings"),
             onClickSelectWallet = {},
@@ -258,7 +237,7 @@ private fun HomeCashPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun HomeGoldPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             destinations = walletDestinations("gold_savings"),
             onClickSelectWallet = {},

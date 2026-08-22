@@ -6,20 +6,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.GoldListItem
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun LatestGold(
@@ -27,9 +29,11 @@ fun LatestGold(
     onLongClickGold: (DomainGold) -> Unit = {},
 ) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+        colors = CardDefaults.defaultColors(
+            color = MiuixTheme.colorScheme.background
+        ),
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(MiuixTheme.colorScheme.background)
             .fillMaxWidth(),
     ) {
         Column(
@@ -43,7 +47,7 @@ fun LatestGold(
         ) {
             Text(
                 text = "Emas Terbaru",
-                style = MaterialTheme.typography.titleMedium,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
 
@@ -77,32 +81,36 @@ fun LatestGold(
 @Composable
 @Preview
 private fun Preview() {
-    LatestGold(
-        golds = List(3) {
-            DtoGold(
-                data = DomainGold(
-                    carat = 24.0,
-                    createdAt = "2026-05-25T14:38:00.000+07:00",
-                    date = "2026-05-25T14:38:00.000+07:00",
-                    grams = 3.3,
-                    id = 1,
-                    notes = "",
-                    price = 1500000.0,
-                    type = "jewelry",
-                    updatedAt = "2026-05-25T14:38:00.000+07:00",
-                    walletId = 1
-                ),
-                profit = ((it - 1) * 500000.0),
-                sellPrice = (1500000 + ((it - 1) * 500000.0)),
-            )
-        }
-    )
+    ArtaMiuixTheme {
+        LatestGold(
+            golds = List(3) {
+                DtoGold(
+                    data = DomainGold(
+                        carat = 24.0,
+                        createdAt = "2026-05-25T14:38:00.000+07:00",
+                        date = "2026-05-25T14:38:00.000+07:00",
+                        grams = 3.3,
+                        id = 1,
+                        notes = "",
+                        price = 1500000.0,
+                        type = "jewelry",
+                        updatedAt = "2026-05-25T14:38:00.000+07:00",
+                        walletId = 1
+                    ),
+                    profit = ((it - 1) * 500000.0),
+                    sellPrice = (1500000 + ((it - 1) * 500000.0)),
+                )
+            }
+        )
+    }
 }
 
 @Composable
 @Preview
 private fun EmptyPreview() {
-    LatestGold(
-        golds = emptyList()
-    )
+    ArtaMiuixTheme {
+        LatestGold(
+            golds = emptyList()
+        )
+    }
 }

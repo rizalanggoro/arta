@@ -1,22 +1,15 @@
 package id.my.rizalanggoro.arta.feature.transaction.presentation.delete
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
+import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
@@ -45,40 +38,14 @@ private fun Content(
     onClickCancel: () -> Unit = {},
     onClickDelete: () -> Unit = {},
 ) {
-    AlertDialog(
-        onDismissRequest = {
-            if (!uiState.isLoading) onClickCancel()
-        },
-        title = {
-            Text("Hapus")
-        },
-        text = {
-            when {
-                uiState.isLoading -> Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    LoadingIndicator()
-                }
-
-                else -> Text(
-                    "Apakah Anda yakin akan menghapus transaksi yang dipilih? " +
-                            "Tindakan ini tidak dapat dipulihkan"
-                )
-            }
-        },
-        dismissButton = {
-            if (!uiState.isLoading)
-                TextButton(onClick = onClickCancel) {
-                    Text("Batal")
-                }
-        },
-        confirmButton = {
-            if (!uiState.isLoading)
-                TextButton(onClick = onClickDelete) {
-                    Text("Hapus")
-                }
-        }
+    ConfirmDialog(
+        title = "Hapus",
+        description = "Apakah Anda yakin akan menghapus transaksi yang dipilih? " +
+                "Tindakan ini tidak dapat dipulihkan",
+        onDismissRequest = { if (!uiState.isLoading) onClickCancel() },
+        onConfirmRequest = onClickDelete,
+        isLoading = uiState.isLoading,
+        confirmText = "Hapus",
     )
 }
 

@@ -16,20 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.ToggleButtonDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.R
@@ -53,9 +40,17 @@ import id.my.rizalanggoro.arta.core.utils.Samples
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardUiState.TimeFilter
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.component.IncomeExpenseSummary
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.DashboardCategoryListItem
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.PullToRefresh
+import top.yukonga.miuix.kmp.basic.PullToRefreshState
+import top.yukonga.miuix.kmp.basic.TabRowWithContour
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
@@ -82,7 +77,6 @@ fun HomeCashDashboardScreen(vm: HomeCashDashboardVM = hiltViewModel()) {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 private fun Content(
     uiState: HomeCashDashboardUiState = HomeCashDashboardUiState(),
     pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
@@ -92,25 +86,20 @@ private fun Content(
     onClickCategory: (DomainCategory) -> Unit = {},
 ) {
     with(uiState) {
-        PullToRefreshBox(
+        PullToRefresh(
             modifier = Modifier.fillMaxSize(),
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
-            state = pullToRefreshState,
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    state = pullToRefreshState,
-                    isRefreshing = isRefreshing,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-            }
+            pullToRefreshState = pullToRefreshState,
         ) {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 item {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .background(MiuixTheme.colorScheme.surfaceContainer)
                             .padding(horizontal = 16.dp)
                             .padding(top = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(
@@ -122,7 +111,7 @@ private fun Content(
                     ) {
                         Text(
                             text = "Saldo saat ini",
-                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 12.sp,
                             color = when {
                                 isLoading -> Color.Transparent
                                 else -> Color.Unspecified
@@ -132,7 +121,7 @@ private fun Content(
                                     isLoading -> Modifier
                                         .shimmer()
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(MaterialTheme.colorScheme.outlineVariant)
+                                        .background(MiuixTheme.colorScheme.outline)
 
                                     else -> Modifier
                                 }
@@ -149,7 +138,7 @@ private fun Content(
 
                                     else -> "•".repeat(8)
                                 },
-                                style = MaterialTheme.typography.headlineMedium,
+                                fontSize = 28.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = when {
                                     isLoading -> Color.Transparent
@@ -160,7 +149,7 @@ private fun Content(
                                         isLoading -> Modifier
                                             .shimmer()
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(MaterialTheme.colorScheme.outlineVariant)
+                                            .background(MiuixTheme.colorScheme.outline)
                                             .fillMaxWidth(.5f)
 
                                         else -> Modifier
@@ -169,12 +158,10 @@ private fun Content(
                             )
                             IconButton(
                                 onClick = { onClickBalanceVisibility(!isBalanceVisible) },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = when {
-                                        isLoading -> MaterialTheme.colorScheme.outlineVariant
-                                        else -> Color.Unspecified
-                                    }
-                                ),
+                                backgroundColor = when {
+                                    isLoading -> MiuixTheme.colorScheme.outline
+                                    else -> Color.Unspecified
+                                },
                                 modifier = Modifier
                                     .size(32.dp)
                                     .then(
@@ -191,7 +178,7 @@ private fun Content(
                                             else -> Icons.Rounded.Visibility
                                         },
                                         null,
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = MiuixTheme.colorScheme.primary
                                     )
                             }
                         }
@@ -202,66 +189,28 @@ private fun Content(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .background(MiuixTheme.colorScheme.surfaceContainer)
                             .padding(horizontal = 16.dp)
                             .padding(top = 24.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            listOf(
-                                mapOf(
-                                    "title" to "Hari ini",
-                                    "filter" to TimeFilter.Today
-                                ),
-                                mapOf(
-                                    "title" to "Minggu ini",
-                                    "filter" to TimeFilter.ThisWeek
-                                ),
-                                mapOf(
-                                    "title" to "Bulan ini",
-                                    "filter" to TimeFilter.ThisMonth
-                                ),
-                            ).forEachIndexed { index, item ->
-                                ToggleButton(
-                                    colors = ToggleButtonDefaults.toggleButtonColors(
-                                        containerColor = when {
-                                            isLoading -> MaterialTheme.colorScheme.outlineVariant
-                                            else -> MaterialTheme.colorScheme.background
-                                        },
-                                        checkedContainerColor = when {
-                                            isLoading -> MaterialTheme.colorScheme.outlineVariant
-                                            else -> Color.Unspecified
-                                        },
-                                    ),
-                                    checked = item["filter"] == uiState.timeFilter,
-                                    onCheckedChange = {
-                                        onChangeTimeFilter(item["filter"] as TimeFilter)
-                                    },
-                                    shapes = when (index) {
-                                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                        2 -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                                    },
-                                    enabled = !uiState.isRefreshing,
-                                    modifier = Modifier.then(
-                                        when {
-                                            isLoading -> Modifier.shimmer()
-                                            else -> Modifier
-                                        }
-                                    )
-                                ) {
-                                    Text(
-                                        item["title"] as String,
-                                        color = when {
-                                            isLoading -> Color.Transparent
-                                            else -> Color.Unspecified
-                                        }
-                                    )
-                                }
+                        TabRowWithContour(
+                            tabs = listOf("Hari ini", "Minggu ini", "Bulan ini"),
+                            selectedTabIndex = when (uiState.timeFilter) {
+                                TimeFilter.Today -> 0
+                                TimeFilter.ThisWeek -> 1
+                                TimeFilter.ThisMonth -> 2
+                            },
+                            onTabSelected = { index ->
+                                onChangeTimeFilter(
+                                    when (index) {
+                                        0 -> TimeFilter.Today
+                                        1 -> TimeFilter.ThisWeek
+                                        else -> TimeFilter.ThisMonth
+                                    }
+                                )
                             }
-                        }
+                        )
                         Column(
                             verticalArrangement = Arrangement.spacedBy(
                                 when {
@@ -282,10 +231,10 @@ private fun Content(
                                             TimeFilter.ThisMonth -> "selama bulan " +
                                                     uiState.startDateMillis.toFormattedDate("MMMM yyyy")
                                         },
-                                style = MaterialTheme.typography.bodyMedium,
+                                fontSize = 14.sp,
                                 color = when {
                                     isLoading -> Color.Transparent
-                                    else -> MaterialTheme.colorScheme.outline
+                                    else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
                                 },
                                 maxLines = when {
                                     isLoading -> 1
@@ -296,7 +245,7 @@ private fun Content(
                                         isLoading -> Modifier
                                             .shimmer()
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(MaterialTheme.colorScheme.outlineVariant)
+                                            .background(MiuixTheme.colorScheme.outline)
 
                                         else -> Modifier
                                     }
@@ -305,13 +254,13 @@ private fun Content(
                             if (isLoading)
                                 Text(
                                     "loading",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontSize = 14.sp,
                                     color = Color.Transparent,
                                     modifier = Modifier
                                         .fillMaxWidth(.5f)
                                         .shimmer()
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(MaterialTheme.colorScheme.outlineVariant)
+                                        .background(MiuixTheme.colorScheme.outline)
                                 )
                         }
                     }
@@ -320,7 +269,7 @@ private fun Content(
                 item {
                     IncomeExpenseSummary(
                         modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .background(MiuixTheme.colorScheme.surfaceContainer)
                             .padding(top = 16.dp)
                             .padding(horizontal = 16.dp),
                         totalIncome = uiState.data?.totalIncome ?: 0.0,
@@ -335,7 +284,7 @@ private fun Content(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .background(MiuixTheme.colorScheme.surfaceContainer)
                             .padding(top = 16.dp)
                     ) {
                         Box(
@@ -347,13 +296,13 @@ private fun Content(
                                         topEnd = 24.dp
                                     )
                                 )
-                                .background(MaterialTheme.colorScheme.background)
+                                .background(MiuixTheme.colorScheme.background)
                                 .padding(horizontal = 16.dp)
                                 .padding(top = 24.dp)
                         ) {
                             Text(
                                 "Transaksi terbaru",
-                                style = MaterialTheme.typography.titleMedium,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = when {
                                     isLoading -> Color.Transparent
@@ -364,7 +313,7 @@ private fun Content(
                                         isLoading -> Modifier
                                             .shimmer()
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(MaterialTheme.colorScheme.outlineVariant)
+                                            .background(MiuixTheme.colorScheme.outline)
 
                                         else -> Modifier
                                     }
@@ -434,7 +383,7 @@ private fun Content(
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content()
     }
 }
@@ -442,7 +391,7 @@ private fun Preview() {
 @Preview(showBackground = true)
 @Composable
 private fun LoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = HomeCashDashboardUiState(
                 isLoading = true
@@ -454,7 +403,7 @@ private fun LoadingPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun RefreshingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = HomeCashDashboardUiState(
                 isRefreshing = true
@@ -466,7 +415,7 @@ private fun RefreshingPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun ErrorPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = HomeCashDashboardUiState(
                 errorMessage = stringResource(R.string.client_error)
@@ -478,8 +427,7 @@ private fun ErrorPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun EmptyPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content()
     }
 }
-

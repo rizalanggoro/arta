@@ -10,16 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,10 +24,18 @@ import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
+import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoldDetailScreen(goldId: Int) {
     val viewModel: GoldDetailVM = hiltViewModel()
@@ -83,7 +81,6 @@ fun GoldDetailScreen(goldId: Int) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
@@ -97,14 +94,15 @@ private fun Content(
     onConfirmDelete: () -> Unit = {},
 ) {
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { SnackbarHost(state = snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(text = "Detail Emas") },
+            SmallTopAppBar(
+                title = "Detail Emas",
                 navigationIcon = {
-                    TextButton(onClick = onClickBack) {
-                        Text(text = "Kembali")
-                    }
+                    TextButton(
+                        text = "Kembali",
+                        onClick = onClickBack
+                    )
                 },
             )
         },
@@ -140,36 +138,35 @@ private fun Content(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f)) {
+                Button(onClick = onEdit, modifier = Modifier.weight(1f)) {
                     Text(text = "Edit")
                 }
-                Button(onClick = onDeleteRequested, modifier = Modifier.weight(1f)) {
+                Button(
+                    onClick = onDeleteRequested,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColorsPrimary()
+                ) {
                     Text(text = "Hapus")
                 }
             }
         }
 
         if (showDeleteDialog) {
-            AlertDialog(
+            ConfirmDialog(
+                title = "Hapus data emas",
+                description = "Anda yakin ingin menghapus data emas ini?",
+                confirmText = "Hapus",
                 onDismissRequest = onDismissDelete,
-                confirmButton = {
-                    Button(onClick = onConfirmDelete) { Text(text = "Hapus") }
-                },
-                dismissButton = {
-                    OutlinedButton(onClick = onDismissDelete) { Text(text = "Batal") }
-                },
-                title = { Text(text = "Hapus data emas") },
-                text = { Text(text = "Anda yakin ingin menghapus data emas ini?") },
+                onConfirmRequest = onConfirmDelete,
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, name = "Gold Detail - Default")
 @Composable
 private fun GoldDetailScreenPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             gold = DomainGold(
                 id = 1,
@@ -187,11 +184,10 @@ private fun GoldDetailScreenPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, name = "Gold Detail - Loading")
 @Composable
 private fun GoldDetailLoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             snackbarHostState = remember { SnackbarHostState() },
             isLoading = true,

@@ -17,15 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.CallMade
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,13 +26,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun TransactionDetailScreen(
@@ -68,7 +68,6 @@ fun TransactionDetailScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
     transaction: DomainTransaction? = null,
@@ -79,8 +78,8 @@ private fun Content(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Detail Transaksi") },
+            SmallTopAppBar(
+                title = "Detail Transaksi",
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
@@ -100,7 +99,7 @@ private fun Content(
             if (transaction == null) {
                 Text(
                     text = "Memuat transaksi...",
-                    style = MaterialTheme.typography.bodyMedium
+                    fontSize = 14.sp
                 )
                 return@Column
             }
@@ -112,7 +111,7 @@ private fun Content(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .background(MiuixTheme.colorScheme.secondaryContainer)
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -124,21 +123,21 @@ private fun Content(
                         if (isIncome) Icons.AutoMirrored.Rounded.CallReceived
                         else Icons.AutoMirrored.Rounded.CallMade,
                         null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MiuixTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
                         text = if (isIncome) "Pemasukan" else "Pengeluaran",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 12.sp,
+                        color = MiuixTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
                 Text(
                     text = transaction.amount.toIndonesianCurrency(),
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = MiuixTheme.colorScheme.onSecondaryContainer
                 )
             }
 
@@ -147,7 +146,7 @@ private fun Content(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .background(MiuixTheme.colorScheme.surfaceContainer)
             ) {
                 DetailRow(label = "Kategori", value = category?.name ?: "-")
                 DetailRow(label = "Tanggal", value = transaction.date.toFormattedDate())
@@ -161,7 +160,7 @@ private fun Content(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedButton(
+                Button(
                     onClick = { onEdit(transaction) },
                     modifier = Modifier.weight(1f)
                 ) {
@@ -169,7 +168,8 @@ private fun Content(
                 }
                 Button(
                     onClick = { onDelete(transaction) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColorsPrimary()
                 ) {
                     Text("Hapus")
                 }
@@ -187,12 +187,12 @@ private fun DetailRow(label: String, value: String) {
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.outline
+            fontSize = 12.sp,
+            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyLarge,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )
     }
@@ -201,7 +201,7 @@ private fun DetailRow(label: String, value: String) {
 @Preview(showBackground = true, name = "Transaction Detail - Income")
 @Composable
 private fun TransactionDetailIncomePreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             transaction = DomainTransaction(
                 amount = 100000.0,
@@ -227,7 +227,7 @@ private fun TransactionDetailIncomePreview() {
 @Preview(showBackground = true, name = "Transaction Detail - Expense")
 @Composable
 private fun TransactionDetailExpensePreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             transaction = DomainTransaction(
                 amount = 50000.0,
@@ -253,7 +253,7 @@ private fun TransactionDetailExpensePreview() {
 @Preview(showBackground = true, name = "Transaction Detail - Loading")
 @Composable
 private fun TransactionDetailLoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(transaction = null)
     }
 }

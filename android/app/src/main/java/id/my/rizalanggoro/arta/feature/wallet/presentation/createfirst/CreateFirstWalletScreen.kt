@@ -5,19 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,16 +12,32 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.HomeRoute
 import id.my.rizalanggoro.arta.core.constant.walletTypes
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.TabRowWithContour
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val ErrorColor = Color(0xFFE53935)
+
 @Composable
 fun CreateFirstWalletScreen(vm: CreateFirstWalletVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
@@ -66,7 +69,6 @@ fun CreateFirstWalletScreen(vm: CreateFirstWalletVM = hiltViewModel()) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
@@ -77,57 +79,53 @@ private fun Content(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Buat Dompet Pertama") })
+            SmallTopAppBar(title = "Buat Dompet Pertama")
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { SnackbarHost(state = snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            TextField(
-                value = uiState.name,
-                onValueChange = onChangeName,
-                label = { Text("Nama dompet") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = uiState.nameError != null,
-                supportingText = when {
-                    uiState.nameError != null -> {
-                        { Text(uiState.nameError) }
-                    }
-
-                    else -> null
-                },
-                enabled = !uiState.isLoading,
-                singleLine = true,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                TextField(
+                    value = uiState.name,
+                    onValueChange = onChangeName,
+                    label = "Nama dompet",
+                    useLabelAsPlaceholder = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isLoading,
+                    singleLine = true,
+                    colors = if (uiState.nameError != null) {
+                        TextFieldDefaults.textFieldColors(borderColor = ErrorColor)
+                    } else {
+                        TextFieldDefaults.textFieldColors()
+                    },
+                )
+                uiState.nameError?.let { error ->
+                    Text(error, fontSize = 13.sp, color = ErrorColor)
+                }
+            }
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(top = 16.dp)
             ) {
-                Text("Tipe wallet", style = MaterialTheme.typography.labelMedium)
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    walletTypes.mapIndexed { index, item ->
-                        SegmentedButton(
-                            selected = uiState.type == item.value,
-                            onClick = { onChangeType(item.value) },
-                            shape = SegmentedButtonDefaults.itemShape(
-                                count = walletTypes.size,
-                                index = index,
-                            ),
-                            enabled = !uiState.isLoading,
-                        ) {
-                            Text(item.name)
-                        }
-                    }
-                }
-                if (uiState.typeError != null) {
-                    Text(
-                        text = uiState.typeError,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                Text(
+                    "Tipe wallet",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                TabRowWithContour(
+                    tabs = walletTypes.map { it.name },
+                    selectedTabIndex = walletTypes
+                        .indexOfFirst { it.value == uiState.type }
+                        .coerceAtLeast(0),
+                    onTabSelected = { index -> onChangeType(walletTypes[index].value) },
+                )
+                uiState.typeError?.let { error ->
+                    Text(text = error, color = MiuixTheme.colorScheme.error, fontSize = 13.sp)
                 }
             }
 
@@ -138,7 +136,7 @@ private fun Content(
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    LoadingIndicator()
+                    InfiniteProgressIndicator(color = MiuixTheme.colorScheme.primary)
                 }
 
                 else -> Button(
@@ -146,6 +144,7 @@ private fun Content(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp),
+                    colors = ButtonDefaults.buttonColorsPrimary()
                 ) {
                     Text("Simpan")
                 }
@@ -157,7 +156,7 @@ private fun Content(
 @Preview(showBackground = true, group = "Wallet")
 @Composable
 private fun CreateFirstWalletPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = CreateFirstWalletUiState(
                 type = "cash_savings"
@@ -169,7 +168,7 @@ private fun CreateFirstWalletPreview() {
 @Preview(showBackground = true, group = "Wallet")
 @Composable
 private fun CreateFirstWalletLoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = CreateFirstWalletUiState(
                 type = "cash_savings",

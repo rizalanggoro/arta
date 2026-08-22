@@ -12,26 +12,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.EditNote
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.core.constant.categoryTypes
@@ -40,10 +29,17 @@ import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DtoCategory
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.RadioButton
+import top.yukonga.miuix.kmp.basic.TabRowWithContour
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun SelectCategoryScreen(
@@ -100,9 +96,9 @@ private fun Content(
         ) {
             Text(
                 text = "Pilih Kategori",
-                style = MaterialTheme.typography.titleLarge,
+                fontSize = 22.sp
             )
-            FilledTonalIconButton(onClick = onClickManageCategory) {
+            IconButton(onClick = onClickManageCategory) {
                 Icon(
                     Icons.Rounded.EditNote,
                     null
@@ -111,24 +107,14 @@ private fun Content(
         }
 
         if (!uiState.isLoading && visibleCategories.isNotEmpty() && uiState.errorMessage.isNullOrEmpty())
-            SingleChoiceSegmentedButtonRow(
+            TabRowWithContour(
+                tabs = categoryTypes.map { it.name },
+                selectedTabIndex = categoryTypes.indexOfFirst { it.value == uiState.selectedType },
+                onTabSelected = { index -> onClickType(categoryTypes[index].value) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-            ) {
-                categoryTypes.mapIndexed { index, item ->
-                    SegmentedButton(
-                        selected = uiState.selectedType == item.value,
-                        onClick = { onClickType(item.value) },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            count = categoryTypes.size,
-                            index = index,
-                        ),
-                    ) {
-                        Text(item.name)
-                    }
-                }
-            }
+            )
 
         when {
             uiState.isLoading -> {
@@ -138,7 +124,7 @@ private fun Content(
                         .padding(horizontal = 16.dp, vertical = 32.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    LoadingIndicator()
+                    InfiniteProgressIndicator(color = MiuixTheme.colorScheme.primary)
                 }
             }
 
@@ -161,22 +147,23 @@ private fun Content(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(visibleCategories) { category ->
-                        ListItem(
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                            leadingContent = {
-                                RadioButton(
-                                    selected = selectedCategoryId == category.data.id,
-                                    onClick = { onClickCategory(category.data) },
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            },
-                            headlineContent = {
-                                Text(category.data.name)
-                            },
-                            modifier = Modifier.clickable {
-                                onClickCategory(category.data)
-                            }
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onClickCategory(category.data) }
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            RadioButton(
+                                selected = selectedCategoryId == category.data.id,
+                                onClick = { onClickCategory(category.data) },
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                category.data.name,
+                                modifier = Modifier.padding(start = 12.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -187,13 +174,13 @@ private fun Content(
 @Preview(showBackground = true)
 @Composable
 private fun SelectCategoryPreview() {
-    ArtaTheme { Content() }
+    ArtaMiuixTheme { Content() }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SelectCategoryItemsPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             selectedCategoryId = 1,
             uiState = SelectCategoryUiState(
@@ -234,7 +221,7 @@ private fun SelectCategoryItemsPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SelectCategoryLoadingPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = SelectCategoryUiState(
                 isLoading = true
@@ -246,7 +233,7 @@ private fun SelectCategoryLoadingPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SelectCategoryErrorPreview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = SelectCategoryUiState(
                 errorMessage = "Terjadi kesalahan tak terduga"

@@ -15,18 +15,6 @@ import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.Balance
 import androidx.compose.material.icons.rounded.Tag
 import androidx.compose.material.icons.rounded.Update
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +24,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.extension.toAmericanCurrency
@@ -46,8 +35,17 @@ import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.componen
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component.PriceSummary
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.PullToRefresh
+import top.yukonga.miuix.kmp.basic.PullToRefreshState
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun HomeGoldDashboardScreen(
@@ -76,9 +74,8 @@ fun HomeGoldDashboardScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 private fun Content(
-    refreshState: PullToRefreshState = PullToRefreshState(),
+    refreshState: PullToRefreshState = rememberPullToRefreshState(),
     uiState: GoldDashboardUiState = GoldDashboardUiState(),
     onClickRetry: () -> Unit = {},
     onClickManageTax: () -> Unit = {},
@@ -91,7 +88,7 @@ private fun Content(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            LoadingIndicator()
+            InfiniteProgressIndicator(color = MiuixTheme.colorScheme.primary)
         }
 
         uiState.errorMessage != null -> ErrorPlaceholder(
@@ -102,22 +99,16 @@ private fun Content(
         )
 
         else -> with(uiState) {
-            PullToRefreshBox(
-                state = refreshState,
+            PullToRefresh(
+                pullToRefreshState = refreshState,
                 isRefreshing = uiState.isRefreshing,
                 onRefresh = onRefresh,
-                indicator = {
-                    PullToRefreshDefaults.LoadingIndicator(
-                        state = refreshState,
-                        isRefreshing = uiState.isRefreshing,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
-                }
+                modifier = Modifier.fillMaxSize()
             ) {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .background(MiuixTheme.colorScheme.surfaceContainer)
                 ) {
                     item {
                         Column(
@@ -128,12 +119,12 @@ private fun Content(
                         ) {
                             Text(
                                 text = "Total asset",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
+                                fontSize = 12.sp,
+                                color = MiuixTheme.colorScheme.primary
                             )
                             Text(
                                 text = (data?.totalAsset ?: 0.0).toIndonesianCurrency(),
-                                style = MaterialTheme.typography.headlineMedium,
+                                fontSize = 28.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Column {
@@ -142,8 +133,8 @@ private fun Content(
                                         (data?.totalBuyPrice ?: 0.0)
                                             .toIndonesianCurrency()
                                     }",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.outline
+                                    fontSize = 12.sp,
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                 )
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -153,13 +144,13 @@ private fun Content(
                                         Icons.AutoMirrored.Rounded.TrendingUp,
                                         null,
                                         modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.outline
+                                        tint = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                     )
                                     Text(
                                         text = (data?.profit ?: 0.0)
                                             .toIndonesianCurrency(),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.outline
+                                        fontSize = 12.sp,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                     )
                                 }
                             }
@@ -187,8 +178,8 @@ private fun Content(
                                 )
                             ).forEach {
                                 Card(
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                    colors = CardDefaults.defaultColors(
+                                        color = MiuixTheme.colorScheme.secondaryContainer
                                     ),
                                     modifier = Modifier.weight(1f)
                                 ) {
@@ -204,14 +195,14 @@ private fun Content(
                                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                             Text(
                                                 text = it["value"] as String,
-                                                style = MaterialTheme.typography.titleMedium,
+                                                fontSize = 16.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                color = MiuixTheme.colorScheme.onSecondaryContainer,
                                             )
                                             Text(
                                                 text = it["title"] as String,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.outline,
+                                                fontSize = 12.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                             )
                                         }
                                     }
@@ -250,8 +241,8 @@ private fun Content(
                                         )
                                     },
                                     modifier = Modifier.weight(1f),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                    colors = CardDefaults.defaultColors(
+                                        color = MiuixTheme.colorScheme.secondaryContainer
                                     )
                                 ) {
                                     Column(
@@ -260,14 +251,14 @@ private fun Content(
                                     ) {
                                         Text(
                                             text = it["title"] as String,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                                            fontSize = 12.sp,
+                                            color = MiuixTheme.colorScheme.onSecondaryContainer
                                         )
                                         Text(
                                             text = it["value"] as String,
-                                            style = MaterialTheme.typography.titleMedium,
+                                            fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                                            color = MiuixTheme.colorScheme.onSecondaryContainer
                                         )
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
@@ -277,13 +268,13 @@ private fun Content(
                                                 Icons.Rounded.Update,
                                                 null,
                                                 modifier = Modifier.size(12.dp),
-                                                tint = MaterialTheme.colorScheme.outline
+                                                tint = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                             )
                                             Text(
                                                 text = (it["date"] as String?)
                                                     .toFormattedDate("dd/MM/yyyy HH:mm"),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.outline,
+                                                fontSize = 12.sp,
+                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                             )
                                         }
                                     }
@@ -315,7 +306,7 @@ private fun Content(
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = GoldDashboardUiState(
                 selectedWallet = DomainWallet(
@@ -336,7 +327,7 @@ private fun Preview() {
 @Preview(showBackground = true, name = "Dashboard Emas - Loading")
 @Composable
 private fun HomeGoldDashboardPreviewLoading() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = GoldDashboardUiState(
                 isLoading = true,
@@ -349,7 +340,7 @@ private fun HomeGoldDashboardPreviewLoading() {
 @Preview(showBackground = true, name = "Dashboard Emas - Error")
 @Composable
 private fun HomeGoldDashboardPreviewError() {
-    ArtaTheme {
+    ArtaMiuixTheme {
         Content(
             uiState = GoldDashboardUiState(
                 isLoading = false,
