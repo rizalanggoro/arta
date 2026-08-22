@@ -3,31 +3,38 @@ package id.my.rizalanggoro.arta.feature.category.presentation.upsert
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.constant.categoryTypes
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.shared.component.LocalBottomSheetTitle
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.TabRowWithContour
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun UpsertCategoryScreen(
@@ -35,6 +42,16 @@ fun UpsertCategoryScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
+    val title = if (uiState.isUpdate) "Ubah Kategori" else "Buat Kategori"
+    val bottomSheetTitle = LocalBottomSheetTitle.current
+
+    LaunchedEffect(title) {
+        bottomSheetTitle?.value = title
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { bottomSheetTitle?.value = null }
+    }
 
     LaunchedEffect(Unit) {
         AppEventBus.event
@@ -50,6 +67,8 @@ fun UpsertCategoryScreen(
     )
 }
 
+private val ErrorColor = Color(0xFFE53935)
+
 @Composable
 private fun Content(
     uiState: UpsertCategoryUiState = UpsertCategoryUiState(),
@@ -58,98 +77,81 @@ private fun Content(
     onClickSubmit: () -> Unit = {},
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = when {
-                uiState.isUpdate -> "Ubah Kategori"
-                else -> "Buat Kategori"
-            },
-            style = MaterialTheme.typography.titleLarge,
-        )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             TextField(
                 value = uiState.name,
                 onValueChange = onChangeName,
-                label = { Text("Nama kategori") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = uiState.nameError != null,
-                supportingText = when {
-                    uiState.nameError != null -> {
-                        { Text(uiState.nameError) }
-                    }
-
-                    else -> null
-                },
+                label = "Nama kategori",
+                useLabelAsPlaceholder = true,
                 enabled = !uiState.isLoading,
-                singleLine = true,
+                colors = if (uiState.nameError != null) {
+                    TextFieldDefaults.textFieldColors(borderColor = ErrorColor)
+                } else {
+                    TextFieldDefaults.textFieldColors()
+                },
             )
+            uiState.nameError?.let { error ->
+                Text(error, fontSize = 13.sp, color = ErrorColor)
+            }
+        }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Tipe kategori",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    categoryTypes.forEachIndexed { index, option ->
-                        SegmentedButton(
-                            selected = uiState.type == option.value,
-                            onClick = { onChangeType(option.value) },
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = categoryTypes.size,
-                            ),
-                            enabled = !uiState.isLoading,
-                        ) {
-                            Text(option.name)
-                        }
-                    }
-                }
+        SmallTitle(
+            "Tipe kategori",
+            insideMargin = PaddingValues(top = 8.dp),
+        )
+
+        TabRowWithContour(
+            tabs = categoryTypes.map { it.name },
+            selectedTabIndex = categoryTypes
+                .indexOfFirst { it.value == uiState.type }
+                .coerceAtLeast(0),
+            onTabSelected = { index -> onChangeType(categoryTypes[index].value) },
+        )
+
+        uiState.errorMessage?.let { error ->
+            Text(error, fontSize = 13.sp, color = ErrorColor)
+        }
+
+        when {
+            uiState.isLoading -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp)
+                    .height(40.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                InfiniteProgressIndicator()
             }
 
-            if (uiState.errorMessage != null) {
-                Text(
-                    text = uiState.errorMessage,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-
-            when {
-                uiState.isLoading -> Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    LoadingIndicator()
-                }
-
-                else -> Button(
-                    onClick = onClickSubmit,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Simpan")
-                }
+            else -> Button(
+                onClick = onClickSubmit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp),
+                colors = ButtonDefaults.buttonColorsPrimary(),
+            ) {
+                Text("Simpan")
             }
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Category Create")
 @Composable
 private fun CreatePreview() {
-    ArtaTheme {
+    MiuixTheme {
         Content()
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Category Update")
 @Composable
 private fun UpdatePreview() {
-    ArtaTheme {
+    MiuixTheme {
         Content(
             uiState = UpsertCategoryUiState(
                 isUpdate = true,
@@ -160,10 +162,10 @@ private fun UpdatePreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Category Update - Loading")
 @Composable
 private fun UpdateLoadingPreview() {
-    ArtaTheme {
+    MiuixTheme {
         Content(
             uiState = UpsertCategoryUiState(
                 isUpdate = true,
@@ -175,10 +177,10 @@ private fun UpdateLoadingPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Category Update - Error")
 @Composable
 private fun UpdateErrorPreview() {
-    ArtaTheme {
+    MiuixTheme {
         Content(
             uiState = UpsertCategoryUiState(
                 isUpdate = true,
