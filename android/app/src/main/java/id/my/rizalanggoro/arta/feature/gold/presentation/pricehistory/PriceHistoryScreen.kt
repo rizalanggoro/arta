@@ -1,30 +1,38 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.pricehistory
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -37,12 +45,16 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.extension.toAmericanCurrency
@@ -87,6 +99,7 @@ fun PriceHistoryScreen(
             modifier = Modifier.padding(innerPadding),
             uiState = uiState,
             onClickRetry = { vm.loadHistory() },
+            onSelectRange = vm::selectRange,
         )
     }
 }
@@ -96,9 +109,10 @@ private fun Content(
     uiState: PriceHistoryUiState = PriceHistoryUiState(),
     modifier: Modifier = Modifier,
     onClickRetry: () -> Unit = {},
+    onSelectRange: (PriceRange) -> Unit = {},
 ) {
     when {
-        uiState.isLoading -> Box(
+        uiState.isLoading && uiState.points.isEmpty() -> Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
@@ -127,6 +141,7 @@ private fun Content(
         else -> PriceChart(
             uiState = uiState,
             modifier = modifier,
+            onSelectRange = onSelectRange,
         )
     }
 }
@@ -135,11 +150,14 @@ private fun Content(
 private fun PriceChart(
     uiState: PriceHistoryUiState,
     modifier: Modifier = Modifier,
+    onSelectRange: (PriceRange) -> Unit = {},
 ) {
     val lineColor = MaterialTheme.colorScheme.primary
+    var sampledPoints by remember { mutableStateOf(emptyList<DtoPricePoint>()) }
     val xAxisFormatter = remember {
         CartesianValueFormatter { _, value, _ ->
-            value.toLong().toFormattedDate("dd/MM HH:mm")
+            val index = value.toInt().coerceIn(0, sampledPoints.lastIndex.coerceAtLeast(0))
+            sampledPoints.getOrNull(index)?.timestamp?.toFormattedDate("dd/MM HH:mm") ?: " "
         }
     }
     val chart = rememberCartesianChart(
@@ -147,10 +165,28 @@ private fun PriceChart(
             lineProvider = LineCartesianLayer.LineProvider.series(
                 listOf(
                     LineCartesianLayer.rememberLine(
-                        fill = LineCartesianLayer.LineFill.single(fill(lineColor))
+                        fill = LineCartesianLayer.LineFill.single(fill(lineColor)),
+                        areaFill = LineCartesianLayer.AreaFill.single(
+                            fill(
+                                ShaderProvider.verticalGradient(
+                                    intArrayOf(
+                                        lineColor.copy(alpha = 0.25f).toArgb(),
+                                        Color.Transparent.toArgb(),
+                                    )
+                                )
+                            )
+                        ),
+                        pointConnector = LineCartesianLayer.PointConnector.cubic(),
                     )
                 )
-            )
+            ),
+            rangeProvider = object : CartesianLayerRangeProvider {
+                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double =
+                    minY - paddedSpan(minY, maxY)
+
+                override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore): Double =
+                    maxY + paddedSpan(minY, maxY)
+            },
         ),
         startAxis = VerticalAxis.rememberStart(
             valueFormatter = CartesianValueFormatter.decimal(DecimalFormat("#,##0.##"))
@@ -162,13 +198,18 @@ private fun PriceChart(
     val modelProducer = remember { CartesianChartModelProducer() }
 
     LaunchedEffect(uiState.points) {
-        if (uiState.points.isEmpty()) return@LaunchedEffect
+        val points = uiState.points
+        if (points.isEmpty()) return@LaunchedEffect
+
+        val step = maxOf(1, points.size / MAX_CHART_POINTS)
+        val sampled = points.filterIndexed { index, _ ->
+            index % step == 0 || index == points.lastIndex
+        }
+
+        sampledPoints = sampled
         modelProducer.runTransaction {
             lineSeries {
-                series(
-                    x = uiState.points.map { it.timestamp.toMillis().toDouble() },
-                    y = uiState.points.map { it.value },
-                )
+                series(y = sampled.map { it.value })
             }
         }
     }
@@ -211,33 +252,41 @@ private fun PriceChart(
             }
         }
 
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+        Text(
+            text = "Riwayat ${uiState.range.label} terakhir",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = "Riwayat 7 hari terakhir",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                CartesianChartHost(
-                    chart = chart,
-                    modelProducer = modelProducer,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(280.dp),
+            PriceRange.entries.forEach { range ->
+                FilterChip(
+                    selected = range == uiState.range,
+                    onClick = { onSelectRange(range) },
+                    label = { Text(text = range.label.replaceFirstChar { it.uppercase() }) },
                 )
             }
         }
+        CartesianChartHost(
+            chart = chart,
+            modelProducer = modelProducer,
+            scrollState = rememberVicoScrollState(scrollEnabled = false),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp),
+        )
     }
 }
+
+private const val MAX_CHART_POINTS = 400
+private const val Y_RANGE_PADDING = 0.08
+
+private fun paddedSpan(minY: Double, maxY: Double): Double =
+    (maxY - minY).coerceAtLeast(1.0) * Y_RANGE_PADDING
 
 private val GoldRoute.PriceHistoryType.title: String
     get() = when (this) {

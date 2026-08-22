@@ -34,6 +34,12 @@ class PriceHistoryVM @AssistedInject constructor(
         loadHistory()
     }
 
+    fun selectRange(range: PriceRange) {
+        if (range == _uiState.value.range) return
+        _uiState.update { it.copy(range = range) }
+        loadHistory()
+    }
+
     fun loadHistory() {
         viewModelScope.launch {
             _uiState.update {
@@ -47,7 +53,7 @@ class PriceHistoryVM @AssistedInject constructor(
                 val response = dashboardApi.getPriceHistory(
                     authorization = authPrefs.authorization(),
                     type = navKey.type.queryValue,
-                    days = 7,
+                    days = _uiState.value.range.days,
                 )
                 if (!response.isSuccessful) throw IllegalStateException(response.errorMessage())
                 response.body() ?: throw IllegalStateException("Response body is null")
