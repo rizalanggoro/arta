@@ -66,7 +66,7 @@ import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -102,7 +102,7 @@ private fun Content(
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
+                SmallTopAppBar(
                     title = uiState.type.title,
                     navigationIcon = {
                         IconButton(onClick = onClickBack) {
