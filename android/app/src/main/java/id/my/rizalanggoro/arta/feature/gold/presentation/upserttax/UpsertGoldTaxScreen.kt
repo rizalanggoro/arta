@@ -4,29 +4,36 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.material3.Button
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.extension.isValidInputNumber
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.shared.component.LocalBottomSheetTitle
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun UpsertGoldTaxScreen(
@@ -35,9 +42,19 @@ fun UpsertGoldTaxScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
+    val title = if (uiState.isUpdate) "Ubah Konfigurasi Pajak" else "Tambah Konfigurasi Pajak"
+    val bottomSheetTitle = LocalBottomSheetTitle.current
 
     LaunchedEffect(taxPreferenceId) {
         vm.setTaxPreferenceId(taxPreferenceId)
+    }
+
+    LaunchedEffect(title) {
+        bottomSheetTitle?.value = title
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { bottomSheetTitle?.value = null }
     }
 
     LaunchedEffect(Unit) {
@@ -47,7 +64,6 @@ fun UpsertGoldTaxScreen(
     }
 
     Content(
-        isUpdate = uiState.isUpdate,
         isLoading = uiState.isLoading,
         carat = uiState.carat,
         caratError = uiState.caratError,
@@ -60,9 +76,10 @@ fun UpsertGoldTaxScreen(
     )
 }
 
+private val ErrorColor = Color(0xFFE53935)
+
 @Composable
 private fun Content(
-    isUpdate: Boolean = false,
     isLoading: Boolean = false,
     carat: String = "",
     caratError: String? = null,
@@ -73,85 +90,82 @@ private fun Content(
     onChangeTaxRate: (String) -> Unit = {},
     onClickSubmit: () -> Unit = {},
 ) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            when {
-                isUpdate -> "Ubah Konfigurasi Pajak"
-                else -> "Tambah Konfigurasi Pajak"
-            },
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             TextField(
                 value = carat,
                 onValueChange = {
                     if (it.isValidInputNumber())
                         onChangeCarat(it)
                 },
+                label = "Karat",
+                useLabelAsPlaceholder = true,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
-                supportingText = when {
-                    caratError != null -> {
-                        { Text(caratError) }
-                    }
-
-                    else -> null
-                },
-                isError = caratError != null,
-                label = { Text("Karat") },
                 enabled = !isLoading,
-                singleLine = true,
+                colors = if (caratError != null) {
+                    TextFieldDefaults.textFieldColors(borderColor = ErrorColor)
+                } else {
+                    TextFieldDefaults.textFieldColors()
+                },
             )
+            caratError?.let { error ->
+                Text(error, fontSize = 13.sp, color = ErrorColor)
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             TextField(
                 value = taxRate,
                 onValueChange = {
                     if (it.isValidInputNumber())
                         onChangeTaxRate(it)
                 },
+                label = "Rasio pajak (%)",
+                useLabelAsPlaceholder = true,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
-                supportingText = when {
-                    taxRateError != null -> {
-                        { Text(taxRateError) }
-                    }
-
-                    else -> null
-                },
-                isError = taxRateError != null,
-                label = { Text("Rasio pajak (%)") },
                 enabled = !isLoading,
-                singleLine = true,
+                colors = if (taxRateError != null) {
+                    TextFieldDefaults.textFieldColors(borderColor = ErrorColor)
+                } else {
+                    TextFieldDefaults.textFieldColors()
+                },
             )
-            if (errorMessage != null) {
-                Text(
-                    text = errorMessage,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                )
+            taxRateError?.let { error ->
+                Text(error, fontSize = 13.sp, color = ErrorColor)
             }
         }
+
+        errorMessage?.let { error ->
+            Text(error, fontSize = 13.sp, color = ErrorColor)
+        }
+
         when {
             isLoading -> Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                contentAlignment = Alignment.Center
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp)
+                    .height(40.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                LoadingIndicator()
+                InfiniteProgressIndicator()
             }
 
             else -> Button(
                 onClick = onClickSubmit,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp),
+                colors = ButtonDefaults.buttonColorsPrimary(),
             ) {
                 Text("Simpan")
             }
@@ -159,14 +173,25 @@ private fun Content(
     }
 }
 
-@Composable
 @Preview(showBackground = true)
+@Composable
 private fun Preview() {
-    ArtaTheme { Content() }
+    MiuixTheme { Content() }
 }
 
-@Composable
 @Preview(showBackground = true)
+@Composable
 private fun LoadingPreview() {
-    ArtaTheme { Content(isLoading = true) }
+    MiuixTheme { Content(isLoading = true) }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ErrorPreview() {
+    MiuixTheme {
+        Content(
+            caratError = "Karat wajib diisi",
+            taxRateError = "Rasio pajak wajib diisi",
+        )
+    }
 }
