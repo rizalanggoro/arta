@@ -1,177 +1,163 @@
 package id.my.rizalanggoro.arta.feature.update.presentation.check
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Numbers
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.icon.extended.Info
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.darkColorScheme
+import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
 fun CheckUpdateScreen(vm: CheckUpdateVM = hiltViewModel()) {
     val uiState by vm.uiState.collectAsState()
+    val backStack = LocalBackStack.current
 
     Content(
         uiState = uiState,
         onClickCheck = vm::onCheckClicked,
         onClickDownload = vm::onDownloadClicked,
         onClickInstall = vm::onInstallClicked,
+        onClickBack = { backStack.removeLastOrNull() },
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun Content(
+    modifier: Modifier = Modifier,
     uiState: CheckUpdateUiState = CheckUpdateUiState(),
     onClickCheck: () -> Unit = {},
     onClickDownload: () -> Unit = {},
     onClickInstall: () -> Unit = {},
     onClickBack: () -> Unit = {},
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = onClickBack) {
-                        Icon(
-                            Icons.AutoMirrored.Rounded.ArrowBack,
-                            null
-                        )
-                    }
-                },
-                title = {
-                    Text("Pembaruan")
-                },
-            )
-        },
+    MiuixTheme(
+        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier.clip(
-                    RoundedCornerShape(16.dp)
-                )
-            ) {
-                ListItem(
-                    colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    ),
-                    leadingContent = {
-                        Icon(
-                            Icons.Rounded.Numbers,
-                            null
-                        )
-                    },
-                    headlineContent = {
-                        Text("Versi aplikasi")
-                    },
-                    supportingContent = {
-                        Text("${uiState.currentVersion}+${uiState.currentVersionCode}")
-                    }
-                )
-
-                if (uiState.isUpdateAvailable)
-                    ListItem(
-                        colors = ListItemDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
-                        ),
-                        leadingContent = {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = "Pembaruan",
+                    navigationIcon = {
+                        IconButton(onClick = onClickBack) {
                             Icon(
-                                Icons.Rounded.Info,
+                                MiuixIcons.Back,
                                 null
                             )
-                        },
-                        headlineContent = {
-                            Text("Pembaruan tersedia!")
                         }
-                    )
-            }
-
-            when {
-                uiState.isChecking -> Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.Center
+                    },
+                )
+            },
+        ) { innerPadding ->
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Card(
+                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
                 ) {
-                    LoadingIndicator()
-                }
+                    BasicComponent(
+                        title = "Versi aplikasi",
+                        summary = "${uiState.currentVersion}+${uiState.currentVersionCode}",
+                    )
 
-                uiState.isDownloading -> {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalAlignment = Alignment.End
-                    ) {
-                        LinearWavyProgressIndicator(
-                            progress = { uiState.downloadProgress / 100f },
-                            modifier = Modifier.fillMaxWidth(),
+                    if (uiState.isUpdateAvailable)
+                        BasicComponent(
+                            title = "Pembaruan tersedia!",
+                            startAction = {
+                                Icon(MiuixIcons.Info, null)
+                            },
                         )
-                        Text(
-                            "Mengunduh ${uiState.downloadProgress}%",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                    }
                 }
 
-                uiState.downloadedApkPath != null -> {
-                    Button(
-                        onClick = onClickInstall,
+                when {
+                    uiState.isChecking -> Box(
                         modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("Instal pembaruan")
+                        InfiniteProgressIndicator(color = MiuixTheme.colorScheme.primary)
                     }
-                }
 
-                uiState.isUpdateAvailable -> {
-                    Button(
-                        onClick = onClickDownload,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Unduh pembaruan")
+                    uiState.isDownloading -> {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        ) {
+                            LinearProgressIndicator(
+                                progress = uiState.downloadProgress / 100f,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            Text(
+                                text = "Mengunduh ${uiState.downloadProgress}%",
+                                fontSize = 13.sp,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                            )
+                        }
                     }
-                }
 
-                else -> {
-                    Button(
-                        onClick = onClickCheck,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Periksa pembaruan")
+                    uiState.downloadedApkPath != null -> {
+                        Button(
+                            onClick = onClickInstall,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColorsPrimary(),
+                        ) {
+                            Text("Instal pembaruan")
+                        }
+                    }
+
+                    uiState.isUpdateAvailable -> {
+                        Button(
+                            onClick = onClickDownload,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColorsPrimary(),
+                        ) {
+                            Text("Unduh pembaruan")
+                        }
+                    }
+
+                    else -> {
+                        Button(
+                            onClick = onClickCheck,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColorsPrimary(),
+                        ) {
+                            Text("Periksa pembaruan")
+                        }
                     }
                 }
             }
@@ -182,69 +168,59 @@ private fun Content(
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
-    ArtaTheme {
-        Content(
-            uiState = CheckUpdateUiState(
-                currentVersion = "1.0",
-                currentVersionCode = 1,
-            )
+    Content(
+        uiState = CheckUpdateUiState(
+            currentVersion = "1.0",
+            currentVersionCode = 1,
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun CheckingPreview() {
-    ArtaTheme {
-        Content(
-            uiState = CheckUpdateUiState(
-                isChecking = true
-            )
+    Content(
+        uiState = CheckUpdateUiState(
+            isChecking = true
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun UpdateAvailablePreview() {
-    ArtaTheme {
-        Content(
-            uiState = CheckUpdateUiState(
-                currentVersionCode = 1,
-                latestVersionCode = 2,
-                isUpdateAvailable = true,
-                statusMessage = "Pembaruan tersedia",
-            )
+    Content(
+        uiState = CheckUpdateUiState(
+            currentVersionCode = 1,
+            latestVersionCode = 2,
+            isUpdateAvailable = true,
+            statusMessage = "Pembaruan tersedia",
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DownloadingPreview() {
-    ArtaTheme {
-        Content(
-            uiState = CheckUpdateUiState(
-                currentVersionCode = 1,
-                latestVersionCode = 2,
-                isDownloading = true,
-                downloadProgress = 62,
-                statusMessage = "Mengunduh pembaruan...",
-            )
+    Content(
+        uiState = CheckUpdateUiState(
+            currentVersionCode = 1,
+            latestVersionCode = 2,
+            isDownloading = true,
+            downloadProgress = 62,
+            statusMessage = "Mengunduh pembaruan...",
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun NoUpdatePreview() {
-    ArtaTheme {
-        Content(
-            uiState = CheckUpdateUiState(
-                currentVersionCode = 2,
-                latestVersionCode = 2,
-                statusMessage = "Aplikasi sudah menggunakan versi terbaru",
-            )
+    Content(
+        uiState = CheckUpdateUiState(
+            currentVersionCode = 2,
+            latestVersionCode = 2,
+            statusMessage = "Aplikasi sudah menggunakan versi terbaru",
         )
-    }
+    )
 }
