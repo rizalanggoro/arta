@@ -1,34 +1,20 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.tax
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,10 +25,22 @@ import id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference
 import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Add
+import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.darkColorScheme
+import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun ListGoldTaxScreen(
     vm: ListGoldTaxVM = hiltViewModel(),
 ) {
@@ -81,7 +79,6 @@ fun ListGoldTaxScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun Content(
     uiState: ListGoldTaxUiState = ListGoldTaxUiState(),
     onClickCreate: () -> Unit = {},
@@ -90,124 +87,93 @@ private fun Content(
     onClickBack: () -> Unit = {},
     onClickRetry: () -> Unit = {},
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Pajak Emas") },
-                navigationIcon = {
-                    IconButton(onClick = onClickBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
+    MiuixTheme(
+        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+    ) {
+        Scaffold(
+            topBar = {
+                SmallTopAppBar(
+                    title = "Pajak Emas",
+                    navigationIcon = {
+                        IconButton(onClick = onClickBack) {
+                            Icon(
+                                MiuixIcons.Back,
+                                null,
+                            )
+                        }
+                    },
+                )
+            },
+            floatingActionButton = {
+                if (uiState.isLoading.not() && uiState.errorMessage.isNullOrBlank())
+                    FloatingActionButton(onClick = dropUnlessResumed { onClickCreate() }) {
+                        Icon(
+                            MiuixIcons.Add,
+                            null
+                        )
                     }
-                },
-            )
-        },
-        floatingActionButton = {
-            if (uiState.isLoading.not() && uiState.errorMessage.isNullOrBlank())
-                FloatingActionButton(onClick = dropUnlessResumed { onClickCreate() }) {
-                    Icon(
-                        Icons.Rounded.Add,
-                        null
-                    )
-                }
-        }
-    ) { paddingValues ->
-        when {
-            uiState.isLoading -> Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                LoadingIndicator()
             }
+        ) { paddingValues ->
+            when {
+                uiState.isLoading -> Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    InfiniteProgressIndicator(color = MiuixTheme.colorScheme.primary)
+                }
 
-            uiState.errorMessage != null -> ErrorPlaceholder(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                message = uiState.errorMessage,
-                onClickRetry = onClickRetry
-            )
+                uiState.errorMessage != null -> ErrorPlaceholder(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    message = uiState.errorMessage,
+                    onClickRetry = onClickRetry
+                )
 
-            uiState.preferences.isEmpty() -> EmptyPlaceholder(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            )
+                uiState.preferences.isEmpty() -> EmptyPlaceholder(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                )
 
-            else -> LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                itemsIndexed(uiState.preferences) { index, preference ->
-                    val shape = RoundedCornerShape(
-                        topStart = if (index == 0) 16.dp else 4.dp,
-                        topEnd = if (index == 0) 16.dp else 4.dp,
-                        bottomStart = if (index == uiState.preferences.lastIndex) 16.dp else 4.dp,
-                        bottomEnd = if (index == uiState.preferences.lastIndex) 16.dp else 4.dp,
-                    )
-                    ListItem(
-                        headlineContent = {
-                            Text("Karat ${preference.carat}")
-                        },
-                        supportingContent = {
-                            Text(text = "Rasio pajak ${preference.taxRate}%")
-                        },
-                        trailingContent = {
-                            Row {
-                                IconButton(onClick = { onClickEdit(preference) }) {
-                                    Icon(
-                                        Icons.Rounded.Edit,
-                                        null
-                                    )
-                                }
-                                IconButton(onClick = { onClickDelete(preference) }) {
-                                    Icon(
-                                        Icons.Rounded.Delete,
-                                        null
-                                    )
-                                }
+                else -> LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 12.dp,
+                        bottom = 96.dp,
+                    ),
+                ) {
+                    item {
+                        Card {
+                            uiState.preferences.forEach { preference ->
+                                BasicComponent(
+                                    title = "Karat ${preference.carat}",
+                                    summary = "Rasio pajak ${preference.taxRate}%",
+                                    endActions = {
+                                        IconButton(onClick = { onClickEdit(preference) }) {
+                                            Icon(
+                                                Icons.Rounded.Edit,
+                                                null
+                                            )
+                                        }
+                                        IconButton(onClick = { onClickDelete(preference) }) {
+                                            Icon(
+                                                Icons.Rounded.Delete,
+                                                null
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
                             }
-                        },
-                        colors = ListItemDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
-                        ),
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = if (index == 0) 0.dp else 2.dp)
-                            .clip(shape)
-                    )
-//                    Card(modifier = Modifier.fillMaxWidth()) {
-//                        Column(
-//                            modifier = Modifier.padding(16.dp),
-//                            verticalArrangement = Arrangement.spacedBy(12.dp),
-//                        ) {
-//                            Text(
-//                                text = "Karat ${preference.carat}",
-//                                style = MaterialTheme.typography.titleMedium,
-//                            )
-//                            Text(
-//                                text = "Rasio pajak ${preference.taxRate}%",
-//                                style = MaterialTheme.typography.bodyMedium,
-//                                color = MaterialTheme.colorScheme.outline,
-//                            )
-//                            OutlinedButton(
-//                                onClick = { onClickEdit(preference) },
-//                                modifier = Modifier.fillMaxWidth(),
-//                            ) {
-//                                Icon(Icons.Rounded.Edit, contentDescription = null)
-//                                Text("Ubah")
-//                            }
-//                            OutlinedButton(
-//                                onClick = { onClickDelete(preference) },
-//                                modifier = Modifier.fillMaxWidth(),
-//                            ) {
-//                                Icon(Icons.Rounded.Delete, contentDescription = null)
-//                                Text("Hapus")
-//                            }
-//                        }
-//                    }
+                        }
+                    }
                 }
             }
         }
@@ -217,65 +183,57 @@ private fun Content(
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
-    ArtaTheme {
-        Content(
-            uiState = ListGoldTaxUiState(
-                isLoading = false,
-                preferences = listOf(
-                    DtoGoldTaxPreference(
-                        id = 1,
-                        userId = 1,
-                        carat = 24.0,
-                        taxRate = 5.0,
-                        createdAt = "",
-                        updatedAt = ""
-                    ),
-                    DtoGoldTaxPreference(
-                        id = 2,
-                        userId = 1,
-                        carat = 18.0,
-                        taxRate = 3.5,
-                        createdAt = "",
-                        updatedAt = ""
-                    ),
-                )
-            ),
-        )
-    }
+    Content(
+        uiState = ListGoldTaxUiState(
+            isLoading = false,
+            preferences = listOf(
+                DtoGoldTaxPreference(
+                    id = 1,
+                    userId = 1,
+                    carat = 24.0,
+                    taxRate = 5.0,
+                    createdAt = "",
+                    updatedAt = ""
+                ),
+                DtoGoldTaxPreference(
+                    id = 2,
+                    userId = 1,
+                    carat = 18.0,
+                    taxRate = 3.5,
+                    createdAt = "",
+                    updatedAt = ""
+                ),
+            )
+        ),
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LoadingPreview() {
-    ArtaTheme {
-        Content(
-            uiState = ListGoldTaxUiState(
-                isLoading = true,
-            ),
-        )
-    }
+    Content(
+        uiState = ListGoldTaxUiState(
+            isLoading = true,
+        ),
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ErrorPreview() {
-    ArtaTheme {
-        Content(
-            uiState = ListGoldTaxUiState(
-                errorMessage = "Terjadi kesalahan tak terduga"
-            ),
-        )
-    }
+    Content(
+        uiState = ListGoldTaxUiState(
+            errorMessage = "Terjadi kesalahan tak terduga"
+        ),
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun EmptyPreview() {
-    ArtaTheme {
-        Content(
-            uiState = ListGoldTaxUiState(
-                preferences = emptyList()
-            ),
-        )
-    }
+    Content(
+        uiState = ListGoldTaxUiState(
+            preferences = emptyList()
+        ),
+    )
 }
