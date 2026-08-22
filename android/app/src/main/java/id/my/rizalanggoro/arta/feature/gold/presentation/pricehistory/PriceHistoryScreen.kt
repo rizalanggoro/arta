@@ -1,32 +1,16 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.pricehistory
 
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,8 +31,8 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelCompone
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
@@ -60,100 +44,116 @@ import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
-import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.extension.toAmericanCurrency
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
-import id.my.rizalanggoro.arta.core.extension.toMillis
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DtoPricePoint
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
-import id.my.rizalanggoro.arta.ui.theme.ArtaTheme
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.TabRow
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.darkColorScheme
+import top.yukonga.miuix.kmp.theme.lightColorScheme
 import java.text.DecimalFormat
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PriceHistoryScreen(
     vm: PriceHistoryVM = hiltViewModel(),
 ) {
-    val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
+    val backStack = LocalBackStack.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-                title = {
-                    Text(text = uiState.type.title)
-                },
-                navigationIcon = {
-                    IconButton(onClick = { backStack.removeLastOrNull() }) {
-                        Icon(
-                            Icons.AutoMirrored.Rounded.ArrowBack,
-                            null
-                        )
-                    }
-                },
-            )
-        },
-    ) { innerPadding ->
-        Content(
-            modifier = Modifier.padding(innerPadding),
-            uiState = uiState,
-            onClickRetry = { vm.loadHistory() },
-            onSelectRange = vm::selectRange,
-        )
-    }
+    Content(
+        uiState = uiState,
+        onClickRetry = { vm.loadHistory() },
+        onSelectRange = vm::selectRange,
+        onClickBack = { backStack.removeLastOrNull() },
+    )
 }
 
 @Composable
 private fun Content(
-    uiState: PriceHistoryUiState = PriceHistoryUiState(),
     modifier: Modifier = Modifier,
+    uiState: PriceHistoryUiState = PriceHistoryUiState(),
     onClickRetry: () -> Unit = {},
     onSelectRange: (PriceRange) -> Unit = {},
+    onClickBack: () -> Unit = {},
 ) {
-    when {
-        uiState.isLoading && uiState.points.isEmpty() -> Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            LoadingIndicator()
+    MiuixTheme(
+        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = uiState.type.title,
+                    navigationIcon = {
+                        IconButton(onClick = onClickBack) {
+                            Icon(
+                                MiuixIcons.Back,
+                                null
+                            )
+                        }
+                    },
+                )
+            },
+        ) { innerPadding ->
+            when {
+                uiState.isLoading && uiState.points.isEmpty() -> Box(
+                    modifier = modifier
+                        .padding(innerPadding)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    InfiniteProgressIndicator(color = MiuixTheme.colorScheme.primary)
+                }
+
+                uiState.errorMessage != null -> ErrorPlaceholder(
+                    modifier = modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    onClickRetry = onClickRetry
+                )
+
+                uiState.points.isEmpty() -> Box(
+                    modifier = modifier
+                        .padding(innerPadding)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Belum ada data. Riwayat akan muncul setelah server mengumpulkan data harga.",
+                        fontSize = 14.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                        modifier = Modifier.padding(horizontal = 32.dp)
+                    )
+                }
+
+                else -> PriceChart(
+                    uiState = uiState,
+                    modifier = modifier.padding(innerPadding),
+                    onSelectRange = onSelectRange,
+                )
+            }
         }
-
-        uiState.errorMessage != null -> ErrorPlaceholder(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            onClickRetry = onClickRetry
-        )
-
-        uiState.points.isEmpty() -> Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Belum ada data. Riwayat akan muncul setelah server mengumpulkan data harga.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
-        }
-
-        else -> PriceChart(
-            uiState = uiState,
-            modifier = modifier,
-            onSelectRange = onSelectRange,
-        )
     }
 }
 
@@ -163,7 +163,7 @@ private fun PriceChart(
     modifier: Modifier = Modifier,
     onSelectRange: (PriceRange) -> Unit = {},
 ) {
-    val lineColor = MaterialTheme.colorScheme.primary
+    val lineColor = MiuixTheme.colorScheme.primary
     var sampledPoints by remember { mutableStateOf(emptyList<DtoPricePoint>()) }
     val xAxisFormatter = remember(uiState.range) {
         CartesianValueFormatter { _, value, _ ->
@@ -174,7 +174,7 @@ private fun PriceChart(
     }
     val marker = rememberDefaultCartesianMarker(
         label = rememberTextComponent(
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MiuixTheme.colorScheme.onPrimary,
             textSize = 9.sp,
             background = shapeComponent(fill = fill(lineColor), shape = CorneredShape.Pill),
             padding = Insets(allDp = 6f),
@@ -250,63 +250,48 @@ private fun PriceChart(
     val latestPoint = uiState.points.last()
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
+            modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp),
+            insideMargin = PaddingValues(16.dp)
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = "Nilai terakhir",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
+                    fontSize = 13.sp,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                 )
                 Text(
                     text = latestPoint.value.formatValue(uiState.type),
-                    style = MaterialTheme.typography.titleLarge,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = MiuixTheme.colorScheme.primary
                 )
                 Text(
                     text = "Diperbarui ${latestPoint.timestamp.toFormattedDate("dd/MM/yyyy HH:mm")}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
+                    fontSize = 13.sp,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                 )
             }
         }
 
-        Text(
-            text = "Riwayat ${uiState.range.label} terakhir",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+        TabRow(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+            tabs = PriceRange.entries.map { it.shortLabel },
+            selectedTabIndex = PriceRange.entries.indexOf(uiState.range),
+            onTabSelected = { index -> onSelectRange(PriceRange.entries[index]) },
         )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PriceRange.entries.forEach { range ->
-                FilterChip(
-                    selected = range == uiState.range,
-                    onClick = { onSelectRange(range) },
-                    label = { Text(text = range.label.replaceFirstChar { it.uppercase() }) },
-                )
-            }
-        }
         if (uiState.isLoading) {
             LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth(),
+                progress = null,
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp)
+                    .fillMaxWidth(),
             )
         }
         CartesianChartHost(
@@ -314,6 +299,7 @@ private fun PriceChart(
             modelProducer = modelProducer,
             scrollState = rememberVicoScrollState(scrollEnabled = false),
             modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
                 .fillMaxWidth()
                 .height(280.dp),
         )
@@ -330,6 +316,16 @@ private val GoldRoute.PriceHistoryType.title: String
     get() = when (this) {
         GoldRoute.PriceHistoryType.GOLD -> "Harga Emas Dunia"
         GoldRoute.PriceHistoryType.FX -> "Nilai Dollar"
+    }
+
+private val PriceRange.shortLabel: String
+    get() = when (this) {
+        PriceRange.ONE_DAY -> "1 hari"
+        PriceRange.ONE_WEEK -> "1 mgg"
+        PriceRange.ONE_MONTH -> "1 bln"
+        PriceRange.THREE_MONTHS -> "3 bln"
+        PriceRange.SIX_MONTHS -> "6 bln"
+        PriceRange.ONE_YEAR -> "1 thn"
     }
 
 private fun Double.formatValue(type: GoldRoute.PriceHistoryType): String =
@@ -351,36 +347,30 @@ private val samplePoints = listOf(
 @Preview(showBackground = true, name = "Riwayat Harga Emas")
 @Composable
 private fun PriceHistoryPreview() {
-    ArtaTheme {
-        PriceChart(
-            uiState = PriceHistoryUiState(
-                type = GoldRoute.PriceHistoryType.GOLD,
-                isLoading = false,
-                points = samplePoints,
-            )
+    PriceChart(
+        uiState = PriceHistoryUiState(
+            type = GoldRoute.PriceHistoryType.GOLD,
+            isLoading = false,
+            points = samplePoints,
         )
-    }
+    )
 }
 
 @Preview(showBackground = true, name = "Riwayat Harga - Loading")
 @Composable
 private fun PriceHistoryPreviewLoading() {
-    ArtaTheme {
-        Content(
-            uiState = PriceHistoryUiState(isLoading = true),
-        )
-    }
+    Content(
+        uiState = PriceHistoryUiState(isLoading = true),
+    )
 }
 
 @Preview(showBackground = true, name = "Riwayat Harga - Error")
 @Composable
 private fun PriceHistoryPreviewError() {
-    ArtaTheme {
-        Content(
-            uiState = PriceHistoryUiState(
-                isLoading = false,
-                errorMessage = "Gagal memuat riwayat harga.",
-            ),
-        )
-    }
+    Content(
+        uiState = PriceHistoryUiState(
+            isLoading = false,
+            errorMessage = "Gagal memuat riwayat harga.",
+        ),
+    )
 }

@@ -110,4 +110,6 @@ dependencies {
     implementation(libs.androidx.compose.adaptive)
     implementation(libs.compose.shimmer)
     implementation(libs.vico.compose.m3)
+    implementation(libs.miuix.ui)
+    implementation(libs.miuix.icons)
 }
