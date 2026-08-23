@@ -279,7 +279,6 @@ private fun Content(
                         insideMargin = PaddingValues(top = 8.dp),
                     )
                 }
-
                 if ((uiState.data?.latestCategories?.isEmpty() ?: true) && !uiState.isLoading) {
                     item {
                         EmptyPlaceholder(
@@ -297,7 +296,7 @@ private fun Content(
                             size = 3,
                             modifier = Modifier.padding(
                                 top = when {
-                                    it == 0 -> 16.dp
+                                    it == 0 -> 12.dp
                                     else -> 2.dp
                                 }
                             ),
@@ -311,7 +310,7 @@ private fun Content(
                     DashboardCategoryListItem(
                         modifier = Modifier.padding(
                             top = when {
-                                index == 0 -> 16.dp
+                                index == 0 -> 12.dp
                                 else -> 2.dp
                             },
                         ),

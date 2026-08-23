@@ -1,32 +1,30 @@
 package id.my.rizalanggoro.arta.feature.transaction.presentation.detail
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.CallMade
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
@@ -34,14 +32,24 @@ import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.DropdownImpl
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Edit
+import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun TransactionDetailScreen(
@@ -76,15 +84,68 @@ private fun Content(
     onEdit: (DomainTransaction) -> Unit = {},
     onDelete: (DomainTransaction) -> Unit = {},
 ) {
+    var showActions by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             SmallTopAppBar(
                 title = "Detail Transaksi",
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
+                        Icon(MiuixIcons.Back, null)
                     }
-                }
+                },
+                actions = {
+                    Box {
+                        IconButton(onClick = { showActions = true }) {
+                            Icon(MiuixIcons.More, null)
+                        }
+
+                        if (showActions && transaction != null) {
+                            WindowListPopup(
+                                show = true,
+                                onDismissRequest = { showActions = false },
+                                alignment = PopupPositionProvider.Align.End,
+                            ) {
+                                ListPopupColumn {
+                                    listOf(
+                                        DropdownItem(
+                                            text = "Ubah",
+                                            icon = { iconModifier ->
+                                                Icon(MiuixIcons.Edit, null, modifier = iconModifier)
+                                            },
+                                        ),
+                                        DropdownItem(
+                                            text = "Hapus",
+                                            icon = { iconModifier ->
+                                                Icon(
+                                                    MiuixIcons.Delete,
+                                                    null,
+                                                    modifier = iconModifier,
+                                                    tint = MiuixTheme.colorScheme.error
+                                                )
+                                            },
+                                        ),
+                                    ).forEachIndexed { index, item ->
+                                        DropdownImpl(
+                                            item = item,
+                                            optionSize = 2,
+                                            isSelected = false,
+                                            index = index,
+                                            onSelectedIndexChange = {
+                                                showActions = false
+                                                when (index) {
+                                                    0 -> onEdit(transaction)
+                                                    else -> onDelete(transaction)
+                                                }
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
             )
         }
     ) { paddingValues ->
@@ -99,80 +160,55 @@ private fun Content(
             if (transaction == null) {
                 Text(
                     text = "Memuat transaksi...",
-                    fontSize = 14.sp
+                    style = MiuixTheme.textStyles.body2
                 )
                 return@Column
             }
 
             val isIncome = category?.type == "income"
 
-            // Amount summary card
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MiuixTheme.colorScheme.secondaryContainer)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.defaultColors(
+                    color = MiuixTheme.colorScheme.secondaryContainer,
+                    contentColor = MiuixTheme.colorScheme.onSecondaryContainer,
+                ),
+                insideMargin = PaddingValues(16.dp),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Icon(
-                        if (isIncome) Icons.AutoMirrored.Rounded.CallReceived
-                        else Icons.AutoMirrored.Rounded.CallMade,
-                        null,
-                        tint = MiuixTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            if (isIncome) Icons.AutoMirrored.Rounded.CallReceived
+                            else Icons.AutoMirrored.Rounded.CallMade,
+                            null,
+                            tint = MiuixTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = if (isIncome) "Pemasukan" else "Pengeluaran",
+                            style = MiuixTheme.textStyles.footnote1,
+                            color = MiuixTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                     Text(
-                        text = if (isIncome) "Pemasukan" else "Pengeluaran",
-                        fontSize = 12.sp,
-                        color = MiuixTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
+                        text = transaction.amount.toIndonesianCurrency(),
+                        style = MiuixTheme.textStyles.body1,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MiuixTheme.colorScheme.onBackground
                     )
                 }
-                Text(
-                    text = transaction.amount.toIndonesianCurrency(),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MiuixTheme.colorScheme.onSecondaryContainer
-                )
             }
 
-            // Detail rows grouped in a card
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MiuixTheme.colorScheme.surfaceContainer)
-            ) {
+            Card(modifier = Modifier.fillMaxWidth()) {
                 DetailRow(label = "Kategori", value = category?.name ?: "-")
                 DetailRow(label = "Tanggal", value = transaction.date.toFormattedDate())
                 DetailRow(label = "Deskripsi", value = transaction.description.ifEmpty { "-" })
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Action buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = { onEdit(transaction) },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Ubah")
-                }
-                Button(
-                    onClick = { onDelete(transaction) },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColorsPrimary()
-                ) {
-                    Text("Hapus")
-                }
             }
         }
     }
@@ -187,12 +223,12 @@ private fun DetailRow(label: String, value: String) {
     ) {
         Text(
             text = label,
-            fontSize = 12.sp,
+            style = MiuixTheme.textStyles.footnote1,
             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
         )
         Text(
             text = value,
-            fontSize = 16.sp,
+            style = MiuixTheme.textStyles.body1,
             fontWeight = FontWeight.Medium
         )
     }
