@@ -116,14 +116,6 @@ private fun Content(
     Scaffold(
         topBar = {
             SmallTopAppBar(
-                color = when {
-                    lastDestination in listOf(
-                        HomeRoute.CashDashboard,
-                        HomeRoute.GoldDashboard,
-                    ) -> MiuixTheme.colorScheme.surfaceContainer
-
-                    else -> MiuixTheme.colorScheme.surface
-                },
                 title = uiState.selectedWallet?.name.let {
                     if (it != null && lastDestination != HomeRoute.Setting) it
                     else "Arta"

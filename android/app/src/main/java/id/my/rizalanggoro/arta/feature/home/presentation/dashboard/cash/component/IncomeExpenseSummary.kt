@@ -238,7 +238,7 @@ private fun SummaryCard(
                 fontWeight = FontWeight.SemiBold,
                 color = when {
                     isLoading -> Color.Transparent
-                    else -> MiuixTheme.colorScheme.onSecondaryContainer
+                    else -> MiuixTheme.colorScheme.onBackground
                 },
                 modifier = Modifier.then(
                     when {
