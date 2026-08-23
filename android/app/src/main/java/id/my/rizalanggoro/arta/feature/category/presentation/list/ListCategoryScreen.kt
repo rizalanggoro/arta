@@ -16,6 +16,9 @@ import androidx.compose.material.icons.automirrored.rounded.CallReceived
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,18 +37,25 @@ import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownImpl
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.TabRowWithContour
+import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun ListCategoryScreen(vm: ListCategoryVM = hiltViewModel()) {
@@ -56,13 +66,8 @@ fun ListCategoryScreen(vm: ListCategoryVM = hiltViewModel()) {
         uiState = uiState,
         onClickCreate = { backStack.add(CategoryRoute.Upsert()) },
         onClickType = vm::onCategoryTypeSelected,
-        onClickCategory = {
-            backStack.add(
-                CategoryRoute.ActionSheet(
-                    categoryId = it.id
-                )
-            )
-        },
+        onClickEdit = { backStack.add(CategoryRoute.Upsert(categoryId = it.id)) },
+        onClickDelete = { backStack.add(CategoryRoute.Delete(categoryId = it.id)) },
         onClickBack = { backStack.removeLastOrNull() },
         onClickRetry = vm::loadCategories,
     )
@@ -74,7 +79,8 @@ private fun Content(
     uiState: ListCategoryUiState = ListCategoryUiState(),
     onClickCreate: () -> Unit = {},
     onClickType: (String) -> Unit = {},
-    onClickCategory: (DomainCategory) -> Unit = {},
+    onClickEdit: (DomainCategory) -> Unit = {},
+    onClickDelete: (DomainCategory) -> Unit = {},
     onClickBack: () -> Unit = {},
     onClickRetry: () -> Unit = {},
 ) {
@@ -82,6 +88,7 @@ private fun Content(
         uiState.selectedType == "income" -> uiState.incomeCategories
         else -> uiState.expenseCategories
     }
+    var actionCategory by remember { mutableStateOf<DomainCategory?>(null) }
 
     ArtaMiuixTheme {
         Scaffold(
@@ -139,7 +146,7 @@ private fun Content(
                     )
 
                     else -> Column(modifier = Modifier.fillMaxSize()) {
-                        TabRowWithContour(
+                        TabRow(
                             tabs = categoryTypes.map { it.name },
                             selectedTabIndex = categoryTypes
                                 .indexOfFirst { it.value == uiState.selectedType }
@@ -148,6 +155,7 @@ private fun Content(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp)
                         )
 
                         LazyColumn(
@@ -195,7 +203,7 @@ private fun Content(
                                                 }
                                             },
                                             enabled = category.data.userId != null,
-                                            onClick = { onClickCategory(category.data) },
+                                            onClick = { actionCategory = category.data },
                                             modifier = Modifier.fillMaxWidth(),
                                         )
                                     }
@@ -212,6 +220,50 @@ private fun Content(
                                         .padding(16.dp),
                                     textAlign = TextAlign.Center
                                 )
+                            }
+                        }
+
+                        actionCategory?.let { target ->
+                            WindowListPopup(
+                                show = true,
+                                onDismissRequest = { actionCategory = null },
+                                alignment = PopupPositionProvider.Align.End,
+                            ) {
+                                ListPopupColumn {
+                                    listOf(
+                                        DropdownItem(
+                                            text = "Ubah",
+                                            icon = { modifier ->
+                                                Icon(MiuixIcons.Edit, null, modifier = modifier)
+                                            },
+                                        ),
+                                        DropdownItem(
+                                            text = "Hapus",
+                                            icon = { modifier ->
+                                                Icon(
+                                                    MiuixIcons.Delete,
+                                                    null,
+                                                    modifier = modifier,
+                                                    tint = MiuixTheme.colorScheme.error
+                                                )
+                                            },
+                                        ),
+                                    ).forEachIndexed { index, item ->
+                                        DropdownImpl(
+                                            item = item,
+                                            optionSize = 2,
+                                            isSelected = false,
+                                            index = index,
+                                            onSelectedIndexChange = {
+                                                actionCategory = null
+                                                when (index) {
+                                                    0 -> onClickEdit(target)
+                                                    else -> onClickDelete(target)
+                                                }
+                                            },
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

@@ -26,11 +26,6 @@ object CategoryRoute {
     ) : NavKey
 
     @Serializable
-    data class ActionSheet(
-        val categoryId: Int,
-    ) : NavKey
-
-    @Serializable
     data class Delete(
         val categoryId: Int,
     ) : NavKey

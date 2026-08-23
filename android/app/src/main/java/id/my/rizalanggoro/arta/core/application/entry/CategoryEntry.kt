@@ -5,7 +5,6 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
-import id.my.rizalanggoro.arta.feature.category.presentation.action.ActionSheetCategory
 import id.my.rizalanggoro.arta.feature.category.presentation.delete.DeleteCategoryDialog
 import id.my.rizalanggoro.arta.feature.category.presentation.delete.DeleteCategoryVM
 import id.my.rizalanggoro.arta.feature.category.presentation.detail.DetailCategoryScreen
@@ -60,14 +59,6 @@ fun EntryProviderScope<NavKey>.categoryEntry() {
                     )
                 }
             )
-        )
-    }
-
-    entry<CategoryRoute.ActionSheet>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
-    ) {
-        ActionSheetCategory(
-            categoryId = it.categoryId
         )
     }
 
