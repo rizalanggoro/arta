@@ -64,11 +64,11 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.text.DecimalFormat
 
@@ -214,12 +214,18 @@ private fun PriceChart(
             },
         ),
         startAxis = VerticalAxis.rememberStart(
-            label = rememberAxisLabelComponent(textSize = 9.sp),
+            label = rememberAxisLabelComponent(
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                textSize = 9.sp,
+            ),
             valueFormatter = CartesianValueFormatter.decimal(DecimalFormat("#,##0.##")),
             itemPlacer = VerticalAxis.ItemPlacer.count(count = { 8 }),
         ),
         bottomAxis = HorizontalAxis.rememberBottom(
-            label = rememberAxisLabelComponent(textSize = 9.sp),
+            label = rememberAxisLabelComponent(
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                textSize = 9.sp,
+            ),
             valueFormatter = xAxisFormatter
         ),
         marker = marker,
@@ -276,12 +282,14 @@ private fun PriceChart(
             }
         }
 
-        TabRow(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp),
-            tabs = PriceRange.entries.map { it.shortLabel },
-            selectedTabIndex = PriceRange.entries.indexOf(uiState.range),
-            onTabSelected = { index -> onSelectRange(PriceRange.entries[index]) },
-        )
+        Card(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
+            WindowDropdownPreference(
+                items = PriceRange.entries.map { it.shortLabel },
+                selectedIndex = PriceRange.entries.indexOf(uiState.range),
+                title = "Rentang waktu",
+                onSelectedIndexChange = { index -> onSelectRange(PriceRange.entries[index]) },
+            )
+        }
         if (uiState.isLoading) {
             LinearProgressIndicator(
                 progress = null,
