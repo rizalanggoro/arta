@@ -3,6 +3,7 @@ package id.my.rizalanggoro.arta.feature.category.presentation.detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.CallMade
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
 import androidx.compose.runtime.Composable
@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
@@ -32,14 +31,19 @@ import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.core.utils.Samples
 import id.my.rizalanggoro.arta.openapi.models.DomainTransaction
 import id.my.rizalanggoro.arta.shared.component.TransactionListItem
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.PullToRefreshState
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -85,7 +89,7 @@ private fun Content(
                     navigationIcon = {
                         IconButton(onClick = onClickBack) {
                             Icon(
-                                Icons.AutoMirrored.Rounded.ArrowBack,
+                                MiuixIcons.Back,
                                 null
                             )
                         }
@@ -99,12 +103,16 @@ private fun Content(
                 onRefresh = onRefresh,
                 pullToRefreshState = pullToRefreshState
             ) {
-                LazyColumn {
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 16.dp,
+                    ),
+                ) {
                     item {
                         Column(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 16.dp),
+                            modifier = Modifier.padding(top = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(
                                 when {
                                     uiState.isLoading -> 4.dp
@@ -114,7 +122,7 @@ private fun Content(
                         ) {
                             Text(
                                 uiState.category?.data?.name ?: "Loading category",
-                                fontSize = 24.sp,
+                                style = MiuixTheme.textStyles.title2,
                                 modifier = Modifier.then(
                                     when {
                                         uiState.isLoading -> Modifier
@@ -133,7 +141,7 @@ private fun Content(
                             Text(
                                 "Berikut total pemasukan dan daftar transaksi yang dilakukan selama " +
                                         "satu hari, yaitu Senin, 12 Juni 2024",
-                                fontSize = 14.sp,
+                                style = MiuixTheme.textStyles.body2,
                                 color = when {
                                     uiState.isLoading -> Color.Transparent
                                     else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -157,22 +165,23 @@ private fun Content(
                     }
 
                     item {
-                        Column(
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
                                 .padding(top = 16.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MiuixTheme.colorScheme.secondaryContainer)
                                 .then(
                                     when {
                                         uiState.isLoading -> Modifier.shimmer()
                                         else -> Modifier
                                     }
                                 ),
+                            colors = CardDefaults.defaultColors(
+                                color = MiuixTheme.colorScheme.secondaryContainer,
+                                contentColor = MiuixTheme.colorScheme.onSecondaryContainer,
+                            ),
+                            insideMargin = PaddingValues(16.dp),
                         ) {
                             Column(
-                                modifier = Modifier.padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Row(
@@ -214,12 +223,12 @@ private fun Content(
                                             true -> "Pemasukan"
                                             else -> "Pengeluaran"
                                         },
-                                        fontSize = 12.sp,
+                                        style = MiuixTheme.textStyles.footnote1,
+                                        fontWeight = FontWeight.SemiBold,
                                         color = when {
                                             uiState.isLoading -> Color.Transparent
                                             else -> MiuixTheme.colorScheme.primary
                                         },
-                                        fontWeight = FontWeight.SemiBold,
                                         modifier = Modifier
                                             .then(
                                                 when {
@@ -241,11 +250,11 @@ private fun Content(
                                 Text(
                                     text = (uiState.category?.totalAmount
                                         ?: 0.0).toIndonesianCurrency(),
-                                    fontSize = 16.sp,
+                                    style = MiuixTheme.textStyles.body1,
                                     fontWeight = FontWeight.SemiBold,
                                     color = when {
                                         uiState.isLoading -> Color.Transparent
-                                        else -> MiuixTheme.colorScheme.onSecondaryContainer
+                                        else -> MiuixTheme.colorScheme.onBackground
                                     },
                                     modifier = Modifier
                                         .then(
@@ -269,27 +278,10 @@ private fun Content(
                     }
 
                     item {
-                        Text(
-                            "Daftar transaksi",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 24.dp)
-                                .then(
-                                    when {
-                                        uiState.isLoading -> Modifier
-                                            .shimmer()
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(MiuixTheme.colorScheme.outline)
-
-                                        else -> Modifier
-                                    }
-                                ),
-                            color = when {
-                                uiState.isLoading -> Color.Transparent
-                                else -> Color.Unspecified
-                            }
+                        SmallTitle(
+                            text = "Daftar transaksi",
+                            modifier = Modifier.padding(top = 24.dp),
+                            insideMargin = PaddingValues(vertical = 8.dp),
                         )
                     }
 
@@ -299,14 +291,12 @@ private fun Content(
                                 isLoading = true,
                                 index = index,
                                 size = 3,
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp)
-                                    .padding(
-                                        top = when {
-                                            index == 0 -> 16.dp
-                                            else -> 2.dp
-                                        }
-                                    ),
+                                modifier = Modifier.padding(
+                                    top = when {
+                                        index == 0 -> 16.dp
+                                        else -> 2.dp
+                                    }
+                                ),
                                 transaction = Samples.domainTransactions.first(),
                                 category = Samples.domainCategories.first()
                             )
@@ -316,14 +306,12 @@ private fun Content(
                             category.transactions ?: emptyList()
                         ) { index, transaction ->
                             TransactionListItem(
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp)
-                                    .padding(
-                                        top = when {
-                                            index == 0 -> 16.dp
-                                            else -> 2.dp
-                                        }
-                                    ),
+                                modifier = Modifier.padding(
+                                    top = when {
+                                        index == 0 -> 16.dp
+                                        else -> 2.dp
+                                    }
+                                ),
                                 transaction = transaction,
                                 category = category.data,
                                 index = index,
