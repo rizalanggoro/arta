@@ -72,7 +72,6 @@ fun LoginScreen(vm: LoginVM = hiltViewModel()) {
         onChangePassword = vm::onPasswordChanged,
         onClickSubmit = vm::onLoginClicked,
         onClickRegister = { backStack.add(AuthRoute.Register) },
-        onClickForgotPassword = { backStack.add(AuthRoute.ForgotPassword) },
     )
 }
 
@@ -84,7 +83,6 @@ private fun Content(
     onChangePassword: (String) -> Unit = {},
     onClickSubmit: () -> Unit = {},
     onClickRegister: () -> Unit = {},
-    onClickForgotPassword: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -172,7 +170,9 @@ private fun Content(
                     color = MiuixTheme.colorScheme.primary
                 )
 
-                else -> Column {
+                else -> Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Button(
                         onClick = onClickSubmit,
                         modifier = Modifier.fillMaxWidth(),
@@ -184,12 +184,6 @@ private fun Content(
                     TextButton(
                         text = "Belum punya akun? Daftar sekarang",
                         onClick = onClickRegister,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-
-                    TextButton(
-                        text = "Lupa kata sandi",
-                        onClick = onClickForgotPassword,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

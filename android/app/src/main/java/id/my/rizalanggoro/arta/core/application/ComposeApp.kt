@@ -1,5 +1,8 @@
 package id.my.rizalanggoro.arta.core.application
 
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -7,9 +10,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -55,6 +60,23 @@ fun ComposeApp(
     val backStack = rememberNavBackStack(startRoute)
     val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
     val dialogStrategy = remember { DialogSceneStrategy<NavKey>() }
+
+    // Sync system bar icon appearance with the in-app theme, not the system theme.
+    val view = LocalView.current
+    SideEffect {
+        val activity = view.context as? ComponentActivity ?: return@SideEffect
+        val style = when {
+            isDarkTheme -> SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+            else -> SystemBarStyle.light(
+                android.graphics.Color.TRANSPARENT,
+                android.graphics.Color.TRANSPARENT,
+            )
+        }
+        activity.enableEdgeToEdge(
+            statusBarStyle = style,
+            navigationBarStyle = style,
+        )
+    }
 
     CompositionLocalProvider(LocalIsDarkTheme provides isDarkTheme) {
         ArtaMiuixTheme {

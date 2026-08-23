@@ -27,6 +27,8 @@ import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import kotlinx.coroutines.flow.filterIsInstance
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
@@ -36,6 +38,8 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private val ErrorColor = Color(0xFFE53935)
@@ -73,6 +77,7 @@ fun RegisterScreen(vm: RegisterVM = hiltViewModel()) {
         onChangeConfirmPassword = vm::onConfirmPasswordChanged,
         onClickSubmit = vm::onRegisterClicked,
         onClickLogin = { backStack.removeLastOrNull() },
+        onClickBack = { backStack.removeLastOrNull() },
     )
 }
 
@@ -86,10 +91,21 @@ private fun Content(
     onChangeConfirmPassword: (String) -> Unit = {},
     onClickSubmit: () -> Unit = {},
     onClickLogin: () -> Unit = {},
+    onClickBack: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
-            SmallTopAppBar(title = "Registrasi")
+            SmallTopAppBar(
+                title = "Registrasi",
+                navigationIcon = {
+                    IconButton(onClick = onClickBack) {
+                        Icon(
+                            MiuixIcons.Back,
+                            null
+                        )
+                    }
+                },
+            )
         },
         snackbarHost = { SnackbarHost(state = snackbarHostState) },
     ) { paddingValues ->
@@ -218,7 +234,9 @@ private fun Content(
                     color = MiuixTheme.colorScheme.primary
                 )
 
-                else -> Column {
+                else -> Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Button(
                         onClick = onClickSubmit,
                         modifier = Modifier.fillMaxWidth(),
