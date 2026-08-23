@@ -6,16 +6,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.dropUnlessResumed
 import id.my.rizalanggoro.arta.core.application.route.GoldRoute
@@ -27,16 +29,24 @@ import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownImpl
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun ListGoldTaxScreen(
@@ -85,6 +95,8 @@ private fun Content(
     onClickBack: () -> Unit = {},
     onClickRetry: () -> Unit = {},
 ) {
+    var actionPreference by remember { mutableStateOf<DtoGoldTaxPreference?>(null) }
+
     ArtaMiuixTheme {
         Scaffold(
             topBar = {
@@ -148,27 +160,72 @@ private fun Content(
                     item {
                         Card {
                             uiState.preferences.forEach { preference ->
-                                BasicComponent(
-                                    title = "Karat ${preference.carat}",
-                                    summary = "Rasio pajak ${preference.taxRate}%",
-                                    endActions = {
-                                        IconButton(onClick = { onClickEdit(preference) }) {
-                                            Icon(
-                                                Icons.Rounded.Edit,
-                                                null
-                                            )
+                                Box {
+                                    BasicComponent(
+                                        title = "Karat ${preference.carat}",
+                                        summary = "Rasio pajak ${preference.taxRate}%",
+                                        onClick = { actionPreference = preference },
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+
+                                    if (actionPreference?.id == preference.id) {
+                                        WindowListPopup(
+                                            show = true,
+                                            onDismissRequest = { actionPreference = null },
+                                            alignment = PopupPositionProvider.Align.End,
+                                        ) {
+                                            ListPopupColumn {
+                                                listOf(
+                                                    DropdownItem(
+                                                        text = "Ubah",
+                                                        icon = { iconModifier ->
+                                                            Icon(MiuixIcons.Edit, null, modifier = iconModifier)
+                                                        },
+                                                    ),
+                                                    DropdownItem(
+                                                        text = "Hapus",
+                                                        icon = { iconModifier ->
+                                                            Icon(
+                                                                MiuixIcons.Delete,
+                                                                null,
+                                                                modifier = iconModifier,
+                                                                tint = MiuixTheme.colorScheme.error
+                                                            )
+                                                        },
+                                                    ),
+                                                ).forEachIndexed { index, item ->
+                                                    DropdownImpl(
+                                                        item = item,
+                                                        optionSize = 2,
+                                                        isSelected = false,
+                                                        index = index,
+                                                        onSelectedIndexChange = {
+                                                            actionPreference = null
+                                                            when (index) {
+                                                                0 -> onClickEdit(preference)
+                                                                else -> onClickDelete(preference)
+                                                            }
+                                                        },
+                                                    )
+                                                }
+                                            }
                                         }
-                                        IconButton(onClick = { onClickDelete(preference) }) {
-                                            Icon(
-                                                Icons.Rounded.Delete,
-                                                null
-                                            )
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
+                                    }
+                                }
                             }
                         }
+                    }
+
+                    item {
+                        Text(
+                            text = "Ketuk preferensi pajak untuk melihat opsi lainnya",
+                            fontSize = 13.sp,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }
