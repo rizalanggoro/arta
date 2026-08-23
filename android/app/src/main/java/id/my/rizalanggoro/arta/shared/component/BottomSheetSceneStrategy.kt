@@ -8,6 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.rememberLifecycleOwner
 import androidx.navigation3.runtime.NavEntry
@@ -28,6 +30,10 @@ import top.yukonga.miuix.kmp.theme.lightColorScheme
 /** Set by screens inside the sheet to show a title in the sheet's built-in title row. */
 val LocalBottomSheetTitle = staticCompositionLocalOf<MutableState<String?>?> { null }
 
+/** Set by screens inside the sheet to show a composable at the end of the sheet's title row. */
+val LocalBottomSheetEndAction =
+    staticCompositionLocalOf<MutableState<(@Composable () -> Unit)?>?> { null }
+
 /** An [OverlayScene] that renders an [entry] within a [WindowBottomSheet]. */
 internal data class BottomSheetScene<T : Any>(
     override val key: T,
@@ -43,16 +49,20 @@ internal data class BottomSheetScene<T : Any>(
         val lifecycleOwner = rememberLifecycleOwner()
         var visible by remember { mutableStateOf(true) }
         val sheetTitle = remember { mutableStateOf<String?>(null) }
+        val sheetEndAction = remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
         ArtaMiuixTheme {
             CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.onBackground) {
                 WindowBottomSheet(
                     show = visible,
                     title = sheetTitle.value,
+                    endAction = sheetEndAction.value,
+                    insideMargin = DpSize(0.dp, 0.dp),
                     onDismissRequest = { visible = false },
                     onDismissFinished = onBack,
                 ) {
                     CompositionLocalProvider(
                         LocalBottomSheetTitle provides sheetTitle,
+                        LocalBottomSheetEndAction provides sheetEndAction,
                         LocalLifecycleOwner provides lifecycleOwner,
                     ) {
                         entry.Content()

@@ -1,26 +1,22 @@
 package id.my.rizalanggoro.arta.feature.wallet.presentation.select
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.constant.toWalletName
@@ -32,12 +28,18 @@ import id.my.rizalanggoro.arta.openapi.models.DtoWallet
 import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
+import id.my.rizalanggoro.arta.shared.component.LocalBottomSheetEndAction
+import id.my.rizalanggoro.arta.shared.component.LocalBottomSheetTitle
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
-import top.yukonga.miuix.kmp.basic.RadioButton
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.preference.RadioButtonPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -46,21 +48,48 @@ fun SelectWalletScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
     val backStack = LocalBackStack.current
+    val bottomSheetTitle = LocalBottomSheetTitle.current
+    val bottomSheetEndAction = LocalBottomSheetEndAction.current
 
     LaunchedEffect(Unit) {
         AppEventBus.event
             .filterIsInstance<AppEvent.WalletSelected>()
-            .collect { backStack.removeLastOrNull() }
+            .collect {
+                delay(300)
+                backStack.removeLastOrNull()
+            }
+    }
+
+    LaunchedEffect(bottomSheetTitle, bottomSheetEndAction) {
+        bottomSheetTitle?.value = "Pilih Dompet"
+        bottomSheetEndAction?.value = {
+            IconButton(
+                onClick = {
+                    backStack.removeLastOrNull()
+                    backStack.add(WalletRoute.List)
+                },
+                modifier = Modifier.padding(end = 16.dp)
+            ) {
+                Icon(
+                    MiuixIcons.Settings,
+                    null
+                )
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            bottomSheetTitle?.value = null
+            bottomSheetEndAction?.value = null
+        }
     }
 
     Content(
         uiState = uiState,
         onClickRetry = vm::loadWallets,
         onClickWallet = vm::onWalletSelected,
-        onClickManageWallet = {
-            backStack.removeLastOrNull()
-            backStack.add(WalletRoute.List)
-        }
+        onClickCancel = { backStack.removeLastOrNull() },
     )
 }
 
@@ -69,37 +98,17 @@ private fun Content(
     uiState: SelectWalletUiState = SelectWalletUiState(),
     onClickRetry: () -> Unit = {},
     onClickWallet: (DomainWallet) -> Unit = {},
-    onClickManageWallet: () -> Unit = {},
+    onClickCancel: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            Text(
-                text = "Pilih Dompet",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            IconButton(onClick = onClickManageWallet) {
-                Icon(
-                    Icons.Rounded.Settings,
-                    null
-                )
-            }
-        }
-
         when {
             uiState.isLoading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(32.dp),
+                        .height(160.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     InfiniteProgressIndicator(color = MiuixTheme.colorScheme.primary)
@@ -125,31 +134,23 @@ private fun Content(
                         .padding(bottom = 16.dp)
                 ) {
                     items(uiState.wallets) { wallet ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onClickWallet(wallet.data) }
-                                .padding(horizontal = 16.dp, vertical = 4.dp)
-                        ) {
-                            RadioButton(
-                                selected = uiState.selectedWallet?.id == wallet.data.id,
-                                onClick = { onClickWallet(wallet.data) },
-                            )
-                            Column {
-                                Text(
-                                    wallet.data.name.orEmpty(),
-                                    fontSize = 16.sp
-                                )
-                                Text(
-                                    wallet.data.type.orEmpty().toWalletName(),
-                                    fontSize = 14.sp,
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                                )
-                            }
-                        }
+                        RadioButtonPreference(
+                            title = wallet.data.name.orEmpty(),
+                            summary = wallet.data.type.orEmpty().toWalletName(),
+                            selected = uiState.selectedWallet?.id == wallet.data.id,
+                            onClick = { onClickWallet(wallet.data) },
+                        )
                     }
+                }
+                Button(
+                    onClick = onClickCancel,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .navigationBarsPadding()
+                        .padding(bottom = 16.dp)
+                ) {
+                    Text("Batal")
                 }
             }
         }

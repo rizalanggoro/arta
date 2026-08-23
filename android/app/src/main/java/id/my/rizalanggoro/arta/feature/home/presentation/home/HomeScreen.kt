@@ -3,14 +3,6 @@ package id.my.rizalanggoro.arta.feature.home.presentation.home
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Balance
-import androidx.compose.material.icons.rounded.Dashboard
-import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material.icons.rounded.Payment
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,6 +38,13 @@ import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Add
+import top.yukonga.miuix.kmp.icon.extended.BankCards
+import top.yukonga.miuix.kmp.icon.extended.Filter
+import top.yukonga.miuix.kmp.icon.extended.GridView
+import top.yukonga.miuix.kmp.icon.extended.Layers
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -121,7 +120,7 @@ private fun Content(
                     if (lastDestination == HomeRoute.ListTransaction)
                         IconButton(onClick = onClickFilter) {
                             Icon(
-                                Icons.Rounded.FilterList,
+                                MiuixIcons.Filter,
                                 null
                             )
                         }
@@ -129,7 +128,7 @@ private fun Content(
                     if (lastDestination != HomeRoute.Setting)
                         IconButton(onClick = onClickSelectWallet) {
                             Icon(
-                                Icons.Rounded.Wallet,
+                                MiuixIcons.BankCards,
                                 null
                             )
                         }
@@ -159,7 +158,7 @@ private fun Content(
             if (lastDestination != HomeRoute.Setting) {
                 FloatingActionButton(onClick = onClickFab) {
                     Icon(
-                        Icons.Rounded.Add,
+                        MiuixIcons.Add,
                         contentDescription = null
                     )
                 }
@@ -196,7 +195,7 @@ private fun walletDestinations(type: String?): List<HomeDestination> {
     return listOf(
         HomeDestination(
             label = "Ringkasan",
-            icon = Icons.Rounded.Dashboard,
+            icon = MiuixIcons.GridView,
             route = when (isCash) {
                 true -> HomeRoute.CashDashboard
                 else -> HomeRoute.GoldDashboard
@@ -205,19 +204,19 @@ private fun walletDestinations(type: String?): List<HomeDestination> {
         when (isCash) {
             true -> HomeDestination(
                 label = "Transaksi",
-                icon = Icons.Rounded.Payment,
+                icon = MiuixIcons.BankCards,
                 route = HomeRoute.ListTransaction
             )
 
             else -> HomeDestination(
                 label = "Emas",
-                icon = Icons.Rounded.Balance,
+                icon = MiuixIcons.Layers,
                 route = HomeRoute.ListGold
             )
         },
         HomeDestination(
             label = "Pengaturan",
-            icon = Icons.Rounded.Settings,
+            icon = MiuixIcons.Settings,
             route = HomeRoute.Setting
         ),
     )

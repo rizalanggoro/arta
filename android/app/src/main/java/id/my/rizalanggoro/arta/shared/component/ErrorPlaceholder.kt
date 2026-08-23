@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -43,13 +42,13 @@ fun ErrorPlaceholder(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(MiuixTheme.colorScheme.primaryContainer),
+                .background(MiuixTheme.colorScheme.errorContainer),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Rounded.Warning,
                 null,
-                tint = MiuixTheme.colorScheme.primary
+                tint = MiuixTheme.colorScheme.error
             )
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -68,8 +67,7 @@ fun ErrorPlaceholder(
         }
         Button(
             onClick = onClickRetry,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColorsPrimary()
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Muat ulang")
         }
