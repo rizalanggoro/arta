@@ -1,6 +1,5 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.gold
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +22,7 @@ import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.shared.component.GoldListItem
@@ -32,8 +32,6 @@ import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.PullToRefreshState
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.darkColorScheme
-import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
 fun HomeGoldScreen(
@@ -70,9 +68,7 @@ private fun Content(
     onClickRetry: () -> Unit = {},
     onLongClickGold: (DomainGold) -> Unit = {},
 ) {
-    MiuixTheme(
-        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    ) {
+    ArtaMiuixTheme {
         when {
             uiState.isLoading && uiState.golds.isEmpty() -> Box(
                 contentAlignment = Alignment.Center,

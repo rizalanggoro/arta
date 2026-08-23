@@ -1,6 +1,5 @@
 package id.my.rizalanggoro.arta.feature.update.presentation.check
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -33,8 +33,6 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.icon.extended.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.darkColorScheme
-import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
 fun CheckUpdateScreen(vm: CheckUpdateVM = hiltViewModel()) {
@@ -59,9 +57,7 @@ private fun Content(
     onClickInstall: () -> Unit = {},
     onClickBack: () -> Unit = {},
 ) {
-    MiuixTheme(
-        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    ) {
+    ArtaMiuixTheme {
         Scaffold(
             topBar = {
                 SmallTopAppBar(

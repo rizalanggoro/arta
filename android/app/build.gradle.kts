@@ -112,4 +112,5 @@ dependencies {
     implementation(libs.vico.compose.m3)
     implementation(libs.miuix.ui)
     implementation(libs.miuix.icons)
+    implementation(libs.miuix.preference)
 }

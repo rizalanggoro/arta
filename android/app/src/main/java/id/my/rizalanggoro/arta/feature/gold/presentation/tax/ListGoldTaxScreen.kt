@@ -1,6 +1,5 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.tax
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +21,7 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DtoGoldTaxPreference
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.ConfirmDialog
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
@@ -37,8 +37,6 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.darkColorScheme
-import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
 fun ListGoldTaxScreen(
@@ -87,9 +85,7 @@ private fun Content(
     onClickBack: () -> Unit = {},
     onClickRetry: () -> Unit = {},
 ) {
-    MiuixTheme(
-        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    ) {
+    ArtaMiuixTheme {
         Scaffold(
             topBar = {
                 SmallTopAppBar(

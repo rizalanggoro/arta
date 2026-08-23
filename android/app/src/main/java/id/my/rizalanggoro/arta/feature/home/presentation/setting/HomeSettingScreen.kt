@@ -31,9 +31,7 @@ import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowRight
 import top.yukonga.miuix.kmp.icon.extended.BankCards
 import top.yukonga.miuix.kmp.icon.extended.Close2
 import top.yukonga.miuix.kmp.icon.extended.Contacts
@@ -41,6 +39,8 @@ import top.yukonga.miuix.kmp.icon.extended.GridView
 import top.yukonga.miuix.kmp.icon.extended.Layers
 import top.yukonga.miuix.kmp.icon.extended.Theme
 import top.yukonga.miuix.kmp.icon.extended.Update
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -117,7 +117,9 @@ private fun Content(
             }
             item {
                 Card {
-                    BasicComponent(
+                    SwitchPreference(
+                        checked = uiState.isDarkTheme,
+                        onCheckedChange = onToggleTheme,
                         title = "Tema gelap",
                         startAction = {
                             Icon(
@@ -125,13 +127,6 @@ private fun Content(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         },
-                        endActions = {
-                            Switch(
-                                checked = uiState.isDarkTheme,
-                                onCheckedChange = onToggleTheme,
-                            )
-                        },
-                        onClick = { onToggleTheme(!uiState.isDarkTheme) },
                     )
                 }
             }
@@ -144,7 +139,7 @@ private fun Content(
             }
             item {
                 Card {
-                    BasicComponent(
+                    ArrowPreference(
                         title = "Dompet",
                         summary = "Kelola dompet tabungan uang dan emas",
                         startAction = {
@@ -153,12 +148,9 @@ private fun Content(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         },
-                        endActions = {
-                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
-                        },
                         onClick = onClickManageWallet,
                     )
-                    BasicComponent(
+                    ArrowPreference(
                         title = "Kategori",
                         summary = "Kelola kategori pengeluaran dan pemasukan transaksi",
                         startAction = {
@@ -167,12 +159,9 @@ private fun Content(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         },
-                        endActions = {
-                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
-                        },
                         onClick = onClickManageCategory,
                     )
-                    BasicComponent(
+                    ArrowPreference(
                         title = "Pajak emas",
                         summary = "Atur preferensi pajak jual emas berdasarkan ukuran karat",
                         startAction = {
@@ -180,9 +169,6 @@ private fun Content(
                                 MiuixIcons.Layers, null,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
-                        },
-                        endActions = {
-                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
                         },
                         onClick = onClickManageGoldTax,
                     )
@@ -197,7 +183,7 @@ private fun Content(
             }
             item {
                 Card {
-                    BasicComponent(
+                    ArrowPreference(
                         title = "Pembaruan",
                         summary = "Periksa dan unduh pembaruan aplikasi",
                         startAction = {
@@ -210,20 +196,15 @@ private fun Content(
                                 Icon(MiuixIcons.Update, null)
                             }
                         },
-                        endActions = {                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
-                        },
                         onClick = onClickUpdate,
                     )
-                    BasicComponent(
+                    ArrowPreference(
                         title = "Keluar",
                         startAction = {
                             Icon(
                                 MiuixIcons.Close2, null,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
-                        },
-                        endActions = {
-                            Icon(MiuixIcons.Basic.ArrowRight, null, modifier = Modifier.padding(start = 8.dp))
                         },
                         onClick = onClickLogout,
                     )

@@ -1,6 +1,5 @@
 package id.my.rizalanggoro.arta.feature.wallet.presentation.list
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +22,7 @@ import id.my.rizalanggoro.arta.core.application.route.WalletRoute
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainWallet
 import id.my.rizalanggoro.arta.openapi.models.DtoWallet
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.shared.component.WalletListItem
@@ -34,13 +34,10 @@ import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.darkColorScheme
-import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
 fun ListWalletScreen(vm: ListWalletVM = hiltViewModel()) {
@@ -71,9 +68,7 @@ private fun Content(
     onLongClickWallet: (DomainWallet) -> Unit = {},
     onClickRetry: () -> Unit = {},
 ) {
-    MiuixTheme(
-        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    ) {
+    ArtaMiuixTheme {
         Scaffold(
             topBar = {
                 SmallTopAppBar(

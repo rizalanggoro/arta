@@ -1,7 +1,6 @@
 package id.my.rizalanggoro.arta.feature.category.presentation.list
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,6 +29,7 @@ import id.my.rizalanggoro.arta.core.constant.categoryTypes
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DtoCategory
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -46,8 +46,6 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.darkColorScheme
-import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
 fun ListCategoryScreen(vm: ListCategoryVM = hiltViewModel()) {
@@ -85,9 +83,7 @@ private fun Content(
         else -> uiState.expenseCategories
     }
 
-    MiuixTheme(
-        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    ) {
+    ArtaMiuixTheme {
         Scaffold(
             topBar = {
                 SmallTopAppBar(

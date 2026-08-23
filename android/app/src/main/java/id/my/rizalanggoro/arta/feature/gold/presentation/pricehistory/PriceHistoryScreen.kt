@@ -1,6 +1,5 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.pricehistory
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +56,7 @@ import id.my.rizalanggoro.arta.core.extension.toFormattedDate
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.openapi.models.DtoPricePoint
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -70,8 +70,6 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.darkColorScheme
-import top.yukonga.miuix.kmp.theme.lightColorScheme
 import java.text.DecimalFormat
 
 @Composable
@@ -97,9 +95,7 @@ private fun Content(
     onSelectRange: (PriceRange) -> Unit = {},
     onClickBack: () -> Unit = {},
 ) {
-    MiuixTheme(
-        colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    ) {
+    ArtaMiuixTheme {
         Scaffold(
             topBar = {
                 SmallTopAppBar(
