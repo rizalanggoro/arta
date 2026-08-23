@@ -5,7 +5,6 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import id.my.rizalanggoro.arta.core.application.route.GoldRoute
-import id.my.rizalanggoro.arta.feature.gold.presentation.action.GoldActionSheet
 import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldDialog
 import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
@@ -57,14 +56,6 @@ fun EntryProviderScope<NavKey>.goldEntry() {
     entry<GoldRoute.Detail> {
         GoldDetailScreen(
             goldId = it.id
-        )
-    }
-
-    entry<GoldRoute.ActionSheet>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
-    ) {
-        GoldActionSheet(
-            goldId = it.goldId
         )
     }
 

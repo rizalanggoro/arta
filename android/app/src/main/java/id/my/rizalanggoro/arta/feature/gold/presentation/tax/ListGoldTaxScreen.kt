@@ -117,7 +117,8 @@ private fun Content(
                     FloatingActionButton(onClick = dropUnlessResumed { onClickCreate() }) {
                         Icon(
                             MiuixIcons.Add,
-                            null
+                            null,
+                            tint = MiuixTheme.colorScheme.onPrimary
                         )
                     }
             }

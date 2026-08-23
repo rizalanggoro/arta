@@ -1,13 +1,18 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
@@ -16,13 +21,27 @@ import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.GoldListItem
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownImpl
+import top.yukonga.miuix.kmp.basic.DropdownItem
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Edit
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun LatestGold(
     golds: List<DtoGold> = emptyList(),
-    onLongClickGold: (DomainGold) -> Unit = {},
+    onClickEdit: (DomainGold) -> Unit = {},
+    onClickDelete: (DomainGold) -> Unit = {},
 ) {
+    var actionGold by remember { mutableStateOf<DomainGold?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,28 +53,82 @@ fun LatestGold(
             insideMargin = PaddingValues(top = 8.dp),
         )
 
-            when {
-                golds.isEmpty() -> EmptyPlaceholder(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 32.dp)
-                )
+        when {
+            golds.isEmpty() -> EmptyPlaceholder(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp)
+            )
 
-                else -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        golds.forEachIndexed { index, gold ->
+            else -> {
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    golds.forEach { gold ->
+                        Box {
                             GoldListItem(
                                 gold = gold,
-                                onLongClick = onLongClickGold,
+                                onLongClick = { actionGold = it },
                             )
+
+                            if (actionGold?.id == gold.data.id) {
+                                WindowListPopup(
+                                    show = true,
+                                    onDismissRequest = { actionGold = null },
+                                    alignment = PopupPositionProvider.Align.End,
+                                ) {
+                                    ListPopupColumn {
+                                        listOf(
+                                            DropdownItem(
+                                                text = "Ubah",
+                                                icon = { iconModifier ->
+                                                    Icon(MiuixIcons.Edit, null, modifier = iconModifier)
+                                                },
+                                            ),
+                                            DropdownItem(
+                                                text = "Hapus",
+                                                icon = { iconModifier ->
+                                                    Icon(
+                                                        MiuixIcons.Delete,
+                                                        null,
+                                                        modifier = iconModifier,
+                                                        tint = MiuixTheme.colorScheme.error
+                                                    )
+                                                },
+                                            ),
+                                        ).forEachIndexed { index, item ->
+                                            DropdownImpl(
+                                                item = item,
+                                                optionSize = 2,
+                                                isSelected = false,
+                                                index = index,
+                                                onSelectedIndexChange = {
+                                                    actionGold = null
+                                                    when (index) {
+                                                        0 -> onClickEdit(gold.data)
+                                                        else -> onClickDelete(gold.data)
+                                                    }
+                                                },
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
+
+                Text(
+                    text = "Tekan dan tahan untuk melihat opsi lainnya",
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
+}
 
 @Composable
 @Preview

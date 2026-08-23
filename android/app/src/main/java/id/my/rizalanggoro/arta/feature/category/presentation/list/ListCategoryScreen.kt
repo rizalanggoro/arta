@@ -111,6 +111,7 @@ private fun Content(
                         Icon(
                             MiuixIcons.Add,
                             contentDescription = null,
+                            tint = MiuixTheme.colorScheme.onPrimary
                         )
                     }
                 }

@@ -1,21 +1,14 @@
 package id.my.rizalanggoro.arta.feature.gold.presentation.upsert
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.Today
-import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,6 +37,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
@@ -51,9 +45,15 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
-import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.icon.extended.BankCards
+import top.yukonga.miuix.kmp.icon.extended.Layers
+import top.yukonga.miuix.kmp.icon.extended.Months
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private val ErrorColor = Color(0xFFE53935)
@@ -119,7 +119,7 @@ private fun Content(
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
                         Icon(
-                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            MiuixIcons.Back,
                             contentDescription = null,
                         )
                     }
@@ -136,11 +136,8 @@ private fun Content(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MiuixTheme.colorScheme.surfaceContainer)
+            Card(
+                modifier = Modifier.fillMaxWidth()
             ) {
                 BasicComponent(
                     title = uiState.selectedWallet?.name ?: "Tidak ada dompet",
@@ -148,37 +145,42 @@ private fun Content(
                         ?: "Tidak ada jenis dompet",
                     startAction = {
                         Icon(
-                            Icons.Rounded.Wallet,
-                            null
+                            MiuixIcons.BankCards,
+                            null,
+                            modifier = Modifier.padding(end = 8.dp)
                         )
                     },
                 )
 
-                BasicComponent(
+                ArrowPreference(
                     title = "Tanggal",
                     summary = uiState.date.toIndonesianDate(),
                     startAction = {
                         Icon(
-                            Icons.Rounded.Today,
-                            null
-                        )
-                    },
-                    endActions = {
-                        Icon(
-                            Icons.Rounded.ChevronRight,
-                            null
+                            MiuixIcons.Months,
+                            null,
+                            modifier = Modifier.padding(end = 8.dp)
                         )
                     },
                     onClick = if (uiState.isLoading) ({}) else onClickSelectDate,
                 )
-            }
 
-            TabRowWithContour(
-                tabs = goldTypes.map { it.name },
-                selectedTabIndex = goldTypes.indexOfFirst { it.value == uiState.type },
-                onTabSelected = { index -> onTypeChanged(goldTypes[index].value) },
-                modifier = Modifier.fillMaxWidth(),
-            )
+                WindowDropdownPreference(
+                    items = goldTypes.map { it.name },
+                    selectedIndex = goldTypes.indexOfFirst { it.value == uiState.type }
+                        .coerceAtLeast(0),
+                    title = "Tipe emas",
+                    startAction = {
+                        Icon(
+                            MiuixIcons.Layers,
+                            null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    },
+                    enabled = !uiState.isLoading,
+                    onSelectedIndexChange = { index -> onTypeChanged(goldTypes[index].value) },
+                )
+            }
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)

@@ -163,7 +163,8 @@ private fun Content(
                 FloatingActionButton(onClick = onClickFab) {
                     Icon(
                         MiuixIcons.Add,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = MiuixTheme.colorScheme.onPrimary
                     )
                 }
             }

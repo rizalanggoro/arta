@@ -65,11 +65,8 @@ fun HomeGoldDashboardScreen(
                 GoldRoute.PriceHistory(type = type)
             )
         },
-        onLongClickGold = {
-            backStack.add(
-                GoldRoute.ActionSheet(goldId = it.id)
-            )
-        },
+        onClickEdit = { backStack.add(GoldRoute.Upsert(goldId = it.id)) },
+        onClickDelete = { backStack.add(GoldRoute.Delete(goldId = it.id)) },
     )
 }
 
@@ -81,7 +78,8 @@ private fun Content(
     onClickManageTax: () -> Unit = {},
     onClickPriceHistory: (GoldRoute.PriceHistoryType) -> Unit = {},
     onRefresh: () -> Unit = {},
-    onLongClickGold: (DomainGold) -> Unit = {},
+    onClickEdit: (DomainGold) -> Unit = {},
+    onClickDelete: (DomainGold) -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -296,7 +294,8 @@ private fun Content(
                     item {
                         LatestGold(
                             golds = data?.latestGolds ?: emptyList(),
-                            onLongClickGold = onLongClickGold,
+                            onClickEdit = onClickEdit,
+                            onClickDelete = onClickDelete,
                         )
                     }
                 }
