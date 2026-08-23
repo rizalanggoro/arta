@@ -2,10 +2,13 @@ package id.my.rizalanggoro.arta.feature.transaction.presentation.upsert
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.Today
@@ -42,6 +45,7 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.Text
@@ -128,10 +132,13 @@ private fun Content(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
         ) {
-            Card {
+            Card(
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
                 BasicComponent(
                     title = "Dompet",
                     summary = uiState.selectedWallet?.name ?: "Tidak ada dompet",
@@ -220,7 +227,7 @@ private fun Content(
                     onClick = onClickSubmit,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp),
+                        .padding(top = 16.dp, bottom = 16.dp),
                     colors = ButtonDefaults.buttonColorsPrimary(),
                     enabled = !uiState.isLoading
                 ) {
