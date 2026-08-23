@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.TrendingDown
 import androidx.compose.material.icons.automirrored.rounded.TrendingFlat
@@ -22,11 +21,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
-import id.my.rizalanggoro.arta.core.utils.getBottomRadius
-import id.my.rizalanggoro.arta.core.utils.getTopRadius
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
 import top.yukonga.miuix.kmp.basic.Icon
@@ -35,8 +31,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun GoldListItem(
-    index: Int = 0,
-    size: Int = 1,
     gold: DtoGold,
     onClick: (DomainGold) -> Unit = {},
     onLongClick: (DomainGold) -> Unit = {},
@@ -55,15 +49,6 @@ fun GoldListItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(
-                RoundedCornerShape(
-                    topStart = getTopRadius(index, size),
-                    topEnd = getTopRadius(index, size),
-                    bottomStart = getBottomRadius(index, size),
-                    bottomEnd = getBottomRadius(index, size),
-                )
-            )
-            .background(MiuixTheme.colorScheme.surfaceContainer)
             .combinedClickable(
                 onClick = { onClick(gold.data) },
                 onLongClick = { onLongClick(gold.data) }
@@ -103,19 +88,19 @@ fun GoldListItem(
             ) {
                 Text(
                     text = gold.data.date.toIndonesianDate(),
-                    fontSize = 12.sp,
+                    style = MiuixTheme.textStyles.footnote1,
                     color = MiuixTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = gold.sellPrice.toIndonesianCurrency(),
-                    fontSize = 16.sp,
+                    style = MiuixTheme.textStyles.body1,
                     fontWeight = FontWeight.Bold
                 )
                 Column {
                     Text(
                         text = "Harga beli ${gold.data.price.toIndonesianCurrency()}",
-                        fontSize = 12.sp,
+                        style = MiuixTheme.textStyles.footnote2,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     )
                     if (status != 0)
@@ -126,7 +111,7 @@ fun GoldListItem(
                                     else -> "Kerugian"
                                 }
                             } ${gold.profit.toIndonesianCurrency()}",
-                            fontSize = 12.sp,
+                            style = MiuixTheme.textStyles.footnote2,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                         )
                 }
@@ -138,13 +123,13 @@ fun GoldListItem(
         ) {
             Text(
                 text = "${gold.data.carat.toInt()}k",
-                fontSize = 12.sp,
+                style = MiuixTheme.textStyles.footnote1,
                 color = MiuixTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
                 text = "${gold.data.grams.toFloat()}gr",
-                fontSize = 12.sp,
+                style = MiuixTheme.textStyles.footnote2,
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary
             )
         }

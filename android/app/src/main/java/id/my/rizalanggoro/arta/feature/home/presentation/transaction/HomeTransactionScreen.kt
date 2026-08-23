@@ -234,16 +234,19 @@ private fun Content(
 
                 when (groupBy) {
                     TransactionGroupType.CATEGORY -> {
-                        itemsIndexed(uiState.categories) { index, category ->
-                            DashboardCategoryListItem(
+                        item {
+                            Card(
                                 modifier = Modifier
+                                    .padding(top = 16.dp)
                                     .padding(horizontal = 16.dp)
-                                    .padding(top = if (index == 0) 16.dp else 2.dp),
-                                category = category,
-                                index = index,
-                                size = uiState.categories.size,
-                                onClick = onClickCategory,
-                            )
+                            ) {
+                                uiState.categories.forEach { category ->
+                                    DashboardCategoryListItem(
+                                        category = category,
+                                        onClick = onClickCategory,
+                                    )
+                                }
+                            }
                         }
 
                         if (!isLoading && categories.isNotEmpty()) {

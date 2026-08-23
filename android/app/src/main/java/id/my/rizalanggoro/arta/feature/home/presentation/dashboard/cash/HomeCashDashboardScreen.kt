@@ -290,35 +290,31 @@ private fun Content(
                 }
 
                 if (isLoading) {
-                    items(3) {
-                        DashboardCategoryListItem(
-                            index = it,
-                            size = 3,
-                            modifier = Modifier.padding(
-                                top = when {
-                                    it == 0 -> 12.dp
-                                    else -> 2.dp
+                    item {
+                        Card(modifier = Modifier.padding(top = 12.dp)) {
+                            Column {
+                                repeat(3) {
+                                    DashboardCategoryListItem(
+                                        category = Samples.dtoCategories[it],
+                                        isLoading = true
+                                    )
                                 }
-                            ),
-                            category = Samples.dtoCategories[it],
-                            isLoading = true
-                        )
+                            }
+                        }
                     }
                 }
 
-                itemsIndexed(uiState.data?.latestCategories ?: emptyList()) { index, category ->
-                    DashboardCategoryListItem(
-                        modifier = Modifier.padding(
-                            top = when {
-                                index == 0 -> 12.dp
-                                else -> 2.dp
-                            },
-                        ),
-                        category = category,
-                        index = index,
-                        size = uiState.data?.latestCategories?.size ?: 0,
-                        onClick = onClickCategory,
-                    )
+                uiState.data?.latestCategories?.takeIf { it.isNotEmpty() }?.let { categories ->
+                    item {
+                        Card(modifier = Modifier.padding(top = 12.dp)) {
+                            categories.forEach { category ->
+                                DashboardCategoryListItem(
+                                    category = category,
+                                    onClick = onClickCategory,
+                                )
+                            }
+                        }
+                    }
                 }
 
                 item {

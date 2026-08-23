@@ -22,11 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
-import id.my.rizalanggoro.arta.core.utils.getBottomRadius
-import id.my.rizalanggoro.arta.core.utils.getTopRadius
 import id.my.rizalanggoro.arta.openapi.models.DomainCategory
 import id.my.rizalanggoro.arta.openapi.models.DtoCategory
 import top.yukonga.miuix.kmp.basic.Icon
@@ -37,8 +34,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun DashboardCategoryListItem(
     modifier: Modifier = Modifier,
     category: DtoCategory,
-    index: Int = 0,
-    size: Int = 1,
     onClick: (DomainCategory) -> Unit = {},
     isLoading: Boolean = false,
 ) {
@@ -51,15 +46,6 @@ fun DashboardCategoryListItem(
                 }
             )
             .fillMaxWidth()
-            .clip(
-                RoundedCornerShape(
-                    topStart = getTopRadius(index, size),
-                    topEnd = getTopRadius(index, size),
-                    bottomStart = getBottomRadius(index, size),
-                    bottomEnd = getBottomRadius(index, size),
-                )
-            )
-            .background(MiuixTheme.colorScheme.surfaceContainer)
             .clickable { onClick(category.data) }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -104,7 +90,7 @@ fun DashboardCategoryListItem(
         ) {
             Text(
                 (category.totalAmount ?: 0.0).toIndonesianCurrency(),
-                fontSize = 16.sp,
+                style = MiuixTheme.textStyles.body1,
                 color = when {
                     isLoading -> Color.Transparent
                     else -> Color.Unspecified
@@ -123,7 +109,7 @@ fun DashboardCategoryListItem(
             )
             Text(
                 category.data.name,
-                fontSize = 14.sp,
+                style = MiuixTheme.textStyles.body2,
                 color = when {
                     isLoading -> Color.Transparent
                     else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
@@ -143,7 +129,7 @@ fun DashboardCategoryListItem(
         }
         Text(
             "${category.transactionCount ?: 0} trx",
-            fontSize = 12.sp,
+            style = MiuixTheme.textStyles.footnote1,
             fontWeight = FontWeight.SemiBold,
             color = when {
                 isLoading -> Color.Transparent

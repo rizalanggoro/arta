@@ -1,9 +1,9 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,19 +12,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
-import androidx.compose.material.icons.rounded.Balance
-import androidx.compose.material.icons.rounded.Tag
-import androidx.compose.material.icons.rounded.Update
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.extension.toAmericanCurrency
@@ -45,7 +40,12 @@ import top.yukonga.miuix.kmp.basic.PullToRefreshState
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.All
+import top.yukonga.miuix.kmp.icon.extended.Layers
+import top.yukonga.miuix.kmp.icon.extended.Update
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 @Composable
 fun HomeGoldDashboardScreen(
@@ -106,34 +106,40 @@ private fun Content(
                 modifier = Modifier.fillMaxSize()
             ) {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MiuixTheme.colorScheme.surfaceContainer)
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 96.dp,
+                    ),
                 ) {
                     item {
-                        Column(
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                .padding(top = 16.dp)
                         ) {
-                            Text(
-                                text = "Total asset",
-                                fontSize = 12.sp,
-                                color = MiuixTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = (data?.totalAsset ?: 0.0).toIndonesianCurrency(),
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Column {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "Total asset",
+                                    style = MiuixTheme.textStyles.footnote1,
+                                    color = MiuixTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = (data?.totalAsset ?: 0.0).toIndonesianCurrency(),
+                                    style = MiuixTheme.textStyles.title2.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                )
                                 Text(
                                     text = "Harga beli ${
                                         (data?.totalBuyPrice ?: 0.0)
                                             .toIndonesianCurrency()
                                     }",
-                                    fontSize = 12.sp,
+                                    style = MiuixTheme.textStyles.footnote2,
                                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                 )
                                 Row(
@@ -149,7 +155,7 @@ private fun Content(
                                     Text(
                                         text = (data?.profit ?: 0.0)
                                             .toIndonesianCurrency(),
-                                        fontSize = 12.sp,
+                                        style = MiuixTheme.textStyles.footnote2,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                     )
                                 }
@@ -162,21 +168,20 @@ private fun Content(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 16.dp)
+                                .padding(top = 12.dp)
                         ) {
                             listOf(
-                                mapOf(
-                                    "title" to "Total berat",
-                                    "value" to "${(data?.totalWeight?.toFloat() ?: 0)} gr",
-                                    "icon" to Icons.Rounded.Balance
+                                Triple(
+                                    "Total berat",
+                                    "${(data?.totalWeight?.toFloat() ?: 0)} gr",
+                                    MiuixIcons.Layers
                                 ),
-                                mapOf(
-                                    "title" to "Total emas",
-                                    "value" to (data?.totalGoldItems ?: 0).toString(),
-                                    "icon" to Icons.Rounded.Tag
-                                )
-                            ).forEach {
+                                Triple(
+                                    "Total emas",
+                                    (data?.totalGoldItems ?: 0).toString(),
+                                    MiuixIcons.All
+                                ),
+                            ).forEach { (title, value, icon) ->
                                 Card(
                                     colors = CardDefaults.defaultColors(
                                         color = MiuixTheme.colorScheme.secondaryContainer
@@ -188,20 +193,18 @@ private fun Content(
                                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(
-                                            it["icon"] as ImageVector,
-                                            null
-                                        )
+                                        Icon(icon, null)
                                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                             Text(
-                                                text = it["value"] as String,
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = MiuixTheme.colorScheme.onSecondaryContainer,
+                                                text = value,
+                                                style = MiuixTheme.textStyles.body1.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = MiuixTheme.colorScheme.onBackground,
                                             )
                                             Text(
-                                                text = it["title"] as String,
-                                                fontSize = 12.sp,
+                                                text = title,
+                                                style = MiuixTheme.textStyles.footnote1,
                                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                             )
                                         }
@@ -216,30 +219,24 @@ private fun Content(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 8.dp)
+                                .padding(top = 12.dp)
                         ) {
                             listOf(
-                                mapOf(
-                                    "title" to "Emas dunia",
-                                    "value" to (data?.goldPrice?.pricePerOunceUsd
+                                Triple(
+                                    "Emas dunia",
+                                    (data?.goldPrice?.pricePerOunceUsd
                                         ?: 0.0).toAmericanCurrency(),
-                                    "date" to data?.goldPrice?.createdAt,
-                                    "type" to GoldRoute.PriceHistoryType.GOLD
+                                    GoldRoute.PriceHistoryType.GOLD
                                 ),
-                                mapOf(
-                                    "title" to "Nilai dollar",
-                                    "value" to (data?.fxRate?.rate ?: 0).toIndonesianCurrency(),
-                                    "date" to data?.fxRate?.createdAt,
-                                    "type" to GoldRoute.PriceHistoryType.FX
+                                Triple(
+                                    "Nilai dollar",
+                                    (data?.fxRate?.rate ?: 0).toIndonesianCurrency(),
+                                    GoldRoute.PriceHistoryType.FX
                                 )
-                            ).forEach {
+                            ).forEach { (title, value, type) ->
                                 Card(
-                                    onClick = {
-                                        onClickPriceHistory(
-                                            it["type"] as GoldRoute.PriceHistoryType
-                                        )
-                                    },
+                                    onClick = { onClickPriceHistory(type) },
+                                    pressFeedbackType = PressFeedbackType.Tilt,
                                     modifier = Modifier.weight(1f),
                                     colors = CardDefaults.defaultColors(
                                         color = MiuixTheme.colorScheme.secondaryContainer
@@ -250,30 +247,35 @@ private fun Content(
                                         verticalArrangement = Arrangement.spacedBy(2.dp)
                                     ) {
                                         Text(
-                                            text = it["title"] as String,
-                                            fontSize = 12.sp,
-                                            color = MiuixTheme.colorScheme.onSecondaryContainer
+                                            text = title,
+                                            style = MiuixTheme.textStyles.footnote1,
+                                            color = MiuixTheme.colorScheme.primary
                                         )
                                         Text(
-                                            text = it["value"] as String,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MiuixTheme.colorScheme.onSecondaryContainer
+                                            text = value,
+                                            style = MiuixTheme.textStyles.body1.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MiuixTheme.colorScheme.onBackground
                                         )
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
                                             Icon(
-                                                Icons.Rounded.Update,
+                                                MiuixIcons.Update,
                                                 null,
                                                 modifier = Modifier.size(12.dp),
                                                 tint = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                             )
                                             Text(
-                                                text = (it["date"] as String?)
-                                                    .toFormattedDate("dd/MM/yyyy HH:mm"),
-                                                fontSize = 12.sp,
+                                                text = when (type) {
+                                                    GoldRoute.PriceHistoryType.GOLD ->
+                                                        data?.goldPrice?.createdAt
+
+                                                    else -> data?.fxRate?.createdAt
+                                                }.toFormattedDate("dd/MM/yyyy HH:mm"),
+                                                style = MiuixTheme.textStyles.footnote2,
                                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                             )
                                         }

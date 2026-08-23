@@ -1,12 +1,11 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.gold
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,6 +26,7 @@ import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.shared.component.GoldListItem
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.PullToRefreshState
@@ -98,15 +98,18 @@ private fun Content(
             ) {
                 LazyColumn(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    itemsIndexed(uiState.golds) { index, gold ->
-                        GoldListItem(
-                            gold = gold,
-                            onLongClick = onLongClickGold,
-                            index = index,
-                            size = uiState.golds.size
-                        )
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            uiState.golds.forEachIndexed { index, gold ->
+                                GoldListItem(
+                                    gold = gold,
+                                    onLongClick = onLongClickGold,
+                                )
+                            }
+                        }
                     }
 
                     item {

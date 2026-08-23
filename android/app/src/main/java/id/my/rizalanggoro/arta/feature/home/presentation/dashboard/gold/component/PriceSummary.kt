@@ -1,15 +1,11 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,11 +18,14 @@ import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.openapi.models.DomainGoldTaxPreference
 import id.my.rizalanggoro.arta.openapi.models.DtoGoldTax
 import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
-import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -35,111 +34,61 @@ fun PriceSummary(
     goldTaxes: List<DtoGoldTax> = emptyList(),
     onClickManageTax: () -> Unit = {},
 ) {
-    Card(
-        cornerRadius = 24.dp,
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
-        colors = CardDefaults.defaultColors(
-            color = MiuixTheme.colorScheme.background
-        ),
+            .padding(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    "Ringkasan Harga",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+            SmallTitle(
+                text = "Ringkasan Harga",
+                modifier = Modifier.weight(1f),
+                insideMargin = PaddingValues(vertical = 8.dp),
+            )
+
+            IconButton(onClick = onClickManageTax) {
+                Icon(
+                    MiuixIcons.Settings,
+                    null
                 )
-
-                Button(onClick = onClickManageTax) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Rounded.EditNote,
-                            null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text("Atur pajak")
-                    }
-                }
             }
+        }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Column(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MiuixTheme.colorScheme.surfaceContainer)
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        retailPrice.toIndonesianCurrency(),
-                        fontSize = 16.sp
-                    )
-                    Text(
-                        "Harga emas/gram (sebelum pajak)",
-                        fontSize = 12.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                    )
-                }
+        Card(modifier = Modifier.fillMaxWidth()) {
+            BasicComponent(
+                title = retailPrice.toIndonesianCurrency(),
+                summary = "Harga emas/gram (sebelum pajak)",
+            )
+        }
 
-                // price per carat
-                if (goldTaxes.isNotEmpty()) {
-                    Text(
-                        "Berikut harga emas/gram untuk setiap karat setelah perhitungan konfigurasi pajak",
-                        fontSize = 12.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                        modifier = Modifier.padding(top = 8.dp),
+        // price per carat
+        if (goldTaxes.isNotEmpty()) {
+            Text(
+                "Berikut harga emas/gram untuk setiap karat setelah perhitungan konfigurasi pajak",
+                style = MiuixTheme.textStyles.footnote2,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+            )
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                goldTaxes.forEach {
+                    BasicComponent(
+                        title = it.sellPrice.toIndonesianCurrency(),
+                        summary = "Besaran pajak ${it.data.taxRate}%",
+                        endActions = {
+                            Text(
+                                "${it.data.carat.toInt()}k",
+                                style = MiuixTheme.textStyles.footnote1,
+                                color = MiuixTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        },
                     )
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp)),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        goldTaxes.forEach {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(MiuixTheme.colorScheme.surfaceContainer)
-                                    .padding(16.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                ) {
-                                    Text(
-                                        it.sellPrice.toIndonesianCurrency(),
-                                        fontSize = 16.sp
-                                    )
-                                    Text(
-                                        "Besaran pajak ${it.data.taxRate}%",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                                    )
-                                }
-                                Text(
-                                    "${it.data.carat.toInt()}k",
-                                    fontSize = 12.sp,
-                                    color = MiuixTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-                    }
                 }
             }
         }

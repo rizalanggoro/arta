@@ -1,74 +1,54 @@
 package id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import id.my.rizalanggoro.arta.openapi.models.DomainGold
 import id.my.rizalanggoro.arta.openapi.models.DtoGold
 import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.GoldListItem
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.basic.SmallTitle
 
 @Composable
 fun LatestGold(
     golds: List<DtoGold> = emptyList(),
     onLongClickGold: (DomainGold) -> Unit = {},
 ) {
-    Card(
-        colors = CardDefaults.defaultColors(
-            color = MiuixTheme.colorScheme.background
-        ),
+    Column(
         modifier = Modifier
-            .background(MiuixTheme.colorScheme.background)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(top = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(
-                    top = 16.dp,
-                    bottom = (32 + 56).dp
-                ),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "Emas Terbaru",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+        SmallTitle(
+            text = "Emas Terbaru",
+            insideMargin = PaddingValues(top = 8.dp),
+        )
 
             when {
                 golds.isEmpty() -> EmptyPlaceholder(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 32.dp)
+                        .padding(vertical = 32.dp)
                 )
 
                 else -> {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                        modifier = Modifier.clip(RoundedCornerShape(16.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         golds.forEachIndexed { index, gold ->
                             GoldListItem(
                                 gold = gold,
                                 onLongClick = onLongClickGold,
-                                index = index,
-                                size = golds.size
                             )
                         }
                     }
@@ -76,7 +56,6 @@ fun LatestGold(
             }
         }
     }
-}
 
 @Composable
 @Preview
