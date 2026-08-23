@@ -5,7 +5,6 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import id.my.rizalanggoro.arta.core.application.route.WalletRoute
-import id.my.rizalanggoro.arta.feature.wallet.presentation.action.ActionSheetWallet
 import id.my.rizalanggoro.arta.feature.wallet.presentation.createfirst.CreateFirstWalletScreen
 import id.my.rizalanggoro.arta.feature.wallet.presentation.delete.DeleteWalletDialog
 import id.my.rizalanggoro.arta.feature.wallet.presentation.delete.DeleteWalletVM
@@ -35,14 +34,6 @@ fun EntryProviderScope<NavKey>.walletEntry() {
 
     entry<WalletRoute.CreateFirst> {
         CreateFirstWalletScreen()
-    }
-
-    entry<WalletRoute.ActionSheet>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
-    ) {
-        ActionSheetWallet(
-            walletId = it.walletId
-        )
     }
 
     entry<WalletRoute.Delete>(

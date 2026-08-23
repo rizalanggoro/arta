@@ -1,6 +1,6 @@
 package id.my.rizalanggoro.arta.shared.component
 
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,17 +13,14 @@ import top.yukonga.miuix.kmp.basic.BasicComponent
 fun WalletListItem(
     modifier: Modifier = Modifier,
     wallet: DomainWallet,
-    onLongClick: (DomainWallet) -> Unit = {},
+    onClick: (DomainWallet) -> Unit = {},
 ) {
     BasicComponent(
         title = wallet.name,
         summary = wallet.type.toWalletName(),
         modifier = modifier
             .fillMaxWidth()
-            .combinedClickable(
-                onClick = {},
-                onLongClick = { onLongClick(wallet) },
-            ),
+            .clickable { onClick(wallet) },
     )
 }
 

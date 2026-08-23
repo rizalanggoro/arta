@@ -23,9 +23,4 @@ object WalletRoute {
     data class Delete(
         val walletId: Int,
     ) : NavKey
-
-    @Serializable
-    data class ActionSheet(
-        val walletId: Int,
-    ) : NavKey
 }

@@ -11,6 +11,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -27,17 +30,24 @@ import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.ErrorPlaceholder
 import id.my.rizalanggoro.arta.shared.component.WalletListItem
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownImpl
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun ListWalletScreen(vm: ListWalletVM = hiltViewModel()) {
@@ -47,13 +57,8 @@ fun ListWalletScreen(vm: ListWalletVM = hiltViewModel()) {
     Content(
         uiState = uiState,
         onClickCreate = { backStack.add(WalletRoute.Upsert()) },
-        onLongClickWallet = {
-            backStack.add(
-                WalletRoute.ActionSheet(
-                    walletId = it.id
-                )
-            )
-        },
+        onClickEdit = { backStack.add(WalletRoute.Upsert(walletId = it.id)) },
+        onClickDelete = { backStack.add(WalletRoute.Delete(walletId = it.id)) },
         onClickRetry = vm::loadWallets,
         onClickBack = { backStack.removeLastOrNull() },
     )
@@ -65,9 +70,11 @@ private fun Content(
     uiState: ListWalletUiState = ListWalletUiState(),
     onClickCreate: () -> Unit = {},
     onClickBack: () -> Unit = {},
-    onLongClickWallet: (DomainWallet) -> Unit = {},
+    onClickEdit: (DomainWallet) -> Unit = {},
+    onClickDelete: (DomainWallet) -> Unit = {},
     onClickRetry: () -> Unit = {},
 ) {
+    var actionWallet by remember { mutableStateOf<DomainWallet?>(null) }
     ArtaMiuixTheme {
         Scaffold(
             topBar = {
@@ -133,17 +140,63 @@ private fun Content(
                         item {
                             Card {
                                 uiState.wallets.forEach { wallet ->
-                                    WalletListItem(
-                                        wallet = wallet.data,
-                                        onLongClick = onLongClickWallet,
-                                    )
+                                    Box {
+                                        WalletListItem(
+                                            wallet = wallet.data,
+                                            onClick = { actionWallet = it },
+                                        )
+
+                                        if (actionWallet?.id == wallet.data.id) {
+                                            WindowListPopup(
+                                                show = true,
+                                                onDismissRequest = { actionWallet = null },
+                                                alignment = PopupPositionProvider.Align.End,
+                                            ) {
+                                                ListPopupColumn {
+                                                    listOf(
+                                                        DropdownItem(
+                                                            text = "Ubah",
+                                                            icon = { iconModifier ->
+                                                                Icon(MiuixIcons.Edit, null, modifier = iconModifier)
+                                                            },
+                                                        ),
+                                                        DropdownItem(
+                                                            text = "Hapus",
+                                                            icon = { iconModifier ->
+                                                                Icon(
+                                                                    MiuixIcons.Delete,
+                                                                    null,
+                                                                    modifier = iconModifier,
+                                                                    tint = MiuixTheme.colorScheme.error
+                                                                )
+                                                            },
+                                                        ),
+                                                    ).forEachIndexed { index, item ->
+                                                        DropdownImpl(
+                                                            item = item,
+                                                            optionSize = 2,
+                                                            isSelected = false,
+                                                            index = index,
+                                                            onSelectedIndexChange = {
+                                                                actionWallet = null
+                                                                when (index) {
+                                                                    0 -> onClickEdit(wallet.data)
+                                                                    else -> onClickDelete(wallet.data)
+                                                                }
+                                                            },
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
 
                         item {
                             Text(
-                                text = "Tekan dan tahan untuk melihat opsi lainnya",
+                                text = "Ketuk dompet untuk melihat opsi lainnya",
                                 fontSize = 13.sp,
                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                 modifier = Modifier.fillMaxWidth(),

@@ -169,43 +169,89 @@ private fun Content(
                             item {
                                 Card {
                                     visibleCategories.forEach { category ->
-                                        BasicComponent(
-                                            title = category.data.name,
-                                            summary = when {
-                                                category.data.userId == null -> "Bawaan"
-                                                else -> "Kustom"
-                                            },
-                                            startAction = {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .padding(end = 4.dp)
-                                                        .size(40.dp)
-                                                        .clip(CircleShape)
-                                                        .background(
+                                        Box {
+                                            BasicComponent(
+                                                title = category.data.name,
+                                                summary = when {
+                                                    category.data.userId == null -> "Bawaan"
+                                                    else -> "Kustom"
+                                                },
+                                                startAction = {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .padding(end = 4.dp)
+                                                            .size(40.dp)
+                                                            .clip(CircleShape)
+                                                            .background(
+                                                                when (category.data.type) {
+                                                                    "income" -> MiuixTheme.colorScheme.primary
+                                                                    else -> MiuixTheme.colorScheme.error
+                                                                }
+                                                            )
+                                                    ) {
+                                                        Icon(
                                                             when (category.data.type) {
-                                                                "income" -> MiuixTheme.colorScheme.primary
-                                                                else -> MiuixTheme.colorScheme.error
+                                                                "income" -> Icons.AutoMirrored.Rounded.CallReceived
+                                                                else -> Icons.AutoMirrored.Rounded.CallMade
+                                                            },
+                                                            contentDescription = null,
+                                                            modifier = Modifier.align(Alignment.Center),
+                                                            tint = when (category.data.type) {
+                                                                "income" -> MiuixTheme.colorScheme.onPrimary
+                                                                else -> MiuixTheme.colorScheme.onError
                                                             }
                                                         )
+                                                    }
+                                                },
+                                                enabled = category.data.userId != null,
+                                                onClick = { actionCategory = category.data },
+                                                modifier = Modifier.fillMaxWidth(),
+                                            )
+
+                                            if (actionCategory?.id == category.data.id) {
+                                                WindowListPopup(
+                                                    show = true,
+                                                    onDismissRequest = { actionCategory = null },
+                                                    alignment = PopupPositionProvider.Align.End,
                                                 ) {
-                                                    Icon(
-                                                        when (category.data.type) {
-                                                            "income" -> Icons.AutoMirrored.Rounded.CallReceived
-                                                            else -> Icons.AutoMirrored.Rounded.CallMade
-                                                        },
-                                                        contentDescription = null,
-                                                        modifier = Modifier.align(Alignment.Center),
-                                                        tint = when (category.data.type) {
-                                                            "income" -> MiuixTheme.colorScheme.onPrimary
-                                                            else -> MiuixTheme.colorScheme.onError
+                                                    ListPopupColumn {
+                                                        listOf(
+                                                            DropdownItem(
+                                                                text = "Ubah",
+                                                                icon = { iconModifier ->
+                                                                    Icon(MiuixIcons.Edit, null, modifier = iconModifier)
+                                                                },
+                                                            ),
+                                                            DropdownItem(
+                                                                text = "Hapus",
+                                                                icon = { iconModifier ->
+                                                                    Icon(
+                                                                        MiuixIcons.Delete,
+                                                                        null,
+                                                                        modifier = iconModifier,
+                                                                        tint = MiuixTheme.colorScheme.error
+                                                                    )
+                                                                },
+                                                            ),
+                                                        ).forEachIndexed { index, item ->
+                                                            DropdownImpl(
+                                                                item = item,
+                                                                optionSize = 2,
+                                                                isSelected = false,
+                                                                index = index,
+                                                                onSelectedIndexChange = {
+                                                                    actionCategory = null
+                                                                    when (index) {
+                                                                        0 -> onClickEdit(category.data)
+                                                                        else -> onClickDelete(category.data)
+                                                                    }
+                                                                },
+                                                            )
                                                         }
-                                                    )
+                                                    }
                                                 }
-                                            },
-                                            enabled = category.data.userId != null,
-                                            onClick = { actionCategory = category.data },
-                                            modifier = Modifier.fillMaxWidth(),
-                                        )
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -220,50 +266,6 @@ private fun Content(
                                         .padding(16.dp),
                                     textAlign = TextAlign.Center
                                 )
-                            }
-                        }
-
-                        actionCategory?.let { target ->
-                            WindowListPopup(
-                                show = true,
-                                onDismissRequest = { actionCategory = null },
-                                alignment = PopupPositionProvider.Align.End,
-                            ) {
-                                ListPopupColumn {
-                                    listOf(
-                                        DropdownItem(
-                                            text = "Ubah",
-                                            icon = { modifier ->
-                                                Icon(MiuixIcons.Edit, null, modifier = modifier)
-                                            },
-                                        ),
-                                        DropdownItem(
-                                            text = "Hapus",
-                                            icon = { modifier ->
-                                                Icon(
-                                                    MiuixIcons.Delete,
-                                                    null,
-                                                    modifier = modifier,
-                                                    tint = MiuixTheme.colorScheme.error
-                                                )
-                                            },
-                                        ),
-                                    ).forEachIndexed { index, item ->
-                                        DropdownImpl(
-                                            item = item,
-                                            optionSize = 2,
-                                            isSelected = false,
-                                            index = index,
-                                            onSelectedIndexChange = {
-                                                actionCategory = null
-                                                when (index) {
-                                                    0 -> onClickEdit(target)
-                                                    else -> onClickDelete(target)
-                                                }
-                                            },
-                                        )
-                                    }
-                                }
                             }
                         }
                     }
