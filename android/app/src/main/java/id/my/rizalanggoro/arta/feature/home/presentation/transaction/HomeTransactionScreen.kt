@@ -89,7 +89,25 @@ fun HomeTransactionScreen(vm: HomeTransactionVM = hiltViewModel()) {
             )
         },
         onClickNextTimeRange = vm::onNextTimeRangeClicked,
-        onClickPrevTimeRange = vm::onPrevTimeRangeClicked
+        onClickPrevTimeRange = vm::onPrevTimeRangeClicked,
+        onClickViewIncomeChart = {
+            backStack.add(
+                TransactionRoute.Chart(
+                    type = "income",
+                    timeRange = uiState.timeRange,
+                    timeRangeOffset = uiState.timeRangeOffset,
+                )
+            )
+        },
+        onClickViewExpenseChart = {
+            backStack.add(
+                TransactionRoute.Chart(
+                    type = "expense",
+                    timeRange = uiState.timeRange,
+                    timeRangeOffset = uiState.timeRangeOffset,
+                )
+            )
+        },
     )
 }
 
@@ -103,6 +121,8 @@ private fun Content(
     onLongClickItem: (DomainTransaction) -> Unit = {},
     onClickNextTimeRange: () -> Unit = {},
     onClickPrevTimeRange: () -> Unit = {},
+    onClickViewIncomeChart: () -> Unit = {},
+    onClickViewExpenseChart: () -> Unit = {},
 ) {
     with(uiState) {
         val hasData = when (groupBy) {
@@ -186,7 +206,9 @@ private fun Content(
                             .padding(horizontal = 16.dp),
                         totalIncome = totalIncome,
                         totalExpense = totalExpense,
-                        isLoading = isLoading
+                        isLoading = isLoading,
+                        onClickIncome = onClickViewIncomeChart,
+                        onClickExpense = onClickViewExpenseChart,
                     )
                 }
 

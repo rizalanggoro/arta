@@ -36,6 +36,8 @@ fun IncomeExpenseSummary(
     totalIncome: Double = 0.0,
     totalExpense: Double = 0.0,
     isLoading: Boolean = false,
+    onClickIncome: (() -> Unit)? = null,
+    onClickExpense: (() -> Unit)? = null,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -46,14 +48,16 @@ fun IncomeExpenseSummary(
             title = "Pemasukan",
             value = totalIncome,
             icon = Icons.AutoMirrored.Rounded.CallReceived,
-            isLoading = isLoading
+            isLoading = isLoading,
+            onClick = onClickIncome,
         )
         SummaryCard(
             modifier = Modifier.weight(1f),
             title = "Pengeluaran",
             value = totalExpense,
             icon = Icons.AutoMirrored.Rounded.CallMade,
-            isLoading = isLoading
+            isLoading = isLoading,
+            onClick = onClickExpense,
         )
     }
 }
@@ -65,8 +69,10 @@ private fun SummaryCard(
     value: Double = 0.0,
     icon: ImageVector = Icons.AutoMirrored.Rounded.CallReceived,
     isLoading: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) {
     Card(
+        onClick = { onClick?.invoke() },
         modifier = modifier.then(
             when {
                 isLoading -> Modifier.shimmer()
@@ -79,7 +85,6 @@ private fun SummaryCard(
         ),
         insideMargin = PaddingValues(16.dp),
         pressFeedbackType = PressFeedbackType.Tilt,
-        onClick = {},
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)

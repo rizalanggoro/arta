@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import id.my.rizalanggoro.arta.R
 import id.my.rizalanggoro.arta.core.constant.TransactionGroupType
 import id.my.rizalanggoro.arta.core.constant.TransactionTimeRangeType
+import id.my.rizalanggoro.arta.core.constant.calculateTimeRange
 import id.my.rizalanggoro.arta.core.data.AuthPrefs
 import id.my.rizalanggoro.arta.core.data.SelectedWalletPrefs
 import id.my.rizalanggoro.arta.core.data.TransactionFilterPrefs
@@ -119,33 +120,11 @@ class HomeTransactionVM @Inject constructor(
     }
 
     private fun parseTimeRange() = _uiState.update {
-        val now = LocalDate.now()
-        val offset = it.timeRangeOffset.toLong()
-
-        val start = when (it.timeRange) {
-            TransactionTimeRangeType.DAILY -> now
-                .plusDays(offset)
-                .atStartOfDay(ZoneId.systemDefault())
-
-            TransactionTimeRangeType.WEEKLY -> now
-                .plusWeeks(offset)
-                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                .atStartOfDay(ZoneId.systemDefault())
-
-            TransactionTimeRangeType.MONTHLY -> now
-                .plusMonths(offset)
-                .withDayOfMonth(1)
-                .atStartOfDay(ZoneId.systemDefault())
-        }
-        val end = when (it.timeRange) {
-            TransactionTimeRangeType.DAILY -> start.plusDays(1)
-            TransactionTimeRangeType.WEEKLY -> start.plusWeeks(1)
-            TransactionTimeRangeType.MONTHLY -> start.plusMonths(1)
-        }
+        val (start, end) = calculateTimeRange(it.timeRange, it.timeRangeOffset)
 
         it.copy(
-            startDateMillis = start.toInstant().toEpochMilli(),
-            endDateMillis = end.toInstant().toEpochMilli()
+            startDateMillis = start,
+            endDateMillis = end,
         )
     }
 

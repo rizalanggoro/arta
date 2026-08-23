@@ -1,6 +1,7 @@
 package id.my.rizalanggoro.arta.core.application.route
 
 import androidx.navigation3.runtime.NavKey
+import id.my.rizalanggoro.arta.core.constant.TransactionTimeRangeType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -27,4 +28,11 @@ object TransactionRoute {
 
     @Serializable
     data object Filter : NavKey
+
+    @Serializable
+    data class Chart(
+        val type: String,
+        val timeRange: TransactionTimeRangeType,
+        val timeRangeOffset: Int = 0,
+    ) : NavKey
 }

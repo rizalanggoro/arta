@@ -25,7 +25,7 @@ retrofit = "3.0.0"
 loggingInterceptor = "5.1.0"
 converterScalars = "3.0.0"
 converterKotlinxSerialization = "3.0.0"
-vico = "2.3.1"
+vico = "3.3.0"
 miuix = "0.9.3"
 
 [libraries]

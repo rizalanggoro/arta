@@ -7,6 +7,8 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.feature.transaction.presentation.action.TransactionActionSheet
 import id.my.rizalanggoro.arta.feature.transaction.presentation.action.TransactionFilterActionSheet
+import id.my.rizalanggoro.arta.feature.transaction.presentation.chart.TransactionChartScreen
+import id.my.rizalanggoro.arta.feature.transaction.presentation.chart.TransactionChartVM
 import id.my.rizalanggoro.arta.feature.transaction.presentation.delete.DeleteTransactionDialog
 import id.my.rizalanggoro.arta.feature.transaction.presentation.delete.DeleteTransactionVM
 import id.my.rizalanggoro.arta.feature.transaction.presentation.detail.TransactionDetailScreen
@@ -63,5 +65,17 @@ fun EntryProviderScope<NavKey>.transactionEntry() {
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
         TransactionFilterActionSheet()
+    }
+
+    entry<TransactionRoute.Chart> { navKey ->
+        TransactionChartScreen(
+            vm = hiltViewModel<TransactionChartVM, TransactionChartVM.Factory>(
+                creationCallback = {
+                    it.create(
+                        navKey = navKey
+                    )
+                }
+            )
+        )
     }
 }
