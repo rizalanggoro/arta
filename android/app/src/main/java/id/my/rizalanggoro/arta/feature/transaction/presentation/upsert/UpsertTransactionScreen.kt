@@ -1,18 +1,13 @@
 package id.my.rizalanggoro.arta.feature.transaction.presentation.upsert
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Category
-import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material.icons.rounded.Wallet
 import androidx.compose.material3.rememberDatePickerState
@@ -23,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,6 +36,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
@@ -51,6 +46,9 @@ import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private val ErrorColor = Color(0xFFE53935)
@@ -119,7 +117,7 @@ private fun Content(
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
                         Icon(
-                            Icons.AutoMirrored.Rounded.ArrowBack, null
+                            MiuixIcons.Back, null
                         )
                     }
                 },
@@ -133,22 +131,45 @@ private fun Content(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
         ) {
-            BasicComponent(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MiuixTheme.colorScheme.surfaceContainer),
-                title = "Dompet",
-                summary = uiState.selectedWallet?.name ?: "Tidak ada dompet",
-                startAction = {
-                    Icon(
-                        Icons.Rounded.Wallet, null
-                    )
-                },
-                endActions = {
-                    Icon(
-                        Icons.Rounded.ChevronRight, null
-                    )
-                })
+            Card {
+                BasicComponent(
+                    title = "Dompet",
+                    summary = uiState.selectedWallet?.name ?: "Tidak ada dompet",
+                    startAction = {
+                        Icon(
+                            Icons.Rounded.Wallet, null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    },
+                )
+            }
+
+            Card(
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                ArrowPreference(
+                    title = "Kategori",
+                    summary = uiState.selectedCategory?.name ?: "Pilih kategori",
+                    startAction = {
+                        Icon(
+                            Icons.Rounded.Category, null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    },
+                    onClick = onClickSelectCategory,
+                )
+                ArrowPreference(
+                    title = "Tanggal",
+                    summary = uiState.date.toIndonesianDate(),
+                    startAction = {
+                        Icon(
+                            Icons.Rounded.Today, null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    },
+                    onClick = onClickSelectDate,
+                )
+            }
 
             Column {
                 TextField(
@@ -171,54 +192,6 @@ private fun Content(
                     Text(it, fontSize = 13.sp, color = ErrorColor)
                 }
             }
-
-            BasicComponent(
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 4.dp
-                        )
-                    )
-                    .background(MiuixTheme.colorScheme.surfaceContainer),
-                title = "Kategori",
-                summary = uiState.selectedCategory?.name ?: "Pilih kategori",
-                startAction = {
-                    Icon(
-                        Icons.Rounded.Category, null
-                    )
-                },
-                endActions = {
-                    Icon(
-                        Icons.Rounded.ChevronRight, null
-                    )
-                },
-                onClick = onClickSelectCategory,
-            )
-
-            BasicComponent(
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 4.dp, topEnd = 4.dp, bottomStart = 16.dp, bottomEnd = 16.dp
-                        )
-                    )
-                    .background(MiuixTheme.colorScheme.surfaceContainer),
-                title = "Tanggal",
-                summary = uiState.date.toIndonesianDate(),
-                startAction = {
-                    Icon(
-                        Icons.Rounded.Today, null
-                    )
-                },
-                endActions = {
-                    Icon(
-                        Icons.Rounded.ChevronRight, null
-                    )
-                },
-                onClick = onClickSelectDate,
-            )
 
             TextField(
                 value = uiState.description,
