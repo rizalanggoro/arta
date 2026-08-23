@@ -22,6 +22,8 @@ import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.core.application.route.HomeRoute
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.application.route.WalletRoute
+import id.my.rizalanggoro.arta.core.constant.TransactionGroupType
+import id.my.rizalanggoro.arta.core.constant.TransactionTimeRangeType
 import id.my.rizalanggoro.arta.core.event.AppEventBus
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.cash.HomeCashDashboardScreen
@@ -29,8 +31,11 @@ import id.my.rizalanggoro.arta.feature.home.presentation.dashboard.gold.HomeGold
 import id.my.rizalanggoro.arta.feature.home.presentation.gold.HomeGoldScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.setting.HomeSettingScreen
 import id.my.rizalanggoro.arta.feature.home.presentation.transaction.HomeTransactionScreen
+import id.my.rizalanggoro.arta.feature.transaction.presentation.action.TransactionFilterVM
 import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
 import top.yukonga.miuix.kmp.basic.Badge
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -45,14 +50,17 @@ import top.yukonga.miuix.kmp.icon.extended.Filter
 import top.yukonga.miuix.kmp.icon.extended.GridView
 import top.yukonga.miuix.kmp.icon.extended.Layers
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.menu.WindowIconCascadingDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun HomeScreen(
     vm: HomeVM = hiltViewModel(),
+    filterVm: TransactionFilterVM = hiltViewModel(),
 ) {
     val backStack = LocalBackStack.current
     val uiState by vm.uiState.collectAsState()
+    val filterUiState by filterVm.uiState.collectAsState()
     val destinations = walletDestinations(uiState.selectedWallet?.type)
 
     val walletType = uiState.selectedWallet?.type
@@ -74,9 +82,10 @@ fun HomeScreen(
                 "gold_savings" -> backStack.add(GoldRoute.Upsert())
             }
         },
-        onClickFilter = {
-            backStack.add(TransactionRoute.Filter)
-        },
+        filterGroupBy = filterUiState.groupBy,
+        filterTimeRange = filterUiState.timeRange,
+        onSelectGroupBy = filterVm::onGroupByChanged,
+        onSelectTimeRange = filterVm::onTimeRangeChanged,
         entryProvider = entryProvider {
             entry<HomeRoute.CashDashboard> { HomeCashDashboardScreen() }
             entry<HomeRoute.GoldDashboard> { HomeGoldDashboardScreen() }
@@ -97,7 +106,10 @@ private fun Content(
     entryProvider: ((NavKey) -> NavEntry<NavKey>)? = null,
     onClickFab: () -> Unit = {},
     hasUpdate: Boolean = false,
-    onClickFilter: () -> Unit = {},
+    filterGroupBy: TransactionGroupType = TransactionGroupType.CATEGORY,
+    filterTimeRange: TransactionTimeRangeType = TransactionTimeRangeType.DAILY,
+    onSelectGroupBy: (TransactionGroupType) -> Unit = {},
+    onSelectTimeRange: (TransactionTimeRangeType) -> Unit = {},
 ) {
     val lastDestination = homeBackStack?.lastOrNull()
 
@@ -118,12 +130,12 @@ private fun Content(
                 },
                 actions = {
                     if (lastDestination == HomeRoute.ListTransaction)
-                        IconButton(onClick = onClickFilter) {
-                            Icon(
-                                MiuixIcons.Filter,
-                                null
-                            )
-                        }
+                        FilterMenuButton(
+                            groupBy = filterGroupBy,
+                            timeRange = filterTimeRange,
+                            onSelectGroupBy = onSelectGroupBy,
+                            onSelectTimeRange = onSelectTimeRange,
+                        )
 
                     if (lastDestination != HomeRoute.Setting)
                         IconButton(onClick = onClickSelectWallet) {
@@ -180,6 +192,67 @@ private fun Content(
                     entryProvider = entryProvider
                 )
         }
+    }
+}
+
+@Composable
+private fun FilterMenuButton(
+    groupBy: TransactionGroupType,
+    timeRange: TransactionTimeRangeType,
+    onSelectGroupBy: (TransactionGroupType) -> Unit,
+    onSelectTimeRange: (TransactionTimeRangeType) -> Unit,
+) {
+    WindowIconCascadingDropdownMenu(
+        entries = listOf(
+            DropdownEntry(
+                items = listOf(
+                    DropdownItem(
+                        text = "Kategori",
+                        enabled = true,
+                        selected = groupBy == TransactionGroupType.CATEGORY,
+                        onClick = { onSelectGroupBy(TransactionGroupType.CATEGORY) },
+                    ),
+                    DropdownItem(
+                        text = "Transaksi",
+                        enabled = true,
+                        selected = groupBy == TransactionGroupType.TRANSACTION,
+                        onClick = { onSelectGroupBy(TransactionGroupType.TRANSACTION) },
+                    ),
+                )
+            ),
+            DropdownEntry(
+                items = listOf(
+                    DropdownItem(
+                        text = "Rentang waktu",
+                        children = listOf(
+                            DropdownItem(
+                                text = "Harian",
+                                enabled = true,
+                                selected = timeRange == TransactionTimeRangeType.DAILY,
+                                onClick = { onSelectTimeRange(TransactionTimeRangeType.DAILY) },
+                            ),
+                            DropdownItem(
+                                text = "Mingguan",
+                                enabled = true,
+                                selected = timeRange == TransactionTimeRangeType.WEEKLY,
+                                onClick = { onSelectTimeRange(TransactionTimeRangeType.WEEKLY) },
+                            ),
+                            DropdownItem(
+                                text = "Bulanan",
+                                enabled = true,
+                                selected = timeRange == TransactionTimeRangeType.MONTHLY,
+                                onClick = { onSelectTimeRange(TransactionTimeRangeType.MONTHLY) },
+                            ),
+                        ),
+                    ),
+                )
+            ),
+        ),
+    ) {
+        Icon(
+            MiuixIcons.Filter,
+            null
+        )
     }
 }
 

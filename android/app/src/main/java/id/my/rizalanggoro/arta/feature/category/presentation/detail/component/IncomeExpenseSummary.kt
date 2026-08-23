@@ -3,9 +3,9 @@ package id.my.rizalanggoro.arta.feature.category.presentation.detail.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,12 +20,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.shimmer
 import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
+import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 @Composable
 fun IncomeExpenseSummary(
@@ -63,19 +66,22 @@ private fun SummaryCard(
     icon: ImageVector = Icons.AutoMirrored.Rounded.CallReceived,
     isLoading: Boolean = false,
 ) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(MiuixTheme.colorScheme.secondaryContainer)
-            .then(
-                when {
-                    isLoading -> Modifier.shimmer()
-                    else -> Modifier
-                }
-            ),
+    Card(
+        modifier = modifier.then(
+            when {
+                isLoading -> Modifier.shimmer()
+                else -> Modifier
+            }
+        ),
+        colors = CardDefaults.defaultColors(
+            color = MiuixTheme.colorScheme.secondaryContainer,
+            contentColor = MiuixTheme.colorScheme.onSecondaryContainer,
+        ),
+        insideMargin = PaddingValues(16.dp),
+        pressFeedbackType = PressFeedbackType.Tilt,
+        onClick = {},
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
@@ -106,12 +112,12 @@ private fun SummaryCard(
                 )
                 Text(
                     text = title,
-                    fontSize = 12.sp,
+                    style = MiuixTheme.textStyles.footnote1,
+                    fontWeight = FontWeight.SemiBold,
                     color = when {
                         isLoading -> Color.Transparent
                         else -> MiuixTheme.colorScheme.primary
                     },
-                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .then(
                             when {
@@ -129,11 +135,11 @@ private fun SummaryCard(
             }
             Text(
                 text = value.toIndonesianCurrency(),
-                fontSize = 16.sp,
+                style = MiuixTheme.textStyles.body1,
                 fontWeight = FontWeight.SemiBold,
                 color = when {
                     isLoading -> Color.Transparent
-                    else -> MiuixTheme.colorScheme.onSecondaryContainer
+                    else -> MiuixTheme.colorScheme.onBackground
                 },
                 modifier = Modifier
                     .then(
@@ -159,5 +165,7 @@ private fun SummaryCard(
 @Composable
 @Preview
 private fun Preview() {
-    IncomeExpenseSummary()
+    ArtaMiuixTheme {
+        IncomeExpenseSummary()
+    }
 }

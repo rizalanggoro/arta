@@ -2,26 +2,22 @@ package id.my.rizalanggoro.arta.feature.home.presentation.transaction
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ChevronLeft
-import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
 import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
@@ -41,12 +37,16 @@ import id.my.rizalanggoro.arta.shared.component.DashboardCategoryListItem
 import id.my.rizalanggoro.arta.shared.component.EmptyPlaceholder
 import id.my.rizalanggoro.arta.shared.component.TransactionListItem
 import kotlinx.coroutines.flow.filterIsInstance
+import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.PullToRefreshState
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
+import top.yukonga.miuix.kmp.icon.extended.ChevronForward
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -120,57 +120,61 @@ private fun Content(
                 modifier = Modifier.fillMaxSize()
             ) {
                 stickyHeader {
-                    Row(
+                    Card(
                         modifier = Modifier
                             .padding(top = 16.dp)
                             .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        insideMargin = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                     ) {
-                        IconButton(onClick = onClickPrevTimeRange) {
-                            Icon(
-                                Icons.Rounded.ChevronLeft,
-                                null
-                            )
-                        }
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(
-                                when (timeRange) {
-                                    TransactionTimeRangeType.DAILY -> "Harian"
-                                    TransactionTimeRangeType.WEEKLY -> "Mingguan"
-                                    TransactionTimeRangeType.MONTHLY -> "Bulanan"
-                                },
-                                fontSize = 14.sp,
-                                color = MiuixTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                when (timeRange) {
-                                    TransactionTimeRangeType.DAILY -> startDateMillis.toIndonesianDate()
-                                    TransactionTimeRangeType.WEEKLY -> {
-                                        val endMillis = endDateMillis - 86400000
-                                        val startMonth = startDateMillis.toFormattedDate("MMMM yyyy")
-                                        val endMonth = endMillis.toFormattedDate("MMMM yyyy")
-                                        if (startMonth == endMonth) {
-                                            "${startDateMillis.toFormattedDate("d")} - ${endMillis.toFormattedDate("d MMMM yyyy")}"
-                                        } else {
-                                            "${startDateMillis.toFormattedDate("d MMMM")} - ${endMillis.toFormattedDate("d MMMM yyyy")}"
+                            IconButton(onClick = onClickPrevTimeRange) {
+                                Icon(
+                                    MiuixIcons.ChevronBackward,
+                                    null
+                                )
+                            }
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    when (timeRange) {
+                                        TransactionTimeRangeType.DAILY -> "Harian"
+                                        TransactionTimeRangeType.WEEKLY -> "Mingguan"
+                                        TransactionTimeRangeType.MONTHLY -> "Bulanan"
+                                    },
+                                    color = MiuixTheme.colorScheme.primary,
+                                    style = MiuixTheme.textStyles.subtitle
+                                )
+                                Text(
+                                    when (timeRange) {
+                                        TransactionTimeRangeType.DAILY -> startDateMillis.toIndonesianDate()
+                                        TransactionTimeRangeType.WEEKLY -> {
+                                            val endMillis = endDateMillis - 86400000
+                                            val startMonth = startDateMillis.toFormattedDate("MMMM yyyy")
+                                            val endMonth = endMillis.toFormattedDate("MMMM yyyy")
+                                            if (startMonth == endMonth) {
+                                                "${startDateMillis.toFormattedDate("d")} - ${endMillis.toFormattedDate("d MMMM yyyy")}"
+                                            } else {
+                                                "${startDateMillis.toFormattedDate("d MMMM")} - ${endMillis.toFormattedDate("d MMMM yyyy")}"
+                                            }
                                         }
-                                    }
-                                    TransactionTimeRangeType.MONTHLY -> startDateMillis.toFormattedDate("MMMM yyyy")
-                                },
-                                fontSize = 12.sp,
-                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                            )
-                        }
-                        IconButton(onClick = onClickNextTimeRange) {
-                            Icon(
-                                Icons.Rounded.ChevronRight,
-                                null
-                            )
+                                        TransactionTimeRangeType.MONTHLY -> startDateMillis.toFormattedDate("MMMM yyyy")
+                                    },
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                    style = MiuixTheme.textStyles.footnote1
+                                )
+                            }
+                            IconButton(onClick = onClickNextTimeRange) {
+                                Icon(
+                                    MiuixIcons.ChevronForward,
+                                    null
+                                )
+                            }
                         }
                     }
                 }
@@ -280,9 +284,9 @@ private fun Content(
 private fun FooterText(text: String) {
     Text(
         text,
-        fontSize = 12.sp,
         color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         textAlign = TextAlign.Center,
+        style = MiuixTheme.textStyles.footnote1,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
