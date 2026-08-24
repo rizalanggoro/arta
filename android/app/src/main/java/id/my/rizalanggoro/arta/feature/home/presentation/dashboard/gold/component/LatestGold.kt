@@ -37,6 +37,7 @@ import top.yukonga.miuix.kmp.window.WindowListPopup
 @Composable
 fun LatestGold(
     golds: List<DtoGold> = emptyList(),
+    onClickItem: (DomainGold) -> Unit = {},
     onClickEdit: (DomainGold) -> Unit = {},
     onClickDelete: (DomainGold) -> Unit = {},
 ) {
@@ -68,6 +69,7 @@ fun LatestGold(
                         Box {
                             GoldListItem(
                                 gold = gold,
+                                onClick = { onClickItem(it) },
                                 onLongClick = { actionGold = it },
                             )
 
@@ -119,7 +121,7 @@ fun LatestGold(
                 }
 
                 Text(
-                    text = "Tekan dan tahan untuk melihat opsi lainnya",
+                    text = "Ketuk untuk membuka detail • Tekan dan tahan untuk opsi lainnya",
                     style = MiuixTheme.textStyles.footnote1,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     textAlign = TextAlign.Center,

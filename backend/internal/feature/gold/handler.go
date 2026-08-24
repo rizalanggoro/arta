@@ -9,6 +9,7 @@ import (
 	"github.com/artafinance/backend/internal/cron/goldprice"
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
+	"github.com/artafinance/backend/pkg/config"
 	"github.com/artafinance/backend/pkg/jwt"
 	"github.com/artafinance/backend/pkg/middleware"
 	"github.com/gofiber/fiber/v2"
@@ -25,6 +26,7 @@ type Handler struct {
 	fxRepo        *fxrate.Repository
 	goldPriceRepo *goldprice.Repository
 	jwtMgr        *jwt.Manager
+	config        *config.Config
 }
 
 // NewHandler creates a new gold handler.
@@ -33,12 +35,14 @@ func NewHandler(
 	fxRepo *fxrate.Repository,
 	goldPriceRepo *goldprice.Repository,
 	jwtMgr *jwt.Manager,
+	config *config.Config,
 ) *Handler {
 	return &Handler{
 		repo:          repo,
 		fxRepo:        fxRepo,
 		goldPriceRepo: goldPriceRepo,
 		jwtMgr:        jwtMgr,
+		config:        config,
 	}
 }
 
@@ -121,7 +125,7 @@ func (h *Handler) list(c *fiber.Ctx) error {
 
 	res := ListGoldsRes{Golds: make([]dto.Gold, 0, len(golds))}
 	for _, g := range golds {
-		sellPrice := g.Grams * goldPriceIDRPerGram * (g.Carat / 24.0) * (1 - mappedTax[g.Carat]/100)
+		sellPrice := g.Grams * goldPriceIDRPerGram * (g.Carat / 24.0) * h.config.GoldRetailMultiplier * (1 - mappedTax[g.Carat]/100)
 		res.Golds = append(res.Golds, dto.Gold{
 			Data:      g,
 			SellPrice: sellPrice,

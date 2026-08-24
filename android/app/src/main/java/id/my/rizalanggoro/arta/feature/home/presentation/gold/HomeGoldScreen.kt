@@ -64,6 +64,7 @@ fun HomeGoldScreen(
         uiState = uiState,
         onRefresh = vm::loadGolds,
         onClickRetry = vm::loadGolds,
+        onClickItem = { backStack.add(GoldRoute.Detail(id = it.id)) },
         onClickEdit = { backStack.add(GoldRoute.Upsert(goldId = it.id)) },
         onClickDelete = { backStack.add(GoldRoute.Delete(goldId = it.id)) },
     )
@@ -75,6 +76,7 @@ private fun Content(
     uiState: HomeGoldUiState = HomeGoldUiState(),
     onRefresh: () -> Unit = {},
     onClickRetry: () -> Unit = {},
+    onClickItem: (DomainGold) -> Unit = {},
     onClickEdit: (DomainGold) -> Unit = {},
     onClickDelete: (DomainGold) -> Unit = {},
 ) {
@@ -118,6 +120,7 @@ private fun Content(
                                 Box {
                                     GoldListItem(
                                         gold = gold,
+                                        onClick = { onClickItem(it) },
                                         onLongClick = { actionGold = it },
                                     )
 
@@ -171,7 +174,7 @@ private fun Content(
 
                     item {
                         Text(
-                            text = "Tekan dan tahan untuk melihat opsi lainnya",
+                            text = "Ketuk untuk membuka detail • Tekan dan tahan untuk opsi lainnya",
                             style = MiuixTheme.textStyles.footnote1,
                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             textAlign = TextAlign.Center,

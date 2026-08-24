@@ -67,6 +67,7 @@ fun HomeGoldDashboardScreen(
         },
         onClickEdit = { backStack.add(GoldRoute.Upsert(goldId = it.id)) },
         onClickDelete = { backStack.add(GoldRoute.Delete(goldId = it.id)) },
+        onClickItem = { backStack.add(GoldRoute.Detail(id = it.id)) },
     )
 }
 
@@ -80,6 +81,7 @@ private fun Content(
     onRefresh: () -> Unit = {},
     onClickEdit: (DomainGold) -> Unit = {},
     onClickDelete: (DomainGold) -> Unit = {},
+    onClickItem: (DomainGold) -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -294,6 +296,7 @@ private fun Content(
                     item {
                         LatestGold(
                             golds = data?.latestGolds ?: emptyList(),
+                            onClickItem = onClickItem,
                             onClickEdit = onClickEdit,
                             onClickDelete = onClickDelete,
                         )
