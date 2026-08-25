@@ -1,9 +1,11 @@
 # Added by code-review-graph
 .code-review-graph/
-# .agents
-# .github
-# .vscode
 .env
 CLAUDE.md
 .freebuff
 docs
+AGENTS.md
+PRD.md
+.agents/
+tmp/
+.opencode.json
