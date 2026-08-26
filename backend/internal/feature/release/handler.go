@@ -6,18 +6,20 @@ import (
 
 	"github.com/artafinance/backend/internal/domain"
 	"github.com/artafinance/backend/internal/dto"
+	"github.com/artafinance/backend/pkg/config"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
 // Handler exposes release HTTP endpoints.
 type Handler struct {
-	repo *Repository
+	repo   *Repository
+	config *config.Config
 }
 
 // NewHandler creates a new release handler.
-func NewHandler(repo *Repository) *Handler {
-	return &Handler{repo: repo}
+func NewHandler(repo *Repository, config *config.Config) *Handler {
+	return &Handler{repo: repo, config: config}
 }
 
 // RegisterRoutes registers release routes.
@@ -35,9 +37,17 @@ func (h *Handler) RegisterRoutes(router fiber.Router) {
 // @Param body body CreateReleaseReq true "body"
 // @Success 201 {object} ReleaseRes
 // @Failure 400 {object} dto.Error
+// @Failure 401 {object} dto.Error
 // @Failure 500 {object} dto.Error
 // @Router /api/release [post]
 func (h *Handler) create(c *fiber.Ctx) error {
+	if h.config.ApiKey == "" {
+		return c.Status(fiber.StatusForbidden).JSON(dto.Error{Code: fiber.StatusForbidden, Message: "release endpoint not configured"})
+	}
+	if c.Get("X-API-Key") != h.config.ApiKey {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
 	var req CreateReleaseReq
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error{Code: fiber.StatusBadRequest, Message: err.Error()})

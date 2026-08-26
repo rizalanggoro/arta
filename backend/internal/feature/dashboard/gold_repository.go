@@ -63,13 +63,15 @@ func (r *DashboardGoldRepository) GetTotalSellPrice(filter GetTotalSellPriceFilt
 
 type GetTotalBuyPriceFilter struct {
 	WalletId uint
+	UserId   uint
 }
 
 func (r *DashboardGoldRepository) GetTotalBuyPrice(filter GetTotalBuyPriceFilter) (*float64, error) {
 	var totalBuyPrice float64
 	if err := r.db.Model(&model.Gold{}).
 		Select("coalesce(sum(golds.price), 0)").
-		Where("wallet_id = ?", filter.WalletId).
+		Joins("JOIN wallets ON wallets.id = golds.wallet_id").
+		Where("golds.wallet_id = ? AND wallets.user_id = ?", filter.WalletId, filter.UserId).
 		Find(&totalBuyPrice).
 		Error; err != nil {
 		return nil, err
@@ -80,13 +82,15 @@ func (r *DashboardGoldRepository) GetTotalBuyPrice(filter GetTotalBuyPriceFilter
 
 type GetTotalWeightFilter struct {
 	WalletId uint
+	UserId   uint
 }
 
 func (r *DashboardGoldRepository) GetTotalWeight(filter GetTotalWeightFilter) (*float64, error) {
 	var totalWeight float64
 	if err := r.db.Model(&model.Gold{}).
 		Select("coalesce(sum(golds.grams), 0)").
-		Where("wallet_id = ?", filter.WalletId).
+		Joins("JOIN wallets ON wallets.id = golds.wallet_id").
+		Where("golds.wallet_id = ? AND wallets.user_id = ?", filter.WalletId, filter.UserId).
 		Find(&totalWeight).
 		Error; err != nil {
 		return nil, err
@@ -97,13 +101,15 @@ func (r *DashboardGoldRepository) GetTotalWeight(filter GetTotalWeightFilter) (*
 
 type GetItemCountFilter struct {
 	WalletId uint
+	UserId   uint
 }
 
 func (r *DashboardGoldRepository) GetItemCount(filter GetItemCountFilter) (*int, error) {
 	var itemCount int
 	if err := r.db.Model(&model.Gold{}).
 		Select("count(*)").
-		Where("wallet_id = ?", filter.WalletId).
+		Joins("JOIN wallets ON wallets.id = golds.wallet_id").
+		Where("golds.wallet_id = ? AND wallets.user_id = ?", filter.WalletId, filter.UserId).
 		Find(&itemCount).
 		Error; err != nil {
 		return nil, err

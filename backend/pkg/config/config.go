@@ -31,6 +31,9 @@ type Config struct {
 
 	// gold price
 	GoldRetailMultiplier float64
+
+	// API key for CI/CD endpoints
+	ApiKey string
 }
 
 // New creates a new Config instance from environment variables
@@ -50,6 +53,7 @@ func New() *Config {
 		EmailFrom:            getEnv("EMAIL_FROM", ""),
 		EmailPassword:        getEnv("EMAIL_PASSWORD", ""),
 		GoldRetailMultiplier: getEnvFloat("GOLD_RETAIL_MULTIPLIER", 1.08), // 8% markup by default
+		ApiKey:               getEnv("API_KEY", ""),
 	}
 }
 

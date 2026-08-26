@@ -104,6 +104,14 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 		})
 	}
 
+	wallet, err := h.walletRepo.GetWalletByID(uint(walletId))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: "wallet not found"})
+	}
+	if strconv.FormatUint(uint64(wallet.UserID), 10) != userIdStr {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
 	goldPrice, err := h.goldPriceRepo.GetLatest()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
@@ -133,6 +141,7 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 
 	totalBuyPrice, err := h.dashboardGoldRepo.GetTotalBuyPrice(GetTotalBuyPriceFilter{
 		WalletId: uint(walletId),
+		UserId:   uint(userId),
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
@@ -143,6 +152,7 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 
 	totalWeight, err := h.dashboardGoldRepo.GetTotalWeight(GetTotalWeightFilter{
 		WalletId: uint(walletId),
+		UserId:   uint(userId),
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
@@ -153,6 +163,7 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 
 	itemCount, err := h.dashboardGoldRepo.GetItemCount(GetItemCountFilter{
 		WalletId: uint(walletId),
+		UserId:   uint(userId),
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{
@@ -307,6 +318,14 @@ func (h *Handler) cash(c *fiber.Ctx) error {
 			Code:    fiber.StatusBadRequest,
 			Message: "wallet_id is required and must be a valid number",
 		})
+	}
+
+	wallet, err := h.walletRepo.GetWalletByID(uint(walletId))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(dto.Error{Code: fiber.StatusNotFound, Message: "wallet not found"})
+	}
+	if strconv.FormatUint(uint64(wallet.UserID), 10) != strUserId {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
 	}
 
 	startDateStr := c.Query("start_date")

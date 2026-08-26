@@ -59,6 +59,22 @@ func (h *Handler) list(c *fiber.Ctx) error {
 		})
 	}
 
+	userID := middleware.GetUserID(c)
+	if userID == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{
+			Code:    fiber.StatusUnauthorized,
+			Message: "unauthorized",
+		})
+	}
+
+	ownerID, err := h.repo.GetWalletOwnerID(uint(walletId))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+	if strconv.FormatUint(uint64(ownerID), 10) != userID {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
 	includeCategory := c.QueryBool("include_category", false)
 	startDateStr := c.Query("start_date", "")
 	endDateStr := c.Query("end_date", "")
@@ -191,19 +207,36 @@ func (h *Handler) get(c *fiber.Ctx) error {
 		})
 	}
 
-	if transaction, err := h.repo.Get(GetFilter{
+	userID := middleware.GetUserID(c)
+	if userID == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{
+			Code:    fiber.StatusUnauthorized,
+			Message: "unauthorized",
+		})
+	}
+
+	transaction, err := h.repo.Get(GetFilter{
 		TransactionId:   uint(id),
 		IncludeCategory: true,
-	}); err != nil {
+	})
+	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(dto.Error{
 			Code:    fiber.StatusNotFound,
 			Message: err.Error(),
 		})
-	} else {
-		return c.Status(fiber.StatusOK).JSON(GetTransactionRes{
-			*transaction,
-		})
 	}
+
+	ownerID, err := h.repo.GetWalletOwnerID(transaction.Data.WalletID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+	if strconv.FormatUint(uint64(ownerID), 10) != userID {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.Error{Code: fiber.StatusUnauthorized, Message: "unauthorized"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(GetTransactionRes{
+		*transaction,
+	})
 }
 
 // @id                   UpdateTransaction
