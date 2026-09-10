@@ -1,6 +1,6 @@
 [versions]
 adaptive = "1.3.0-beta02"
-agp = "9.1.1"
+agp = "9.2.1"
 composeShimmer = "1.4.0"
 composeSkeletonShimmer = "2.0.1"
 coreKtx = "1.18.0"
