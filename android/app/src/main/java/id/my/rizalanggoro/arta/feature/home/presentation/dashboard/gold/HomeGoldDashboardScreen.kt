@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.TrendingDown
+import androidx.compose.material.icons.automirrored.rounded.TrendingFlat
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -146,15 +148,31 @@ private fun Content(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
+                                    val profitPercentage = data?.profitPercentage ?: 0.0
                                     Icon(
-                                        Icons.AutoMirrored.Rounded.TrendingUp,
+                                        when {
+                                            profitPercentage > 0 -> Icons.AutoMirrored.Rounded.TrendingUp
+                                            profitPercentage < 0 -> Icons.AutoMirrored.Rounded.TrendingDown
+                                            else -> Icons.AutoMirrored.Rounded.TrendingFlat
+                                        },
                                         null,
                                         modifier = Modifier.size(16.dp),
                                         tint = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                     )
                                     Text(
-                                        text = (data?.profit ?: 0.0)
-                                            .toIndonesianCurrency(),
+                                        text = buildString {
+                                            append((data?.profit ?: 0.0).toIndonesianCurrency())
+                                            append(" (")
+                                            if (profitPercentage > 0) append("+")
+                                            append(
+                                                String.format(
+                                                    java.util.Locale.forLanguageTag("id-ID"),
+                                                    "%.1f",
+                                                    profitPercentage
+                                                )
+                                            )
+                                            append("%)")
+                                        },
                                         style = MiuixTheme.textStyles.footnote2,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                                     )

@@ -1077,6 +1077,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/dto.Error"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -2731,6 +2737,7 @@ const docTemplate = `{
                 "gold_taxes",
                 "latest_golds",
                 "profit",
+                "profit_percentage",
                 "retail_price",
                 "total_asset",
                 "total_buy_price",
@@ -2757,6 +2764,10 @@ const docTemplate = `{
                     }
                 },
                 "profit": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "profit_percentage": {
                     "type": "number",
                     "format": "double"
                 },

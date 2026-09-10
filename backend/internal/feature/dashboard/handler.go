@@ -192,18 +192,25 @@ func (h *Handler) gold(c *fiber.Ctx) error {
 
 	retailPrice := goldPrice.PricePerOunceUSD / constant.GramsPerTroyOunce * float64(fxRate.Rate) * h.config.GoldRetailMultiplier
 
+	profit := *totalSellPrice - *totalBuyPrice
+	profitPercentage := 0.0
+	if *totalBuyPrice != 0 {
+		profitPercentage = profit / *totalBuyPrice * 100
+	}
+
 	return c.Status(fiber.StatusOK).JSON(GoldDashboardRes{
 		Data: dto.GoldDashboard{
-			TotalAsset:     *totalSellPrice,
-			TotalBuyPrice:  *totalBuyPrice,
-			Profit:         *totalSellPrice - *totalBuyPrice,
-			TotalWeight:    *totalWeight,
-			TotalGoldItems: *itemCount,
-			GoldPrice:      *goldPrice,
-			FxRate:         *fxRate,
-			RetailPrice:    retailPrice,
-			LatestGolds:    golds,
-			GoldTaxes:      goldTaxes,
+			TotalAsset:       *totalSellPrice,
+			TotalBuyPrice:    *totalBuyPrice,
+			Profit:           profit,
+			ProfitPercentage: profitPercentage,
+			TotalWeight:      *totalWeight,
+			TotalGoldItems:   *itemCount,
+			GoldPrice:        *goldPrice,
+			FxRate:           *fxRate,
+			RetailPrice:      retailPrice,
+			LatestGolds:      golds,
+			GoldTaxes:        goldTaxes,
 		},
 	})
 }

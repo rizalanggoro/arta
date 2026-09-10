@@ -672,6 +672,9 @@ definitions:
       profit:
         format: double
         type: number
+      profit_percentage:
+        format: double
+        type: number
       retail_price:
         format: double
         type: number
@@ -692,6 +695,7 @@ definitions:
     - gold_taxes
     - latest_golds
     - profit
+    - profit_percentage
     - retail_price
     - total_asset
     - total_buy_price
@@ -1571,6 +1575,10 @@ paths:
             $ref: '#/definitions/ReleaseRes'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/dto.Error'
         "500":

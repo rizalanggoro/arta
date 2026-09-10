@@ -9,6 +9,7 @@
 | **goldTaxes** | [**kotlin.collections.List&lt;DtoGoldTax&gt;**](DtoGoldTax.md) |  |  |
 | **latestGolds** | [**kotlin.collections.List&lt;DtoGold&gt;**](DtoGold.md) |  |  |
 | **profit** | **kotlin.Double** |  |  |
+| **profitPercentage** | **kotlin.Double** |  |  |
 | **retailPrice** | **kotlin.Double** |  |  |
 | **totalAsset** | **kotlin.Double** |  |  |
 | **totalBuyPrice** | **kotlin.Double** |  |  |

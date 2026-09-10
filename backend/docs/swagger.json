@@ -1075,6 +1075,12 @@
                             "$ref": "#/definitions/dto.Error"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -2729,6 +2735,7 @@
                 "gold_taxes",
                 "latest_golds",
                 "profit",
+                "profit_percentage",
                 "retail_price",
                 "total_asset",
                 "total_buy_price",
@@ -2755,6 +2762,10 @@
                     }
                 },
                 "profit": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "profit_percentage": {
                     "type": "number",
                     "format": "double"
                 },

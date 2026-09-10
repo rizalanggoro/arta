@@ -40,6 +40,7 @@ import kotlinx.serialization.Contextual
  * @param goldTaxes 
  * @param latestGolds 
  * @param profit 
+ * @param profitPercentage 
  * @param retailPrice 
  * @param totalAsset 
  * @param totalBuyPrice 
@@ -64,6 +65,9 @@ data class DtoGoldDashboard (
 
     @SerialName(value = "profit")
     val profit: kotlin.Double,
+
+    @SerialName(value = "profit_percentage")
+    val profitPercentage: kotlin.Double,
 
     @SerialName(value = "retail_price")
     val retailPrice: kotlin.Double,
