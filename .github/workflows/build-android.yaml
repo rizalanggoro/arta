@@ -83,5 +83,6 @@ jobs:
           curl --fail --silent --show-error --request POST \
             "$API_BASE_URL/api/release" \
             --header "Content-Type: application/json" \
+            --header "X-API-Key: ${{ secrets.RELEASE_API_KEY }}" \
             --data "{\"url\":\"$RELEASE_URL\",\"version_code\":$VERSION_CODE}"
         working-directory: ./android
