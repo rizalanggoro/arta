@@ -8,6 +8,7 @@ import id.my.rizalanggoro.arta.core.application.route.GoldRoute
 import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldDialog
 import id.my.rizalanggoro.arta.feature.gold.presentation.delete.DeleteGoldVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.detail.GoldDetailScreen
+import id.my.rizalanggoro.arta.feature.gold.presentation.assethistory.AssetHistoryScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.pricehistory.PriceHistoryScreen
 import id.my.rizalanggoro.arta.feature.gold.presentation.pricehistory.PriceHistoryVM
 import id.my.rizalanggoro.arta.feature.gold.presentation.tax.ListGoldTaxScreen
@@ -43,6 +44,10 @@ fun EntryProviderScope<NavKey>.goldEntry() {
                 }
             )
         )
+    }
+
+    entry<GoldRoute.AssetHistory> {
+        AssetHistoryScreen()
     }
 
     entry<GoldRoute.UpsertTax>(

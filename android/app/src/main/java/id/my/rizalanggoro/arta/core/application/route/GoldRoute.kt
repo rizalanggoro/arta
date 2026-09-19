@@ -22,6 +22,9 @@ object GoldRoute {
     ) : NavKey
 
     @Serializable
+    data object AssetHistory : NavKey
+
+    @Serializable
     data object ListTax : NavKey
 
     @Serializable

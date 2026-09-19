@@ -70,6 +70,7 @@ fun HomeGoldDashboardScreen(
         onClickEdit = { backStack.add(GoldRoute.Upsert(goldId = it.id)) },
         onClickDelete = { backStack.add(GoldRoute.Delete(goldId = it.id)) },
         onClickItem = { backStack.add(GoldRoute.Detail(id = it.id)) },
+        onClickAssetHistory = { backStack.add(GoldRoute.AssetHistory) },
     )
 }
 
@@ -84,6 +85,7 @@ private fun Content(
     onClickEdit: (DomainGold) -> Unit = {},
     onClickDelete: (DomainGold) -> Unit = {},
     onClickItem: (DomainGold) -> Unit = {},
+    onClickAssetHistory: () -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -117,6 +119,8 @@ private fun Content(
                 ) {
                     item {
                         Card(
+                            onClick = onClickAssetHistory,
+                            pressFeedbackType = PressFeedbackType.Tilt,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 16.dp)
