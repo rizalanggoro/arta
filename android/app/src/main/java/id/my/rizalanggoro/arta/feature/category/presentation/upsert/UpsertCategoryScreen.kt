@@ -105,7 +105,7 @@ private fun Content(
 
         SmallTitle(
             "Tipe kategori",
-            insideMargin = PaddingValues(top = 8.dp),
+            insideMargin = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp),
         )
 
         TabRowWithContour(

@@ -83,7 +83,7 @@ private fun Content(
             item {
                 SmallTitle(
                     text = "Akun",
-                    insideMargin = PaddingValues(horizontal = 4.dp),
+                    insideMargin = PaddingValues(horizontal = 16.dp),
                 )
             }
             item {
@@ -114,7 +114,7 @@ private fun Content(
             item {
                 SmallTitle(
                     text = "Preferensi",
-                    insideMargin = PaddingValues(horizontal = 4.dp),
+                    insideMargin = PaddingValues(horizontal = 16.dp),
                 )
             }
             item {
@@ -136,7 +136,7 @@ private fun Content(
             item {
                 SmallTitle(
                     text = "Pengelolaan",
-                    insideMargin = PaddingValues(horizontal = 4.dp),
+                    insideMargin = PaddingValues(horizontal = 16.dp),
                 )
             }
             item {
@@ -180,7 +180,7 @@ private fun Content(
             item {
                 SmallTitle(
                     text = "Lainnya",
-                    insideMargin = PaddingValues(horizontal = 4.dp),
+                    insideMargin = PaddingValues(horizontal = 16.dp),
                 )
             }
             item {

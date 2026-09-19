@@ -48,7 +48,7 @@ fun PriceSummary(
             SmallTitle(
                 text = "Ringkasan Harga",
                 modifier = Modifier.weight(1f),
-                insideMargin = PaddingValues(vertical = 8.dp),
+                insideMargin = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             )
 
             IconButton(onClick = onClickManageTax) {
@@ -72,6 +72,7 @@ fun PriceSummary(
                 "Berikut harga emas/gram untuk setiap karat setelah perhitungan konfigurasi pajak",
                 style = MiuixTheme.textStyles.footnote2,
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
             Card(
                 modifier = Modifier.fillMaxWidth()

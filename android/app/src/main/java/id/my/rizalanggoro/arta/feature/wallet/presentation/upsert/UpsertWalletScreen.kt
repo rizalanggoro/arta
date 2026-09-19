@@ -110,7 +110,7 @@ private fun Content(
 
         SmallTitle(
             "Tipe dompet",
-            insideMargin = PaddingValues(top = 8.dp),
+            insideMargin = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp),
         )
 
         TabRowWithContour(

@@ -276,7 +276,7 @@ private fun Content(
                     SmallTitle(
                         text = "Transaksi terbaru",
                         modifier = Modifier.padding(top = 16.dp),
-                        insideMargin = PaddingValues(top = 8.dp),
+                        insideMargin = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp),
                     )
                 }
                 if ((uiState.data?.latestCategories?.isEmpty() ?: true) && !uiState.isLoading) {

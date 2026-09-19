@@ -51,7 +51,7 @@ fun LatestGold(
     ) {
         SmallTitle(
             text = "Emas Terbaru",
-            insideMargin = PaddingValues(top = 8.dp),
+            insideMargin = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp),
         )
 
         when {

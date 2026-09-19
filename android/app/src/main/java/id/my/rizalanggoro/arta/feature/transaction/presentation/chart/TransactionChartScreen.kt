@@ -279,7 +279,7 @@ private fun Content(
                         else -> {
                             SmallTitle(
                                 text = selectedTransactions.firstOrNull()?.category?.name ?: "",
-                                insideMargin = PaddingValues(start = 16.dp, top = 24.dp, bottom = 8.dp),
+                                insideMargin = PaddingValues(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
                             )
 
                             Card(

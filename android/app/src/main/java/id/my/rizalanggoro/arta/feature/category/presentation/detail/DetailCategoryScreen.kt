@@ -281,7 +281,7 @@ private fun Content(
                         SmallTitle(
                             text = "Daftar transaksi",
                             modifier = Modifier.padding(top = 24.dp),
-                            insideMargin = PaddingValues(vertical = 8.dp),
+                            insideMargin = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         )
                     }
 
