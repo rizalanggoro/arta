@@ -30,6 +30,11 @@ object TransactionRoute {
     data object Filter : NavKey
 
     @Serializable
+    data class AmountInput(
+        val amount: String = "",
+    ) : NavKey
+
+    @Serializable
     data class Chart(
         val type: String,
         val timeRange: TransactionTimeRangeType,

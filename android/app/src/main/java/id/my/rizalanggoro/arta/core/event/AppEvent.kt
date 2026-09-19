@@ -12,6 +12,7 @@ sealed interface AppEvent {
 
     data class CategorySelected(val category: DomainCategory) : AppEvent
     data class WalletSelected(val wallet: DomainWallet) : AppEvent
+    data class AmountConfirmed(val amount: String) : AppEvent
 
     @Deprecated("use navigation instead")
     data object CategoryActionSheet {

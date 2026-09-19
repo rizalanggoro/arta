@@ -53,15 +53,6 @@ class UpsertTransactionVM @AssistedInject constructor(
     // server definitively rejected a submission (see onFailure in onSubmitClicked).
     private var idempotencyKey: String = UUID.randomUUID().toString()
 
-    fun onAmountChanged(value: String) {
-        _uiState.update {
-            it.copy(
-                amount = value,
-                amountError = null,
-            )
-        }
-    }
-
     fun onDescriptionChanged(value: String) {
         _uiState.update { it.copy(description = value) }
     }
@@ -211,6 +202,19 @@ class UpsertTransactionVM @AssistedInject constructor(
                     )
                 }
             }
+        }
+
+        viewModelScope.launch {
+            AppEventBus.event
+                .filterIsInstance<AppEvent.AmountConfirmed>()
+                .collect { event ->
+                    _uiState.update {
+                        it.copy(
+                            amount = event.amount,
+                            amountError = null,
+                        )
+                    }
+                }
         }
 
         viewModelScope.launch {

@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material.icons.rounded.Wallet
@@ -22,15 +22,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import id.my.rizalanggoro.arta.core.application.route.CategoryRoute
+import id.my.rizalanggoro.arta.core.application.route.TransactionRoute
 import id.my.rizalanggoro.arta.core.event.AppEvent
 import id.my.rizalanggoro.arta.core.event.AppEventBus
-import id.my.rizalanggoro.arta.core.extension.isValidInputNumber
+import id.my.rizalanggoro.arta.core.extension.toIndonesianCurrency
 import id.my.rizalanggoro.arta.core.extension.toIndonesianDate
 import id.my.rizalanggoro.arta.core.utils.LocalBackStack
 import id.my.rizalanggoro.arta.shared.component.ArtaMiuixTheme
@@ -79,12 +79,18 @@ fun UpsertTransactionScreen(
     Content(
         snackbarHostState = snackbarHostState,
         uiState = uiState,
-        onAmountChanged = vm::onAmountChanged,
         onDescriptionChanged = vm::onDescriptionChanged,
         onClickSelectCategory = {
             backStack.add(
                 CategoryRoute.Select(
                     categoryId = uiState.selectedCategory?.id
+                )
+            )
+        },
+        onClickInputAmount = {
+            backStack.add(
+                TransactionRoute.AmountInput(
+                    amount = uiState.amount
                 )
             )
         },
@@ -104,9 +110,9 @@ fun UpsertTransactionScreen(
 private fun Content(
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
     uiState: UpsertTransactionUiState = UpsertTransactionUiState(),
-    onAmountChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
     onClickSelectCategory: () -> Unit = {},
+    onClickInputAmount: () -> Unit = {},
     onClickSelectDate: () -> Unit = {},
     onClickSubmit: () -> Unit = {},
     onClickBack: () -> Unit = {},
@@ -179,24 +185,29 @@ private fun Content(
             }
 
             Column {
-                TextField(
-                    value = uiState.amount,
-                    onValueChange = {
-                        if (it.isValidInputNumber()) onAmountChanged(it)
-                    },
-                    label = "Jumlah",
-                    useLabelAsPlaceholder = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    enabled = !uiState.isLoading,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
+                Card(
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    ArrowPreference(
+                        title = "Nominal",
+                        summary = uiState.amount.toDoubleOrNull()?.toIndonesianCurrency()
+                            ?: "Masukkan nominal",
+                        startAction = {
+                            Icon(
+                                Icons.Rounded.Calculate, null,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                        },
+                        onClick = onClickInputAmount,
                     )
-                )
+                }
                 uiState.amountError?.let {
-                    Text(it, fontSize = 13.sp, color = ErrorColor)
+                    Text(
+                        it,
+                        fontSize = 13.sp,
+                        color = ErrorColor,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
                 }
             }
 
